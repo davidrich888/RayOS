@@ -22,14 +22,19 @@ async function saveIdea() {
     showToast('正在儲存...');
     try {
         const props = {
-            '想法': { title: [{ text: { content: text } }] },
+            '想法': { title: (() => { const c = []; for (let i = 0; i < text.length; i += 2000) c.push({ text: { content: text.slice(i, i + 2000) } }); return c; })() },
             '類型': { select: { name: type } },
             '狀態': { select: { name: '💡 新想法' } },
             '優先度': { select: { name: priority } },
             '建立日期': { date: { start: date } }
         };
         if (notes) {
-            props['備註'] = { rich_text: [{ text: { content: notes } }] };
+            // Notion rich_text 每個 block 最多 2000 字元，需分段
+            const chunks = [];
+            for (let i = 0; i < notes.length; i += 2000) {
+                chunks.push({ text: { content: notes.slice(i, i + 2000) } });
+            }
+            props['備註'] = { rich_text: chunks };
         }
         const result = await notionFetch('/pages', 'POST', {
             parent: { database_id: IDEAS_DB_ID },
