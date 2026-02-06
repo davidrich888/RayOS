@@ -47,9 +47,10 @@
     updateBodySyncDot();
     updateWealthSyncDot();
     updateIdeasSyncDot();
-    renderIdeasList();
-    updateIdeasStats();
     updateModelBadges();
+    // 清除舊的 ideas localStorage（已改為 Notion-first）
+    localStorage.removeItem('ideas_data');
+    localStorage.removeItem('ideas_notion_index');
     
     // 🖼️ Moodboard: render immediately from cache/defaults, then sync from Drive
     renderMoodboard();
@@ -84,13 +85,11 @@
             setTimeout(() => syncAccountsFromNotion(true), 2000);
             setTimeout(() => syncIdeasFromNotionDirect(true), 2500);
         }
-        // Body/Ideas auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
-        // 有 Notion Token 時跳過 N8N，避免 N8N error
+        // Body auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
         if (getN8nUrl() && !hasNotionDirect()) {
             if (bodyHistory.length <= 3) {
                 setTimeout(() => syncBodyFromNotion(), 1200);
             }
-            setTimeout(() => syncIdeasFromNotion(true), 1800);
         }
     }
     
