@@ -79,11 +79,12 @@
                 loadDailyHabits(true);
             }
         }, 500);
-        // Auto-sync: Notion Direct (Wealth + Accounts + Ideas)
+        // Auto-sync: Notion Direct (Wealth + Accounts + Ideas + Videos)
         if (hasNotionDirect()) {
             setTimeout(() => syncWealthFromNotion(true), 1500);
             setTimeout(() => syncAccountsFromNotion(true), 2000);
             setTimeout(() => syncIdeasFromNotionDirect(true), 2500);
+            setTimeout(() => syncVideosFromNotion(true), 3000);
         }
         // Body auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
         if (getN8nUrl() && !hasNotionDirect()) {
@@ -93,8 +94,5 @@
         }
     }
     
-    document.getElementById('wealth-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askWealthAI(); });
-    document.getElementById('biz-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askBizAI(); });
-    document.getElementById('body-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askBodyAI(); });
-    document.getElementById('trading-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askTradingAI(); });
+    document.getElementById('life-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askLifeAI(); });
 })();

@@ -30,6 +30,7 @@
         <div class="nav-item" data-section="trading"><span class="nav-icon">📈</span><span>Trading</span></div>
         <div class="nav-item" data-section="business"><span class="nav-icon">📊</span><span>Business</span></div>
         <div class="nav-item" data-section="ideas"><span class="nav-icon">💡</span><span>Ideas</span></div>
+        <div class="nav-item" data-section="lifecoach"><span class="nav-icon">🧠</span><span>AI Coach</span></div>
         <div class="nav-item" data-section="information"><span class="nav-icon">📖</span><span>Information</span></div>
     </nav>
     
@@ -72,6 +73,7 @@
                     <div class="card" onclick="go('wealth')"><div class="card-header"><span class="card-icon">$</span><span class="card-badge">TRACK</span></div><div class="card-title">Wealth</div><div class="card-desc">資產・消費・目標</div></div>
                     <div class="card" onclick="go('business')"><div class="card-header"><span class="card-icon">📊</span><span class="card-badge">GROW</span></div><div class="card-title">Business</div><div class="card-desc">Skool・MRR・Members</div></div>
                     <div class="card" onclick="go('ideas')"><div class="card-header"><span class="card-icon">💡</span><span class="card-badge">CAPTURE</span></div><div class="card-title">Ideas</div><div class="card-desc">靈感・點子・計劃</div></div>
+                    <div class="card" onclick="go('lifecoach')"><div class="card-header"><span class="card-icon">🧠</span><span class="card-badge">AI</span></div><div class="card-title">Life Coach</div><div class="card-desc">AI 人生導師</div></div>
                     <div class="card" onclick="go('information')"><div class="card-header"><span class="card-icon">📖</span><span class="card-badge">LEARN</span></div><div class="card-title">Information</div><div class="card-desc">YouTube Lab</div></div>
                 </div>
             </div>
@@ -159,18 +161,6 @@
                             <div id="expense-result" style="display:none;"></div>
                         </div>
                     </div>
-                    <div class="wealth-sidebar">
-                        <div class="ai-panel">
-                            <div class="ai-header"><div class="ai-icon">🎯</div><div class="ai-title">AI Wealth Coach</div><span class="ai-model-badge"></span></div>
-                            <div class="ai-content"><div class="ai-suggestion" id="wealth-ai-suggestion">Loading...</div></div>
-                            <div class="ai-chat">
-                                <div class="ai-input-wrap">
-                                    <input type="text" class="ai-input" id="wealth-ai-input" placeholder="Ask about your wealth...">
-                                    <button class="ai-send" onclick="askWealthAI()">→</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -246,18 +236,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="wealth-sidebar">
-                        <div class="ai-panel">
-                            <div class="ai-header"><div class="ai-icon">📈</div><div class="ai-title">AI Trading Coach</div><span class="ai-model-badge"></span></div>
-                            <div class="ai-content"><div class="ai-suggestion" id="trading-ai-suggestion">Loading...</div></div>
-                            <div class="ai-chat">
-                                <div class="ai-input-wrap">
-                                    <input type="text" class="ai-input" id="trading-ai-input" placeholder="Ask about your trading...">
-                                    <button class="ai-send" onclick="askTradingAI()">→</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -303,18 +281,6 @@
                                 <div class="form-group"><label class="form-label">Revenue (USD)</label><input type="number" class="form-input" id="biz-revenue-input" placeholder="0"></div>
                             </div>
                             <div class="form-actions"><button class="btn btn-accent" onclick="saveBizMetrics()">Save</button></div>
-                        </div>
-                    </div>
-                    <div class="wealth-sidebar">
-                        <div class="ai-panel">
-                            <div class="ai-header"><div class="ai-icon">📈</div><div class="ai-title">AI Business Coach</div><span class="ai-model-badge"></span></div>
-                            <div class="ai-content"><div class="ai-suggestion" id="biz-ai-suggestion">Select a business to see AI recommendations.</div></div>
-                            <div class="ai-chat">
-                                <div class="ai-input-wrap">
-                                    <input type="text" class="ai-input" id="biz-ai-input" placeholder="Ask about your business...">
-                                    <button class="ai-send" onclick="askBizAI()">→</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -428,18 +394,8 @@
                             </div>
                         </div>
                     </div>
-                    <!-- AI Coach Sidebar -->
+                    <!-- Body Summary Sidebar -->
                     <div class="wealth-sidebar">
-                        <div class="ai-panel">
-                            <div class="ai-header"><div class="ai-icon">&#127947;</div><div class="ai-title">AI Body Coach</div><span class="ai-model-badge"></span></div>
-                            <div class="ai-content"><div class="ai-suggestion" id="body-ai-suggestion">Loading...</div></div>
-                            <div class="ai-chat">
-                                <div class="ai-input-wrap">
-                                    <input type="text" class="ai-input" id="body-ai-input" placeholder="Ask about your physique...">
-                                    <button class="ai-send" onclick="askBodyAI()">&#8594;</button>
-                                </div>
-                            </div>
-                        </div>
                         <div class="form-section" style="margin:0;">
                             <div class="form-title" style="font-size:13px;">&#128170; Summary</div>
                             <div style="display:grid;gap:8px;font-size:12px;">
@@ -562,6 +518,43 @@
                     <div id="ideas-stats" style="margin-left:auto;font-size:12px;color:var(--text-muted);display:flex;gap:12px;"></div>
                 </div>
                 <div id="ideas-list"></div>
+            </div>
+        </section>
+
+        <!-- AI LIFE COACH -->
+        <section class="section" id="lifecoach">
+            <div class="header">
+                <div class="page-title">AI Life Coach</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <span class="ai-model-badge" style="font-size:11px;color:var(--text-dim);"></span>
+                </div>
+            </div>
+            <div class="content">
+                <div class="form-section" style="margin-bottom:16px;padding:16px;">
+                    <div class="form-title">📊 Life Overview</div>
+                    <div id="life-overview" class="stats-row"></div>
+                </div>
+                <div class="ai-panel" style="border-radius:12px;">
+                    <div class="ai-header">
+                        <div class="ai-icon">🧠</div>
+                        <div class="ai-title">AI Life Coach</div>
+                        <span class="ai-model-badge"></span>
+                    </div>
+                    <div class="ai-content" style="max-height:500px;">
+                        <div class="ai-suggestion" id="life-ai-suggestion">Loading...</div>
+                    </div>
+                    <div class="ai-chat">
+                        <div class="ai-input-wrap">
+                            <input type="text" class="ai-input" id="life-ai-input" placeholder="問任何人生問題... 我會參考你所有的數據和學習紀錄">
+                            <button class="ai-send" onclick="askLifeAI()">→</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section" style="margin-top:16px;padding:16px;">
+                    <div class="form-title">📚 Video Knowledge Base</div>
+                    <div id="video-knowledge-summary" style="font-size:12px;color:var(--text-muted);">載入中...</div>
+                </div>
             </div>
         </section>
 

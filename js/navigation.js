@@ -17,6 +17,11 @@ function go(section) {
         document.querySelector('.sidebar-overlay').classList.remove('show');
         document.querySelector('.mobile-menu-btn').innerHTML = '☰';
     }
+    // AI Life Coach: auto-analyze on first visit
+    if (section === 'lifecoach') {
+        updateLifeOverview();
+        autoAnalyzeLife();
+    }
 }
 
 document.querySelectorAll('.nav-item').forEach(item => {

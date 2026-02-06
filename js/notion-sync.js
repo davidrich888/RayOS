@@ -5,6 +5,7 @@ const BODY_DB_ID = 'f481a3da00de4d9391d293a88cf1c9c1';
 const WEALTH_DB_ID = '127c65e93b7c4008b34c86c285295387';
 const ACCOUNTS_DB_ID = '21e464db5e3e456ea7f324d951a11244';
 const IDEAS_DB_ID = 'ed035c908cc04b7b999ef0c023557add';
+const VIDEOS_DB_ID = '76fb8600ae9649bcb6c475f75f0ec818';
 const BODY_DS_ID = '6b8fea6a-9249-4a7b-a36e-5cd7f6ceb61f';
 const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI'};
 const NOTION_API = 'https://api.notion.com/v1';
@@ -336,6 +337,86 @@ async function testN8nConnection() {
     } catch (e) {
         statusEl.innerHTML = '❌ 連線失敗: ' + e.message + '<br><small>確認 workflow 已 Activate 且 URL 是 Production Webhook URL</small>';
     }
+}
+
+// ============ VIDEO KNOWLEDGE SYNC (Notion-first) ============
+let videoKnowledge = [];
+
+async function syncVideosFromNotion(silent = false) {
+    if (!hasNotionDirect()) {
+        if (!silent) showToast('請先在 Settings 設定 Notion Token', true);
+        return;
+    }
+    if (!silent) showToast('正在載入影片知識...');
+    try {
+        const data = await notionFetch('/databases/' + VIDEOS_DB_ID + '/query', 'POST', {
+            page_size: 100,
+            sorts: [{ property: '加入日期', direction: 'descending' }]
+        });
+        if (data.results) {
+            videoKnowledge = data.results.map(page => {
+                const p = page.properties;
+                // 分類支援 multi_select
+                let category = '';
+                if (p['分類']?.multi_select) {
+                    category = p['分類'].multi_select.map(c => c.name).join(', ');
+                } else if (p['分類']?.select?.name) {
+                    category = p['分類'].select.name;
+                }
+                return {
+                    id: page.id,
+                    title: p['影片標題']?.title?.[0]?.plain_text || '',
+                    category: category,
+                    status: p['狀態']?.select?.name || '待看',
+                    summary: p['AI 摘要']?.rich_text?.[0]?.plain_text || '',
+                    keyTakeaway: p['一句話學到']?.rich_text?.[0]?.plain_text || '',
+                    notes: p['我的筆記']?.rich_text?.[0]?.plain_text || '',
+                    channel: p['頻道']?.rich_text?.[0]?.plain_text || '',
+                    rating: p['我的評分']?.number || 0,
+                    priority: p['優先度']?.select?.name || ''
+                };
+            }).filter(v => v.title);
+            // 更新 dashboard stat
+            const statEl = document.getElementById('stat-learning');
+            if (statEl) statEl.textContent = videoKnowledge.length;
+            // 更新 Life Coach 影片摘要
+            renderVideoKnowledgeSummary();
+            console.log('[RayOS Direct] Videos loaded:', videoKnowledge.length);
+            if (!silent) showToast('✓ 已載入 ' + videoKnowledge.length + ' 部影片');
+        }
+    } catch (e) {
+        console.error('[RayOS Direct] Videos load error:', e);
+        if (!silent) showToast('影片載入失敗: ' + e.message, true);
+    }
+}
+
+function renderVideoKnowledgeSummary() {
+    const el = document.getElementById('video-knowledge-summary');
+    if (!el) return;
+    if (videoKnowledge.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">尚未載入影片知識</div>';
+        return;
+    }
+    const pending = videoKnowledge.filter(v => v.status === '待看').length;
+    const inProgress = videoKnowledge.filter(v => v.status === '進行中').length;
+    const completed = videoKnowledge.filter(v => v.status === '已完成').length;
+    const withSummary = videoKnowledge.filter(v => v.summary).length;
+    // 分類統計
+    const catMap = {};
+    videoKnowledge.forEach(v => {
+        (v.category || '未分類').split(', ').forEach(c => { catMap[c] = (catMap[c] || 0) + 1; });
+    });
+    const catStr = Object.entries(catMap).sort((a,b) => b[1]-a[1]).map(([k,v]) => `${k}: ${v}`).join(' · ');
+    el.innerHTML = `
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;">
+            <span>📚 共 <strong>${videoKnowledge.length}</strong> 部</span>
+            <span>🔴 待看 <strong>${pending}</strong></span>
+            <span>🟡 進行中 <strong>${inProgress}</strong></span>
+            <span>🟢 已完成 <strong>${completed}</strong></span>
+            <span>🤖 有摘要 <strong>${withSummary}</strong></span>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);">${catStr}</div>
+    `;
 }
 
 // === 自動跨日 ===

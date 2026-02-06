@@ -141,7 +141,6 @@ function updatePhysicDisplay() {
     updateBodyChart();
     renderBodyHistoryTable();
     renderPhotoSelects();
-    updateBodyAI();
     updateBodySyncDot();
 }
 
@@ -443,12 +442,5 @@ function findBodyDataForDate(dateStr) {
     return (minDiff < 15 * 86400000) ? closest : null;
 }
 
-// AI Body Coach - now uses Claude API
-function updateBodyAI() {
-    autoAnalyze('physic');
-}
-
-function askBodyAI() {
-    askAI('physic', 'body-ai-input', 'body-ai-suggestion');
-}
+// AI Body Coach removed — unified to Life Coach page
 
