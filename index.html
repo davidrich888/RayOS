@@ -933,7 +933,7 @@
                 <div class="page-title">Daily</div>
                 <div class="header-actions">
                     <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <span class="sync-dot off" id="sync-dot"></span><button class="btn" onclick="syncDailyFromNotion()">🔄 Sync Notion</button>
+                    <span class="sync-dot off" id="sync-dot"></span><button class="btn" onclick="syncDailyFromNotionDirect()">🔄 Sync Notion</button>
                     <button class="btn btn-accent" onclick="window.open('https://www.notion.so/58da82d689ed42029274234183f77bb6','_blank')">Notion</button>
                 </div>
             </div>
@@ -1059,14 +1059,24 @@
         <div class="modal">
             <div class="modal-title">Settings</div>
             <div class="form-group" style="margin-bottom:16px;">
-                <label class="form-label">n8n Webhook URL</label>
-                <input type="text" class="form-input" id="n8n-webhook" placeholder="https://your-n8n.com/webhook/rayos-sync">
-                <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">填入 n8n Production Webhook URL，頁面載入時自動雙向同步</div>
+                <label class="form-label">Notion API Token（直接同步，推薦）</label>
+                <input type="password" class="form-input" id="notion-token" placeholder="ntn_xxxxx...">
+                <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">取得方式：<a href="https://www.notion.so/my-integrations" target="_blank" style="color:var(--accent);">notion.so/my-integrations</a> → 建立 Integration → 複製 Token → 記得在資料庫連接 Integration</div>
             </div>
             <div class="form-group" style="margin-bottom:16px;">
-                <label class="form-label">同步狀態</label>
+                <label class="form-label">Notion 同步狀態</label>
+                <div id="notion-direct-status" style="font-size:12px;color:var(--text-dim);padding:8px 0;">未設定</div>
+                <button class="btn btn-small" onclick="testNotionDirect()" style="margin-top:4px;">🔍 測試 Notion 連線</button>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">n8n Webhook URL（進階，可選）</label>
+                <input type="text" class="form-input" id="n8n-webhook" placeholder="https://your-n8n.com/webhook/rayos-sync">
+                <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">若不使用 Notion Token，可用 n8n 中轉。有 Notion Token 時此欄可留空</div>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">n8n 同步狀態</label>
                 <div id="worker-status" style="font-size:12px;color:var(--text-dim);padding:8px 0;">未設定</div>
-                <button class="btn btn-small" onclick="testN8nConnection()" style="margin-top:4px;">🔍 Test Connection</button>
+                <button class="btn btn-small" onclick="testN8nConnection()" style="margin-top:4px;">🔍 Test n8n</button>
             </div>
             <div class="form-group" style="margin-bottom:16px;">
                 <label class="form-label">Anthropic API Key (Claude AI Coach)</label>
@@ -1562,23 +1572,184 @@
         function formatMoney(n) { if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M'; if (n >= 1000) return Math.round(n / 1000) + 'K'; return formatNumber(n); }
         function toTWD(a, c) { if (c === 'USD') return a * USD_RATE; if (c === 'USDT') return a * USDT_RATE; return a; }
 
-        // ==================== n8n SYNC SYSTEM ====================
+        // ==================== NOTION SYNC SYSTEM ====================
         const NOTION_DB_ID = '58da82d689ed42029274234183f77bb6';
+        const BODY_DB_ID = 'f481a3da00de4d9391d293a88cf1c9c1';
+        const WEALTH_DB_ID = '127c65e93b7c4008b34c86c285295387';
+        const IDEAS_DB_ID = '3d416eb92c484ad3bff54919c3ea43fd';
         const BODY_DS_ID = '6b8fea6a-9249-4a7b-a36e-5cd7f6ceb61f';
         const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI'};
+        const NOTION_API = 'https://api.notion.com/v1';
         let notionPageIndex = JSON.parse(localStorage.getItem('notion_page_index') || '{}');
         let syncInProgress = false;
 
         function getN8nUrl() { return localStorage.getItem('n8n_webhook') || ''; }
+        function getNotionToken() { return localStorage.getItem('notion_token') || ''; }
+        function hasNotionDirect() { return !!getNotionToken(); }
         function updateSyncDot() {
             const d = document.getElementById('sync-dot');
-            if (d) d.className = 'sync-dot ' + (getN8nUrl() ? 'on' : 'off');
+            if (d) d.className = 'sync-dot ' + ((hasNotionDirect() || getN8nUrl()) ? 'on' : 'off');
         }
+
+        // === Notion API helper (via Vercel serverless proxy to avoid CORS) ===
+        async function notionFetch(path, method, body) {
+            const token = getNotionToken();
+            if (!token) throw new Error('No Notion token');
+            const proxyUrl = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+                ? '/api/notion'
+                : (location.origin + '/api/notion');
+            const res = await fetch(proxyUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path, method: method || 'POST', body, token })
+            });
+            if (!res.ok) {
+                const errText = await res.text().catch(() => '');
+                throw new Error('Notion ' + res.status + ': ' + errText.substring(0, 200));
+            }
+            return res.json();
+        }
+
+        // ============ DIRECT NOTION API (推薦) ============
+
+        // === 直接從 Notion 拉取全部 Habits ===
+        async function syncDailyFromNotionDirect(silent = false) {
+            if (!hasNotionDirect()) {
+                // Fallback to n8n
+                return syncDailyFromNotion(silent);
+            }
+            if (syncInProgress) return false;
+            syncInProgress = true;
+            if (!silent) showToast('正在從 Notion 同步...');
+            try {
+                const data = await notionFetch('/databases/' + NOTION_DB_ID + '/query', 'POST', {
+                    page_size: 100,
+                    sorts: [{ property: 'Date', direction: 'descending' }]
+                });
+                const newPageIndex = {};
+                let count = 0;
+                for (const page of data.results) {
+                    const props = page.properties;
+                    const titleArr = props['Date']?.title;
+                    if (!titleArr || !titleArr[0]) continue;
+                    const dateStr = titleArr[0].plain_text;
+                    if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) continue;
+                    newPageIndex[dateStr] = page.id;
+                    dailyHabitsData[dateStr] = {
+                        trading: props['Trading']?.checkbox || false,
+                        advertise: props['Advertise']?.checkbox || false,
+                        deliver: props['Deliver']?.checkbox || props['Deliever']?.checkbox || false,
+                        gym: props['Gym']?.checkbox || false,
+                        fatloss: props['FatLoss']?.checkbox || props['Fat Loss']?.checkbox || false,
+                        ai: props['AI']?.checkbox || false
+                    };
+                    count++;
+                }
+                notionPageIndex = newPageIndex;
+                localStorage.setItem('notion_page_index', JSON.stringify(notionPageIndex));
+                localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
+                console.log('[RayOS Direct] Synced', count, 'days, pageIndex:', Object.keys(notionPageIndex).length);
+                loadDailyHabits(true); // skipNotionCreate — we'll handle it below
+                updateSyncDot();
+                if (!silent) showToast('✓ 已同步 ' + count + ' 天');
+                syncInProgress = false;
+                // Auto-create today if not in Notion yet
+                const today = new Date().toISOString().split('T')[0];
+                if (!notionPageIndex[today]) {
+                    console.log('[RayOS Direct] Today', today, 'not in Notion — creating');
+                    if (!dailyHabitsData[today]) {
+                        dailyHabitsData[today] = {trading:false,advertise:false,deliver:false,gym:false,fatloss:false,ai:false};
+                        localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
+                    }
+                    await createDayInNotionDirect(today);
+                    loadDailyHabits(true);
+                }
+                return true;
+            } catch (e) {
+                console.error('[RayOS Direct] Sync error:', e);
+                if (!silent) showToast('Notion 同步失敗: ' + e.message, true);
+                syncInProgress = false;
+                return false;
+            }
+        }
+
+        // === 直接寫入 Notion checkbox ===
+        async function writeHabitToNotionDirect(dateStr, habit, value) {
+            const field = H2N[habit];
+            if (!field) return;
+            let pageId = notionPageIndex[dateStr];
+            if (!pageId) {
+                console.log('[RayOS Direct] No pageId for', dateStr, '— creating day first');
+                await createDayInNotionDirect(dateStr);
+                pageId = notionPageIndex[dateStr];
+                if (!pageId) {
+                    showToast('Notion 同步失敗：無法建立 ' + dateStr, true);
+                    return;
+                }
+            }
+            try {
+                await notionFetch('/pages/' + pageId, 'PATCH', {
+                    properties: { [field]: { checkbox: !!value } }
+                });
+                console.log('[RayOS Direct] Updated', dateStr, field, '=', !!value);
+            } catch (e) {
+                console.error('[RayOS Direct] Update error:', e);
+                showToast('Notion 更新失敗: ' + e.message, true);
+            }
+        }
+
+        // === 直接在 Notion 建立新的一天 ===
+        async function createDayInNotionDirect(dateStr) {
+            const habits = dailyHabitsData[dateStr] || {};
+            try {
+                const props = {
+                    'Date': { title: [{ text: { content: dateStr } }] },
+                    'Trading': { checkbox: !!habits.trading },
+                    'Advertise': { checkbox: !!habits.advertise },
+                    'Deliver': { checkbox: !!habits.deliver },
+                    'Gym': { checkbox: !!habits.gym },
+                    'FatLoss': { checkbox: !!habits.fatloss },
+                    'AI': { checkbox: !!habits.ai }
+                };
+                // Add date property
+                props['\u65e5\u671f'] = { date: { start: dateStr } };
+                const page = await notionFetch('/pages', 'POST', {
+                    parent: { database_id: NOTION_DB_ID },
+                    properties: props
+                });
+                notionPageIndex[dateStr] = page.id;
+                localStorage.setItem('notion_page_index', JSON.stringify(notionPageIndex));
+                console.log('[RayOS Direct] Created day:', dateStr, '→', page.id);
+            } catch (e) {
+                console.error('[RayOS Direct] Create error:', e);
+                showToast('Notion 建立失敗: ' + e.message, true);
+            }
+        }
+
+        // === 測試 Notion 直接連線 ===
+        async function testNotionDirect() {
+            const token = document.getElementById('notion-token').value;
+            const statusEl = document.getElementById('notion-direct-status');
+            if (!token) { statusEl.innerHTML = '❌ 請填入 Notion API Token'; return; }
+            statusEl.textContent = '⏳ 測試中...';
+            try {
+                // Temporarily save token so notionFetch can use it
+                const oldToken = localStorage.getItem('notion_token');
+                localStorage.setItem('notion_token', token);
+                const data = await notionFetch('/databases/' + NOTION_DB_ID + '/query', 'POST', { page_size: 1 });
+                if (!oldToken) localStorage.removeItem('notion_token'); else localStorage.setItem('notion_token', oldToken);
+                statusEl.innerHTML = '✅ <span style="color:var(--success);">Notion 連線成功！Daily Habits DB 可存取</span>';
+            } catch (e) {
+                statusEl.innerHTML = '❌ 連線失敗: ' + e.message + '<br><small>確認 Token 正確，且 Integration 已連接到資料庫</small>';
+            }
+        }
+
+        // ============ N8N FALLBACK (進階) ============
 
         // === 從 Notion 拉取全部 Habits（經 n8n）===
         async function syncDailyFromNotion(silent = false) {
             const url = getN8nUrl();
-            if (!url) { if (!silent) showToast('請先在 Settings 設定 n8n Webhook URL', true); return false; }
+            if (!url) { if (!silent) showToast('請先在 Settings 設定 Notion Token 或 n8n URL', true); return false; }
             if (syncInProgress) return false;
             syncInProgress = true;
             if (!silent) showToast('正在從 Notion 同步...');
@@ -1593,8 +1764,8 @@
                 if (data.habits) {
                     notionPageIndex = data.pageIndex || {};
                     localStorage.setItem('notion_page_index', JSON.stringify(notionPageIndex));
-                    console.log('[RayOS] Synced pageIndex:', Object.keys(notionPageIndex).length, 'entries');
-                    if (!data.pageIndex) console.warn('[RayOS] Response missing pageIndex — update_habit will fail');
+                    console.log('[RayOS n8n] Synced pageIndex:', Object.keys(notionPageIndex).length, 'entries');
+                    if (!data.pageIndex) console.warn('[RayOS n8n] Response missing pageIndex — update_habit will fail');
                     Object.keys(data.habits).forEach(dateStr => {
                         const nd = data.habits[dateStr];
                         dailyHabitsData[dateStr] = {
@@ -1615,52 +1786,53 @@
                 }
                 throw new Error('無效回應');
             } catch (e) {
-                console.error('Sync error:', e);
-                if (!silent) showToast('同步失敗: ' + e.message, true);
+                console.error('[RayOS n8n] Sync error:', e);
+                if (!silent) showToast('n8n 同步失敗: ' + e.message, true);
                 syncInProgress = false;
                 return false;
             }
         }
 
-        // === 勾選後即時寫回 Notion（經 n8n）===
+        // === 勾選後即時寫回 Notion（自動選擇直接或 n8n）===
         async function writeHabitToNotion(dateStr, habit, value) {
+            if (hasNotionDirect()) {
+                return writeHabitToNotionDirect(dateStr, habit, value);
+            }
+            // n8n fallback
             const url = getN8nUrl();
             if (!url) return;
             const field = H2N[habit];
             if (!field) return;
 
             let pageId = notionPageIndex[dateStr];
-
-            // 如果沒有 pageId，先建立頁面再更新
             if (!pageId) {
-                console.log('[RayOS] No pageId for', dateStr, '— creating day first');
+                console.log('[RayOS n8n] No pageId for', dateStr, '— creating day first');
                 await createDayInNotion(dateStr);
                 pageId = notionPageIndex[dateStr];
                 if (!pageId) {
-                    console.warn('[RayOS] Still no pageId after create — check n8n config');
                     showToast('Notion 同步失敗：無法取得 pageId', true);
                     return;
                 }
             }
-
             try {
                 const res = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'update_habit', pageId, field, value: !!value })
                 });
-                if (!res.ok) {
-                    console.warn('[RayOS] update_habit failed:', res.status);
-                    showToast('Notion 更新失敗: ' + res.status, true);
-                }
+                if (!res.ok) showToast('Notion 更新失敗: ' + res.status, true);
             } catch (e) {
-                console.error('[RayOS] Write error:', e);
+                console.error('[RayOS n8n] Write error:', e);
                 showToast('Notion 寫入錯誤', true);
             }
         }
 
-        // === 在 Notion 建立新的一天（經 n8n）===
+        // === 在 Notion 建立新的一天（自動選擇）===
         async function createDayInNotion(dateStr) {
+            if (hasNotionDirect()) {
+                return createDayInNotionDirect(dateStr);
+            }
+            // n8n fallback
             const url = getN8nUrl();
             if (!url) return;
             const habits = {};
@@ -1675,11 +1847,11 @@
                 if (data.pageId) {
                     notionPageIndex[dateStr] = data.pageId;
                     localStorage.setItem('notion_page_index', JSON.stringify(notionPageIndex));
-                    console.log('[RayOS] Created day in Notion:', dateStr, '→', data.pageId);
+                    console.log('[RayOS n8n] Created day:', dateStr, '→', data.pageId);
                 } else {
-                    console.warn('[RayOS] create_day response missing pageId:', data);
+                    console.warn('[RayOS n8n] create_day response missing pageId:', data);
                 }
-            } catch (e) { console.error('[RayOS] Create error:', e); }
+            } catch (e) { console.error('[RayOS n8n] Create error:', e); }
         }
 
         // === 測試 n8n 連線 ===
@@ -1729,11 +1901,13 @@
 
         // ==================== SETTINGS ====================
         function saveSettings() {
+            const notionToken = document.getElementById('notion-token').value;
             const webhook = document.getElementById('n8n-webhook').value.replace(/\/+$/, '');
             const apiKey = document.getElementById('anthropic-key').value;
             const aiModel = document.getElementById('ai-model').value;
             const aiProfile = document.getElementById('ai-profile').value;
             const driveUrl = document.getElementById('drive-script-url').value.replace(/\/+$/, '');
+            if (notionToken) localStorage.setItem('notion_token', notionToken);
             if (webhook) localStorage.setItem('n8n_webhook', webhook);
             if (apiKey) localStorage.setItem('anthropic_key', apiKey);
             if (driveUrl) localStorage.setItem('drive_script_url', driveUrl);
@@ -1743,7 +1917,12 @@
             updateModelBadges();
             showToast('Settings saved');
             hideModal('settings-modal');
-            if (webhook) syncDailyFromNotion(true);
+            // Prefer direct Notion sync, fallback to n8n
+            if (notionToken) {
+                syncDailyFromNotionDirect(true);
+            } else if (webhook) {
+                syncDailyFromNotion(true);
+            }
             if (driveUrl) syncMoodboardFromDrive();
         }
 
@@ -1760,7 +1939,7 @@
                 loadDailyHabits();
                 hideModal('settings-modal');
                 showToast('Data reset — syncing from Notion...');
-                syncDailyFromNotion(true);
+                syncDailyFromNotionDirect(true);
             }
         }
 
@@ -3315,6 +3494,7 @@ Prop Firm: Fee $38,918 / Payout $64,043 / Net $29,648 / Pass Rate 25%`;
             document.getElementById('wealth-quote-author').textContent = '— ' + quote.author;
             document.getElementById('goal-target').textContent = formatNumber(wealthGoal);
             
+            if(localStorage.getItem('notion_token')) document.getElementById('notion-token').value = localStorage.getItem('notion_token');
             if(localStorage.getItem('n8n_webhook')) document.getElementById('n8n-webhook').value = localStorage.getItem('n8n_webhook');
             if(localStorage.getItem('anthropic_key')) document.getElementById('anthropic-key').value = localStorage.getItem('anthropic_key');
             if(localStorage.getItem('ai_model')) document.getElementById('ai-model').value = localStorage.getItem('ai_model');
@@ -3357,21 +3537,25 @@ Prop Firm: Fee $38,918 / Payout $64,043 / Net $29,648 / Pass Rate 25%`;
             }
             
             // 🔄 頁面載入自動從 Notion 同步最新資料
-            if (getN8nUrl()) {
+            if (hasNotionDirect() || getN8nUrl()) {
                 setTimeout(async () => {
-                    const ok = await syncDailyFromNotion(true);
+                    const ok = await syncDailyFromNotionDirect(true);
                     if (!ok) {
                         loadDailyHabits(true);
                     }
                 }, 500);
-                // Body auto-sync
-                if (bodyHistory.length <= 3) {
+                // Body auto-sync (still uses n8n for now)
+                if (getN8nUrl() && bodyHistory.length <= 3) {
                     setTimeout(() => syncBodyFromNotion(), 1200);
                 }
-                // Wealth auto-sync
-                setTimeout(() => syncWealthFromNotion(true), 1500);
-                // Ideas auto-sync
-                setTimeout(() => syncIdeasFromNotion(true), 1800);
+                // Wealth auto-sync (still uses n8n for now)
+                if (getN8nUrl()) {
+                    setTimeout(() => syncWealthFromNotion(true), 1500);
+                }
+                // Ideas auto-sync (still uses n8n for now)
+                if (getN8nUrl()) {
+                    setTimeout(() => syncIdeasFromNotion(true), 1800);
+                }
             }
             
             document.getElementById('wealth-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askWealthAI(); });
