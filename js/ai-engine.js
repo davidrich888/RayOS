@@ -4,6 +4,87 @@
 const aiChatHistory = { life: [] };
 let aiAutoAnalyzed = { life: false };
 
+// ============ AI MEMORY SYSTEM ============
+// AI 每次對話後自動提煉洞察，累積越來越了解 Ray
+const MAX_MEMORIES = 20; // 最多保留 20 條記憶
+
+function getAIMemories() {
+    return JSON.parse(localStorage.getItem('ai_memory') || '[]');
+}
+
+function saveAIMemory(insight) {
+    const memories = getAIMemories();
+    memories.push({
+        text: insight.trim(),
+        date: new Date().toISOString().split('T')[0],
+        id: Date.now()
+    });
+    // 超過上限，移除最舊的
+    while (memories.length > MAX_MEMORIES) memories.shift();
+    localStorage.setItem('ai_memory', JSON.stringify(memories));
+    renderMemoryPanel();
+}
+
+function deleteAIMemory(id) {
+    const memories = getAIMemories().filter(m => m.id !== id);
+    localStorage.setItem('ai_memory', JSON.stringify(memories));
+    renderMemoryPanel();
+}
+
+function clearAllMemories() {
+    localStorage.removeItem('ai_memory');
+    renderMemoryPanel();
+    showToast('AI 記憶已清除');
+}
+
+function renderMemoryPanel() {
+    const el = document.getElementById('ai-memory-panel');
+    if (!el) return;
+    const memories = getAIMemories();
+    if (memories.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:12px;">AI 尚未累積記憶 — 對話後會自動學習</div>';
+        return;
+    }
+    el.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:11px;color:var(--text-muted);">🧠 ${memories.length}/${MAX_MEMORIES} 條記憶</span>
+            <button onclick="clearAllMemories()" style="font-size:10px;padding:2px 8px;background:var(--danger);color:#fff;border:none;border-radius:4px;cursor:pointer;">清除全部</button>
+        </div>
+        ${memories.slice().reverse().map(m => `
+            <div style="display:flex;justify-content:space-between;align-items:start;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
+                <div style="flex:1;">
+                    <span style="color:var(--text-dim);font-size:10px;">${m.date}</span>
+                    <div style="margin-top:2px;">${m.text}</div>
+                </div>
+                <button onclick="deleteAIMemory(${m.id})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0 4px;">✕</button>
+            </div>
+        `).join('')}
+    `;
+}
+
+function buildMemoryContext() {
+    const memories = getAIMemories();
+    if (memories.length === 0) return '';
+    let ctx = '\n\n=== YOUR ACCUMULATED INSIGHTS ABOUT RAY ===';
+    ctx += '\n(These are things you learned from previous conversations. Use them to give better, more personalized advice.)';
+    memories.forEach(m => {
+        ctx += `\n- [${m.date}] ${m.text}`;
+    });
+    return ctx;
+}
+
+// 從 AI 回應中提取 [MEMORY:...] 並儲存
+function extractAndSaveMemory(responseText) {
+    const regex = /\[MEMORY:(.*?)\]/gs;
+    let match;
+    let cleanText = responseText;
+    while ((match = regex.exec(responseText)) !== null) {
+        saveAIMemory(match[1]);
+        cleanText = cleanText.replace(match[0], '');
+    }
+    return cleanText.trim();
+}
+
 const AI_SYSTEM_PROMPTS = {
     life: `You are Ray's personal AI Life Coach — 他最信任的人生導師。
 你能看到 Ray 所有的人生數據：財富、體態、交易績效、每日習慣、點子、以及他正在學習的影片知識。
@@ -16,7 +97,16 @@ const AI_SYSTEM_PROMPTS = {
 - 當某個領域表現不好時，主動提醒
 - 當 Ray 的影片庫裡有相關知識時，主動引用並告訴他如何應用
 
-回答用繁體中文，混合英文術語。直接、數據驅動、可執行。Max 500 words.`
+回答用繁體中文，混合英文術語。直接、數據驅動、可執行。Max 500 words.
+
+IMPORTANT — Memory System:
+At the END of every response, add a [MEMORY:...] tag with 1 concise insight (max 30 words) you learned about Ray from this conversation.
+This can be: his preferences, decisions, concerns, patterns, goals, personality traits, or anything that helps you coach him better next time.
+Examples:
+[MEMORY:Ray 偏好短線交易而非長期持有，風險承受度中等]
+[MEMORY:Ray 目前最在意體脂下降，健身頻率不穩定是主要瓶頸]
+[MEMORY:Ray 對被動收入很有興趣，正在研究 AI 自動化]
+Only write genuinely useful insights. Do NOT repeat data you already have in the dashboard — focus on preferences, patterns, and personal context that data alone cannot capture.`
 };
 
 // Model display names
@@ -119,7 +209,10 @@ function buildSystemPrompt() {
     // Video knowledge context
     prompt += buildVideoKnowledgeContext();
 
-    prompt += `\n\n根據以上所有數據和影片知識，給出全方位的人生建議。當影片知識與問題相關時，主動引用並告訴 Ray 如何應用。`;
+    // AI accumulated memory
+    prompt += buildMemoryContext();
+
+    prompt += `\n\n根據以上所有數據、影片知識和累積記憶，給出全方位的人生建議。當影片知識與問題相關時，主動引用並告訴 Ray 如何應用。記得在回答末尾加上 [MEMORY:...] 標籤。`;
     return prompt;
 }
 
@@ -226,7 +319,9 @@ async function callClaudeAPI(userMessage) {
             return '⚠️ API 錯誤 (' + response.status + '): ' + (errData.error?.message || 'Unknown error');
         }
         const data = await response.json();
-        const text = data.content?.map(b => b.type === 'text' ? b.text : '').join('') || 'No response';
+        const rawText = data.content?.map(b => b.type === 'text' ? b.text : '').join('') || 'No response';
+        // 提取 [MEMORY:...] 並儲存，回傳乾淨文字
+        const text = extractAndSaveMemory(rawText);
         return text;
     } catch (err) {
         console.error('Claude API error:', err);
@@ -315,6 +410,8 @@ function updateLifeOverview() {
         <div class="stat-box" onclick="go('ideas')"><div class="stat-value">${ideasData.length}</div><div class="stat-label">Ideas</div></div>
         <div class="stat-box" onclick="go('information')"><div class="stat-value">${videoKnowledge.length}</div><div class="stat-label">Learning</div></div>
     `;
+    // Render memory panel on overview update
+    renderMemoryPanel();
 }
 
 // Expense analyzer (standalone, kept for wealth page)

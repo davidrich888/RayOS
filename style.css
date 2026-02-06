@@ -481,6 +481,9 @@
             
             /* ===== INFORMATION ===== */
             #information .content { height: calc(100vh - 60px); padding: 0; }
+
+            /* ===== AI COACH: stack panels on mobile ===== */
+            #lifecoach .content > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
         }
         
         /* ===== SMALL PHONE (≤400px) ===== */
