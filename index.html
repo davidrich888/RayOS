@@ -558,8 +558,8 @@
                     <span class="sync-dot off" id="wealth-sync-dot"></span>
                     <button class="btn" onclick="syncWealthFromNotion()">Sync Notion</button>
                     <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <button class="btn" onclick="showModal('account-modal')">Accounts</button>
-                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/9b31234579244560bfaa6247bf71d462','_blank')">Notion</button>
+                    <button class="btn" onclick="syncAccountsFromNotion();showModal('account-modal')">Accounts</button>
+                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/127c65e93b7c4008b34c86c285295387','_blank')">Notion</button>
                 </div>
             </div>
             <div class="content">
@@ -601,9 +601,11 @@
                                     </div>
                                     <div class="chart-tabs">
                                         <button class="chart-tab active" onclick="setWealthChart('total',this)">Total Assets</button>
+                                        <button class="chart-tab" onclick="setWealthChart('reserve',this)">備用金</button>
                                         <button class="chart-tab" onclick="setWealthChart('savings',this)">活期存款</button>
                                         <button class="chart-tab" onclick="setWealthChart('stocks',this)">股票/ETF</button>
                                         <button class="chart-tab" onclick="setWealthChart('crypto',this)">加密貨幣</button>
+                                        <button class="chart-tab" onclick="setWealthChart('forex',this)">外幣存款</button>
                                         <button class="chart-tab" onclick="setWealthChart('debt',this)">債務</button>
                                     </div>
                                 </div>
@@ -1279,12 +1281,16 @@
     <script>
         // ==================== PRELOAD DATA ====================
         const PRELOAD_WEALTH_HISTORY = [
-            { date: '2023-10-04', totalAssets: 193010, netWorth: -26980, monthlyGrowth: null, categories: { '活期存款': 0, '股票ETF': 0, '加密貨幣': 0, '債務': 0 } },
-            { date: '2024-09-30', totalAssets: 698106, netWorth: 396511, monthlyGrowth: 67.64, categories: { '活期存款': 388871, '股票ETF': 18193, '加密貨幣': 50763, '債務': 301595 } },
-            { date: '2024-12-31', totalAssets: 1485956, netWorth: 1194361, monthlyGrowth: 11.50, categories: { '活期存款': 609953, '股票ETF': 16955, '加密貨幣': 58548, '債務': 291595 } },
-            { date: '2025-06-30', totalAssets: 3753106, netWorth: 3567863, monthlyGrowth: 6.14, categories: { '活期存款': 1250488, '股票ETF': 1769422, '加密貨幣': 733196, '債務': 185243 } },
-            { date: '2025-12-31', totalAssets: 3398914, netWorth: 3233505, monthlyGrowth: -3.20, categories: { '活期存款': 1466884, '股票ETF': 1556503, '加密貨幣': 375527, '債務': 165409 } },
-            { date: '2026-01-31', totalAssets: 4113482, netWorth: 3950411, monthlyGrowth: 21.02, categories: { '活期存款': 2088372, '股票ETF': 1677624, '加密貨幣': 347486, '債務': 163071 } }
+            { date: '2023-10-04', totalAssets: 193010, netWorth: -26980, monthlyGrowth: null, yearlyGrowth: null, categories: { '備用金': 0, '活期存款': 0, '股票ETF': 0, '加密貨幣': 0, '外幣存款': 0, '債務': 0 } },
+            { date: '2023-11-07', totalAssets: 296437, netWorth: 81437, monthlyGrowth: 53.59, yearlyGrowth: 15.08, categories: { '備用金': 115869, '活期存款': 23352, '股票ETF': 103534, '加密貨幣': 54747, '外幣存款': 0, '債務': 215000 } },
+            { date: '2024-01-06', totalAssets: 299134, netWorth: -108670, monthlyGrowth: -12.31, yearlyGrowth: -182.87, categories: { '備用金': 67292, '活期存款': 19022, '股票ETF': 177509, '加密貨幣': 35312, '外幣存款': 0, '債務': 407804 } },
+            { date: '2024-08-19', totalAssets: 290704, netWorth: -20891, monthlyGrowth: 45.92, yearlyGrowth: -115.93, categories: { '備用金': 120000, '活期存款': 40476, '股票ETF': 17890, '加密貨幣': 112338, '外幣存款': 0, '債務': 311595 } },
+            { date: '2024-09-30', totalAssets: 698106, netWorth: 396511, monthlyGrowth: 67.64, yearlyGrowth: 202.37, categories: { '備用金': 240279, '活期存款': 388871, '股票ETF': 18193, '加密貨幣': 50763, '外幣存款': 0, '債務': 301595 } },
+            { date: '2024-12-31', totalAssets: 1485956, netWorth: 1194361, monthlyGrowth: 11.50, yearlyGrowth: 810.80, categories: { '備用金': 800500, '活期存款': 609953, '股票ETF': 16955, '加密貨幣': 58548, '外幣存款': 0, '債務': 291595 } },
+            { date: '2025-03-30', totalAssets: 3263895, netWorth: 3071638, monthlyGrowth: 18.78, yearlyGrowth: 157.18, categories: { '備用金': 701282, '活期存款': 730478, '股票ETF': 939185, '加密貨幣': 892950, '外幣存款': 0, '債務': 192257 } },
+            { date: '2025-06-30', totalAssets: 3753106, netWorth: 3567863, monthlyGrowth: 6.14, yearlyGrowth: 198.73, categories: { '備用金': 0, '活期存款': 1250488, '股票ETF': 1769422, '加密貨幣': 733196, '外幣存款': 0, '債務': 185243 } },
+            { date: '2025-12-31', totalAssets: 3398914, netWorth: 3233505, monthlyGrowth: -3.20, yearlyGrowth: 170.73, categories: { '備用金': 0, '活期存款': 1466884, '股票ETF': 1556503, '加密貨幣': 375527, '外幣存款': 0, '債務': 165409 } },
+            { date: '2026-01-31', totalAssets: 4113482, netWorth: 3950411, monthlyGrowth: 21.02, yearlyGrowth: 22.17, categories: { '備用金': 0, '活期存款': 2088372, '股票ETF': 1677624, '加密貨幣': 347486, '外幣存款': 0, '債務': 163071 } }
         ];
 
         const PRELOAD_BODY_HISTORY = [
@@ -1314,7 +1320,9 @@
 
         // ==================== CONFIG ====================
         const USD_RATE = 32.5, USDT_RATE = 32.5;
-        const CATEGORY_ICONS = {'備用金':'💵','活期存款':'🏦','股票ETF':'📈','加密貨幣':'🪙','債務':'💳'};
+        const CATEGORY_ICONS = {'備用金':'💵','活期存款':'🏦','股票ETF':'📈','加密貨幣':'🪙','定期存款':'🏛️','外幣存款':'💱','動產':'🚗','不動產':'🏠','債務':'💳','應收貸款':'📄'};
+        const WEALTH_DB_ID = '127c65e93b7c4008b34c86c285295387';
+        const ACCOUNTS_DB_ID = '21e464db5e3e456ea7f324d951a11244';
         const DEFAULT_ACCOUNTS = [
             {name:'台新主帳戶',platform:'台新',category:'活期存款',currency:'TWD'},
             {name:'WISE',platform:'WISE',category:'活期存款',currency:'USD'},
@@ -2050,9 +2058,11 @@
             let data;
             switch (wealthChartType) {
                 case 'total': data = hist.map(h => h.totalAssets || 0); break;
+                case 'reserve': data = hist.map(h => h.categories?.['備用金'] || 0); break;
                 case 'savings': data = hist.map(h => h.categories?.['活期存款'] || 0); break;
                 case 'stocks': data = hist.map(h => h.categories?.['股票ETF'] || 0); break;
                 case 'crypto': data = hist.map(h => h.categories?.['加密貨幣'] || 0); break;
+                case 'forex': data = hist.map(h => h.categories?.['外幣存款'] || 0); break;
                 case 'debt': data = hist.map(h => h.categories?.['債務'] || 0); break;
                 default: data = hist.map(h => h.totalAssets || 0);
             }
@@ -2147,6 +2157,47 @@
             }
         }
 
+        async function syncAccountsFromNotion(silent = false) {
+            if (!hasNotionDirect()) {
+                if (!silent) showToast('請先設定 Notion Token', true);
+                return;
+            }
+            if (!silent) showToast('正在同步帳戶...');
+            try {
+                const data = await notionFetch('/databases/' + ACCOUNTS_DB_ID + '/query', 'POST', {
+                    sorts: [{ property: '排序', direction: 'ascending' }]
+                });
+                if (data.results && data.results.length > 0) {
+                    accounts = data.results.map(page => {
+                        const p = page.properties;
+                        const getTitle = (prop) => prop?.title?.[0]?.plain_text || '';
+                        const getNum = (prop) => prop?.number ?? 0;
+                        const getText = (prop) => prop?.rich_text?.[0]?.plain_text || '';
+                        const getSelect = (prop) => prop?.select?.name || '';
+                        return {
+                            name: getTitle(p['Name']),
+                            platform: getText(p['平台']),
+                            category: getSelect(p['分類']),
+                            currency: getSelect(p['幣別']) || 'TWD',
+                            amount: getNum(p['金額']),
+                            twdValue: getNum(p['台幣現值']),
+                            rate: getNum(p['匯率']),
+                            interestRate: getNum(p['利率']),
+                            description: getText(p['說明']),
+                            sortOrder: getNum(p['排序']),
+                            pageId: page.id
+                        };
+                    }).filter(a => a.name);
+                    localStorage.setItem('accounts', JSON.stringify(accounts));
+                    if (!silent) showToast('Synced ' + accounts.length + ' accounts');
+                    console.log('[RayOS Direct] Accounts synced:', accounts.length);
+                }
+            } catch(e) {
+                console.error('[RayOS] Accounts sync error:', e);
+                if (!silent) showToast('帳戶同步失敗: ' + e.message, true);
+            }
+        }
+
         function toggleWealthForm() {
             const f = document.getElementById('wealth-form');
             const b = document.getElementById('wealth-form-toggle');
@@ -2204,16 +2255,58 @@
                     data.monthlyGrowth = ((data.totalAssets - prev.totalAssets) / prev.totalAssets) * 100;
                 }
             }
+            // Calculate yearly growth (compare to same month last year)
+            const targetYear = parseInt(date.slice(0, 4)) - 1;
+            const targetMonth = date.slice(5, 7);
+            const lastYearRecord = wealthHistory.find(h => h.date && h.date.startsWith(targetYear + '-' + targetMonth));
+            if (lastYearRecord && lastYearRecord.totalAssets > 0) {
+                data.yearlyGrowth = ((data.totalAssets - lastYearRecord.totalAssets) / lastYearRecord.totalAssets) * 100;
+            }
             wealthHistory.push(data);
             localStorage.setItem('wealth_history', JSON.stringify(wealthHistory));
             updateWealthDisplay();
             toggleWealthForm();
-            // Sync to Notion via n8n
+            // Sync to Notion (Direct → N8N fallback)
             const synced = await writeWealthToNotion(data);
             showToast(synced ? 'Saved & Synced' : 'Saved');
         }
 
         async function writeWealthToNotion(data) {
+            // Try Notion Direct first
+            if (hasNotionDirect()) {
+                try {
+                    console.log('[RayOS] Writing wealth to Notion Direct');
+                    const cats = data.categories || {};
+                    const props = {
+                        'Date': { title: [{ text: { content: data.date } }] },
+                        'TotalAssets': { number: Math.round(data.totalAssets || 0) },
+                        'NetWorth': { number: Math.round(data.netWorth || 0) },
+                        'MonthlyGrowth': { number: data.monthlyGrowth ? data.monthlyGrowth / 100 : 0 },
+                        'YearlyGrowth': { number: data.yearlyGrowth ? data.yearlyGrowth / 100 : 0 },
+                        '備用金': { number: Math.round(cats['備用金'] || 0) },
+                        '活期存款': { number: Math.round(cats['活期存款'] || 0) },
+                        '股票ETF': { number: Math.round(cats['股票ETF'] || 0) },
+                        '加密貨幣': { number: Math.round(cats['加密貨幣'] || 0) },
+                        '外幣存款': { number: Math.round(cats['外幣存款'] || 0) },
+                        '債務': { number: Math.round(cats['債務'] || 0) },
+                        '定期存款': { number: Math.round(cats['定期存款'] || 0) }
+                    };
+                    if (data.notes) props['備註'] = { rich_text: [{ text: { content: data.notes } }] };
+                    const result = await notionFetch('/pages', 'POST', {
+                        parent: { database_id: WEALTH_DB_ID },
+                        properties: props
+                    });
+                    if (result.id) {
+                        wealthNotionIndex[data.date] = result.id;
+                        localStorage.setItem('wealth_notion_index', JSON.stringify(wealthNotionIndex));
+                    }
+                    console.log('[RayOS Direct] Wealth written:', data.date);
+                    return true;
+                } catch(e) {
+                    console.warn('[RayOS] Notion Direct wealth write failed:', e.message);
+                }
+            }
+            // Fallback: N8N
             const url = getN8nUrl();
             if (!url) return false;
             try {
@@ -2236,12 +2329,71 @@
                     localStorage.setItem('wealth_notion_index', JSON.stringify(wealthNotionIndex));
                 }
                 return result.ok;
-            } catch(e) { console.error('[RayOS] Wealth sync error:', e); return false; }
+            } catch(e) { console.error('[RayOS] Wealth N8N sync error:', e); return false; }
+        }
+
+        function mapNotionWealthPage(page) {
+            const p = page.properties || {};
+            const getTitle = (prop) => prop?.title?.[0]?.plain_text || '';
+            const getNum = (prop) => prop?.number ?? 0;
+            const getText = (prop) => prop?.rich_text?.[0]?.plain_text || '';
+            const date = getTitle(p['Date']);
+            const mg = getNum(p['MonthlyGrowth']);
+            const yg = getNum(p['YearlyGrowth']);
+            return {
+                date,
+                totalAssets: getNum(p['TotalAssets']),
+                netWorth: getNum(p['NetWorth']),
+                monthlyGrowth: mg !== 0 ? mg * 100 : null,
+                yearlyGrowth: yg !== 0 ? yg * 100 : null,
+                notes: getText(p['備註']),
+                categories: {
+                    '備用金': getNum(p['備用金']),
+                    '活期存款': getNum(p['活期存款']),
+                    '股票ETF': getNum(p['股票ETF']),
+                    '加密貨幣': getNum(p['加密貨幣']),
+                    '外幣存款': getNum(p['外幣存款']),
+                    '定期存款': getNum(p['定期存款']),
+                    '債務': getNum(p['債務']),
+                    '保險': getNum(p['保險']),
+                    '退休金': getNum(p['退休金']),
+                    'PropFirm': getNum(p['PropFirm'])
+                },
+                pageId: page.id
+            };
         }
 
         async function syncWealthFromNotion(silent = false) {
+            // Try Notion Direct first
+            if (hasNotionDirect()) {
+                if (!silent) showToast('正在同步 Wealth 資料...');
+                try {
+                    console.log('[RayOS] Syncing wealth via Notion Direct');
+                    const data = await notionFetch('/databases/' + WEALTH_DB_ID + '/query', 'POST', {
+                        sorts: [{ property: 'Date', direction: 'ascending' }]
+                    });
+                    if (data.results && data.results.length > 0) {
+                        wealthNotionIndex = {};
+                        wealthHistory = data.results.map(page => {
+                            const record = mapNotionWealthPage(page);
+                            if (record.date) wealthNotionIndex[record.date] = page.id;
+                            return record;
+                        }).filter(r => r.date);
+                        localStorage.setItem('wealth_notion_index', JSON.stringify(wealthNotionIndex));
+                        localStorage.setItem('wealth_history', JSON.stringify(wealthHistory));
+                        updateWealthDisplay();
+                        updateWealthSyncDot();
+                        if (!silent) showToast('Synced ' + wealthHistory.length + ' wealth records');
+                        console.log('[RayOS Direct] Wealth synced:', wealthHistory.length, 'records');
+                        return;
+                    }
+                } catch(e) {
+                    console.warn('[RayOS] Notion Direct wealth sync failed, trying N8N:', e.message);
+                }
+            }
+            // Fallback: N8N
             const url = getN8nUrl();
-            if (!url) { if (!silent) showToast('請先在 Settings 設定 n8n Webhook URL', true); return; }
+            if (!url) { if (!silent) showToast('請先在 Settings 設定 Notion Token 或 n8n URL', true); return; }
             if (!silent) showToast('正在同步 Wealth 資料...');
             try {
                 const res = await fetch(url, {
@@ -2260,6 +2412,7 @@
                         totalDebt: r.totalDebt || 0,
                         netWorth: r.netWorth || (r.TotalAssets || 0),
                         monthlyGrowth: r.MonthlyGrowth != null ? r.MonthlyGrowth * 100 : null,
+                        yearlyGrowth: r.YearlyGrowth != null ? r.YearlyGrowth * 100 : null,
                         categories: r.categories || {}
                     })).filter(r => r.date).sort((a,b) => a.date.localeCompare(b.date));
                     localStorage.setItem('wealth_history', JSON.stringify(wealthHistory));
@@ -2277,7 +2430,7 @@
 
         function updateWealthSyncDot() {
             const d = document.getElementById('wealth-sync-dot');
-            if (d) d.className = 'sync-dot ' + (getN8nUrl() ? 'on' : 'off');
+            if (d) d.className = 'sync-dot ' + (hasNotionDirect() || getN8nUrl() ? 'on' : 'off');
         }
 
         function updateWealthDisplay() {
@@ -2296,6 +2449,11 @@
                     const mg = lat.monthlyGrowth;
                     document.getElementById('display-monthly').textContent = (mg > 0 ? '+' : '') + mg.toFixed(2) + '%';
                     document.getElementById('display-monthly').className = 'summary-value ' + (mg >= 0 ? 'positive' : 'negative');
+                }
+                if (lat.yearlyGrowth !== null && lat.yearlyGrowth !== undefined) {
+                    const yg = lat.yearlyGrowth;
+                    document.getElementById('display-yearly').textContent = (yg > 0 ? '+' : '') + yg.toFixed(2) + '%';
+                    document.getElementById('display-yearly').className = 'summary-value ' + (yg >= 0 ? 'positive' : 'negative');
                 }
                 updateWealthChart();
             }
@@ -3574,13 +3732,17 @@ Prop Firm: Fee $38,918 / Payout $64,043 / Net $29,648 / Pass Rate 25%`;
                         loadDailyHabits(true);
                     }
                 }, 500);
-                // Body/Wealth/Ideas auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
+                // Auto-sync: Notion Direct (Wealth + Accounts)
+                if (hasNotionDirect()) {
+                    setTimeout(() => syncWealthFromNotion(true), 1500);
+                    setTimeout(() => syncAccountsFromNotion(true), 2000);
+                }
+                // Body/Ideas auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
                 // 有 Notion Token 時跳過 N8N，避免 N8N error
                 if (getN8nUrl() && !hasNotionDirect()) {
                     if (bodyHistory.length <= 3) {
                         setTimeout(() => syncBodyFromNotion(), 1200);
                     }
-                    setTimeout(() => syncWealthFromNotion(true), 1500);
                     setTimeout(() => syncIdeasFromNotion(true), 1800);
                 }
             }
