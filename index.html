@@ -1682,28 +1682,21 @@
         }
 
         // === 直接寫入 Notion checkbox ===
+        // NOTE: This function THROWS on error (not catch) so writeHabitToNotion can fallback to N8N
         async function writeHabitToNotionDirect(dateStr, habit, value) {
             const field = H2N[habit];
-            if (!field) return;
+            if (!field) throw new Error('Unknown habit: ' + habit);
             let pageId = notionPageIndex[dateStr];
             if (!pageId) {
                 console.log('[RayOS Direct] No pageId for', dateStr, '— creating day first');
                 await createDayInNotionDirect(dateStr);
                 pageId = notionPageIndex[dateStr];
-                if (!pageId) {
-                    showToast('Notion 同步失敗：無法建立 ' + dateStr, true);
-                    return;
-                }
+                if (!pageId) throw new Error('Failed to create day ' + dateStr);
             }
-            try {
-                await notionFetch('/pages/' + pageId, 'PATCH', {
-                    properties: { [field]: { checkbox: !!value } }
-                });
-                console.log('[RayOS Direct] Updated', dateStr, field, '=', !!value);
-            } catch (e) {
-                console.error('[RayOS Direct] Update error:', e);
-                showToast('Notion 更新失敗: ' + e.message, true);
-            }
+            await notionFetch('/pages/' + pageId, 'PATCH', {
+                properties: { [field]: { checkbox: !!value } }
+            });
+            console.log('[RayOS Direct] Updated', dateStr, field, '=', !!value);
         }
 
         // === 直接在 Notion 建立新的一天 ===
@@ -1801,23 +1794,33 @@
             }
         }
 
-        // === 勾選後即時寫回 Notion（自動選擇直接或 n8n）===
+        // === 勾選後即時寫回 Notion（Direct 優先，失敗 fallback N8N）===
         async function writeHabitToNotion(dateStr, habit, value) {
-            if (hasNotionDirect()) {
-                console.log('[RayOS] Using Notion Direct API for', habit, '=', value);
-                return writeHabitToNotionDirect(dateStr, habit, value);
-            }
-            console.log('[RayOS] Using N8N fallback for', habit, '=', value);
-            // n8n fallback
-            const url = getN8nUrl();
-            if (!url) return;
             const field = H2N[habit];
             if (!field) return;
 
+            // 1. 優先嘗試 Notion Direct API
+            if (hasNotionDirect()) {
+                try {
+                    console.log('[RayOS] Trying Notion Direct for', habit, '=', value);
+                    await writeHabitToNotionDirect(dateStr, habit, value);
+                    return; // 成功就結束
+                } catch (e) {
+                    console.warn('[RayOS] Notion Direct failed, trying N8N fallback:', e.message);
+                }
+            }
+
+            // 2. Fallback: N8N
+            const url = getN8nUrl();
+            if (!url) {
+                showToast('Notion 同步失敗：無可用連線', true);
+                return;
+            }
+            console.log('[RayOS] Using N8N for', habit, '=', value);
             let pageId = notionPageIndex[dateStr];
             if (!pageId) {
                 console.log('[RayOS n8n] No pageId for', dateStr, '— creating day first');
-                await createDayInNotion(dateStr);
+                await createDayInNotionN8N(dateStr);
                 pageId = notionPageIndex[dateStr];
                 if (!pageId) {
                     showToast('Notion 同步失敗：無法取得 pageId', true);
@@ -1830,19 +1833,35 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'update_habit', pageId, field, value: !!value })
                 });
-                if (!res.ok) showToast('Notion 更新失敗: ' + res.status, true);
+                if (!res.ok) {
+                    console.warn('[RayOS n8n] update_habit failed:', res.status);
+                    showToast('Notion 更新失敗: ' + res.status, true);
+                } else {
+                    console.log('[RayOS n8n] Updated', dateStr, field, '=', !!value);
+                }
             } catch (e) {
                 console.error('[RayOS n8n] Write error:', e);
                 showToast('Notion 寫入錯誤', true);
             }
         }
 
-        // === 在 Notion 建立新的一天（自動選擇）===
+        // === 在 Notion 建立新的一天（Direct 優先，失敗 fallback N8N）===
         async function createDayInNotion(dateStr) {
+            // 1. 優先嘗試 Notion Direct
             if (hasNotionDirect()) {
-                return createDayInNotionDirect(dateStr);
+                try {
+                    await createDayInNotionDirect(dateStr);
+                    return;
+                } catch (e) {
+                    console.warn('[RayOS] Direct create failed, trying N8N:', e.message);
+                }
             }
-            // n8n fallback
+            // 2. Fallback: N8N
+            await createDayInNotionN8N(dateStr);
+        }
+
+        // === N8N: 建立新的一天 ===
+        async function createDayInNotionN8N(dateStr) {
             const url = getN8nUrl();
             if (!url) return;
             const habits = {};
