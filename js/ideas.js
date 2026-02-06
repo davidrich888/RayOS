@@ -199,6 +199,44 @@ async function updateIdeaStatus(ideaId, newStatus) {
     }
 }
 
+// === 刪除 Idea（Direct 優先，fallback n8n）===
+async function deleteIdea(ideaId) {
+    if (!confirm('確定要刪除這個想法嗎？')) return;
+    const idx = ideasData.findIndex(i => i.id === ideaId);
+    if (idx === -1) return;
+    ideasData.splice(idx, 1);
+    delete ideasNotionIndex[ideaId];
+    localStorage.setItem('ideas_data', JSON.stringify(ideasData));
+    localStorage.setItem('ideas_notion_index', JSON.stringify(ideasNotionIndex));
+    renderIdeasList();
+    updateIdeasStats();
+
+    // Notion Direct: archive page
+    if (hasNotionDirect() && ideaId && !ideaId.startsWith('local-')) {
+        try {
+            await notionFetch('/pages/' + ideaId, 'PATCH', { archived: true });
+            console.log('[RayOS Direct] Idea archived:', ideaId);
+            showToast('已刪除並同步');
+            return;
+        } catch (e) {
+            console.warn('[RayOS] Notion Direct archive failed, trying n8n:', e.message);
+        }
+    }
+
+    // Fallback: n8n
+    const url = getN8nUrl();
+    if (url && ideaId && !ideaId.startsWith('local-')) {
+        try {
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'delete_idea', pageId: ideaId })
+            });
+        } catch(e) { console.error('[RayOS n8n] Idea delete error:', e); }
+    }
+    showToast('已刪除');
+}
+
 function setIdeasFilter(filter) {
     currentIdeasFilter = filter;
     document.querySelectorAll('.ideas-filter-btn').forEach(b => b.classList.remove('active'));
@@ -241,6 +279,7 @@ function renderIdeasList() {
                     ${idea.notes ? `<div style="font-size:12px;color:var(--text-muted);margin-top:4px;font-style:italic;">${idea.notes}</div>` : ''}
                 </div>
                 <select class="form-input" style="width:auto;font-size:12px;padding:4px 8px;" onchange="updateIdeaStatus('${idea.id}',this.value)">${statusOptions}</select>
+                <button onclick="deleteIdea('${idea.id}')" style="background:none;border:1px solid var(--border);border-radius:6px;color:#e74c3c;cursor:pointer;font-size:14px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;" title="刪除">✕</button>
             </div>
         </div>`;
     }).join('');
