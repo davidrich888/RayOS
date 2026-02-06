@@ -1,0 +1,191 @@
+{
+  "name": "Ray AI 管家 — 點子收集",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {}
+      },
+      "id": "tg-trigger-001",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Ray AI 管家 Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "" },
+          "conditions": [
+            {
+              "id": "filter-length",
+              "leftValue": "={{ $json.message.text.length }}",
+              "rightValue": 5,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-001",
+      "name": "Filter Short Messages",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $credentials.httpHeaderAuth.value }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 500, system: '你是 Ray 的 AI 管家。分析使用者傳來的想法或點子，回傳 JSON 格式（不要 markdown code block，只回傳純 JSON）：\\n{\\n  \"title\": \"想法摘要（繁體中文，30字內）\",\\n  \"type\": \"從以下選一個最適合的：💰 賣錢點子 / 📹 影片點子 / 🛠️ 工具/自動化 / 📝 內容點子 / 🌟 人生目標 / 🤔 其他\",\\n  \"priority\": \"從以下選一個：🔥 高 / ⭐ 中 / 📌 低\",\\n  \"notes\": \"原始訊息全文 + 你的簡短分析（為什麼這個想法有價值、建議下一步行動）\"\\n}\\n只回傳 JSON，不要任何其他文字。', messages: [{ role: 'user', content: $json.message.text }] }) }}",
+        "options": {
+          "response": { "response": { "responseFormat": "json" } }
+        }
+      },
+      "id": "claude-001",
+      "name": "Claude Analyze Idea",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Claude response → extract JSON from content\nconst content = $input.first().json;\nlet text = '';\nif (content.content && content.content[0] && content.content[0].text) {\n  text = content.content[0].text;\n}\n\n// Remove markdown code block if present\ntext = text.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n\ntry {\n  const parsed = JSON.parse(text);\n  return [{\n    json: {\n      title: parsed.title || '未分類想法',\n      type: parsed.type || '🤔 其他',\n      priority: parsed.priority || '⭐ 中',\n      notes: parsed.notes || $('Telegram Trigger').first().json.message.text,\n      chatId: $('Telegram Trigger').first().json.message.chat.id,\n      date: new Date().toISOString().split('T')[0]\n    }\n  }];\n} catch (e) {\n  // Fallback: save raw message\n  return [{\n    json: {\n      title: $('Telegram Trigger').first().json.message.text.substring(0, 30),\n      type: '🤔 其他',\n      priority: '⭐ 中',\n      notes: $('Telegram Trigger').first().json.message.text,\n      chatId: $('Telegram Trigger').first().json.message.chat.id,\n      date: new Date().toISOString().split('T')[0]\n    }\n  }];\n}"
+      },
+      "id": "code-parse-001",
+      "name": "Parse Claude Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "operation": "create",
+        "databaseId": { "__rl": true, "value": "ed035c908cc04b7b999ef0c023557add", "mode": "id" },
+        "title": "={{ $json.title }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "類型|select",
+              "selectValue": "={{ $json.type }}"
+            },
+            {
+              "key": "狀態|select",
+              "selectValue": "💡 新想法"
+            },
+            {
+              "key": "優先度|select",
+              "selectValue": "={{ $json.priority }}"
+            },
+            {
+              "key": "建立日期|date",
+              "dateValue": "={{ $json.date }}"
+            },
+            {
+              "key": "備註|rich_text",
+              "textContent": "={{ $json.notes }}"
+            }
+          ]
+        }
+      },
+      "id": "notion-create-001",
+      "name": "Save to Notion Ideas",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [880, 300],
+      "credentials": {
+        "notionApi": {
+          "id": "NOTION_CREDENTIAL_ID",
+          "name": "Notion Integration"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Parse Claude Response').first().json.chatId }}",
+        "text": "={{ '✅ 已存入 Notion！\\n\\n📌 ' + $('Parse Claude Response').first().json.title + '\\n🏷️ ' + $('Parse Claude Response').first().json.type + ' · ' + $('Parse Claude Response').first().json.priority }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "tg-reply-001",
+      "name": "Reply Confirmation",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1100, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Ray AI 管家 Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Parse Claude Response').first().json.chatId }}",
+        "text": "⚠️ 儲存失敗，請稍後再試。\n\n已備份原始訊息，不會遺失。",
+        "additionalFields": {}
+      },
+      "id": "tg-error-001",
+      "name": "Error Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1100, 500],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Ray AI 管家 Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [[{ "node": "Filter Short Messages", "type": "main", "index": 0 }]]
+    },
+    "Filter Short Messages": {
+      "main": [[{ "node": "Claude Analyze Idea", "type": "main", "index": 0 }]]
+    },
+    "Claude Analyze Idea": {
+      "main": [[{ "node": "Parse Claude Response", "type": "main", "index": 0 }]]
+    },
+    "Parse Claude Response": {
+      "main": [[{ "node": "Save to Notion Ideas", "type": "main", "index": 0 }]]
+    },
+    "Save to Notion Ideas": {
+      "main": [[{ "node": "Reply Confirmation", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [{ "name": "telegram" }, { "name": "notion" }, { "name": "ai" }],
+  "triggerCount": 1,
+  "pinData": {}
+}

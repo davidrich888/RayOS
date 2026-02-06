@@ -94,7 +94,8 @@
         .section-label { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 16px; text-transform: uppercase; }
         
         /* Wealth Layout */
-        .wealth-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
+        .wealth-layout { display: flex; flex-direction: column; gap: 20px; }
+        .wealth-layout:has(.wealth-sidebar) { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
         .wealth-main { display: flex; flex-direction: column; gap: 20px; }
         .wealth-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; height: fit-content; }
         
@@ -315,7 +316,7 @@
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 90; }
         
         @media (max-width: 1200px) {
-            .wealth-layout { grid-template-columns: 1fr; }
+            .wealth-layout:has(.wealth-sidebar) { grid-template-columns: 1fr; }
             .wealth-sidebar { position: relative; top: 0; }
             .cards { grid-template-columns: repeat(3, 1fr); }
             /* masonry handled by JS */
