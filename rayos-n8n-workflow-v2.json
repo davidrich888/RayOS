@@ -1,0 +1,92 @@
+{
+  "name": "RayOS - Notion Daily Habits Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rayos-sync",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": "e97b6953-7020-4e3d-bbf5-cf7e69b27e5f",
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst habits = {};\n\nfor (const item of items) {\n  const props = item.json.properties;\n  let dateStr = '';\n  \n  // Try different possible date field names\n  const dateField = props['日期'] || props['Date'] || props['date'];\n  if (dateField && dateField.title && dateField.title[0]) {\n    dateStr = dateField.title[0].plain_text;\n  }\n  \n  if (!dateStr || !dateStr.match(/^\\d{4}-\\d{2}-\\d{2}$/)) {\n    continue;\n  }\n  \n  habits[dateStr] = {\n    Trading: props['Trading']?.checkbox || false,\n    Advertise: props['Advertise']?.checkbox || false,\n    Deliever: props['Deliever']?.checkbox || false,\n    Deliver: props['Deliver']?.checkbox || false,\n    Gym: props['Gym']?.checkbox || false,\n    FatLoss: props['FatLoss']?.checkbox || props['Fat Loss']?.checkbox || false,\n    AI: props['AI']?.checkbox || false\n  };\n}\n\nreturn [{ json: { habits } }];"
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [910, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

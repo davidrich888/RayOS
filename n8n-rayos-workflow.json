@@ -1,0 +1,356 @@
+{
+  "name": "RayOS Sync Hub",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "rayos-sync",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 400],
+      "webhookId": "rayos-sync-id"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "fetch_habits",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "fetch_habits"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "update_habit",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "update_habit"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "create_day",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create_day"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000002",
+      "name": "Route",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [260, 400]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/58da82d689ed42029274234183f77bb6/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Notion-Version", "value": "2022-06-28" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"page_size\": 100 }",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000003",
+      "name": "Query All Habits",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Notion API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform Notion query results → { habits, pageIndex, count }\nconst response = $input.first().json;\nconst results = response.results || [];\nconst habits = {};\nconst pageIndex = {};\n\nfor (const page of results) {\n  const props = page.properties || {};\n  // Date is the title field\n  const dateStr = props.Date?.title?.[0]?.plain_text || '';\n  if (!dateStr || !/^\\d{4}-\\d{2}-\\d{2}$/.test(dateStr)) continue;\n\n  habits[dateStr] = {\n    Trading:   props.Trading?.checkbox   || false,\n    Advertise: props.Advertise?.checkbox || false,\n    Deliver:   props.Deliver?.checkbox   || false,\n    Gym:       props.Gym?.checkbox       || false,\n    FatLoss:   props.FatLoss?.checkbox   || false,\n    AI:        props.AI?.checkbox        || false\n  };\n  pageIndex[dateStr] = page.id;\n}\n\nreturn [{ json: { habits, pageIndex, count: Object.keys(habits).length } }];"
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000004",
+      "name": "Transform Habits",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
+            ]
+          }
+        }
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000005",
+      "name": "Respond Fetch",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1040, 100]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "// Prepare PATCH request for updating a checkbox\nconst body = $json.body;\nconst { pageId, field, value } = body;\n\nif (!pageId || !field) {\n  return [{ json: { error: 'Missing pageId or field', ok: false } }];\n}\n\nreturn [{\n  json: {\n    patchUrl: `https://api.notion.com/v1/pages/${pageId}`,\n    patchBody: JSON.stringify({\n      properties: {\n        [field]: { checkbox: !!value }\n      }\n    })\n  }\n}];"
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000006",
+      "name": "Prepare Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 350]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $json.patchUrl }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Notion-Version", "value": "2022-06-28" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json.patchBody }}",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000007",
+      "name": "Update Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 350],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Notion API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return success after update\nreturn [{ json: { ok: true } }];"
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000008",
+      "name": "Format Update Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 350]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
+            ]
+          }
+        }
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000009",
+      "name": "Respond Update",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 350]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "// Build Notion page creation payload\nconst body = $json.body;\nconst { date, habits } = body;\n\nconst properties = {\n  Date: { title: [{ text: { content: date } }] },\n  Trading:   { checkbox: !!(habits?.Trading) },\n  Advertise: { checkbox: !!(habits?.Advertise) },\n  Deliver:   { checkbox: !!(habits?.Deliver) },\n  Gym:       { checkbox: !!(habits?.Gym) },\n  FatLoss:   { checkbox: !!(habits?.FatLoss) },\n  AI:        { checkbox: !!(habits?.AI) }\n};\n\nreturn [{\n  json: {\n    createBody: JSON.stringify({\n      parent: { database_id: '58da82d689ed42029274234183f77bb6' },\n      properties\n    })\n  }\n}];"
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000010",
+      "name": "Prepare Create",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 600]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Notion-Version", "value": "2022-06-28" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json.createBody }}",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000011",
+      "name": "Create Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 600],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Notion API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return success with new page ID\nconst response = $input.first().json;\nreturn [{ json: { ok: true, pageId: response.id || null } }];"
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000012",
+      "name": "Format Create Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 600]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
+            ]
+          }
+        }
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000013",
+      "name": "Respond Create",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 600]
+    },
+
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\":\"ok\",\"version\":\"RayOS Sync Hub v1.0\",\"types\":[\"fetch_habits\",\"update_habit\",\"create_day\"]}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
+            ]
+          }
+        }
+      },
+      "id": "f8a1b2c3-0001-4e00-a000-000000000014",
+      "name": "Respond Health",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [520, 850]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Route", "type": "main", "index": 0 }]
+      ]
+    },
+    "Route": {
+      "main": [
+        [{ "node": "Query All Habits", "type": "main", "index": 0 }],
+        [{ "node": "Prepare Update", "type": "main", "index": 0 }],
+        [{ "node": "Prepare Create", "type": "main", "index": 0 }],
+        [{ "node": "Respond Health", "type": "main", "index": 0 }]
+      ]
+    },
+    "Query All Habits": {
+      "main": [
+        [{ "node": "Transform Habits", "type": "main", "index": 0 }]
+      ]
+    },
+    "Transform Habits": {
+      "main": [
+        [{ "node": "Respond Fetch", "type": "main", "index": 0 }]
+      ]
+    },
+    "Prepare Update": {
+      "main": [
+        [{ "node": "Update Page", "type": "main", "index": 0 }]
+      ]
+    },
+    "Update Page": {
+      "main": [
+        [{ "node": "Format Update Response", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Update Response": {
+      "main": [
+        [{ "node": "Respond Update", "type": "main", "index": 0 }]
+      ]
+    },
+    "Prepare Create": {
+      "main": [
+        [{ "node": "Create Page", "type": "main", "index": 0 }]
+      ]
+    },
+    "Create Page": {
+      "main": [
+        [{ "node": "Format Create Response", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Create Response": {
+      "main": [
+        [{ "node": "Respond Create", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0
+}

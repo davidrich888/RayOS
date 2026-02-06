@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📚 Ray 的學習研究庫</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans TC', -apple-system, sans-serif; }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo, useEffect, useRef } = React;
+
+    const API_URL = "https://david86726.app.n8n.cloud/webhook/youtube-videos";
+    const UPDATE_API_URL = "https://david86726.app.n8n.cloud/webhook/update-video";
+    const DELETE_API_URL = "https://david86726.app.n8n.cloud/webhook/delete-video";
+
+    const categories = ["全部", "交易", "AI 自動化", "商業", "健身", "兩性", "人生", "美學"];
+    const statuses = ["全部", "待看", "進行中", "已完成"];
+
+    // 時間轉秒數
+    function timeToSeconds(timeStr) {
+      const parts = timeStr.split(':').map(Number);
+      if (parts.length === 2) {
+        return parts[0] * 60 + parts[1];
+      } else if (parts.length === 3) {
+        return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      }
+      return 0;
+    }
+
+    // 解析精華片段
+    function parseHighlights(text) {
+      if (!text) return [];
+      const lines = text.split('\n').filter(line => line.trim());
+      return lines.map(line => {
+        const match = line.match(/^(\d+:\d+)(?:-(\d+:\d+))?\s*[-–]\s*(.+)$/);
+        if (match) {
+          return {
+            startTime: match[1],
+            endTime: match[2] || null,
+            description: match[3].trim(),
+            startSeconds: timeToSeconds(match[1])
+          };
+        }
+        return null;
+      }).filter(Boolean);
+    }
+
+    // 星星評分組件
+    function StarRating({ rating, onRate, size = "text-lg" }) {
+      const [hoverRating, setHoverRating] = useState(0);
+      
+      return (
+        <div className="flex gap-0.5">
+          {[1, 2, 3, 4, 5].map(star => (
+            <button
+              key={star}
+              onClick={() => onRate(star)}
+              onMouseEnter={() => setHoverRating(star)}
+              onMouseLeave={() => setHoverRating(0)}
+              className={`${size} transition-colors ${
+                (hoverRating || rating) >= star ? 'text-yellow-400' : 'text-neutral-600'
+              } hover:scale-110`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    // 狀態選擇組件
+    function StatusSelector({ currentStatus, onStatusChange }) {
+      const statusOptions = ["待看", "進行中", "已完成"];
+      
+      return (
+        <div className="flex gap-2">
+          {statusOptions.map(status => (
+            <button
+              key={status}
+              onClick={() => onStatusChange(status)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                currentStatus === status
+                  ? status === "待看" ? "bg-neutral-700 text-white" :
+                    status === "進行中" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" :
+                    "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+              }`}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    // 分類多選組件
+    function CategoryMultiSelector({ currentCategories, onCategoriesChange, availableCategories }) {
+      const selected = currentCategories ? currentCategories.split(',').map(c => c.trim()).filter(Boolean) : [];
+
+      const toggleCategory = (cat) => {
+        let newSelected;
+        if (selected.includes(cat)) {
+          newSelected = selected.filter(c => c !== cat);
+        } else {
+          newSelected = [...selected, cat];
+        }
+        onCategoriesChange(newSelected.join(', '));
+      };
+
+      return (
+        <div className="flex flex-wrap gap-2">
+          {availableCategories.filter(c => c !== "全部").map(cat => (
+            <button
+              key={cat}
+              onClick={() => toggleCategory(cat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                selected.includes(cat)
+                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                  : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    // 語音輸入組件
+    function SpeechToText({ onTranscript, isListening, setIsListening }) {
+      const recognitionRef = useRef(null);
+
+      useEffect(() => {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          recognitionRef.current = new SpeechRecognition();
+          recognitionRef.current.continuous = true;
+          recognitionRef.current.interimResults = true;
+          recognitionRef.current.lang = 'zh-TW';
+
+          recognitionRef.current.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              transcript += event.results[i][0].transcript;
+            }
+            onTranscript(transcript);
+          };
+
+          recognitionRef.current.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            setIsListening(false);
+          };
+
+          recognitionRef.current.onend = () => {
+            setIsListening(false);
+          };
+        }
+      }, []);
+
+      const toggleListening = () => {
+        if (isListening) {
+          recognitionRef.current?.stop();
+          setIsListening(false);
+        } else {
+          recognitionRef.current?.start();
+          setIsListening(true);
+        }
+      };
+
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        return null;
+      }
+
+      return (
+        <button
+          onClick={toggleListening}
+          className={`p-2 rounded-lg transition-all ${
+            isListening 
+              ? 'bg-red-500 text-white animate-pulse' 
+              : 'bg-neutral-700 text-neutral-400 hover:bg-neutral-600'
+          }`}
+          title={isListening ? '停止錄音' : '語音輸入'}
+        >
+          🎤
+        </button>
+      );
+    }
+
+    // 影片彈窗組件
+    function VideoModal({ video, onClose, onUpdate, onDelete, getThumbnail }) {
+      const [rating, setRating] = useState(video.rating || 0);
+      const [status, setStatus] = useState(video.status || "待看");
+      const [selectedCategories, setSelectedCategories] = useState(video.category || "");
+      const [notes, setNotes] = useState(video.notes || "");
+      const [thumbnailSaved, setThumbnailSaved] = useState(video.thumbnailSaved || false);
+      const [isListening, setIsListening] = useState(false);
+      const [tempTranscript, setTempTranscript] = useState("");
+      const [isUpdating, setIsUpdating] = useState(false);
+      const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+      const [isDeleting, setIsDeleting] = useState(false);
+      const [currentTime, setCurrentTime] = useState(0);
+      const [isSavingNotes, setIsSavingNotes] = useState(false);
+      const iframeRef = useRef(null);
+
+      const getVideoId = (url) => {
+        const match = url?.match(/[?&]v=([^&]+)/);
+        return match ? match[1] : null;
+      };
+
+      const videoId = getVideoId(video.url);
+      const highlights = parseHighlights(video.highlights);
+      const [shouldAutoplay, setShouldAutoplay] = useState(false);
+
+      const seekTo = (seconds) => {
+        setCurrentTime(seconds);
+        setShouldAutoplay(true);
+      };
+
+      const youtubeUrl = videoId 
+        ? `https://www.youtube.com/embed/${videoId}${currentTime > 0 ? `?start=${currentTime}` : ''}${shouldAutoplay ? (currentTime > 0 ? '&' : '?') + 'autoplay=1' : ''}`
+        : '';
+
+      const handleRatingChange = async (newRating) => {
+        setRating(newRating);
+        setIsUpdating(true);
+        try {
+          await fetch(UPDATE_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pageId: video.id,
+              rating: newRating,
+              status: status
+            })
+          });
+          onUpdate(video.id, { rating: newRating, status });
+        } catch (err) {
+          console.error('Error updating rating:', err);
+        }
+        setIsUpdating(false);
+      };
+
+      const handleStatusChange = async (newStatus) => {
+        setStatus(newStatus);
+        setIsUpdating(true);
+        try {
+          await fetch(UPDATE_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pageId: video.id,
+              rating: rating,
+              status: newStatus
+            })
+          });
+          onUpdate(video.id, { rating, status: newStatus });
+        } catch (err) {
+          console.error('Error updating status:', err);
+        }
+        setIsUpdating(false);
+      };
+
+      const handleCategoriesChange = async (newCategories) => {
+        setSelectedCategories(newCategories);
+        setIsUpdating(true);
+        try {
+          await fetch(UPDATE_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pageId: video.id,
+              categories: newCategories
+            })
+          });
+          onUpdate(video.id, { category: newCategories });
+        } catch (err) {
+          console.error('Error updating categories:', err);
+        }
+        setIsUpdating(false);
+      };
+
+      const handleSaveNotes = async () => {
+        setIsSavingNotes(true);
+        try {
+          await fetch(UPDATE_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pageId: video.id,
+              notes: notes
+            })
+          });
+          onUpdate(video.id, { notes });
+        } catch (err) {
+          console.error('Error saving notes:', err);
+        }
+        setIsSavingNotes(false);
+      };
+
+      const handleThumbnailSaveToggle = async () => {
+        const newValue = !thumbnailSaved;
+        setThumbnailSaved(newValue);
+        setIsUpdating(true);
+        try {
+          await fetch(UPDATE_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pageId: video.id,
+              thumbnailSaved: newValue
+            })
+          });
+          onUpdate(video.id, { thumbnailSaved: newValue });
+        } catch (err) {
+          console.error('Error updating thumbnail saved:', err);
+          setThumbnailSaved(!newValue);
+        }
+        setIsUpdating(false);
+      };
+
+      const handleDownloadThumbnail = async () => {
+        const thumbnailUrl = getThumbnail(video);
+        if (!thumbnailUrl) return;
+        
+        try {
+          // 使用高畫質版本
+          const videoId = getVideoId(video.url);
+          const hqUrl = videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : thumbnailUrl;
+          
+          // 開新分頁下載
+          window.open(hqUrl, '_blank');
+        } catch (err) {
+          console.error('Error downloading thumbnail:', err);
+        }
+      };
+
+      const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+          await fetch(DELETE_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pageId: video.id
+            })
+          });
+          onDelete(video.id);
+          onClose();
+        } catch (err) {
+          console.error('Error deleting video:', err);
+          alert('刪除失敗，請稍後再試');
+        }
+        setIsDeleting(false);
+      };
+
+      useEffect(() => {
+        const handleEsc = (e) => {
+          if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+      }, [onClose]);
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+          <div 
+            className="relative bg-neutral-900 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-neutral-700"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* 關閉按鈕 */}
+            <button 
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+
+            {/* 頭部資訊 */}
+            <div className="p-6 pb-0">
+              <div className="flex gap-2 text-xs text-neutral-500 mb-2">
+                <span>{video.category || '未分類'}</span>
+                <span>•</span>
+                <span>{video.channel}</span>
+              </div>
+              <h2 className="text-lg font-semibold text-white pr-8 leading-snug">
+                {video.title}
+              </h2>
+            </div>
+
+            {/* 影片播放器 */}
+            <div className="p-6 pb-4">
+              {videoId ? (
+                <div className="aspect-video bg-black rounded-xl overflow-hidden">
+                  <iframe
+                    ref={iframeRef}
+                    key={currentTime}
+                    src={youtubeUrl}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="aspect-video bg-neutral-800 rounded-xl flex items-center justify-center">
+                  <span className="text-neutral-500">無法載入影片</span>
+                </div>
+              )}
+              
+              {/* 縮圖操作按鈕 */}
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={handleThumbnailSaveToggle}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    thumbnailSaved 
+                      ? 'bg-pink-500/20 text-pink-400 border border-pink-500/30' 
+                      : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+                  }`}
+                >
+                  {thumbnailSaved ? '❤️ 已收藏縮圖' : '🤍 收藏縮圖'}
+                </button>
+                <button
+                  onClick={handleDownloadThumbnail}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-neutral-800 text-neutral-400 hover:bg-neutral-700 transition-all"
+                >
+                  ⬇️ 下載縮圖
+                </button>
+              </div>
+            </div>
+
+            {/* 精華片段 */}
+            {highlights.length > 0 && (
+              <div className="px-6 pb-4">
+                <div className="bg-gradient-to-br from-amber-900/40 to-amber-800/20 rounded-xl p-4 border border-amber-600/30">
+                  <div className="text-sm font-medium text-amber-400 mb-3">⭐ 精華片段（點擊跳轉）</div>
+                  <div className="space-y-2">
+                    {highlights.map((h, i) => (
+                      <button
+                        key={i}
+                        onClick={() => seekTo(h.startSeconds)}
+                        className="w-full flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors text-left group"
+                      >
+                        <span className="text-amber-300 font-mono text-sm whitespace-nowrap bg-amber-500/30 px-2 py-1 rounded border border-amber-500/40 group-hover:bg-amber-500/40 transition-colors">
+                          {h.startTime}{h.endTime ? `-${h.endTime}` : ''}
+                        </span>
+                        <span className="text-neutral-300 text-sm pt-1">{h.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 評分與狀態 */}
+            <div className="px-6 pb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div>
+                <div className="text-xs text-neutral-500 mb-1">我的評分</div>
+                <StarRating rating={rating} onRate={handleRatingChange} size="text-xl" />
+              </div>
+              <div>
+                <div className="text-xs text-neutral-500 mb-1">觀看狀態</div>
+                <StatusSelector currentStatus={status} onStatusChange={handleStatusChange} />
+              </div>
+            </div>
+
+            {/* 分類（可複選） */}
+            <div className="px-6 pb-4">
+              <div className="text-xs text-neutral-500 mb-2">分類（可複選）</div>
+              <CategoryMultiSelector 
+                currentCategories={selectedCategories}
+                onCategoriesChange={handleCategoriesChange}
+                availableCategories={categories}
+              />
+            </div>
+
+            {/* AI 摘要 */}
+            {video.summary && (
+              <div className="px-6 pb-4">
+                <div className="bg-neutral-800/50 rounded-xl p-4 border border-neutral-700">
+                  <div className="text-sm font-medium text-neutral-300 mb-3">🤖 AI 摘要</div>
+                  <div className="text-sm text-neutral-300 whitespace-pre-line leading-relaxed">
+                    {video.summary}
+                  </div>
+                  {video.keyTakeaway && (
+                    <div className="mt-4 pt-4 border-t border-neutral-700">
+                      <div className="text-sm text-amber-400">
+                        💡 {video.keyTakeaway}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 我的筆記 */}
+            <div className="px-6 pb-4">
+              <div className="bg-neutral-800/50 rounded-xl p-4 border border-neutral-700">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-sm font-medium text-neutral-300">📝 我的筆記</div>
+                  <div className="flex gap-2">
+                    <SpeechToText 
+                      onTranscript={(t) => setTempTranscript(t)}
+                      isListening={isListening}
+                      setIsListening={setIsListening}
+                    />
+                    <button
+                      onClick={handleSaveNotes}
+                      disabled={isSavingNotes}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500 text-black hover:bg-amber-400 transition-colors disabled:opacity-50"
+                    >
+                      {isSavingNotes ? '儲存中...' : '儲存筆記'}
+                    </button>
+                  </div>
+                </div>
+                <textarea
+                  value={isListening ? notes + tempTranscript : notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  onBlur={() => {
+                    if (tempTranscript) {
+                      setNotes(notes + tempTranscript);
+                      setTempTranscript("");
+                    }
+                  }}
+                  placeholder="在這裡寫下你的筆記..."
+                  className="w-full h-24 bg-neutral-900 border border-neutral-700 rounded-lg p-3 text-sm text-neutral-300 placeholder-neutral-600 outline-none focus:border-neutral-500 resize-none"
+                />
+              </div>
+            </div>
+
+            {/* 底部按鈕 */}
+            <div className="p-6 pt-2 flex gap-3">
+              <a
+                href={video.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm text-center transition-colors flex items-center justify-center gap-2"
+              >
+                <span>▶</span> 在 YouTube 觀看
+              </a>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="px-4 py-3 rounded-xl bg-neutral-800 hover:bg-red-900 text-neutral-400 hover:text-red-400 font-medium text-sm transition-colors"
+                title="刪除影片"
+              >
+                🗑️
+              </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-medium text-sm transition-colors"
+              >
+                關閉
+              </button>
+            </div>
+
+            {/* 刪除確認對話框 */}
+            {showDeleteConfirm && (
+              <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-2xl">
+                <div className="bg-neutral-800 rounded-xl p-6 mx-4 max-w-sm border border-neutral-700">
+                  <div className="text-center mb-4">
+                    <div className="text-3xl mb-2">🗑️</div>
+                    <h3 className="text-white font-semibold mb-2">確定要刪除嗎？</h3>
+                    <p className="text-neutral-400 text-sm">這會同時從 Notion 資料庫中移除此影片</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="flex-1 py-2 rounded-lg bg-neutral-700 text-white text-sm font-medium hover:bg-neutral-600 transition-colors"
+                    >
+                      取消
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="flex-1 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-500 transition-colors disabled:opacity-50"
+                    >
+                      {isDeleting ? '刪除中...' : '確定刪除'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 更新中指示器 */}
+            {isUpdating && (
+              <div className="absolute top-4 left-4 bg-neutral-800 px-3 py-1 rounded-full text-xs text-neutral-400">
+                儲存中...
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // 影片卡片組件
+    function VideoCard({ video, getThumbnail, onOpenModal }) {
+      // 取得優先度標籤樣式
+      const getPriorityStyle = () => {
+        if (video.priority?.includes('必看')) {
+          return { bg: 'bg-red-500/90', text: '🔥 必看' };
+        } else if (video.priority?.includes('重要')) {
+          return { bg: 'bg-amber-500/90', text: '⭐ 重要' };
+        }
+        return null;
+      };
+
+      const priorityStyle = getPriorityStyle();
+
+      return (
+        <div className="bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-neutral-700 transition-all group">
+          {/* Thumbnail */}
+          <div 
+            className="relative aspect-video bg-neutral-800 overflow-hidden cursor-pointer"
+            onClick={() => onOpenModal(video)}
+          >
+            {getThumbnail(video) && (
+              <img 
+                src={getThumbnail(video)} 
+                alt={video.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+            
+            {/* 左上角：評分星星 */}
+            {video.rating > 0 && (
+              <div className="absolute top-2 left-2 bg-black/80 px-2 py-1 rounded text-xs font-medium text-yellow-400 flex items-center gap-0.5">
+                {'★'.repeat(video.rating)}
+              </div>
+            )}
+            
+            {/* 右上角：優先度標籤 */}
+            {priorityStyle && (
+              <div className={`absolute top-2 right-2 ${priorityStyle.bg} px-2 py-1 rounded text-xs font-medium text-white`}>
+                {priorityStyle.text}
+              </div>
+            )}
+            
+            {/* 右上角：收藏縮圖標記（如果沒有優先度才顯示在右上） */}
+            {video.thumbnailSaved && !priorityStyle && (
+              <div className="absolute top-2 right-2 bg-pink-500/90 px-2 py-1 rounded text-xs font-medium text-white">
+                ❤️ 已收藏
+              </div>
+            )}
+            
+            {/* 收藏縮圖標記（如果有優先度則顯示在右下） */}
+            {video.thumbnailSaved && priorityStyle && (
+              <div className="absolute bottom-2 left-2 bg-pink-500/90 px-2 py-1 rounded text-xs font-medium text-white">
+                ❤️
+              </div>
+            )}
+            
+            {/* 右下角：影片長度 */}
+            {video.duration && (
+              <div className="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded text-xs font-medium">
+                {video.duration}
+              </div>
+            )}
+            
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-lg ml-1">▶</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-4">
+            <div className="flex gap-2 mb-2 text-xs">
+              <span className="text-neutral-500">{video.category || '未分類'}</span>
+              <span className="text-neutral-700">•</span>
+              <span className={
+                video.status === "待看" ? "text-neutral-500" :
+                video.status === "進行中" ? "text-amber-500" :
+                "text-emerald-500"
+              }>{video.status}</span>
+            </div>
+
+            <h3 className="font-medium text-white mb-1.5 line-clamp-2 leading-snug text-sm">
+              {video.title}
+            </h3>
+            <p className="text-xs text-neutral-500 mb-3">{video.channel}</p>
+
+            {/* Summary Preview */}
+            {video.summary ? (
+              <div className="bg-neutral-800/50 rounded-lg p-3 border border-neutral-800">
+                <div className="text-xs text-neutral-400 mb-1">AI 摘要</div>
+                <div className="text-xs text-neutral-300 line-clamp-3">
+                  {video.summary.split('\n')[0]}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-neutral-800/30 rounded-lg p-3 border border-dashed border-neutral-800 text-center">
+                <p className="text-xs text-neutral-600">尚未整理摘要</p>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2 mt-3">
+              <button 
+                onClick={() => onOpenModal(video)}
+                className="flex-1 py-2 rounded-lg border border-neutral-800 text-neutral-400 text-xs font-medium hover:bg-neutral-800 hover:text-white transition-colors text-center"
+              >
+                📖 查看詳情
+              </button>
+              <a 
+                href={video.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-2 px-3 rounded-lg border border-neutral-800 text-neutral-400 text-xs font-medium hover:bg-neutral-800 hover:text-white transition-colors"
+              >
+                ▶️
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [videos, setVideos] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [selectedCategory, setSelectedCategory] = useState("全部");
+      const [selectedStatus, setSelectedStatus] = useState("待看");
+      const [searchQuery, setSearchQuery] = useState("");
+      const [selectedVideo, setSelectedVideo] = useState(null);
+      const [showSavedThumbnailsOnly, setShowSavedThumbnailsOnly] = useState(false);
+
+      useEffect(() => {
+        fetch(API_URL)
+          .then(res => res.json())
+          .then(data => {
+            const formattedVideos = data.map((item, index) => {
+              const props = item.properties;
+              // 處理分類（支援 multi_select 和 select）
+              let category = '';
+              if (props['分類']?.multi_select) {
+                category = props['分類'].multi_select.map(c => c.name).join(', ');
+              } else if (props['分類']?.select?.name) {
+                category = props['分類'].select.name;
+              }
+              
+              return {
+                id: item.id || index,
+                title: props['影片標題']?.title?.[0]?.plain_text || '無標題',
+                channel: props['頻道']?.rich_text?.[0]?.plain_text || '',
+                duration: props['影片長度']?.rich_text?.[0]?.plain_text || '',
+                category: category,
+                status: props['狀態']?.select?.name || '待看',
+                priority: props['優先度']?.select?.name || '',
+                thumbnail: props['縮圖網址']?.url || '',
+                url: props['網址']?.url || '',
+                summary: props['AI 摘要']?.rich_text?.[0]?.plain_text || '',
+                keyTakeaway: props['一句話學到']?.rich_text?.[0]?.plain_text || '',
+                highlights: props['精華片段']?.rich_text?.[0]?.plain_text || '',
+                rating: props['我的評分']?.number || 0,
+                notes: props['我的筆記']?.rich_text?.[0]?.plain_text || '',
+                thumbnailSaved: props['收藏縮圖']?.checkbox || false,
+                createdTime: item.created_time || '',
+              };
+            });
+            
+            formattedVideos.sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime));
+            
+            setVideos(formattedVideos);
+            setLoading(false);
+          })
+          .catch(err => {
+            console.error('Error fetching data:', err);
+            setError('無法載入資料');
+            setLoading(false);
+          });
+      }, []);
+
+      const handleVideoUpdate = (videoId, updates) => {
+        setVideos(prev => prev.map(v => 
+          v.id === videoId ? { ...v, ...updates } : v
+        ));
+      };
+
+      const handleVideoDelete = (videoId) => {
+        setVideos(prev => prev.filter(v => v.id !== videoId));
+      };
+
+      const filteredVideos = useMemo(() => {
+        return videos.filter(video => {
+          const matchCategory = selectedCategory === "全部" || 
+            (video.category && video.category.includes(selectedCategory));
+          const matchStatus = selectedStatus === "全部" || video.status === selectedStatus;
+          const matchSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             video.channel.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchThumbnailSaved = !showSavedThumbnailsOnly || video.thumbnailSaved;
+          return matchCategory && matchStatus && matchSearch && matchThumbnailSaved;
+        });
+      }, [videos, selectedCategory, selectedStatus, searchQuery, showSavedThumbnailsOnly]);
+
+      const stats = useMemo(() => {
+        return {
+          total: videos.length,
+          pending: videos.filter(v => v.status === "待看").length,
+          inProgress: videos.filter(v => v.status === "進行中").length,
+          completed: videos.filter(v => v.status === "已完成").length,
+          summarized: videos.filter(v => v.summary).length,
+          thumbnailSaved: videos.filter(v => v.thumbnailSaved).length,
+        };
+      }, [videos]);
+
+      const getThumbnail = (video) => {
+        if (video.thumbnail) return video.thumbnail;
+        if (video.url) {
+          const match = video.url.match(/[?&]v=([^&]+)/);
+          if (match) return `https://i.ytimg.com/vi/${match[1]}/hqdefault.jpg`;
+        }
+        return '';
+      };
+
+      if (loading) {
+        return (
+          <div className="min-h-screen bg-neutral-950 text-neutral-200 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p>載入中...</p>
+            </div>
+          </div>
+        );
+      }
+
+      if (error) {
+        return (
+          <div className="min-h-screen bg-neutral-950 text-neutral-200 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-red-400 mb-4">{error}</p>
+              <button onClick={() => window.location.reload()} className="px-4 py-2 bg-white text-black rounded-lg">
+                重新載入
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-neutral-950 text-neutral-200">
+          {/* Header */}
+          <header className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur-md">
+            <div className="max-w-6xl mx-auto px-4 py-4">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h1 className="text-xl font-semibold text-white">📚 Ray 的學習研究庫</h1>
+                  <p className="text-neutral-500 text-sm mt-0.5">把資訊焦慮轉化為系統學習</p>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="bg-neutral-800 text-white font-medium px-4 py-2 rounded-lg text-sm hover:bg-neutral-700 transition-colors"
+                  >
+                    🔄 刷新
+                  </button>
+                  <a
+                    href="https://www.notion.so/76fb8600ae9649bcb6c475f75f0ec818"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white text-black font-medium px-4 py-2 rounded-lg text-sm hover:bg-neutral-200 transition-colors hidden sm:block"
+                  >
+                    Notion →
+                  </a>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="flex gap-4 sm:gap-6 text-sm overflow-x-auto pb-2">
+                <span className="text-neutral-400 whitespace-nowrap">總共 <span className="text-white font-medium">{stats.total}</span></span>
+                <span className="text-neutral-400 whitespace-nowrap">待看 <span className="text-white font-medium">{stats.pending}</span></span>
+                <span className="text-neutral-400 whitespace-nowrap">進行中 <span className="text-white font-medium">{stats.inProgress}</span></span>
+                <span className="text-neutral-400 whitespace-nowrap">已完成 <span className="text-white font-medium">{stats.completed}</span></span>
+                <span className="text-neutral-400 whitespace-nowrap">已整理 <span className="text-white font-medium">{stats.summarized}</span></span>
+                <button 
+                  onClick={() => setShowSavedThumbnailsOnly(!showSavedThumbnailsOnly)}
+                  className={`whitespace-nowrap transition-colors ${
+                    showSavedThumbnailsOnly 
+                      ? 'text-pink-400 font-medium' 
+                      : 'text-neutral-400 hover:text-pink-400'
+                  }`}
+                >
+                  ❤️ 縮圖收藏 <span className={showSavedThumbnailsOnly ? 'text-pink-400' : 'text-white font-medium'}>{stats.thumbnailSaved}</span>
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Main */}
+          <main className="max-w-6xl mx-auto px-4 py-4">
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+              <input
+                type="text"
+                placeholder="搜尋..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full sm:w-48 px-4 py-2 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-200 text-sm outline-none focus:border-neutral-600 transition-colors placeholder-neutral-600"
+              />
+
+              <div className="flex gap-1 overflow-x-auto pb-2 sm:pb-0">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
+                      selectedCategory === cat
+                        ? 'bg-white text-black font-medium'
+                        : 'text-neutral-400 hover:text-white'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              <div className="hidden sm:block h-4 w-px bg-neutral-800 self-center"></div>
+
+              <div className="flex gap-1 overflow-x-auto pb-2 sm:pb-0">
+                {statuses.map(status => (
+                  <button
+                    key={status}
+                    onClick={() => setSelectedStatus(status)}
+                    className={`px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
+                      selectedStatus === status
+                        ? 'bg-neutral-800 text-white font-medium'
+                        : 'text-neutral-400 hover:text-white'
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Video Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredVideos.map(video => (
+                <VideoCard 
+                  key={video.id} 
+                  video={video} 
+                  getThumbnail={getThumbnail}
+                  onOpenModal={setSelectedVideo}
+                />
+              ))}
+            </div>
+
+            {filteredVideos.length === 0 && !loading && (
+              <div className="text-center py-16">
+                <p className="text-neutral-500">找不到符合條件的影片</p>
+              </div>
+            )}
+          </main>
+
+          {/* Telegram Hint */}
+          <a 
+            href="https://t.me/YT_video_DB_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-6 right-6 bg-neutral-800 hover:bg-neutral-700 rounded-full px-4 py-2 flex items-center gap-2 transition-colors border border-neutral-700"
+          >
+            <span>✈️</span>
+            <span className="text-sm text-neutral-300">新增影片</span>
+          </a>
+
+          {/* Video Modal */}
+          {selectedVideo && (
+            <VideoModal 
+              video={selectedVideo}
+              onClose={() => setSelectedVideo(null)}
+              onUpdate={handleVideoUpdate}
+              onDelete={handleVideoDelete}
+              getThumbnail={getThumbnail}
+            />
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
