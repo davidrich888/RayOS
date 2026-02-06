@@ -23,7 +23,40 @@ async function saveIdea() {
     if (document.getElementById('idea-notes')) document.getElementById('idea-notes').value = '';
     renderIdeasList();
     updateIdeasStats();
-    // Sync to Notion
+
+    // Sync to Notion: Direct API 優先，fallback n8n
+    if (hasNotionDirect()) {
+        try {
+            console.log('[RayOS Direct] Creating idea in Notion');
+            const props = {
+                '想法': { title: [{ text: { content: idea.text } }] },
+                '類型': { select: { name: idea.type } },
+                '狀態': { select: { name: idea.status } },
+                '優先度': { select: { name: idea.priority } },
+                '建立日期': { date: { start: idea.date } }
+            };
+            if (idea.notes) {
+                props['備註'] = { rich_text: [{ text: { content: idea.notes } }] };
+            }
+            const result = await notionFetch('/pages', 'POST', {
+                parent: { database_id: IDEAS_DB_ID },
+                properties: props
+            });
+            if (result.id) {
+                idea.id = result.id;
+                ideasNotionIndex[result.id] = result.id;
+                localStorage.setItem('ideas_data', JSON.stringify(ideasData));
+                localStorage.setItem('ideas_notion_index', JSON.stringify(ideasNotionIndex));
+                console.log('[RayOS Direct] Idea created:', result.id);
+            }
+            showToast('Idea saved & synced');
+            return;
+        } catch (e) {
+            console.warn('[RayOS] Notion Direct idea create failed, trying n8n:', e.message);
+        }
+    }
+
+    // Fallback: n8n
     const url = getN8nUrl();
     if (url) {
         try {
@@ -42,14 +75,60 @@ async function saveIdea() {
                 localStorage.setItem('ideas_data', JSON.stringify(ideasData));
                 localStorage.setItem('ideas_notion_index', JSON.stringify(ideasNotionIndex));
             }
-        } catch(e) { console.error('[RayOS] Idea sync error:', e); }
+        } catch(e) { console.error('[RayOS] Idea n8n sync error:', e); }
     }
     showToast('Idea saved');
 }
 
+// === 從 Notion Direct API 拉取全部 Ideas ===
+async function syncIdeasFromNotionDirect(silent = false) {
+    if (!hasNotionDirect()) {
+        return syncIdeasFromNotion(silent);
+    }
+    if (!silent) showToast('正在同步 Ideas...');
+    try {
+        console.log('[RayOS Direct] Syncing ideas from Notion');
+        const data = await notionFetch('/databases/' + IDEAS_DB_ID + '/query', 'POST', {
+            page_size: 100,
+            sorts: [{ property: '建立日期', direction: 'descending' }]
+        });
+        if (data.results && data.results.length > 0) {
+            const newIndex = {};
+            ideasData = data.results.map(page => {
+                const p = page.properties;
+                const id = page.id;
+                newIndex[id] = id;
+                return {
+                    id,
+                    text: p['想法']?.title?.[0]?.plain_text || '',
+                    type: p['類型']?.select?.name || '🤔 其他',
+                    status: p['狀態']?.select?.name || '💡 新想法',
+                    priority: p['優先度']?.select?.name || '⭐ 中',
+                    date: p['建立日期']?.date?.start || '',
+                    notes: p['備註']?.rich_text?.[0]?.plain_text || ''
+                };
+            }).filter(i => i.text);
+            ideasNotionIndex = newIndex;
+            localStorage.setItem('ideas_data', JSON.stringify(ideasData));
+            localStorage.setItem('ideas_notion_index', JSON.stringify(ideasNotionIndex));
+            renderIdeasList();
+            updateIdeasStats();
+            updateIdeasSyncDot();
+            console.log('[RayOS Direct] Ideas synced:', ideasData.length);
+            if (!silent) showToast('✓ 已同步 ' + ideasData.length + ' 個想法');
+        } else {
+            if (!silent) showToast('Notion 中沒有找到 Ideas');
+        }
+    } catch (e) {
+        console.error('[RayOS Direct] Ideas sync error:', e);
+        if (!silent) showToast('Ideas 同步失敗: ' + e.message, true);
+    }
+}
+
+// === 從 n8n 拉取全部 Ideas（fallback）===
 async function syncIdeasFromNotion(silent = false) {
     const url = getN8nUrl();
-    if (!url) { if (!silent) showToast('請先設定 n8n Webhook URL', true); return; }
+    if (!url) { if (!silent) showToast('請先設定 Notion Token 或 n8n Webhook URL', true); return; }
     if (!silent) showToast('正在同步 Ideas...');
     try {
         const res = await fetch(url, {
@@ -80,11 +159,12 @@ async function syncIdeasFromNotion(silent = false) {
             if (!silent) showToast('No ideas found in Notion');
         }
     } catch(e) {
-        console.error('[RayOS] Ideas sync error:', e);
+        console.error('[RayOS n8n] Ideas sync error:', e);
         if (!silent) showToast('Ideas 同步失敗: ' + e.message, true);
     }
 }
 
+// === 更新 Idea 狀態（Direct 優先，fallback n8n）===
 async function updateIdeaStatus(ideaId, newStatus) {
     const idea = ideasData.find(i => i.id === ideaId);
     if (!idea) return;
@@ -92,7 +172,21 @@ async function updateIdeaStatus(ideaId, newStatus) {
     localStorage.setItem('ideas_data', JSON.stringify(ideasData));
     renderIdeasList();
     updateIdeasStats();
-    // Sync to Notion
+
+    // Notion Direct API 優先
+    if (hasNotionDirect() && ideasNotionIndex[ideaId]) {
+        try {
+            await notionFetch('/pages/' + ideaId, 'PATCH', {
+                properties: { '狀態': { select: { name: newStatus } } }
+            });
+            console.log('[RayOS Direct] Idea status updated:', ideaId, '→', newStatus);
+            return;
+        } catch (e) {
+            console.warn('[RayOS] Notion Direct idea update failed, trying n8n:', e.message);
+        }
+    }
+
+    // Fallback: n8n
     const url = getN8nUrl();
     if (url && ideasNotionIndex[ideaId]) {
         try {
@@ -101,7 +195,7 @@ async function updateIdeaStatus(ideaId, newStatus) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'update_idea', pageId: ideaId, data: { status: newStatus } })
             });
-        } catch(e) { console.error('[RayOS] Idea update error:', e); }
+        } catch(e) { console.error('[RayOS n8n] Idea update error:', e); }
     }
 }
 
@@ -165,5 +259,5 @@ function updateIdeasStats() {
 
 function updateIdeasSyncDot() {
     const d = document.getElementById('ideas-sync-dot');
-    if (d) d.className = 'sync-dot ' + (getN8nUrl() ? 'on' : 'off');
+    if (d) d.className = 'sync-dot ' + ((hasNotionDirect() || getN8nUrl()) ? 'on' : 'off');
 }

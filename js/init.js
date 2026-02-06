@@ -78,10 +78,11 @@
                 loadDailyHabits(true);
             }
         }, 500);
-        // Auto-sync: Notion Direct (Wealth + Accounts)
+        // Auto-sync: Notion Direct (Wealth + Accounts + Ideas)
         if (hasNotionDirect()) {
             setTimeout(() => syncWealthFromNotion(true), 1500);
             setTimeout(() => syncAccountsFromNotion(true), 2000);
+            setTimeout(() => syncIdeasFromNotionDirect(true), 2500);
         }
         // Body/Ideas auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
         // 有 Notion Token 時跳過 N8N，避免 N8N error
