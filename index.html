@@ -6,10 +6,15 @@
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RayOS">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
     <title>RayOS V11.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -631,6 +636,11 @@
 我希望 AI：直接、不要客套、用數據說話"></textarea>
                 <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">寫下你的目標、挑戰、偏好 — AI Coach 會根據這些 + 你的實際數據給建議</div>
             </div>
+            <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px;">
+                <div class="form-title" style="font-size:14px;">📲 跨裝置同步</div>
+                <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">將目前設定匯出為 QR Code，用手機掃描即可自動匯入全部 API Key 和設定</p>
+                <button class="btn btn-accent" onclick="exportSettingsQR()" style="width:100%;">📲 匯出設定 QR Code</button>
+            </div>
             <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Data</label><button class="btn btn-danger" onclick="resetData()" style="width:100%;margin-top:6px;">🔄 Reset to Demo Data</button></div>
             <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px;">
                 <div class="form-title" style="font-size:14px;">🖼️ Moodboard — Google Drive</div>
@@ -801,6 +811,25 @@
     </div>
 
 
+    <div class="modal-overlay" id="qr-export-modal">
+        <div class="modal" style="max-width:420px;text-align:center;">
+            <div class="modal-title">📲 匯出設定</div>
+            <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">用手機掃描 QR Code，即可自動匯入所有設定</p>
+            <div id="qr-code-container" style="display:inline-block;padding:16px;background:#fff;margin-bottom:16px;"></div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:16px;" id="qr-payload-info"></div>
+            <div class="form-actions" style="justify-content:center;"><button class="btn" onclick="hideModal('qr-export-modal')">關閉</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="import-success-modal">
+        <div class="modal" style="max-width:420px;text-align:center;">
+            <div class="modal-title">✅ 設定已匯入</div>
+            <p style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">以下設定已自動儲存到此裝置：</p>
+            <div id="import-result-list" style="text-align:left;font-size:12px;color:var(--text-dim);margin-bottom:16px;padding:12px;background:var(--bg-input);border:1px solid var(--border);"></div>
+            <div class="form-actions" style="justify-content:center;"><button class="btn btn-accent" onclick="hideModal('import-success-modal');location.reload();">確認並重新載入</button></div>
+        </div>
+    </div>
+
     <!-- JS Modules (order matters for variable dependencies) -->
     <script src="js/data.js"></script>
     <script src="js/config.js"></script>
@@ -817,5 +846,14 @@
     <script src="js/daily.js"></script>
     <script src="js/ideas.js"></script>
     <script src="js/init.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('[RayOS] SW registered:', reg.scope))
+                    .catch(err => console.warn('[RayOS] SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>

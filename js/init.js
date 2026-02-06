@@ -1,6 +1,9 @@
 // ==================== INIT ====================
 
 (function init() {
+    // 📲 Check for settings import from QR code URL
+    if (importSettingsFromURL()) return;
+
     // 🔄 Migration v2: clear old preloaded daily habits cache
     if (localStorage.getItem('daily_data_version') !== '2') {
         localStorage.removeItem('daily_habits');
