@@ -89,8 +89,59 @@ function exportSettingsQR() {
     const keyCount = Object.keys(settings).length;
     info.textContent = '包含 ' + keyCount + ' 項設定 (' + json.length + ' bytes)';
 
+    // 7. Store for copy button
+    window._exportedSettingsB64 = b64;
+
     hideModal('settings-modal');
     showModal('qr-export-modal');
+}
+
+function copySettingsCode() {
+    if (!window._exportedSettingsB64) {
+        showToast('請先匯出設定', true);
+        return;
+    }
+    navigator.clipboard.writeText(window._exportedSettingsB64)
+        .then(() => showToast('設定碼已複製到剪貼簿'))
+        .catch(() => {
+            // Fallback: prompt user to copy manually
+            prompt('請手動複製以下設定碼：', window._exportedSettingsB64);
+        });
+}
+
+// Shared import logic: decode Base64, validate, save to localStorage, show success
+function _importSettingsFromB64(b64) {
+    const json = decodeURIComponent(escape(atob(b64)));
+    const settings = JSON.parse(json);
+
+    if (typeof settings !== 'object' || Array.isArray(settings)) {
+        throw new Error('Invalid format');
+    }
+
+    const imported = [];
+    EXPORT_KEYS.forEach(key => {
+        if (settings[key] !== undefined && settings[key] !== null) {
+            localStorage.setItem(key, settings[key]);
+            const label = EXPORT_KEY_LABELS[key] || key;
+            const isSensitive = ['notion_token', 'anthropic_key', 'n8n_webhook', 'drive_script_url'].includes(key);
+            const display = isSensitive
+                ? settings[key].substring(0, 10) + '...'
+                : (settings[key].length > 30 ? settings[key].substring(0, 30) + '...' : settings[key]);
+            imported.push({ label, display });
+        }
+    });
+
+    if (imported.length === 0) return false;
+
+    const list = document.getElementById('import-result-list');
+    list.innerHTML = imported.map(item =>
+        '<div style="padding:4px 0;border-bottom:1px solid var(--border);">' +
+            '<span style="color:var(--accent);">' + item.label + '</span>' +
+            '<span style="float:right;color:var(--text-muted);font-size:11px;">' + item.display + '</span>' +
+        '</div>'
+    ).join('');
+
+    return true;
 }
 
 function importSettingsFromURL() {
@@ -99,46 +150,13 @@ function importSettingsFromURL() {
     if (!importData) return false;
 
     try {
-        // 1. Decode Base64 (handle UTF-8)
-        const json = decodeURIComponent(escape(atob(importData)));
-        const settings = JSON.parse(json);
-
-        if (typeof settings !== 'object' || Array.isArray(settings)) {
-            throw new Error('Invalid format');
-        }
-
-        // 2. Validate and save only known keys
-        const imported = [];
-        EXPORT_KEYS.forEach(key => {
-            if (settings[key] !== undefined && settings[key] !== null) {
-                localStorage.setItem(key, settings[key]);
-                const label = EXPORT_KEY_LABELS[key] || key;
-                // Mask sensitive values for display
-                const isSensitive = ['notion_token', 'anthropic_key', 'n8n_webhook', 'drive_script_url'].includes(key);
-                const display = isSensitive
-                    ? settings[key].substring(0, 10) + '...'
-                    : (settings[key].length > 30 ? settings[key].substring(0, 30) + '...' : settings[key]);
-                imported.push({ label, display });
-            }
-        });
-
-        if (imported.length === 0) {
+        if (!_importSettingsFromB64(importData)) {
             showToast('匯入資料中沒有有效設定', true);
             return false;
         }
 
-        // 3. Clean URL (remove ?import= parameter)
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, '', cleanUrl);
-
-        // 4. Show success modal
-        const list = document.getElementById('import-result-list');
-        list.innerHTML = imported.map(item =>
-            '<div style="padding:4px 0;border-bottom:1px solid var(--border);">' +
-                '<span style="color:var(--accent);">' + item.label + '</span>' +
-                '<span style="float:right;color:var(--text-muted);font-size:11px;">' + item.display + '</span>' +
-            '</div>'
-        ).join('');
+        // Clean URL (remove ?import= parameter)
+        window.history.replaceState({}, '', window.location.origin + window.location.pathname);
 
         showModal('import-success-modal');
         return true;
@@ -147,6 +165,29 @@ function importSettingsFromURL() {
         showToast('匯入失敗: 無效的資料格式', true);
         window.history.replaceState({}, '', window.location.origin + window.location.pathname);
         return false;
+    }
+}
+
+function importSettingsFromPaste() {
+    const input = document.getElementById('import-code-input');
+    const b64 = input.value.trim();
+    if (!b64) {
+        showToast('請貼上設定碼', true);
+        return;
+    }
+
+    try {
+        if (!_importSettingsFromB64(b64)) {
+            showToast('匯入資料中沒有有效設定', true);
+            return;
+        }
+
+        input.value = '';
+        hideModal('settings-modal');
+        showModal('import-success-modal');
+    } catch (e) {
+        console.error('[RayOS] Paste import failed:', e);
+        showToast('設定碼無效，請確認是否正確複製', true);
     }
 }
 
