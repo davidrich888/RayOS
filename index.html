@@ -1595,19 +1595,27 @@
         async function notionFetch(path, method, body) {
             const token = getNotionToken();
             if (!token) throw new Error('No Notion token');
-            const proxyUrl = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-                ? '/api/notion'
-                : (location.origin + '/api/notion');
-            const res = await fetch(proxyUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path, method: method || 'POST', body, token })
-            });
-            if (!res.ok) {
-                const errText = await res.text().catch(() => '');
-                throw new Error('Notion ' + res.status + ': ' + errText.substring(0, 200));
+            const proxyUrl = location.origin + '/api/notion';
+            console.log('[RayOS Proxy]', (method || 'POST'), path);
+            try {
+                const res = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path, method: method || 'POST', body, token })
+                });
+                if (!res.ok) {
+                    const errText = await res.text().catch(() => '');
+                    console.error('[RayOS Proxy] Error:', res.status, errText.substring(0, 200));
+                    throw new Error('Notion ' + res.status + ': ' + errText.substring(0, 200));
+                }
+                return res.json();
+            } catch (e) {
+                if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('Load failed')) {
+                    console.error('[RayOS Proxy] Proxy unreachable — check Vercel deployment');
+                    throw new Error('Proxy \u4e0d\u53ef\u7528 \u2014 \u78ba\u8a8d Vercel \u90e8\u7f72\u6210\u529f');
+                }
+                throw e;
             }
-            return res.json();
         }
 
         // ============ DIRECT NOTION API (推薦) ============
@@ -1796,8 +1804,10 @@
         // === 勾選後即時寫回 Notion（自動選擇直接或 n8n）===
         async function writeHabitToNotion(dateStr, habit, value) {
             if (hasNotionDirect()) {
+                console.log('[RayOS] Using Notion Direct API for', habit, '=', value);
                 return writeHabitToNotionDirect(dateStr, habit, value);
             }
+            console.log('[RayOS] Using N8N fallback for', habit, '=', value);
             // n8n fallback
             const url = getN8nUrl();
             if (!url) return;
@@ -3538,22 +3548,20 @@ Prop Firm: Fee $38,918 / Payout $64,043 / Net $29,648 / Pass Rate 25%`;
             
             // 🔄 頁面載入自動從 Notion 同步最新資料
             if (hasNotionDirect() || getN8nUrl()) {
+                // Daily Habits: 優先用 Notion Direct，失敗才 fallback n8n
                 setTimeout(async () => {
                     const ok = await syncDailyFromNotionDirect(true);
                     if (!ok) {
                         loadDailyHabits(true);
                     }
                 }, 500);
-                // Body auto-sync (still uses n8n for now)
-                if (getN8nUrl() && bodyHistory.length <= 3) {
-                    setTimeout(() => syncBodyFromNotion(), 1200);
-                }
-                // Wealth auto-sync (still uses n8n for now)
-                if (getN8nUrl()) {
+                // Body/Wealth/Ideas auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
+                // 有 Notion Token 時跳過 N8N，避免 N8N error
+                if (getN8nUrl() && !hasNotionDirect()) {
+                    if (bodyHistory.length <= 3) {
+                        setTimeout(() => syncBodyFromNotion(), 1200);
+                    }
                     setTimeout(() => syncWealthFromNotion(true), 1500);
-                }
-                // Ideas auto-sync (still uses n8n for now)
-                if (getN8nUrl()) {
                     setTimeout(() => syncIdeasFromNotion(true), 1800);
                 }
             }
