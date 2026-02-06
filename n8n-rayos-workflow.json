@@ -1,5 +1,5 @@
 {
-  "name": "RayOS Sync Hub",
+  "name": "RayOS Sync Hub v2",
   "nodes": [
     {
       "parameters": {
@@ -22,13 +22,7 @@
             {
               "conditions": {
                 "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.type }}",
-                    "rightValue": "fetch_habits",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ],
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "fetch_habits", "operator": { "type": "string", "operation": "equals" } }],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -37,13 +31,7 @@
             {
               "conditions": {
                 "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.type }}",
-                    "rightValue": "update_habit",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ],
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "update_habit", "operator": { "type": "string", "operation": "equals" } }],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -52,17 +40,83 @@
             {
               "conditions": {
                 "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.type }}",
-                    "rightValue": "create_day",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ],
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "create_day", "operator": { "type": "string", "operation": "equals" } }],
                 "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "create_day"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "fetch_body", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "fetch_body"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "create_body", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create_body"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "update_body", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "update_body"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "fetch_wealth", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "fetch_wealth"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "create_wealth", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create_wealth"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "fetch_ideas", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "fetch_ideas"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "create_idea", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create_idea"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "update_idea", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "update_idea"
             }
           ]
         },
@@ -82,11 +136,7 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Notion-Version", "value": "2022-06-28" }
-          ]
-        },
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }] },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "{ \"page_size\": 100 }",
@@ -96,52 +146,40 @@
       "name": "Query All Habits",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [520, 100],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "REPLACE_AFTER_IMPORT",
-          "name": "Notion API"
-        }
-      }
+      "position": [520, -100],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
     },
     {
       "parameters": {
-        "jsCode": "// Transform Notion query results → { habits, pageIndex, count }\nconst response = $input.first().json;\nconst results = response.results || [];\nconst habits = {};\nconst pageIndex = {};\n\nfor (const page of results) {\n  const props = page.properties || {};\n  // Date is the title field\n  const dateStr = props.Date?.title?.[0]?.plain_text || '';\n  if (!dateStr || !/^\\d{4}-\\d{2}-\\d{2}$/.test(dateStr)) continue;\n\n  habits[dateStr] = {\n    Trading:   props.Trading?.checkbox   || false,\n    Advertise: props.Advertise?.checkbox || false,\n    Deliver:   props.Deliver?.checkbox   || false,\n    Gym:       props.Gym?.checkbox       || false,\n    FatLoss:   props.FatLoss?.checkbox   || false,\n    AI:        props.AI?.checkbox        || false\n  };\n  pageIndex[dateStr] = page.id;\n}\n\nreturn [{ json: { habits, pageIndex, count: Object.keys(habits).length } }];"
+        "jsCode": "const response = $input.first().json;\nconst results = response.results || [];\nconst habits = {};\nconst pageIndex = {};\nfor (const page of results) {\n  const props = page.properties || {};\n  const dateStr = props.Date?.title?.[0]?.plain_text || '';\n  if (!dateStr || !/^\\d{4}-\\d{2}-\\d{2}$/.test(dateStr)) continue;\n  habits[dateStr] = {\n    Trading: props.Trading?.checkbox || false,\n    Advertise: props.Advertise?.checkbox || false,\n    Deliver: props.Deliver?.checkbox || false,\n    Gym: props.Gym?.checkbox || false,\n    FatLoss: props.FatLoss?.checkbox || false,\n    AI: props.AI?.checkbox || false\n  };\n  pageIndex[dateStr] = page.id;\n}\nreturn [{ json: { habits, pageIndex, count: Object.keys(habits).length } }];"
       },
       "id": "f8a1b2c3-0001-4e00-a000-000000000004",
       "name": "Transform Habits",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [780, 100]
+      "position": [780, -100]
     },
     {
       "parameters": {
         "respondWith": "firstIncomingItem",
-        "options": {
-          "responseHeaders": {
-            "entries": [
-              { "name": "Access-Control-Allow-Origin", "value": "*" },
-              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
-            ]
-          }
-        }
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
       },
       "id": "f8a1b2c3-0001-4e00-a000-000000000005",
       "name": "Respond Fetch",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1040, 100]
+      "position": [1040, -100]
     },
 
     {
       "parameters": {
-        "jsCode": "// Prepare PATCH request for updating a checkbox\nconst body = $json.body;\nconst { pageId, field, value } = body;\n\nif (!pageId || !field) {\n  return [{ json: { error: 'Missing pageId or field', ok: false } }];\n}\n\nreturn [{\n  json: {\n    patchUrl: `https://api.notion.com/v1/pages/${pageId}`,\n    patchBody: JSON.stringify({\n      properties: {\n        [field]: { checkbox: !!value }\n      }\n    })\n  }\n}];"
+        "jsCode": "const body = $json.body;\nconst { pageId, field, value } = body;\nif (!pageId || !field) return [{ json: { error: 'Missing pageId or field', ok: false } }];\nreturn [{ json: { patchUrl: `https://api.notion.com/v1/pages/${pageId}`, patchBody: JSON.stringify({ properties: { [field]: { checkbox: !!value } } }) } }];"
       },
       "id": "f8a1b2c3-0001-4e00-a000-000000000006",
       "name": "Prepare Update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [520, 350]
+      "position": [520, 100]
     },
     {
       "parameters": {
@@ -150,12 +188,7 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Notion-Version", "value": "2022-06-28" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }, { "name": "Content-Type", "value": "application/json" }] },
         "sendBody": true,
         "specifyBody": "string",
         "body": "={{ $json.patchBody }}",
@@ -165,52 +198,38 @@
       "name": "Update Page",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [780, 350],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "REPLACE_AFTER_IMPORT",
-          "name": "Notion API"
-        }
-      }
+      "position": [780, 100],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
     },
     {
-      "parameters": {
-        "jsCode": "// Return success after update\nreturn [{ json: { ok: true } }];"
-      },
+      "parameters": { "jsCode": "return [{ json: { ok: true } }];" },
       "id": "f8a1b2c3-0001-4e00-a000-000000000008",
       "name": "Format Update Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1040, 350]
+      "position": [1040, 100]
     },
     {
       "parameters": {
         "respondWith": "firstIncomingItem",
-        "options": {
-          "responseHeaders": {
-            "entries": [
-              { "name": "Access-Control-Allow-Origin", "value": "*" },
-              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
-            ]
-          }
-        }
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
       },
       "id": "f8a1b2c3-0001-4e00-a000-000000000009",
       "name": "Respond Update",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1280, 350]
+      "position": [1280, 100]
     },
 
     {
       "parameters": {
-        "jsCode": "// Build Notion page creation payload\nconst body = $json.body;\nconst { date, habits } = body;\n\nconst properties = {\n  Date: { title: [{ text: { content: date } }] },\n  Trading:   { checkbox: !!(habits?.Trading) },\n  Advertise: { checkbox: !!(habits?.Advertise) },\n  Deliver:   { checkbox: !!(habits?.Deliver) },\n  Gym:       { checkbox: !!(habits?.Gym) },\n  FatLoss:   { checkbox: !!(habits?.FatLoss) },\n  AI:        { checkbox: !!(habits?.AI) }\n};\n\nreturn [{\n  json: {\n    createBody: JSON.stringify({\n      parent: { database_id: '58da82d689ed42029274234183f77bb6' },\n      properties\n    })\n  }\n}];"
+        "jsCode": "const body = $json.body;\nconst { date, habits, dateProperty } = body;\nconst properties = {\n  Date: { title: [{ text: { content: date } }] },\n  Trading: { checkbox: !!(habits?.Trading) },\n  Advertise: { checkbox: !!(habits?.Advertise) },\n  Deliver: { checkbox: !!(habits?.Deliver) },\n  Gym: { checkbox: !!(habits?.Gym) },\n  FatLoss: { checkbox: !!(habits?.FatLoss) },\n  AI: { checkbox: !!(habits?.AI) }\n};\nif (dateProperty) {\n  properties['\\u65e5\\u671f'] = { date: { start: dateProperty } };\n}\nreturn [{ json: { createBody: JSON.stringify({ parent: { database_id: '58da82d689ed42029274234183f77bb6' }, properties }) } }];"
       },
       "id": "f8a1b2c3-0001-4e00-a000-000000000010",
       "name": "Prepare Create",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [520, 600]
+      "position": [520, 300]
     },
     {
       "parameters": {
@@ -219,12 +238,7 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Notion-Version", "value": "2022-06-28" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }, { "name": "Content-Type", "value": "application/json" }] },
         "sendBody": true,
         "specifyBody": "string",
         "body": "={{ $json.createBody }}",
@@ -234,117 +248,467 @@
       "name": "Create Page",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [780, 600],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "REPLACE_AFTER_IMPORT",
-          "name": "Notion API"
-        }
-      }
+      "position": [780, 300],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
     },
     {
-      "parameters": {
-        "jsCode": "// Return success with new page ID\nconst response = $input.first().json;\nreturn [{ json: { ok: true, pageId: response.id || null } }];"
-      },
+      "parameters": { "jsCode": "const response = $input.first().json;\nreturn [{ json: { ok: true, pageId: response.id || null } }];" },
       "id": "f8a1b2c3-0001-4e00-a000-000000000012",
       "name": "Format Create Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1040, 600]
+      "position": [1040, 300]
     },
     {
       "parameters": {
         "respondWith": "firstIncomingItem",
-        "options": {
-          "responseHeaders": {
-            "entries": [
-              { "name": "Access-Control-Allow-Origin", "value": "*" },
-              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
-            ]
-          }
-        }
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
       },
       "id": "f8a1b2c3-0001-4e00-a000-000000000013",
       "name": "Respond Create",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1280, 600]
+      "position": [1280, 300]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/f481a3da00de4d9391d293a88cf1c9c1/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"page_size\": 100 }",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000001",
+      "name": "Query Body",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 500],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst results = response.results || [];\nconst records = [];\nconst pageIndex = {};\nfor (const page of results) {\n  const p = page.properties || {};\n  const recId = p['Record ID']?.title?.[0]?.plain_text || '';\n  const dateVal = p.Date?.date?.start || recId;\n  if (!dateVal) continue;\n  const fatRaw = p['Fat %']?.number || 0;\n  records.push({\n    'Record ID': recId,\n    Date: dateVal,\n    date: dateVal,\n    Weight: p.Weight?.number || 0,\n    Muscle: p.Muscle?.number || 0,\n    'Fat %': fatRaw,\n    Notes: p.Notes?.rich_text?.[0]?.plain_text || ''\n  });\n  pageIndex[dateVal] = page.id;\n}\nreturn [{ json: { records, pageIndex, count: records.length } }];"
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000002",
+      "name": "Transform Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000003",
+      "name": "Respond Body Fetch",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1040, 500]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body;\nconst d = body.data || {};\nconst properties = {\n  'Record ID': { title: [{ text: { content: d['Record ID'] || d.Date || '' } }] },\n  Date: { date: { start: d.Date || '' } },\n  Weight: { number: d.Weight || 0 },\n  Muscle: { number: d.Muscle || 0 },\n  'Fat %': { number: d['Fat %'] || 0 },\n  Notes: { rich_text: [{ text: { content: d.Notes || '' } }] }\n};\nreturn [{ json: { createBody: JSON.stringify({ parent: { database_id: 'f481a3da00de4d9391d293a88cf1c9c1' }, properties }) } }];"
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000004",
+      "name": "Prepare Body Create",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 700]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }, { "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json.createBody }}",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000005",
+      "name": "Create Body Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 700],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": { "jsCode": "const response = $input.first().json;\nreturn [{ json: { ok: true, pageId: response.id || null } }];" },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000006",
+      "name": "Format Body Create Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 700]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000007",
+      "name": "Respond Body Create",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 700]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body;\nconst { pageId, data: d } = body;\nif (!pageId) return [{ json: { error: 'Missing pageId', ok: false } }];\nconst props = {};\nif (d.Weight != null) props.Weight = { number: d.Weight };\nif (d.Muscle != null) props.Muscle = { number: d.Muscle };\nif (d['Fat %'] != null) props['Fat %'] = { number: d['Fat %'] };\nif (d.Notes != null) props.Notes = { rich_text: [{ text: { content: d.Notes } }] };\nreturn [{ json: { patchUrl: `https://api.notion.com/v1/pages/${pageId}`, patchBody: JSON.stringify({ properties: props }) } }];"
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000008",
+      "name": "Prepare Body Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 900]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $json.patchUrl }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }, { "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json.patchBody }}",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000009",
+      "name": "Update Body Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 900],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": { "jsCode": "return [{ json: { ok: true } }];" },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000010",
+      "name": "Format Body Update Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 900]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0002-4e00-a000-000000000011",
+      "name": "Respond Body Update",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 900]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/127c65e93b7c4008b34c86c285295387/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"page_size\": 100 }",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0003-4e00-a000-000000000001",
+      "name": "Query Wealth",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 1100],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst results = response.results || [];\nconst records = [];\nconst pageIndex = {};\nfor (const page of results) {\n  const p = page.properties || {};\n  const dateStr = p.Date?.title?.[0]?.plain_text || '';\n  if (!dateStr) continue;\n  records.push({\n    Date: dateStr,\n    date: dateStr,\n    TotalAssets: p.TotalAssets?.number || 0,\n    totalAssets: p.TotalAssets?.number || 0,\n    MonthlyGrowth: p.MonthlyGrowth?.number || 0\n  });\n  pageIndex[dateStr] = page.id;\n}\nreturn [{ json: { records, pageIndex, count: records.length } }];"
+      },
+      "id": "f8a1b2c3-0003-4e00-a000-000000000002",
+      "name": "Transform Wealth",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 1100]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0003-4e00-a000-000000000003",
+      "name": "Respond Wealth Fetch",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1040, 1100]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body;\nconst d = body.data || {};\nconst properties = {\n  Date: { title: [{ text: { content: d.Date || '' } }] },\n  TotalAssets: { number: d.TotalAssets || 0 },\n  MonthlyGrowth: { number: d.MonthlyGrowth || 0 }\n};\nreturn [{ json: { createBody: JSON.stringify({ parent: { database_id: '127c65e93b7c4008b34c86c285295387' }, properties }) } }];"
+      },
+      "id": "f8a1b2c3-0003-4e00-a000-000000000004",
+      "name": "Prepare Wealth Create",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 1300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }, { "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json.createBody }}",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0003-4e00-a000-000000000005",
+      "name": "Create Wealth Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 1300],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": { "jsCode": "const response = $input.first().json;\nreturn [{ json: { ok: true, pageId: response.id || null } }];" },
+      "id": "f8a1b2c3-0003-4e00-a000-000000000006",
+      "name": "Format Wealth Create Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 1300]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0003-4e00-a000-000000000007",
+      "name": "Respond Wealth Create",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 1300]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/3d416eb92c484ad3bff54919c3ea43fd/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"page_size\": 100 }",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000001",
+      "name": "Query Ideas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 1500],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst results = response.results || [];\nconst records = [];\nconst pageIndex = {};\nfor (const page of results) {\n  const p = page.properties || {};\n  const text = p['\\u60f3\\u6cd5']?.title?.[0]?.plain_text || '';\n  if (!text) continue;\n  const id = page.id;\n  records.push({\n    id,\n    text,\n    type: p['\\u985e\\u578b']?.select?.name || '',\n    status: p['\\u72c0\\u614b']?.select?.name || '',\n    priority: p['\\u512a\\u5148\\u5ea6']?.select?.name || '',\n    date: p['\\u5efa\\u7acb\\u65e5\\u671f']?.date?.start || '',\n    notes: p['\\u5099\\u8a3b']?.rich_text?.[0]?.plain_text || ''\n  });\n  pageIndex[id] = id;\n}\nreturn [{ json: { records, pageIndex, count: records.length } }];"
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000002",
+      "name": "Transform Ideas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 1500]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000003",
+      "name": "Respond Ideas Fetch",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1040, 1500]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body;\nconst d = body.data || {};\nconst properties = {\n  '\\u60f3\\u6cd5': { title: [{ text: { content: d.text || '' } }] },\n  '\\u985e\\u578b': { select: { name: d.type || '\\ud83e\\udd14 \\u5176\\u4ed6' } },\n  '\\u72c0\\u614b': { select: { name: d.status || '\\ud83d\\udca1 \\u65b0\\u60f3\\u6cd5' } },\n  '\\u512a\\u5148\\u5ea6': { select: { name: d.priority || '\\u2b50 \\u4e2d' } },\n  '\\u5099\\u8a3b': { rich_text: [{ text: { content: d.notes || '' } }] }\n};\nif (d.date) properties['\\u5efa\\u7acb\\u65e5\\u671f'] = { date: { start: d.date } };\nreturn [{ json: { createBody: JSON.stringify({ parent: { database_id: '3d416eb92c484ad3bff54919c3ea43fd' }, properties }) } }];"
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000004",
+      "name": "Prepare Idea Create",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 1700]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }, { "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json.createBody }}",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000005",
+      "name": "Create Idea Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 1700],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": { "jsCode": "const response = $input.first().json;\nreturn [{ json: { ok: true, pageId: response.id || null } }];" },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000006",
+      "name": "Format Idea Create Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 1700]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000007",
+      "name": "Respond Idea Create",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 1700]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body;\nconst { pageId, data: d } = body;\nif (!pageId) return [{ json: { error: 'Missing pageId', ok: false } }];\nconst props = {};\nif (d.status) props['\\u72c0\\u614b'] = { select: { name: d.status } };\nif (d.priority) props['\\u512a\\u5148\\u5ea6'] = { select: { name: d.priority } };\nreturn [{ json: { patchUrl: `https://api.notion.com/v1/pages/${pageId}`, patchBody: JSON.stringify({ properties: props }) } }];"
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000008",
+      "name": "Prepare Idea Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 1900]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $json.patchUrl }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Notion-Version", "value": "2022-06-28" }, { "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json.patchBody }}",
+        "options": {}
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000009",
+      "name": "Update Idea Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 1900],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": { "jsCode": "return [{ json: { ok: true } }];" },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000010",
+      "name": "Format Idea Update Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 1900]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0004-4e00-a000-000000000011",
+      "name": "Respond Idea Update",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 1900]
     },
 
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\"status\":\"ok\",\"version\":\"RayOS Sync Hub v1.0\",\"types\":[\"fetch_habits\",\"update_habit\",\"create_day\"]}",
-        "options": {
-          "responseHeaders": {
-            "entries": [
-              { "name": "Access-Control-Allow-Origin", "value": "*" },
-              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
-            ]
-          }
-        }
+        "responseBody": "={\"status\":\"ok\",\"version\":\"RayOS Sync Hub v2.0\",\"types\":[\"fetch_habits\",\"update_habit\",\"create_day\",\"fetch_body\",\"create_body\",\"update_body\",\"fetch_wealth\",\"create_wealth\",\"fetch_ideas\",\"create_idea\",\"update_idea\"]}",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
       },
       "id": "f8a1b2c3-0001-4e00-a000-000000000014",
       "name": "Respond Health",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [520, 850]
+      "position": [520, 2100]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [
-        [{ "node": "Route", "type": "main", "index": 0 }]
-      ]
+      "main": [[{ "node": "Route", "type": "main", "index": 0 }]]
     },
     "Route": {
       "main": [
         [{ "node": "Query All Habits", "type": "main", "index": 0 }],
         [{ "node": "Prepare Update", "type": "main", "index": 0 }],
         [{ "node": "Prepare Create", "type": "main", "index": 0 }],
+        [{ "node": "Query Body", "type": "main", "index": 0 }],
+        [{ "node": "Prepare Body Create", "type": "main", "index": 0 }],
+        [{ "node": "Prepare Body Update", "type": "main", "index": 0 }],
+        [{ "node": "Query Wealth", "type": "main", "index": 0 }],
+        [{ "node": "Prepare Wealth Create", "type": "main", "index": 0 }],
+        [{ "node": "Query Ideas", "type": "main", "index": 0 }],
+        [{ "node": "Prepare Idea Create", "type": "main", "index": 0 }],
+        [{ "node": "Prepare Idea Update", "type": "main", "index": 0 }],
         [{ "node": "Respond Health", "type": "main", "index": 0 }]
       ]
     },
-    "Query All Habits": {
-      "main": [
-        [{ "node": "Transform Habits", "type": "main", "index": 0 }]
-      ]
-    },
-    "Transform Habits": {
-      "main": [
-        [{ "node": "Respond Fetch", "type": "main", "index": 0 }]
-      ]
-    },
-    "Prepare Update": {
-      "main": [
-        [{ "node": "Update Page", "type": "main", "index": 0 }]
-      ]
-    },
-    "Update Page": {
-      "main": [
-        [{ "node": "Format Update Response", "type": "main", "index": 0 }]
-      ]
-    },
-    "Format Update Response": {
-      "main": [
-        [{ "node": "Respond Update", "type": "main", "index": 0 }]
-      ]
-    },
-    "Prepare Create": {
-      "main": [
-        [{ "node": "Create Page", "type": "main", "index": 0 }]
-      ]
-    },
-    "Create Page": {
-      "main": [
-        [{ "node": "Format Create Response", "type": "main", "index": 0 }]
-      ]
-    },
-    "Format Create Response": {
-      "main": [
-        [{ "node": "Respond Create", "type": "main", "index": 0 }]
-      ]
-    }
+    "Query All Habits": { "main": [[{ "node": "Transform Habits", "type": "main", "index": 0 }]] },
+    "Transform Habits": { "main": [[{ "node": "Respond Fetch", "type": "main", "index": 0 }]] },
+    "Prepare Update": { "main": [[{ "node": "Update Page", "type": "main", "index": 0 }]] },
+    "Update Page": { "main": [[{ "node": "Format Update Response", "type": "main", "index": 0 }]] },
+    "Format Update Response": { "main": [[{ "node": "Respond Update", "type": "main", "index": 0 }]] },
+    "Prepare Create": { "main": [[{ "node": "Create Page", "type": "main", "index": 0 }]] },
+    "Create Page": { "main": [[{ "node": "Format Create Response", "type": "main", "index": 0 }]] },
+    "Format Create Response": { "main": [[{ "node": "Respond Create", "type": "main", "index": 0 }]] },
+    "Query Body": { "main": [[{ "node": "Transform Body", "type": "main", "index": 0 }]] },
+    "Transform Body": { "main": [[{ "node": "Respond Body Fetch", "type": "main", "index": 0 }]] },
+    "Prepare Body Create": { "main": [[{ "node": "Create Body Page", "type": "main", "index": 0 }]] },
+    "Create Body Page": { "main": [[{ "node": "Format Body Create Response", "type": "main", "index": 0 }]] },
+    "Format Body Create Response": { "main": [[{ "node": "Respond Body Create", "type": "main", "index": 0 }]] },
+    "Prepare Body Update": { "main": [[{ "node": "Update Body Page", "type": "main", "index": 0 }]] },
+    "Update Body Page": { "main": [[{ "node": "Format Body Update Response", "type": "main", "index": 0 }]] },
+    "Format Body Update Response": { "main": [[{ "node": "Respond Body Update", "type": "main", "index": 0 }]] },
+    "Query Wealth": { "main": [[{ "node": "Transform Wealth", "type": "main", "index": 0 }]] },
+    "Transform Wealth": { "main": [[{ "node": "Respond Wealth Fetch", "type": "main", "index": 0 }]] },
+    "Prepare Wealth Create": { "main": [[{ "node": "Create Wealth Page", "type": "main", "index": 0 }]] },
+    "Create Wealth Page": { "main": [[{ "node": "Format Wealth Create Response", "type": "main", "index": 0 }]] },
+    "Format Wealth Create Response": { "main": [[{ "node": "Respond Wealth Create", "type": "main", "index": 0 }]] },
+    "Query Ideas": { "main": [[{ "node": "Transform Ideas", "type": "main", "index": 0 }]] },
+    "Transform Ideas": { "main": [[{ "node": "Respond Ideas Fetch", "type": "main", "index": 0 }]] },
+    "Prepare Idea Create": { "main": [[{ "node": "Create Idea Page", "type": "main", "index": 0 }]] },
+    "Create Idea Page": { "main": [[{ "node": "Format Idea Create Response", "type": "main", "index": 0 }]] },
+    "Format Idea Create Response": { "main": [[{ "node": "Respond Idea Create", "type": "main", "index": 0 }]] },
+    "Prepare Idea Update": { "main": [[{ "node": "Update Idea Page", "type": "main", "index": 0 }]] },
+    "Update Idea Page": { "main": [[{ "node": "Format Idea Update Response", "type": "main", "index": 0 }]] },
+    "Format Idea Update Response": { "main": [[{ "node": "Respond Idea Update", "type": "main", "index": 0 }]] }
   },
   "pinData": {},
   "settings": {
