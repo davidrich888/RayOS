@@ -165,7 +165,7 @@
         .form-row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
         .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
         .form-label { font-size: 10px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.5px; }
-        .form-input, .form-select { background: var(--bg-input); border: 1px solid var(--border); padding: 10px 12px; color: var(--text); font-size: 14px; font-family: inherit; }
+        .form-input, .form-select { width: 100%; background: var(--bg-input); border: 1px solid var(--border); padding: 10px 12px; color: var(--text); font-size: 14px; font-family: inherit; }
         .form-input:focus { outline: none; border-color: var(--accent); }
         .form-actions { display: flex; gap: 10px; margin-top: 16px; }
         
@@ -411,6 +411,7 @@
             .tab { padding: 10px 12px; font-size: 11px; white-space: nowrap; }
             
             /* ===== WEALTH SECTION ===== */
+            .wealth-main { overflow: hidden; }
             .wealth-layout { gap: 16px; }
             .wealth-quote-goal { grid-template-columns: 1fr !important; gap: 12px !important; }
             #wealth .wealth-sidebar { margin-top: 12px; }
