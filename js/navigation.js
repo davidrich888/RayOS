@@ -6,6 +6,9 @@ function toggleMobileMenu() {
     document.querySelector('.mobile-menu-btn').innerHTML = document.querySelector('.sidebar').classList.contains('open') ? '✕' : '☰';
 }
 
+// Track which sections have been synced this session
+const _sectionSynced = {};
+
 function go(section) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
@@ -17,14 +20,44 @@ function go(section) {
         document.querySelector('.sidebar-overlay').classList.remove('show');
         document.querySelector('.mobile-menu-btn').innerHTML = '☰';
     }
-    // Refresh Daily Habits checkboxes from synced data
-    if (section === 'daily') {
-        loadDailyHabits(true);
-    }
-    // AI Life Coach: auto-analyze on first visit
-    if (section === 'lifecoach') {
-        updateLifeOverview();
-        autoAnalyzeLife();
+
+    // === Auto-sync & refresh on section navigation ===
+    const canSync = (typeof hasNotionDirect === 'function' && hasNotionDirect()) || (typeof getN8nUrl === 'function' && getN8nUrl());
+    const firstVisit = !_sectionSynced[section];
+    if (firstVisit) _sectionSynced[section] = true;
+
+    switch (section) {
+        case 'daily':
+            if (typeof loadDailyHabits === 'function') loadDailyHabits(true);
+            if (firstVisit && canSync && typeof syncDailyFromNotionDirect === 'function') syncDailyFromNotionDirect(true);
+            break;
+        case 'ideas':
+            if (typeof renderIdeasList === 'function') renderIdeasList();
+            if (firstVisit && canSync && typeof syncIdeasFromNotionDirect === 'function') syncIdeasFromNotionDirect(true);
+            break;
+        case 'wealth':
+            if (typeof updateWealthDisplay === 'function') updateWealthDisplay();
+            if (firstVisit && canSync) {
+                if (typeof syncWealthFromNotion === 'function') syncWealthFromNotion(true);
+                if (typeof syncAccountsFromNotion === 'function') syncAccountsFromNotion(true);
+            }
+            break;
+        case 'physic':
+            if (typeof updatePhysicDisplay === 'function') updatePhysicDisplay();
+            if (firstVisit && canSync && typeof syncBodyFromNotion === 'function') syncBodyFromNotion();
+            break;
+        case 'dashboard':
+            if (typeof renderMoodboard === 'function') renderMoodboard();
+            if (firstVisit && typeof syncMoodboardFromDrive === 'function') syncMoodboardFromDrive();
+            break;
+        case 'information':
+            if (typeof renderVideoKnowledgeSummary === 'function') renderVideoKnowledgeSummary();
+            if (firstVisit && canSync && typeof syncVideosFromNotion === 'function') syncVideosFromNotion(true);
+            break;
+        case 'lifecoach':
+            if (typeof updateLifeOverview === 'function') updateLifeOverview();
+            if (typeof autoAnalyzeLife === 'function') autoAnalyzeLife();
+            break;
     }
 }
 
