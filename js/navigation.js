@@ -3,7 +3,7 @@
 function toggleMobileMenu() {
     document.querySelector('.sidebar').classList.toggle('open');
     document.querySelector('.sidebar-overlay').classList.toggle('show');
-    document.querySelector('.mobile-menu-btn').innerHTML = document.querySelector('.sidebar').classList.contains('open') ? '✕' : '☰';
+    document.querySelector('.mobile-menu-btn').innerHTML = document.querySelector('.sidebar').classList.contains('open') ? 'â' : 'â°';
 }
 
 // Track which sections have been synced this session
@@ -18,7 +18,7 @@ function go(section) {
     if (window.innerWidth <= 768) {
         document.querySelector('.sidebar').classList.remove('open');
         document.querySelector('.sidebar-overlay').classList.remove('show');
-        document.querySelector('.mobile-menu-btn').innerHTML = '☰';
+        document.querySelector('.mobile-menu-btn').innerHTML = 'â°';
     }
 
     // === Auto-sync & refresh on section navigation ===
@@ -64,6 +64,16 @@ function go(section) {
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => go(item.dataset.section));
 });
+
+
+// === Dashboard moodboard: auto-sync on initial page load ===
+// Dashboard is the default section, so go('dashboard') is never called on first load.
+// We trigger renderMoodboard + syncMoodboardFromDrive here with a delay.
+setTimeout(() => {
+    if (typeof renderMoodboard === 'function') renderMoodboard();
+    if (typeof syncMoodboardFromDrive === 'function') syncMoodboardFromDrive();
+    _sectionSynced['dashboard'] = true;
+}, 1500);
 
 // ==================== UTILS ====================
 function showToast(msg, isError = false) {
