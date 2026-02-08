@@ -17,6 +17,10 @@ function go(section) {
         document.querySelector('.sidebar-overlay').classList.remove('show');
         document.querySelector('.mobile-menu-btn').innerHTML = '☰';
     }
+    // Refresh Daily Habits checkboxes from synced data
+    if (section === 'daily') {
+        loadDailyHabits(true);
+    }
     // AI Life Coach: auto-analyze on first visit
     if (section === 'lifecoach') {
         updateLifeOverview();
@@ -40,4 +44,3 @@ function hideModal(id) { document.getElementById(id).classList.remove('show'); }
 function formatNumber(n) { return new Intl.NumberFormat('zh-TW').format(Math.round(n)); }
 function formatMoney(n) { if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M'; if (n >= 1000) return Math.round(n / 1000) + 'K'; return formatNumber(n); }
 function toTWD(a, c) { if (c === 'USD') return a * USD_RATE; if (c === 'USDT') return a * USDT_RATE; return a; }
-
