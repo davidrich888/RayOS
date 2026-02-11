@@ -750,6 +750,7 @@
       const [searchQuery, setSearchQuery] = useState("");
       const [selectedVideo, setSelectedVideo] = useState(null);
       const [showSavedThumbnailsOnly, setShowSavedThumbnailsOnly] = useState(false);
+      const [selectedRatings, setSelectedRatings] = useState([]);
 
       useEffect(() => {
         fetch(API_URL)
@@ -815,9 +816,10 @@
           const matchSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                              video.channel.toLowerCase().includes(searchQuery.toLowerCase());
           const matchThumbnailSaved = !showSavedThumbnailsOnly || video.thumbnailSaved;
-          return matchCategory && matchStatus && matchSearch && matchThumbnailSaved;
+          const matchRating = selectedRatings.length === 0 || selectedRatings.includes(video.rating);
+          return matchCategory && matchStatus && matchSearch && matchThumbnailSaved && matchRating;
         });
-      }, [videos, selectedCategory, selectedStatus, searchQuery, showSavedThumbnailsOnly]);
+      }, [videos, selectedCategory, selectedStatus, searchQuery, showSavedThumbnailsOnly, selectedRatings]);
 
       const stats = useMemo(() => {
         return {
@@ -915,47 +917,93 @@
           {/* Main */}
           <main className="max-w-6xl mx-auto px-4 py-4">
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-              <input
-                type="text"
-                placeholder="搜尋..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full sm:w-48 px-4 py-2 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-200 text-sm outline-none focus:border-neutral-600 transition-colors placeholder-neutral-600"
-              />
+            <div className="flex flex-col gap-3 mb-6">
+              {/* 第一列：搜尋 + 分類 + 狀態 */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="搜尋..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full sm:w-48 px-4 py-2 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-200 text-sm outline-none focus:border-neutral-600 transition-colors placeholder-neutral-600"
+                />
 
-              <div className="flex gap-1 overflow-x-auto pb-2 sm:pb-0">
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
-                      selectedCategory === cat
-                        ? 'bg-white text-black font-medium'
-                        : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
+                <div className="flex gap-1 overflow-x-auto pb-2 sm:pb-0">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
+                        selectedCategory === cat
+                          ? 'bg-white text-black font-medium'
+                          : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="hidden sm:block h-4 w-px bg-neutral-800 self-center"></div>
+
+                <div className="flex gap-1 overflow-x-auto pb-2 sm:pb-0">
+                  {statuses.map(status => (
+                    <button
+                      key={status}
+                      onClick={() => setSelectedStatus(status)}
+                      className={`px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
+                        selectedStatus === status
+                          ? 'bg-neutral-800 text-white font-medium'
+                          : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="hidden sm:block h-4 w-px bg-neutral-800 self-center"></div>
+              {/* 第二列：星號篩選 + 篩選計數 + 清除 */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xs text-neutral-500">評分</span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      onClick={() => setSelectedRatings(prev =>
+                        prev.includes(star) ? prev.filter(s => s !== star) : [...prev, star]
+                      )}
+                      className={`px-2.5 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
+                        selectedRatings.includes(star)
+                          ? 'bg-yellow-500/20 text-yellow-400 font-medium border border-yellow-500/40'
+                          : 'text-neutral-400 hover:text-yellow-400'
+                      }`}
+                    >
+                      {star}★
+                    </button>
+                  ))}
+                </div>
 
-              <div className="flex gap-1 overflow-x-auto pb-2 sm:pb-0">
-                {statuses.map(status => (
+                <div className="hidden sm:block h-4 w-px bg-neutral-800"></div>
+
+                <span className="text-sm text-neutral-500">
+                  共 <span className="text-white font-medium">{filteredVideos.length}</span> 部
+                </span>
+
+                {(selectedCategory !== "全部" || selectedStatus !== "全部" || searchQuery || showSavedThumbnailsOnly || selectedRatings.length > 0) && (
                   <button
-                    key={status}
-                    onClick={() => setSelectedStatus(status)}
-                    className={`px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
-                      selectedStatus === status
-                        ? 'bg-neutral-800 text-white font-medium'
-                        : 'text-neutral-400 hover:text-white'
-                    }`}
+                    onClick={() => {
+                      setSelectedCategory("全部");
+                      setSelectedStatus("全部");
+                      setSearchQuery("");
+                      setShowSavedThumbnailsOnly(false);
+                      setSelectedRatings([]);
+                    }}
+                    className="px-3 py-1.5 rounded-md text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                   >
-                    {status}
+                    ✕ 清除篩選
                   </button>
-                ))}
+                )}
               </div>
             </div>
 
