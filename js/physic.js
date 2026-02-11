@@ -137,6 +137,20 @@ function updatePhysicDisplay() {
                 el('body-muscle-change').style.color = mD >= 0 ? 'var(--success)' : 'var(--danger)';
             }
         }
+                // Vs previous record
+                if (sorted.length >= 2) {
+                                var prev = sorted[sorted.length - 2];
+                                var vW = (latest.weight - prev.weight).toFixed(1);
+                                if (el('body-vs-weight')) { el('body-vs-weight').textContent = (vW > 0?'+':'') + vW + ' kg'; el('body-vs-weight').style.color = vW <= 0 ? 'var(--success)' : 'var(--danger)'; }
+                                var vF = (latest.fatpct - prev.fatpct).toFixed(1);
+                                if (el('body-vs-fat')) { el('body-vs-fat').textContent = (vF > 0?'+':'') + vF + '%'; el('body-vs-fat').style.color = vF <= 0 ? 'var(--success)' : 'var(--danger)'; }
+                                if (latest.muscle && prev.muscle && el('body-vs-muscle')) {
+                                                    var vM = (latest.muscle - prev.muscle).toFixed(1);
+                                                    el('body-vs-muscle').textContent = (vM > 0?'+':'') + vM + ' kg';
+                                                    el('body-vs-muscle').style.color = vM >= 0 ? 'var(--success)' : 'var(--danger)';
+                                }
+                                if (el('body-vs-date')) el('body-vs-date').textContent = prev.date;
+                }
     }
     updateBodyChart();
     renderBodyHistoryTable();
