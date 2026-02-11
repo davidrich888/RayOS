@@ -43,6 +43,7 @@ function go(section) {
             }
             break;
         case 'physic':
+                        if (typeof loadBodyProgressFromDrive === 'function') loadBodyProgressFromDrive();
             if (typeof updatePhysicDisplay === 'function') updatePhysicDisplay();
             if (firstVisit && canSync && typeof syncBodyFromNotion === 'function') syncBodyFromNotion();
             break;
