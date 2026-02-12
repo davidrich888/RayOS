@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RayOS V11.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-elevated: #0f0f0f;
+            --bg-card: #141414;
+            --bg-input: #1a1a1a;
+            --text: #e8e8e8;
+            --text-dim: #6b6b6b;
+            --text-muted: #3a3a3a;
+            --accent: #d4c5a9;
+            --accent-dim: rgba(212, 197, 169, 0.15);
+            --border: #1f1f1f;
+            --success: #4a7c59;
+            --danger: #e63946;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.5s ease-out; }
+        .sync-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+        .sync-dot.on{background:var(--success);box-shadow:0 0 6px var(--success);}
+        .sync-dot.off{background:var(--text-muted);}
+        
+        /* Sidebar */
+        .sidebar { width: 200px; background: var(--bg); border-right: 1px solid var(--border); position: fixed; height: 100vh; padding: 32px 0; z-index: 100; }
+        .logo { padding: 0 24px 32px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; letter-spacing: 2px; color: var(--accent); }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 24px; cursor: pointer; transition: all 0.3s ease; color: var(--text-dim); font-size: 13px; font-weight: 500; }
+        .nav-item:hover { color: var(--text); background: var(--bg-elevated); }
+        .nav-item.active { color: var(--accent); background: var(--accent-dim); border-right: 2px solid var(--accent); }
+        .nav-icon { font-size: 16px; width: 24px; text-align: center; }
+        
+        /* Main */
+        .main { margin-left: 200px; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 32px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 50; }
+        .page-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 700; letter-spacing: 4px; color: var(--text-dim); text-transform: uppercase; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        
+        /* Buttons */
+        .btn { padding: 10px 20px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; font-family: inherit; }
+        .btn:hover { border-color: var(--text-dim); color: var(--text); }
+        .btn-accent { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+        .btn-accent:hover { background: #e0d4bc; }
+        .btn-small { padding: 6px 12px; font-size: 11px; }
+        .btn-danger { border-color: var(--danger); color: var(--danger); }
+        
+        /* Sections */
+        .section { display: none; }
+        .section.active { display: block; }
+        .content { padding: 24px 32px; }
+        
+        /* Moodboard */
+        .moodboard { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 260px); gap: 2px; }
+        .mood-item { overflow: hidden; position: relative; }
+        .mood-item img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7) saturate(0.8); transition: all 0.5s ease; }
+        .mood-item:hover img { filter: brightness(0.9) saturate(1); transform: scale(1.05); }
+        .mood-item.large { grid-column: span 2; }
+        .moodboard-wrapper { position: relative; }
+        .moodboard-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 10; pointer-events: none; }
+        .moodboard-title { font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 700; color: #fff; letter-spacing: 16px; text-shadow: 0 4px 60px rgba(0,0,0,0.9); }
+        .moodboard-sub { font-size: 12px; color: rgba(255,255,255,0.6); letter-spacing: 6px; margin-top: 8px; text-transform: uppercase; }
+        
+        /* Stats Row */
+        .stats-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; padding: 24px 32px; background: var(--bg-elevated); border-bottom: 1px solid var(--border); }
+        .stat-box { text-align: center; padding: 16px; cursor: pointer; transition: all 0.3s; }
+        .stat-box:hover { background: var(--bg-card); }
+        .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; margin-top: 4px; text-transform: uppercase; }
+        
+        /* Cards */
+        .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: all 0.3s; }
+        .card:hover { border-color: var(--text-muted); transform: translateY(-2px); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .card-icon { font-size: 24px; }
+        .card-badge { font-size: 9px; color: var(--accent); letter-spacing: 1px; padding: 4px 8px; border: 1px solid var(--accent); }
+        .card-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; }
+        .card-desc { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+        .section-label { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 16px; text-transform: uppercase; }
+        
+        /* Wealth Layout */
+        .wealth-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
+        .wealth-main { display: flex; flex-direction: column; gap: 20px; }
+        .wealth-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; height: fit-content; }
+        
+        /* Quote */
+        .quote-box { background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%); border: 1px solid var(--border); padding: 20px 24px; position: relative; }
+        .quote-box::before { content: '"'; position: absolute; top: -20px; left: 10px; font-size: 120px; color: var(--accent); opacity: 0.1; font-family: 'Cormorant Garamond', serif; }
+        .quote-text { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic; color: var(--accent); line-height: 1.6; position: relative; z-index: 1; text-align: center; }
+        .quote-author { font-size: 11px; color: var(--text-dim); margin-top: 10px; text-align: center; }
+        
+        /* Goal */
+        .goal-card { background: var(--bg-card); border: 1px solid var(--accent); padding: 20px; }
+        .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .goal-label { font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 2px; }
+        .goal-value { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; }
+        .goal-progress { height: 4px; background: var(--border); margin-top: 12px; border-radius: 2px; overflow: hidden; }
+        .goal-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #e0d4bc); transition: width 0.8s ease; }
+        .goal-info { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--text-dim); }
+        
+        /* AI Panel */
+        .ai-panel { background: linear-gradient(180deg, var(--bg-card) 0%, rgba(20,20,20,0.95) 100%); border: 1px solid var(--accent); position: relative; }
+        .ai-header { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+        .ai-icon { width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .ai-title { font-size: 13px; font-weight: 600; color: var(--accent); }
+        .ai-content { padding: 16px 20px; max-height: 280px; overflow-y: auto; }
+        .ai-suggestion { font-size: 13px; line-height: 1.7; color: var(--text-dim); }
+        .ai-suggestion strong { color: var(--accent); }
+        .ai-suggestion ul { margin: 12px 0; padding-left: 20px; }
+        .ai-suggestion li { margin-bottom: 8px; }
+        .ai-chat { padding: 12px 20px; border-top: 1px solid var(--border); }
+        .ai-input-wrap { display: flex; gap: 8px; }
+        .ai-input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); padding: 10px 14px; color: var(--text); font-size: 13px; font-family: inherit; }
+        .ai-input:focus { outline: none; border-color: var(--accent); }
+        .ai-send { width: 40px; background: var(--accent); border: none; color: var(--bg); cursor: pointer; font-size: 16px; }
+        
+        /* Summary Grid */
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .summary-item { background: var(--bg-card); border: 1px solid var(--border); padding: 16px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .summary-item:hover { border-color: var(--text-muted); }
+        .summary-label { font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+        .summary-value { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; }
+        .summary-value.positive { color: var(--success); }
+        .summary-value.negative { color: var(--danger); }
+        .summary-value.accent { color: var(--accent); }
+        
+        /* Chart */
+        .chart-container { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+        .chart-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; }
+        .chart-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .chart-tab { padding: 6px 12px; font-size: 10px; font-weight: 600; background: transparent; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all 0.3s; font-family: inherit; }
+        .chart-tab.active, .chart-tab:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+        .chart-toggle { display: flex; background: var(--bg-input); border: 1px solid var(--border); overflow: hidden; }
+        .chart-toggle-btn { padding: 6px 14px; font-size: 10px; font-weight: 600; background: transparent; border: none; color: var(--text-dim); cursor: pointer; transition: all 0.3s; }
+        .chart-toggle-btn.active { background: var(--accent); color: var(--bg); }
+        .chart-wrapper { height: 280px; position: relative; }
+        
+        /* Forms */
+        .form-section { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; margin-bottom: 16px; }
+        .form-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+        .form-row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
+        .form-label { font-size: 10px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.5px; }
+        .form-input, .form-select { background: var(--bg-input); border: 1px solid var(--border); padding: 10px 12px; color: var(--text); font-size: 14px; font-family: inherit; }
+        .form-input:focus { outline: none; border-color: var(--accent); }
+        .form-actions { display: flex; gap: 10px; margin-top: 16px; }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .tab { padding: 12px 20px; font-size: 12px; font-weight: 600; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.3s; }
+        .tab:hover { color: var(--text); }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        
+        /* Business */
+        .business-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .business-chip { padding: 8px 16px; font-size: 11px; font-weight: 600; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+        .business-chip:hover { border-color: var(--text-dim); }
+        .business-chip.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+        .business-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .business-stat { background: var(--bg-card); border: 1px solid var(--border); padding: 16px; text-align: center; }
+        .business-stat-value { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; color: var(--accent); }
+        .business-stat-label { font-size: 10px; color: var(--text-dim); margin-top: 6px; letter-spacing: 1px; }
+        
+        /* Account rows */
+        .account-grid { display: flex; flex-direction: column; gap: 6px; }
+        .account-row { display: grid; grid-template-columns: 160px 70px 1fr 32px; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .account-name { font-size: 13px; font-weight: 500; }
+        .account-bank { font-size: 10px; color: var(--text-muted); }
+        .account-row .form-input { text-align: right; font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 600; }
+        .account-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; opacity: 0; transition: all 0.3s; }
+        .account-row:hover .account-delete { opacity: 1; }
+        .account-delete:hover { color: var(--danger); }
+        .category-total { text-align: right; padding: 10px 0; font-size: 12px; color: var(--text-dim); }
+        .category-total span { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 700; color: var(--accent); margin-left: 8px; }
+        .debt-section .form-input { color: var(--danger); }
+        .debt-section .category-total span { color: var(--danger); }
+        
+        /* Toast & Modal */
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--success); color: #fff; padding: 14px 24px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all 0.4s ease; z-index: 1000; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.error { background: var(--danger); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 200; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: var(--bg-card); border: 1px solid var(--border); padding: 28px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; animation: fadeIn 0.3s ease; }
+        .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+        
+        /* Habit Items */
+        .habit-item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: var(--bg-input); border: 1px solid var(--border); cursor: pointer; transition: all 0.3s; }
+        .habit-item:hover { border-color: var(--text-muted); }
+        .habit-item:has(input:checked) { background: var(--accent-dim); border-color: var(--accent); }
+        .habit-item input { display: none; }
+        .habit-icon { font-size: 28px; }
+        .habit-name { font-size: 12px; font-weight: 600; }
+        .habit-time { font-size: 10px; color: var(--text-muted); }
+        .habit-item:has(input:checked) .habit-name { color: var(--accent); }
+        
+        /* Photo Gallery */
+        .photo-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .photo-card { background: var(--bg-card); border: 1px solid var(--border); padding: 12px; text-align: center; }
+        .photo-card img { width: 100%; height: 150px; object-fit: cover; margin-bottom: 8px; }
+        .photo-date { font-size: 11px; color: var(--accent); margin-bottom: 4px; }
+        .photo-stats { font-size: 10px; color: var(--text-dim); }
+        .photo-upload { border: 2px dashed var(--border); padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .photo-upload:hover { border-color: var(--accent); }
+        
+        /* Monthly Table */
+        .monthly-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .monthly-table th, .monthly-table td { padding: 8px 6px; text-align: center; border: 1px solid var(--border); }
+        .monthly-table th { background: var(--bg-elevated); color: var(--text-dim); font-weight: 600; }
+        .monthly-table .positive { color: var(--success); }
+        .monthly-table .negative { color: var(--danger); }
+        
+        /* Daily Grid - Equal Width & Height Columns */
+        .daily-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            align-items: stretch;
+        }
+        .daily-column {
+            display: flex;
+            flex-direction: column;
+        }
+        .daily-column > .goal-card,
+        .daily-column > .form-section {
+            flex: 1;
+        }
+        .daily-column:first-child {
+            display: flex;
+            flex-direction: column;
+        }
+        .daily-column:first-child > .goal-card {
+            flex: 0 0 auto;
+        }
+        .daily-column:first-child > .form-section {
+            flex: 1;
+        }
+        
+        /* Sticky Table Header for Daily History */
+        .daily-history-wrapper {
+            max-height: 480px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .daily-history-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .daily-history-wrapper thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .daily-history-wrapper thead th {
+            background: var(--bg-card) !important;
+            border-bottom: 2px solid var(--accent);
+            padding: 12px 4px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .daily-history-wrapper thead th:first-child {
+            text-align: left;
+            font-size: 11px;
+            padding-left: 8px;
+        }
+        .daily-history-wrapper thead th:last-child {
+            font-size: 11px;
+        }
+        .daily-history-wrapper tbody td {
+            padding: 8px 4px;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            text-align: center;
+        }
+        .daily-history-wrapper tbody td:first-child {
+            text-align: left;
+            white-space: nowrap;
+            padding-left: 8px;
+            font-size: 11px;
+        }
+        .daily-history-wrapper tbody tr:hover {
+            background: var(--bg-elevated);
+        }
+        .daily-history-wrapper tbody tr.today-row {
+            background: rgba(212,197,169,0.15);
+            font-weight: 600;
+        }
+        
+        /* Mobile */
+        .mobile-menu-btn { display: none; position: fixed; top: 14px; left: 14px; z-index: 200; width: 40px; height: 40px; background: var(--bg-card); border: 1px solid var(--border); color: var(--accent); font-size: 18px; cursor: pointer; align-items: center; justify-content: center; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 90; }
+        
+        @media (max-width: 1200px) {
+            .wealth-layout { grid-template-columns: 1fr; }
+            .wealth-sidebar { position: relative; top: 0; }
+            .cards { grid-template-columns: repeat(3, 1fr); }
+            .moodboard { grid-template-rows: repeat(2, 200px); }
+            .daily-grid { grid-template-columns: 1fr 1fr; }
+            .daily-column:nth-child(3) { grid-column: span 2; }
+        }
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: flex; }
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; width: 260px; z-index: 150; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main { margin-left: 0; }
+            .header { padding: 14px 16px; padding-left: 60px; }
+            .content { padding: 16px; }
+            .stats-row { grid-template-columns: repeat(3, 1fr); padding: 16px; }
+            .cards { grid-template-columns: repeat(2, 1fr); }
+            .moodboard { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 150px); }
+            .mood-item.large { grid-column: span 1; }
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            .business-stats { grid-template-columns: repeat(2, 1fr); }
+            .daily-grid { grid-template-columns: 1fr; }
+            .daily-column:nth-child(3) { grid-column: span 1; }
+            .quote-box .quote-text { font-size: 14px; }
+            .daily-history-wrapper { max-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+    <div class="sidebar-overlay" onclick="toggleMobileMenu()"></div>
+    
+    <nav class="sidebar">
+        <div class="logo"><div class="logo-text">RayOS</div></div>
+        <div class="nav-item active" data-section="dashboard"><span class="nav-icon">◉</span><span>Dashboard</span></div>
+        <div class="nav-item" data-section="daily"><span class="nav-icon">✓</span><span>Daily</span></div>
+        <div class="nav-item" data-section="physic"><span class="nav-icon">🥷</span><span>Physic</span></div>
+        <div class="nav-item" data-section="wealth"><span class="nav-icon">$</span><span>Wealth</span></div>
+        <div class="nav-item" data-section="trading"><span class="nav-icon">📈</span><span>Trading</span></div>
+        <div class="nav-item" data-section="business"><span class="nav-icon">📊</span><span>Business</span></div>
+        <div class="nav-item" data-section="ideas"><span class="nav-icon">💡</span><span>Ideas</span></div>
+        <div class="nav-item" data-section="information"><span class="nav-icon">📖</span><span>Information</span></div>
+    </nav>
+    
+    <main class="main">
+        <!-- DASHBOARD -->
+        <section class="section active" id="dashboard">
+            <div class="header">
+                <div class="page-title">Dashboard</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="showModal('settings-modal')">⚙️ Settings</button>
+                </div>
+            </div>
+
+            <div class="moodboard-wrapper">
+                <div class="moodboard">
+                    <div class="mood-item large"><img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80" alt=""></div>
+                    <div class="mood-item"><img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&q=80" alt=""></div>
+                    <div class="mood-item"><img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80" alt=""></div>
+                    <div class="mood-item"><img src="https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=600&q=80" alt=""></div>
+                    <div class="mood-item"><img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&q=80" alt=""></div>
+                    <div class="mood-item large"><img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80" alt=""></div>
+                </div>
+                <div class="moodboard-center">
+                    <div class="moodboard-title">VISION</div>
+                    <div class="moodboard-sub">Build The Life You Want</div>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-box" onclick="go('daily')"><div class="stat-value" id="stat-streak">0</div><div class="stat-label">Streak</div></div>
+                <div class="stat-box" onclick="go('physic')"><div class="stat-value" id="stat-bodyfat">--</div><div class="stat-label">Body Fat</div></div>
+                <div class="stat-box" onclick="go('wealth')"><div class="stat-value" id="stat-wealth">--</div><div class="stat-label">Total Assets</div></div>
+                <div class="stat-box" onclick="go('business')"><div class="stat-value" id="stat-mrr">$0</div><div class="stat-label">MRR</div></div>
+                <div class="stat-box" onclick="go('ideas')"><div class="stat-value" id="stat-ideas">0</div><div class="stat-label">Ideas</div></div>
+                <div class="stat-box" onclick="go('information')"><div class="stat-value" id="stat-learning">0</div><div class="stat-label">Learning</div></div>
+            </div>
+
+            <div class="content">
+                <div class="section-label">Quick Access</div>
+                <div class="cards">
+                    <div class="card" onclick="go('physic')"><div class="card-header"><span class="card-icon">🥷</span><span class="card-badge">TRACK</span></div><div class="card-title">Physic</div><div class="card-desc">體重・體脂・進度</div></div>
+                    <div class="card" onclick="go('wealth')"><div class="card-header"><span class="card-icon">$</span><span class="card-badge">TRACK</span></div><div class="card-title">Wealth</div><div class="card-desc">資產・消費・目標</div></div>
+                    <div class="card" onclick="go('business')"><div class="card-header"><span class="card-icon">📊</span><span class="card-badge">GROW</span></div><div class="card-title">Business</div><div class="card-desc">Skool・MRR・Members</div></div>
+                    <div class="card" onclick="go('ideas')"><div class="card-header"><span class="card-icon">💡</span><span class="card-badge">CAPTURE</span></div><div class="card-title">Ideas</div><div class="card-desc">靈感・點子・計劃</div></div>
+                    <div class="card" onclick="go('information')"><div class="card-header"><span class="card-icon">📖</span><span class="card-badge">LEARN</span></div><div class="card-title">Information</div><div class="card-desc">YouTube Lab</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WEALTH -->
+        <section class="section" id="wealth">
+            <div class="header">
+                <div class="page-title">Wealth</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <button class="btn" onclick="showModal('account-modal')">Accounts</button>
+                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/9b31234579244560bfaa6247bf71d462','_blank')">Notion</button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="wealth-layout">
+                    <div class="wealth-main">
+                        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+                            <div class="quote-box animate-fade">
+                                <div class="quote-text" id="wealth-quote-text">"Wealth is the ability to fully experience life."</div>
+                                <div class="quote-author" id="wealth-quote-author">— Henry David Thoreau</div>
+                                <button class="btn btn-small" style="position:absolute;top:12px;right:12px;opacity:0.5;" onclick="editQuote()">Edit</button>
+                            </div>
+                            <div class="goal-card animate-fade" style="animation-delay:0.1s;">
+                                <div class="goal-header"><span class="goal-label">2026 TARGET</span><button class="btn btn-small" onclick="editGoal()">Edit</button></div>
+                                <div class="goal-value"><span id="goal-current">--</span> / <span id="goal-target">6,500,000</span></div>
+                                <div class="goal-progress"><div class="goal-bar" id="goal-bar" style="width:0%"></div></div>
+                                <div class="goal-info"><span id="goal-pct">0%</span><span id="goal-remain">還差 --</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-grid animate-fade" style="animation-delay:0.15s;">
+                            <div class="summary-item"><div class="summary-label">Total Assets</div><div class="summary-value accent" id="display-total">--</div></div>
+                            <div class="summary-item"><div class="summary-label">Monthly</div><div class="summary-value" id="display-monthly">--</div></div>
+                            <div class="summary-item"><div class="summary-label">Yearly</div><div class="summary-value" id="display-yearly">--</div></div>
+                            <div class="summary-item"><div class="summary-label">Last Update</div><div class="summary-value" id="display-lastdate" style="font-size:16px;">--</div></div>
+                        </div>
+                        
+                        <div class="chart-container animate-fade" style="animation-delay:0.2s;">
+                            <div class="chart-header">
+                                <div class="chart-title">Trend</div>
+                                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                                    <div class="chart-toggle">
+                                        <button class="chart-toggle-btn active" onclick="setWealthMode('trend',this)">Trend</button>
+                                        <button class="chart-toggle-btn" onclick="setWealthMode('growth',this)">Growth %</button>
+                                    </div>
+                                    <div class="chart-toggle">
+                                        <button class="chart-toggle-btn" onclick="setWealthChartStyle('line',this)">📈 Line</button>
+                                        <button class="chart-toggle-btn active" onclick="setWealthChartStyle('bar',this)">📊 Bar</button>
+                                        <button class="chart-toggle-btn" onclick="setWealthChartStyle('both',this)">Both</button>
+                                    </div>
+                                    <div class="chart-tabs">
+                                        <button class="chart-tab active" onclick="setWealthChart('total',this)">Total Assets</button>
+                                        <button class="chart-tab" onclick="setWealthChart('savings',this)">活期存款</button>
+                                        <button class="chart-tab" onclick="setWealthChart('stocks',this)">股票/ETF</button>
+                                        <button class="chart-tab" onclick="setWealthChart('crypto',this)">加密貨幣</button>
+                                        <button class="chart-tab" onclick="setWealthChart('debt',this)">債務</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper"><canvas id="wealthChart"></canvas></div>
+                        </div>
+                        
+                        <div class="tabs">
+                            <div class="tab active" onclick="setWealthTab('snapshot',this)">📊 Monthly Snapshot</div>
+                            <div class="tab" onclick="setWealthTab('expense',this)">💳 Expense Analysis</div>
+                        </div>
+                        <div id="tab-snapshot">
+                            <div style="text-align:center;margin-bottom:20px;">
+                                <button class="btn btn-accent" onclick="toggleWealthForm()" id="wealth-form-toggle">📝 New Snapshot</button>
+                            </div>
+                            <div id="wealth-form" style="display:none;"></div>
+                        </div>
+                        <div id="tab-expense" style="display:none;">
+                            <div class="form-section">
+                                <div class="form-title">📤 Import Credit Card Statement</div>
+                                <textarea class="form-input" id="expense-paste" rows="3" placeholder="Paste CSV: date,description,amount" style="width:100%;"></textarea>
+                                <div class="form-actions"><button class="btn btn-accent" onclick="analyzeExpenses()">Analyze</button></div>
+                            </div>
+                            <div id="expense-result" style="display:none;"></div>
+                        </div>
+                    </div>
+                    <div class="wealth-sidebar">
+                        <div class="ai-panel">
+                            <div class="ai-header"><div class="ai-icon">🎯</div><div class="ai-title">AI Wealth Coach</div></div>
+                            <div class="ai-content"><div class="ai-suggestion" id="wealth-ai-suggestion">Loading...</div></div>
+                            <div class="ai-chat">
+                                <div class="ai-input-wrap">
+                                    <input type="text" class="ai-input" id="wealth-ai-input" placeholder="Ask about your wealth...">
+                                    <button class="ai-send" onclick="askWealthAI()">→</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRADING -->
+        <section class="section" id="trading">
+            <div class="header">
+                <div class="page-title">Trading</div>
+                <div class="header-actions"><button class="btn" onclick="go('dashboard')">← Back</button></div>
+            </div>
+            <div class="content">
+                <div class="tabs">
+                    <div class="tab active" onclick="setTradingTab('algo',this)">🤖 程式交易</div>
+                    <div class="tab" onclick="setTradingTab('propfirm',this)">🏦 Prop Firm</div>
+                </div>
+                
+                <div id="tab-algo">
+                    <div class="summary-grid" style="margin-bottom:20px;">
+                        <div class="summary-item"><div class="summary-label">累積報酬率</div><div class="summary-value accent" id="algo-cumret">43.16%</div></div>
+                        <div class="summary-item"><div class="summary-label">年化報酬率</div><div class="summary-value" id="algo-annual">58.83%</div></div>
+                        <div class="summary-item"><div class="summary-label">MDD</div><div class="summary-value negative" id="algo-mdd">26.01%</div></div>
+                        <div class="summary-item"><div class="summary-label">日勝率</div><div class="summary-value" id="algo-winrate">51.54%</div></div>
+                    </div>
+                    <div class="chart-container" style="margin-bottom:20px;">
+                        <div class="chart-header"><div class="chart-title">Daily Cumulative Return (%)</div></div>
+                        <div class="chart-wrapper"><canvas id="algoChart"></canvas></div>
+                    </div>
+                    <div class="form-section" style="margin-bottom:20px;">
+                        <div class="form-title">📊 Monthly Returns</div>
+                        <div style="overflow-x:auto;">
+                            <table class="monthly-table" id="monthly-returns-table">
+                                <thead><tr><th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th>YTD</th></tr></thead>
+                                <tbody id="monthly-returns-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <div class="form-title">📝 Record Daily Equity</div>
+                        <div class="form-row">
+                            <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="algo-date"></div>
+                            <div class="form-group"><label class="form-label">權益數</label><input type="number" class="form-input" id="algo-equity" placeholder="1,435,231"></div>
+                            <div class="form-group"><label class="form-label">日報酬 %</label><input type="number" step="0.01" class="form-input" id="algo-daily-ret" placeholder="3.09"></div>
+                        </div>
+                        <div class="form-actions"><button class="btn btn-accent" onclick="saveAlgoEquity()">Save</button></div>
+                    </div>
+                </div>
+                
+                <div id="tab-propfirm" style="display:none;">
+                    <div class="summary-grid" style="margin-bottom:20px;">
+                        <div class="summary-item"><div class="summary-label">Total Challenge Fee</div><div class="summary-value negative" id="prop-fee">$38,918</div></div>
+                        <div class="summary-item"><div class="summary-label">Total Payout</div><div class="summary-value positive" id="prop-payout">$64,043</div></div>
+                        <div class="summary-item"><div class="summary-label">Net Profit</div><div class="summary-value accent" id="prop-net">$29,648</div></div>
+                        <div class="summary-item"><div class="summary-label">Pass Rate</div><div class="summary-value" id="prop-passrate">25%</div></div>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-bottom:20px;">
+                        <button class="btn" onclick="window.open('https://www.canva.com','_blank')">📝 Canva Notes</button>
+                        <button class="btn" onclick="window.open('https://app.tradezella.com','_blank')">📈 TradeZella</button>
+                    </div>
+                    <div class="section-label">Active Accounts</div>
+                    <div id="prop-challenges" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;"></div>
+                    <div class="form-section">
+                        <div class="form-title">📝 Add Record</div>
+                        <div class="form-row">
+                            <div class="form-group"><label class="form-label">Firm</label><select class="form-input" id="prop-firm"><option value="FTMO">FTMO</option><option value="TopStep">TopStep</option><option value="Tradeify">Tradeify</option><option value="Other">Other</option></select></div>
+                            <div class="form-group"><label class="form-label">Challenge Fee</label><input type="number" class="form-input" id="prop-challenge-fee" placeholder="875"></div>
+                            <div class="form-group"><label class="form-label">Payout</label><input type="number" class="form-input" id="prop-payout-amount" placeholder="0"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="prop-record-date"></div>
+                            <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="prop-status"><option value="Challenge">Challenge</option><option value="Funded">Funded</option><option value="Failed">Failed</option><option value="Payout">Payout</option></select></div>
+                        </div>
+                        <div class="form-actions"><button class="btn btn-accent" onclick="savePropRecord()">Add</button></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BUSINESS -->
+        <section class="section" id="business">
+            <div class="header">
+                <div class="page-title">Business</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <button class="btn" onclick="showModal('business-modal')">+ Add Business</button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="business-selector" id="business-selector">
+                    <div class="business-chip active" data-biz="skool-free" onclick="selectBusiness('skool-free',this)">🎓 Skool Free</div>
+                    <div class="business-chip" data-biz="skool-paid" onclick="selectBusiness('skool-paid',this)">💎 Skool Paid</div>
+                    <div class="business-chip" data-biz="youtube" onclick="selectBusiness('youtube',this)">📺 YouTube</div>
+                </div>
+                <div class="wealth-layout">
+                    <div class="wealth-main">
+                        <div class="business-stats">
+                            <div class="business-stat"><div class="business-stat-value" id="biz-members">0</div><div class="business-stat-label">Members</div></div>
+                            <div class="business-stat"><div class="business-stat-value" id="biz-mrr">$0</div><div class="business-stat-label">MRR</div></div>
+                            <div class="business-stat"><div class="business-stat-value" id="biz-growth">0%</div><div class="business-stat-label">Growth</div></div>
+                            <div class="business-stat"><div class="business-stat-value" id="biz-ltv">$0</div><div class="business-stat-label">LTV</div></div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title" id="biz-chart-title">Growth</div>
+                                <div class="chart-tabs">
+                                    <button class="chart-tab active" onclick="setBizChart('members',this)">Members</button>
+                                    <button class="chart-tab" onclick="setBizChart('revenue',this)">Revenue</button>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper"><canvas id="bizChart"></canvas></div>
+                        </div>
+                        <div class="form-section">
+                            <div class="form-title">📝 Update Metrics</div>
+                            <div class="form-row">
+                                <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="biz-date"></div>
+                                <div class="form-group"><label class="form-label">Members</label><input type="number" class="form-input" id="biz-members-input" placeholder="0"></div>
+                                <div class="form-group"><label class="form-label">Revenue (USD)</label><input type="number" class="form-input" id="biz-revenue-input" placeholder="0"></div>
+                            </div>
+                            <div class="form-actions"><button class="btn btn-accent" onclick="saveBizMetrics()">Save</button></div>
+                        </div>
+                    </div>
+                    <div class="wealth-sidebar">
+                        <div class="ai-panel">
+                            <div class="ai-header"><div class="ai-icon">📈</div><div class="ai-title">AI Business Coach</div></div>
+                            <div class="ai-content"><div class="ai-suggestion" id="biz-ai-suggestion">Select a business to see AI recommendations.</div></div>
+                            <div class="ai-chat">
+                                <div class="ai-input-wrap">
+                                    <input type="text" class="ai-input" id="biz-ai-input" placeholder="Ask about your business...">
+                                    <button class="ai-send" onclick="askBizAI()">→</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PHYSIC -->
+        <section class="section" id="physic">
+            <div class="header">
+                <div class="page-title">Physic</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/730f534f7c684422b67baed759e7b884','_blank')">Notion</button>
+                </div>
+            </div>
+            <div class="content">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+                    <div>
+                        <div class="goal-card" style="margin-bottom:20px;">
+                            <div class="goal-header"><span class="goal-label">Body Fat Target</span></div>
+                            <div class="goal-value"><span id="physic-current">19.2</span>% → <span id="physic-target">15</span>%</div>
+                            <div class="goal-progress"><div class="goal-bar" id="physic-bar" style="width:0%"></div></div>
+                        </div>
+                        <div class="form-section">
+                            <div class="form-title">📝 Record</div>
+                            <div style="display:grid;gap:12px;">
+                                <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="body-date"></div>
+                                <div class="form-group"><label class="form-label">Weight (kg)</label><input type="number" step="0.1" class="form-input" id="body-weight" placeholder="79.8"></div>
+                                <div class="form-group"><label class="form-label">Muscle (kg)</label><input type="number" step="0.1" class="form-input" id="body-muscle" placeholder="37.0"></div>
+                                <div class="form-group"><label class="form-label">Fat %</label><input type="number" step="0.1" class="form-input" id="body-fatpct" placeholder="19.2"></div>
+                            </div>
+                            <div class="form-actions" style="margin-top:12px;"><button class="btn btn-accent" onclick="saveBodyData()">Save</button></div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <div class="form-title">📷 Progress Comparison</div>
+                        <div id="body-photos-comparison" style="display:flex;flex-direction:column;gap:16px;max-height:500px;overflow-y:auto;"></div>
+                        <div class="photo-upload" onclick="document.getElementById('photo-input').click()" style="margin-top:12px;">
+                            <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="uploadBodyPhoto(event)">
+                            <div style="font-size:20px;margin-bottom:4px;">📸</div>
+                            <div style="color:var(--text-dim);font-size:11px;">Click to upload</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">Trend</div>
+                        <div class="chart-tabs">
+                            <button class="chart-tab active" onclick="setBodyChart('fat',this)">Body Fat</button>
+                            <button class="chart-tab" onclick="setBodyChart('weight',this)">Weight</button>
+                            <button class="chart-tab" onclick="setBodyChart('muscle',this)">Muscle</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="bodyChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DAILY -->
+        <section class="section" id="daily">
+            <div class="header">
+                <div class="page-title">Daily</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <span class="sync-dot off" id="sync-dot"></span><button class="btn" onclick="syncDailyFromNotion()">🔄 Sync Notion</button>
+                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/e97b6953702040e3bbf5cf7e69b27e5f','_blank')">Notion</button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="quote-box" style="margin-bottom:20px;text-align:center;">
+                    <div class="quote-text">"If you're under $1,000,000 per year, basically everyone on earth doesn't know you exist.<br><br>4hrs Promotion、4hrs Delivery、4hrs Building.<br><strong style="font-size:20px;">Promote. Deliver. Build.</strong>"</div>
+                    <div class="quote-author">— Alex Hormozi</div>
+                </div>
+                
+                <!-- 三欄等寬等高 -->
+                <div class="daily-grid">
+                    <!-- 左邊: Today's Progress + Daily Habits -->
+                    <div class="daily-column">
+                        <div class="goal-card" style="margin-bottom:12px;">
+                            <div class="goal-header"><span class="goal-label">Today's Progress</span><span id="daily-date" style="color:var(--text-dim);font-size:11px;"></span></div>
+                            <div class="goal-value"><span id="daily-done">0</span> / <span id="daily-total">6</span></div>
+                            <div class="goal-progress"><div class="goal-bar" id="daily-bar" style="width:0%"></div></div>
+                        </div>
+                        <div class="form-section" style="padding:16px;flex:1;">
+                            <div class="form-title" style="font-size:14px;">✓ Daily Habits</div>
+                            <div id="habits-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="trading" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">📈</span><span class="habit-name" style="font-size:12px;">Trading</span><span class="habit-time">4小時</span></label>
+                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="advertise" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">📣</span><span class="habit-name" style="font-size:12px;">Advertise</span><span class="habit-time">2小時</span></label>
+                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="deliver" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">📦</span><span class="habit-name" style="font-size:12px;">Deliver</span><span class="habit-time">2小時</span></label>
+                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="gym" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">💪</span><span class="habit-name" style="font-size:12px;">Gym</span><span class="habit-time">2小時</span></label>
+                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="fatloss" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">🥗</span><span class="habit-name" style="font-size:12px;">Fat Loss</span><span class="habit-time">2小時</span></label>
+                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="ai" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">🤖</span><span class="habit-name" style="font-size:12px;">AI</span><span class="habit-time">2小時</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 中間: Recent Days (with sticky header) -->
+                    <div class="daily-column">
+                        <div class="form-section" style="padding:16px;height:100%;display:flex;flex-direction:column;">
+                            <div class="form-title" style="font-size:14px;">📊 Recent Days</div>
+                            <div class="daily-history-wrapper" style="flex:1;">
+                                <table id="daily-history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>📈</th>
+                                            <th>📣</th>
+                                            <th>📦</th>
+                                            <th>💪</th>
+                                            <th>🥗</th>
+                                            <th>🤖</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="daily-history-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右邊: Google Calendar -->
+                    <div class="daily-column">
+                        <div class="form-section" style="padding:12px;height:100%;display:flex;flex-direction:column;">
+                            <div class="form-title" style="font-size:14px;">📅 Calendar</div>
+                            <iframe src="https://calendar.google.com/calendar/embed?src=david86726%40gmail.com&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23000000&ctz=Asia%2FTaipei&mode=MONTH" style="border:none;width:100%;flex:1;min-height:400px;filter:invert(0.9) hue-rotate(180deg);"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- IDEAS -->
+        <section class="section" id="ideas">
+            <div class="header">
+                <div class="page-title">Ideas</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/3d416eb92c484ad3bff54919c3ea43fd','_blank')">Notion</button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="form-section">
+                    <div class="form-title">Quick Capture</div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex:2;"><label class="form-label">Idea</label><input type="text" class="form-input" id="idea-text" placeholder="Type your idea..."></div>
+                        <div class="form-group"><label class="form-label">Type</label><select class="form-input" id="idea-type"><option value="💰 Money">💰 Money</option><option value="📹 Video">📹 Video</option><option value="🛠️ Tool">🛠️ Tool</option><option value="📝 Content">📝 Content</option><option value="🌟 Life">🌟 Life</option></select></div>
+                    </div>
+                    <div class="form-actions"><button class="btn btn-accent" onclick="saveIdea()">Save</button></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INFORMATION -->
+        <section class="section" id="information">
+            <div class="header">
+                <div class="page-title">Information</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <button class="btn" onclick="window.open('https://youtube-lab.vercel.app/','_blank')">Open in New Tab ↗</button>
+                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/76fb8600ae9649bcb6c475f75f0ec818','_blank')">Notion</button>
+                </div>
+            </div>
+            <div class="content" style="padding:0;height:calc(100vh - 80px);">
+                <iframe src="https://youtube-lab.vercel.app/" style="width:100%;height:100%;border:none;"></iframe>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast">Saved</div>
+
+    <!-- MODALS -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal">
+            <div class="modal-title">Settings</div>
+            <div class="form-group" style="margin-bottom:16px;"><label class="form-label">n8n Webhook URL</label><input type="text" class="form-input" id="n8n-webhook" placeholder="https://n8n.your-domain.com/webhook/..."></div>
+            <div class="form-group" style="margin-bottom:16px;"><label class="form-label">OpenAI API Key (for AI)</label><input type="password" class="form-input" id="openai-key" placeholder="sk-..."></div>
+            <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Notion Database ID (Daily Habits)</label><input type="text" class="form-input" id="notion-db-id" placeholder="e97b6953-7020-4e3d-bbf5-cf7e69b27e5f"></div>
+            <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Data</label><button class="btn btn-danger" onclick="resetData()" style="width:100%;margin-top:6px;">🔄 Reset to Demo Data</button></div>
+            <div class="form-actions"><button class="btn" onclick="hideModal('settings-modal')">Cancel</button><button class="btn btn-accent" onclick="saveSettings()">Save</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="account-modal">
+        <div class="modal" style="max-width:600px;">
+            <div class="modal-title">Manage Accounts</div>
+            <div id="account-manager-list" style="max-height:300px;overflow-y:auto;margin-bottom:16px;"></div>
+            <div class="form-section" style="margin:0;">
+                <div class="form-title">Add New Account</div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="new-account-name" placeholder="Account name"></div>
+                    <div class="form-group"><label class="form-label">Platform</label><input type="text" class="form-input" id="new-account-platform" placeholder="Bank"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">Category</label><select class="form-input" id="new-account-category"><option value="備用金">💵 備用金</option><option value="活期存款">🏦 活期存款</option><option value="股票ETF">📈 股票/ETF</option><option value="加密貨幣">🪙 加密貨幣</option><option value="債務">💳 債務</option></select></div>
+                    <div class="form-group"><label class="form-label">Currency</label><select class="form-input" id="new-account-currency"><option value="TWD">TWD</option><option value="USD">USD</option><option value="USDT">USDT</option></select></div>
+                </div>
+                <div class="form-actions"><button class="btn btn-accent" onclick="addAccount()">Add</button></div>
+            </div>
+            <div class="form-actions" style="margin-top:16px;"><button class="btn" onclick="hideModal('account-modal')">Close</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="quote-modal">
+        <div class="modal">
+            <div class="modal-title">Edit Quote</div>
+            <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Quote</label><textarea class="form-input" id="quote-text-input" rows="3"></textarea></div>
+            <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Author</label><input type="text" class="form-input" id="quote-author-input"></div>
+            <div class="form-actions"><button class="btn" onclick="hideModal('quote-modal')">Cancel</button><button class="btn btn-accent" onclick="saveQuote()">Save</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="goal-modal">
+        <div class="modal">
+            <div class="modal-title">Edit Wealth Goal</div>
+            <div class="form-group" style="margin-bottom:16px;"><label class="form-label">2026 Target (TWD)</label><input type="number" class="form-input" id="wealth-goal-input" placeholder="6500000"></div>
+            <div class="form-actions"><button class="btn" onclick="hideModal('goal-modal')">Cancel</button><button class="btn btn-accent" onclick="saveGoal()">Save</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="business-modal">
+        <div class="modal">
+            <div class="modal-title">Add Business</div>
+            <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Name</label><input type="text" class="form-input" id="new-biz-name" placeholder="Business name"></div>
+            <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Icon</label><input type="text" class="form-input" id="new-biz-icon" placeholder="🏢"></div>
+            <div class="form-actions"><button class="btn" onclick="hideModal('business-modal')">Cancel</button><button class="btn btn-accent" onclick="addBusiness()">Add</button></div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== PRELOAD DATA ====================
+        const PRELOAD_WEALTH_HISTORY = [
+            { date: '2023-10-04', totalAssets: 193010, netWorth: -26980, monthlyGrowth: null, categories: { '活期存款': 0, '股票ETF': 0, '加密貨幣': 0, '債務': 0 } },
+            { date: '2024-09-30', totalAssets: 698106, netWorth: 396511, monthlyGrowth: 67.64, categories: { '活期存款': 388871, '股票ETF': 18193, '加密貨幣': 50763, '債務': 301595 } },
+            { date: '2024-12-31', totalAssets: 1485956, netWorth: 1194361, monthlyGrowth: 11.50, categories: { '活期存款': 609953, '股票ETF': 16955, '加密貨幣': 58548, '債務': 291595 } },
+            { date: '2025-06-30', totalAssets: 3753106, netWorth: 3567863, monthlyGrowth: 6.14, categories: { '活期存款': 1250488, '股票ETF': 1769422, '加密貨幣': 733196, '債務': 185243 } },
+            { date: '2025-12-31', totalAssets: 3398914, netWorth: 3233505, monthlyGrowth: -3.20, categories: { '活期存款': 1466884, '股票ETF': 1556503, '加密貨幣': 375527, '債務': 165409 } },
+            { date: '2026-01-31', totalAssets: 4113482, netWorth: 3950411, monthlyGrowth: 21.02, categories: { '活期存款': 2088372, '股票ETF': 1677624, '加密貨幣': 347486, '債務': 163071 } }
+        ];
+
+        const PRELOAD_BODY_HISTORY = [
+            { date: '2025-01-15', weight: 81.2, muscle: 36.5, fatpct: 20.1 },
+            { date: '2025-02-01', weight: 80.5, muscle: 36.8, fatpct: 19.5 },
+            { date: '2025-02-15', weight: 79.8, muscle: 37.0, fatpct: 19.2 }
+        ];
+
+        // 根據 Notion 截圖更正的數據 (資料庫 e97b6953-7020-4e3d-bbf5-cf7e69b27e5f)
+        const PRELOAD_DAILY_HABITS = {
+            '2026-01-03': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-04': { trading: false, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-05': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-06': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-07': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-08': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-09': { trading: false, advertise: false, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-01-10': { trading: false, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-11': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-12': { trading: true, advertise: false, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-01-13': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-14': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-15': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-16': { trading: true, advertise: true, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-01-17': { trading: false, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-18': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-19': { trading: true, advertise: false, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-01-20': { trading: false, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-21': { trading: false, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-22': { trading: false, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-23': { trading: true, advertise: false, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-24': { trading: false, advertise: false, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-01-25': { trading: false, advertise: false, deliver: true, gym: false, fatloss: false, ai: false },
+            '2026-01-26': { trading: false, advertise: false, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-01-27': { trading: false, advertise: true, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-01-28': { trading: false, advertise: true, deliver: false, gym: true, fatloss: false, ai: false },
+            '2026-01-29': { trading: false, advertise: false, deliver: true, gym: true, fatloss: false, ai: true },
+            '2026-01-30': { trading: false, advertise: false, deliver: true, gym: true, fatloss: false, ai: false },
+            '2026-01-31': { trading: false, advertise: true, deliver: true, gym: true, fatloss: true, ai: false },
+            '2026-02-01': { trading: false, advertise: false, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-02-02': { trading: false, advertise: false, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-02-03': { trading: false, advertise: false, deliver: false, gym: false, fatloss: false, ai: false },
+            '2026-02-04': { trading: false, advertise: true, deliver: false, gym: true, fatloss: true, ai: true },
+            '2026-02-05': { trading: false, advertise: false, deliver: false, gym: false, fatloss: false, ai: false }
+        };
+
+        const PRELOAD_ALGO_EQUITY = [
+            { date: '2026-01-27', equity: 1372157, dailyRet: 2.04, cumRet: 47.02 },
+            { date: '2026-01-28', equity: 1402547, dailyRet: 2.21, cumRet: 50.28 },
+            { date: '2026-01-29', equity: 1390467, dailyRet: -0.86, cumRet: 48.99 },
+            { date: '2026-01-30', equity: 1345533, dailyRet: -3.23, cumRet: 44.17 },
+            { date: '2026-02-02', equity: 1295151, dailyRet: -3.74, cumRet: 38.77 },
+            { date: '2026-02-03', equity: 1435231, dailyRet: 3.09, cumRet: 43.07 }
+        ];
+
+        const MONTHLY_RETURNS = {
+            2025: { 1: -1.59, 2: -10.14, 3: 23.98, 4: 10.10, 5: 3.62, 6: -6.38, 7: 1.23, 8: -6.45, 9: 0.28, 10: 4.32, 11: 17.92, 12: -5.68, ytd: 31.32 },
+            2026: { 1: 15.83, ytd: 15.83 }
+        };
+
+        // ==================== CONFIG ====================
+        const USD_RATE = 32.5, USDT_RATE = 32.5;
+        const CATEGORY_ICONS = {'備用金':'💵','活期存款':'🏦','股票ETF':'📈','加密貨幣':'🪙','債務':'💳'};
+        const DEFAULT_ACCOUNTS = [
+            {name:'台新主帳戶',platform:'台新',category:'活期存款',currency:'TWD'},
+            {name:'WISE',platform:'WISE',category:'活期存款',currency:'USD'},
+            {name:'IB 長期投資',platform:'IB',category:'股票ETF',currency:'USD'},
+            {name:'幣安',platform:'Binance',category:'加密貨幣',currency:'USDT'},
+            {name:'信用貸款_王道',platform:'王道銀行',category:'債務',currency:'TWD'}
+        ];
+
+        // ==================== STATE ====================
+        let accounts = JSON.parse(localStorage.getItem('accounts')) || DEFAULT_ACCOUNTS;
+        let wealthGoal = parseInt(localStorage.getItem('wealth_goal')) || 6500000;
+        let quote = JSON.parse(localStorage.getItem('wealth_quote')) || {text:"Wealth is the ability to fully experience life.",author:"Henry David Thoreau"};
+        let wealthChartMode = 'trend';
+        let wealthChartType = 'total';
+        let wealthChartStyle = 'bar';
+        let currentBusiness = 'skool-free';
+        let wealthHistory = PRELOAD_WEALTH_HISTORY;
+        let bodyHistory = PRELOAD_BODY_HISTORY;
+        let bodyPhotos = [];
+        let algoEquity = PRELOAD_ALGO_EQUITY;
+        let propRecords = [];
+        let dailyHabitsData = { ...PRELOAD_DAILY_HABITS };
+
+        // Load from localStorage
+        try {
+            const stored = localStorage.getItem('wealth_history');
+            if (stored) { const parsed = JSON.parse(stored); if (parsed.length > 0) wealthHistory = parsed; }
+            const storedBody = localStorage.getItem('body_history');
+            if (storedBody) { const parsed = JSON.parse(storedBody); if (parsed.length > 0) bodyHistory = parsed; }
+            const storedPhotos = localStorage.getItem('body_photos');
+            if (storedPhotos) bodyPhotos = JSON.parse(storedPhotos);
+            const storedAlgo = localStorage.getItem('algo_equity');
+            if (storedAlgo) { const parsed = JSON.parse(storedAlgo); if (parsed.length > 0) algoEquity = parsed; }
+            const storedProp = localStorage.getItem('prop_records');
+            if (storedProp) propRecords = JSON.parse(storedProp);
+            const storedDaily = localStorage.getItem('daily_habits');
+            if (storedDaily) { 
+                const parsed = JSON.parse(storedDaily);
+                dailyHabitsData = { ...PRELOAD_DAILY_HABITS, ...parsed };
+            }
+            if(localStorage.getItem('notion_db_id')) document.getElementById('notion-db-id').value = localStorage.getItem('notion_db_id');
+        } catch(e) { console.log('localStorage error:', e); }
+
+        // ==================== NAVIGATION ====================
+        function toggleMobileMenu() {
+            document.querySelector('.sidebar').classList.toggle('open');
+            document.querySelector('.sidebar-overlay').classList.toggle('show');
+            document.querySelector('.mobile-menu-btn').innerHTML = document.querySelector('.sidebar').classList.contains('open') ? '✕' : '☰';
+        }
+
+        function go(section) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section)?.classList.add('active');
+            window.scrollTo(0, 0);
+            if (window.innerWidth <= 768) {
+                document.querySelector('.sidebar').classList.remove('open');
+                document.querySelector('.sidebar-overlay').classList.remove('show');
+                document.querySelector('.mobile-menu-btn').innerHTML = '☰';
+            }
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => go(item.dataset.section));
+        });
+
+        // ==================== UTILS ====================
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast show' + (isError ? ' error' : '');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+        function showModal(id) { document.getElementById(id).classList.add('show'); }
+        function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+        function formatNumber(n) { return new Intl.NumberFormat('zh-TW').format(Math.round(n)); }
+        function formatMoney(n) { if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M'; if (n >= 1000) return Math.round(n / 1000) + 'K'; return formatNumber(n); }
+        function toTWD(a, c) { if (c === 'USD') return a * USD_RATE; if (c === 'USDT') return a * USDT_RATE; return a; }
+
+        // === 統一 Webhook (n8n 根據 type 路由) ===
+        const syncQ=[];let syncBusy=false;
+        async function syncToN8n(type,data){
+            const u=localStorage.getItem('n8n_webhook');if(!u)return false;
+            syncQ.push({type,data});if(syncBusy)return true;syncBusy=true;
+            while(syncQ.length){const it=syncQ.shift();try{
+                await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:it.type,data:it.data,database_id:localStorage.getItem('notion_db_id')||'e97b6953-7020-4e3d-bbf5-cf7e69b27e5f',ts:new Date().toISOString()})});
+            }catch(e){console.error('sync err:',e);syncBusy=false;return false;}
+            if(syncQ.length)await new Promise(r=>setTimeout(r,500));}syncBusy=false;return true;
+        }
+        // === 自動跨日 ===
+        let curDay=new Date().toISOString().split('T')[0];
+        function checkNewDay(){const now=new Date().toISOString().split('T')[0];if(now!==curDay){curDay=now;if(!dailyHabitsData[now]){dailyHabitsData[now]={trading:false,advertise:false,deliver:false,gym:false,fatloss:false,ai:false};localStorage.setItem('daily_habits',JSON.stringify(dailyHabitsData));createDayInNotion(now);}loadDailyHabits();showToast('🌅 新的一天 '+now);}}
+        setInterval(checkNewDay,30000);
+        document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkNewDay();});
+        // === Notion 寫回 ===
+        const H2N={trading:'Trading',advertise:'Advertise',deliver:'Deliever',gym:'Gym',fatloss:'Fat Loss',ai:'AI'};
+        async function writeHabitToNotion(ds,h,v){if(!localStorage.getItem('n8n_webhook'))return;const f=H2N[h];if(!f)return;const a={};Object.entries(dailyHabitsData[ds]||{}).forEach(([k,v2])=>{a[H2N[k]||k]=v2;});syncToN8n('update_daily_habit',{date:ds,habit_field:f,value:v,all_habits:a});}
+        async function createDayInNotion(ds){if(!localStorage.getItem('n8n_webhook'))return;const h={};Object.entries(dailyHabitsData[ds]||{}).forEach(([k,v])=>{h[H2N[k]||k]=v;});syncToN8n('create_daily_entry',{date:ds,habits:h});}
+        function updateSyncDot(){const d=document.getElementById('sync-dot');if(d)d.className='sync-dot '+(localStorage.getItem('n8n_webhook')?'on':'off');}
+
+        // ==================== SETTINGS ====================
+        function saveSettings() {
+            const webhook = document.getElementById('n8n-webhook').value;
+            const apiKey = document.getElementById('openai-key').value;
+            const notionDbId = document.getElementById('notion-db-id').value;
+            if (webhook) localStorage.setItem('n8n_webhook', webhook);
+            if (apiKey) localStorage.setItem('openai_key', apiKey);
+            if (notionDbId) localStorage.setItem('notion_db_id', notionDbId);
+            showToast('Settings saved');
+            hideModal('settings-modal');
+        }
+
+        function resetData() {
+            if (confirm('Reset all data to demo data?')) {
+                localStorage.setItem('wealth_history', JSON.stringify(PRELOAD_WEALTH_HISTORY));
+                localStorage.setItem('daily_habits', JSON.stringify(PRELOAD_DAILY_HABITS));
+                wealthHistory = PRELOAD_WEALTH_HISTORY;
+                dailyHabitsData = { ...PRELOAD_DAILY_HABITS };
+                updateSyncDot();
+            updateWealthDisplay();
+                updateDailyHistoryTable();
+                hideModal('settings-modal');
+                showToast('Data reset');
+            }
+        }
+
+        // ==================== CHARTS ====================
+        Chart.register(ChartDataLabels);
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                datalabels: { color: '#6b6b6b', font: { size: 9 }, anchor: 'end', align: 'top', formatter: (v) => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? Math.round(v/1000)+'K' : v }
+            },
+            scales: {
+                x: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 10 } } },
+                y: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 10 }, callback: v => formatMoney(v) } }
+            }
+        };
+
+        const wealthCtx = document.getElementById('wealthChart').getContext('2d');
+        let wealthChart = new Chart(wealthCtx, { type: 'bar', data: { labels: [], datasets: [{ data: [], backgroundColor: 'rgba(100,149,237,0.7)' }] }, options: chartOptions });
+
+        const bodyCtx = document.getElementById('bodyChart').getContext('2d');
+        const bodyChart = new Chart(bodyCtx, { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#d4c5a9', tension: 0.4, fill: true, backgroundColor: 'rgba(212,197,169,0.1)' }] }, options: { ...chartOptions, plugins: { ...chartOptions.plugins, datalabels: { display: false } } } });
+
+        const bizCtx = document.getElementById('bizChart').getContext('2d');
+        const bizChart = new Chart(bizCtx, { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#d4c5a9', tension: 0.4, fill: true, backgroundColor: 'rgba(212,197,169,0.1)' }] }, options: chartOptions });
+
+        const algoCtx = document.getElementById('algoChart').getContext('2d');
+        const algoChart = new Chart(algoCtx, { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#d4c5a9', tension: 0.4, fill: true, backgroundColor: 'rgba(212,197,169,0.1)' }] }, options: { ...chartOptions, plugins: { ...chartOptions.plugins, datalabels: { display: false } } } });
+
+        function setWealthMode(mode, btn) {
+            btn.parentElement.querySelectorAll('.chart-toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            wealthChartMode = mode;
+            updateWealthChart();
+        }
+
+        function setWealthChartStyle(style, btn) {
+            btn.parentElement.querySelectorAll('.chart-toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            wealthChartStyle = style;
+            updateWealthChart();
+        }
+
+        function setWealthChart(type, btn) {
+            document.querySelectorAll('#wealth .chart-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            wealthChartType = type;
+            updateWealthChart();
+        }
+
+        function updateWealthChart() {
+            const hist = wealthHistory.slice(-24);
+            if (!hist.length) return;
+            const labels = hist.map(h => h.date ? h.date.slice(2,7).replace('-','/') : '');
+            let data;
+            switch (wealthChartType) {
+                case 'total': data = hist.map(h => h.totalAssets || 0); break;
+                case 'savings': data = hist.map(h => h.categories?.['活期存款'] || 0); break;
+                case 'stocks': data = hist.map(h => h.categories?.['股票ETF'] || 0); break;
+                case 'crypto': data = hist.map(h => h.categories?.['加密貨幣'] || 0); break;
+                case 'debt': data = hist.map(h => h.categories?.['債務'] || 0); break;
+                default: data = hist.map(h => h.totalAssets || 0);
+            }
+            if (wealthChartMode === 'growth') {
+                data = wealthChartType === 'total' ? hist.map(h => h.monthlyGrowth || 0) : data.map((v, i) => i === 0 ? 0 : parseFloat(((v - data[i-1]) / (data[i-1] || 1) * 100).toFixed(1)));
+            }
+            wealthChart.data.labels = labels;
+            wealthChart.data.datasets[0].data = data;
+            wealthChart.data.datasets[0].type = wealthChartStyle === 'line' ? 'line' : 'bar';
+            wealthChart.update();
+        }
+
+        function setBodyChart(type, btn) {
+            document.querySelectorAll('#physic .chart-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            const hist = bodyHistory.slice(-24);
+            if (!hist.length) return;
+            const labels = hist.map(h => h.date?.slice(5) || '');
+            let data;
+            switch (type) {
+                case 'fat': data = hist.map(h => h.fatpct); break;
+                case 'weight': data = hist.map(h => h.weight); break;
+                case 'muscle': data = hist.map(h => h.muscle); break;
+            }
+            bodyChart.data.labels = labels;
+            bodyChart.data.datasets[0].data = data;
+            bodyChart.update();
+        }
+
+        // ==================== WEALTH ====================
+        function setWealthTab(tab, btn) {
+            document.querySelectorAll('#wealth .tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-snapshot').style.display = tab === 'snapshot' ? 'block' : 'none';
+            document.getElementById('tab-expense').style.display = tab === 'expense' ? 'block' : 'none';
+        }
+
+        function editQuote() {
+            document.getElementById('quote-text-input').value = quote.text;
+            document.getElementById('quote-author-input').value = quote.author;
+            showModal('quote-modal');
+        }
+
+        function saveQuote() {
+            quote.text = document.getElementById('quote-text-input').value;
+            quote.author = document.getElementById('quote-author-input').value;
+            localStorage.setItem('wealth_quote', JSON.stringify(quote));
+            document.getElementById('wealth-quote-text').textContent = '"' + quote.text + '"';
+            document.getElementById('wealth-quote-author').textContent = '— ' + quote.author;
+            hideModal('quote-modal');
+            showToast('Quote saved');
+        }
+
+        function editGoal() {
+            document.getElementById('wealth-goal-input').value = wealthGoal;
+            showModal('goal-modal');
+        }
+
+        function saveGoal() {
+            wealthGoal = parseInt(document.getElementById('wealth-goal-input').value) || 6500000;
+            localStorage.setItem('wealth_goal', wealthGoal);
+            document.getElementById('goal-target').textContent = formatNumber(wealthGoal);
+            updateWealthDisplay();
+            hideModal('goal-modal');
+            showToast('Goal saved');
+        }
+
+        function renderAccountManager() {
+            const c = document.getElementById('account-manager-list');
+            const g = {};
+            accounts.forEach((a, i) => { if (!g[a.category]) g[a.category] = []; g[a.category].push({ ...a, idx: i }); });
+            let h = '';
+            Object.keys(g).forEach(cat => {
+                h += `<div style="margin-bottom:12px;"><div style="font-size:11px;color:var(--accent);margin-bottom:6px;">${CATEGORY_ICONS[cat] || ''} ${cat}</div>`;
+                g[cat].forEach(a => {
+                    h += `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;"><span>${a.name} (${a.currency})</span><button class="btn btn-small btn-danger" onclick="deleteAccount(${a.idx})">Delete</button></div>`;
+                });
+                h += '</div>';
+            });
+            c.innerHTML = h;
+        }
+
+        function addAccount() {
+            const n = document.getElementById('new-account-name').value;
+            const p = document.getElementById('new-account-platform').value;
+            const cat = document.getElementById('new-account-category').value;
+            const cur = document.getElementById('new-account-currency').value;
+            if (!n) return showToast('Enter name', true);
+            accounts.push({ name: n, platform: p, category: cat, currency: cur });
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            renderAccountManager();
+            document.getElementById('new-account-name').value = '';
+            showToast('Account added');
+        }
+
+        function deleteAccount(idx) {
+            if (confirm('Delete?')) {
+                accounts.splice(idx, 1);
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                renderAccountManager();
+                showToast('Deleted');
+            }
+        }
+
+        function toggleWealthForm() {
+            const f = document.getElementById('wealth-form');
+            const b = document.getElementById('wealth-form-toggle');
+            if (f.style.display === 'none') { f.style.display = 'block'; b.innerHTML = '✕ Close'; renderWealthForm(); }
+            else { f.style.display = 'none'; b.innerHTML = '📝 New Snapshot'; }
+        }
+
+        function renderWealthForm() {
+            const f = document.getElementById('wealth-form');
+            const g = {};
+            accounts.forEach(a => { if (!g[a.category]) g[a.category] = []; g[a.category].push(a); });
+            let h = `<div class="form-section"><div class="form-title">📅 Date</div><input type="date" class="form-input" id="wealth-date" value="${new Date().toISOString().split('T')[0]}" style="max-width:180px;"></div>`;
+            Object.keys(g).forEach(cat => {
+                const isDebt = cat === '債務';
+                h += `<div class="form-section ${isDebt ? 'debt-section' : ''}"><div class="form-title">${CATEGORY_ICONS[cat] || ''} ${cat}</div><div class="account-grid">`;
+                g[cat].forEach(a => {
+                    h += `<div class="account-row"><div><div class="account-name">${a.name}</div><div class="account-bank">${a.platform}</div></div><span style="font-size:10px;color:var(--text-muted);">${a.currency}</span><input type="number" class="form-input account-input" data-account="${a.name}" data-category="${a.category}" data-currency="${a.currency}" ${isDebt ? 'data-debt="true"' : ''} placeholder=""><span></span></div>`;
+                });
+                h += `</div><div class="category-total">Subtotal: <span id="subtotal-${cat}">0</span></div></div>`;
+            });
+            h += `<div class="form-section" style="background:var(--bg-elevated);border-color:var(--accent);"><div class="summary-grid" style="margin-bottom:0;"><div class="summary-item" style="background:transparent;border:none;"><div class="summary-label">Total Assets</div><div class="summary-value" id="total-assets">0</div></div><div class="summary-item" style="background:transparent;border:none;"><div class="summary-label">Total Debt</div><div class="summary-value negative" id="total-debt">0</div></div><div class="summary-item" style="background:transparent;border:none;"><div class="summary-label">Net Worth</div><div class="summary-value accent" id="net-worth">0</div></div></div></div><div class="form-actions" style="justify-content:center;"><button class="btn" onclick="toggleWealthForm()">Cancel</button><button class="btn btn-accent" onclick="saveWealthSnapshot()">💾 Save</button></div>`;
+            f.innerHTML = h;
+            document.querySelectorAll('.account-input').forEach(i => i.addEventListener('input', calculateWealth));
+        }
+
+        function calculateWealth() {
+            const inputs = document.querySelectorAll('.account-input');
+            const cats = {};
+            let totalA = 0, totalD = 0;
+            inputs.forEach(i => {
+                const v = parseFloat(i.value) || 0;
+                const cur = i.dataset.currency || 'TWD';
+                const cat = i.dataset.category;
+                const isDebt = i.dataset.debt === 'true';
+                const twd = toTWD(v, cur);
+                if (!cats[cat]) cats[cat] = 0;
+                cats[cat] += twd;
+                if (isDebt) totalD += twd; else totalA += twd;
+            });
+            Object.keys(cats).forEach(c => { const e = document.getElementById('subtotal-' + c); if (e) e.textContent = formatNumber(cats[c]); });
+            document.getElementById('total-assets').textContent = formatNumber(totalA);
+            document.getElementById('total-debt').textContent = formatNumber(totalD);
+            document.getElementById('net-worth').textContent = formatNumber(totalA - totalD);
+            return { totalAssets: totalA, totalDebt: totalD, netWorth: totalA - totalD, categories: cats };
+        }
+
+        async function saveWealthSnapshot() {
+            const date = document.getElementById('wealth-date').value;
+            const r = calculateWealth();
+            const data = { date, ...r };
+            wealthHistory.push(data);
+            localStorage.setItem('wealth_history', JSON.stringify(wealthHistory));
+            updateWealthDisplay();
+            toggleWealthForm();
+            const synced = await syncToN8n('wealth', data);
+            showToast(synced ? 'Synced ✓' : 'Saved');
+        }
+
+        function updateWealthDisplay() {
+            if (wealthHistory.length > 0) {
+                const lat = wealthHistory[wealthHistory.length - 1];
+                const total = lat.totalAssets || 0;
+                document.getElementById('display-total').textContent = formatMoney(total);
+                document.getElementById('stat-wealth').textContent = formatMoney(total);
+                document.getElementById('display-lastdate').textContent = lat.date || '--';
+                document.getElementById('goal-current').textContent = formatNumber(total);
+                const pct = Math.min(100, (total / wealthGoal) * 100);
+                document.getElementById('goal-bar').style.width = pct + '%';
+                document.getElementById('goal-pct').textContent = pct.toFixed(1) + '%';
+                document.getElementById('goal-remain').textContent = '還差 ' + formatMoney(Math.max(0, wealthGoal - total));
+                if (lat.monthlyGrowth !== null && lat.monthlyGrowth !== undefined) {
+                    const mg = lat.monthlyGrowth;
+                    document.getElementById('display-monthly').textContent = (mg > 0 ? '+' : '') + mg.toFixed(2) + '%';
+                    document.getElementById('display-monthly').className = 'summary-value ' + (mg >= 0 ? 'positive' : 'negative');
+                }
+                updateWealthChart();
+            }
+            document.getElementById('wealth-ai-suggestion').innerHTML = '<strong>目標進度：</strong> ' + ((wealthHistory[wealthHistory.length-1]?.totalAssets || 0) / wealthGoal * 100).toFixed(1) + '%';
+        }
+
+        function askWealthAI() { showToast('請在 Settings 設定 OpenAI API Key'); }
+        function askBizAI() { showToast('請在 Settings 設定 OpenAI API Key'); }
+        function analyzeExpenses() { showToast('功能開發中'); }
+
+        // ==================== BUSINESS ====================
+        function selectBusiness(bizId, el) {
+            document.querySelectorAll('.business-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            currentBusiness = bizId;
+            updateBizDisplay();
+        }
+
+        function updateBizDisplay() {
+            const data = JSON.parse(localStorage.getItem(`biz_${currentBusiness}`) || '[]');
+            if (data.length > 0) {
+                const lat = data[data.length - 1];
+                document.getElementById('biz-members').textContent = formatNumber(lat.members || 0);
+                document.getElementById('biz-mrr').textContent = '$' + formatNumber(lat.revenue || 0);
+                document.getElementById('stat-mrr').textContent = '$' + formatNumber(lat.revenue || 0);
+            } else {
+                document.getElementById('biz-members').textContent = '0';
+                document.getElementById('biz-mrr').textContent = '$0';
+            }
+            updateBizChart('members');
+        }
+
+        function setBizChart(type, btn) {
+            document.querySelectorAll('#business .chart-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            updateBizChart(type);
+        }
+
+        function updateBizChart(type = 'members') {
+            const data = JSON.parse(localStorage.getItem(`biz_${currentBusiness}`) || '[]').slice(-12);
+            if (!data.length) { bizChart.data.labels = []; bizChart.data.datasets[0].data = []; bizChart.update(); return; }
+            const labels = data.map(d => d.date?.slice(5) || '');
+            const values = type === 'members' ? data.map(d => d.members || 0) : data.map(d => d.revenue || 0);
+            bizChart.data.labels = labels;
+            bizChart.data.datasets[0].data = values;
+            bizChart.update();
+        }
+
+        async function saveBizMetrics() {
+            const date = document.getElementById('biz-date').value;
+            const members = parseInt(document.getElementById('biz-members-input').value) || 0;
+            const revenue = parseFloat(document.getElementById('biz-revenue-input').value) || 0;
+            const data = { date, members, revenue };
+            let hist = JSON.parse(localStorage.getItem(`biz_${currentBusiness}`) || '[]');
+            hist.push(data);
+            localStorage.setItem(`biz_${currentBusiness}`, JSON.stringify(hist));
+            updateBizDisplay();
+            document.getElementById('biz-members-input').value = '';
+            document.getElementById('biz-revenue-input').value = '';
+            showToast('Saved');
+        }
+
+        function addBusiness() {
+            const name = document.getElementById('new-biz-name').value;
+            const icon = document.getElementById('new-biz-icon').value || '🏢';
+            if (!name) return showToast('Enter name', true);
+            const id = name.toLowerCase().replace(/\s+/g, '-');
+            const selector = document.getElementById('business-selector');
+            selector.innerHTML += `<div class="business-chip" data-biz="${id}" onclick="selectBusiness('${id}',this)">${icon} ${name}</div>`;
+            hideModal('business-modal');
+            document.getElementById('new-biz-name').value = '';
+            showToast('Business added');
+        }
+
+        // ==================== TRADING ====================
+        function setTradingTab(tab, btn) {
+            document.querySelectorAll('#trading .tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-algo').style.display = tab === 'algo' ? 'block' : 'none';
+            document.getElementById('tab-propfirm').style.display = tab === 'propfirm' ? 'block' : 'none';
+        }
+
+        function updateTradingDisplay() {
+            if (algoEquity.length > 0) {
+                const latest = algoEquity[algoEquity.length - 1];
+                document.getElementById('algo-cumret').textContent = latest.cumRet.toFixed(2) + '%';
+                const wins = algoEquity.filter(e => e.dailyRet > 0).length;
+                document.getElementById('algo-winrate').textContent = ((wins / algoEquity.length) * 100).toFixed(2) + '%';
+            }
+            updateAlgoChart();
+            updateMonthlyReturnsTable();
+            renderPropChallenges();
+            document.getElementById('algo-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('prop-record-date').value = new Date().toISOString().split('T')[0];
+        }
+
+        function updateAlgoChart() {
+            const data = algoEquity.slice(-30);
+            if (data.length === 0) return;
+            algoChart.data.labels = data.map(d => d.date.slice(5));
+            algoChart.data.datasets[0].data = data.map(d => d.cumRet);
+            algoChart.update();
+        }
+
+        function updateMonthlyReturnsTable() {
+            const tbody = document.getElementById('monthly-returns-body');
+            let html = '';
+            for (const [year, months] of Object.entries(MONTHLY_RETURNS)) {
+                html += '<tr>';
+                html += `<td><strong>${year}</strong></td>`;
+                for (let m = 1; m <= 12; m++) {
+                    const val = months[m];
+                    if (val !== undefined) {
+                        const cls = val >= 0 ? 'positive' : 'negative';
+                        html += `<td class="${cls}">${val >= 0 ? '+' : ''}${val.toFixed(2)}%</td>`;
+                    } else { html += '<td>-</td>'; }
+                }
+                const ytdCls = months.ytd >= 0 ? 'positive' : 'negative';
+                html += `<td class="${ytdCls}"><strong>${months.ytd >= 0 ? '+' : ''}${months.ytd.toFixed(2)}%</strong></td>`;
+                html += '</tr>';
+            }
+            tbody.innerHTML = html;
+        }
+
+        function saveAlgoEquity() {
+            const date = document.getElementById('algo-date').value;
+            const equity = parseFloat(document.getElementById('algo-equity').value) || 0;
+            const dailyRet = parseFloat(document.getElementById('algo-daily-ret').value) || 0;
+            const cumRet = ((equity - 1000000) / 1000000 * 100);
+            algoEquity.push({ date, equity, dailyRet, cumRet });
+            try { localStorage.setItem('algo_equity', JSON.stringify(algoEquity)); } catch(e) {}
+            updateTradingDisplay();
+            document.getElementById('algo-equity').value = '';
+            document.getElementById('algo-daily-ret').value = '';
+            showToast('Equity saved');
+        }
+
+        function renderPropChallenges() {
+            const container = document.getElementById('prop-challenges');
+            if (propRecords.length === 0) {
+                container.innerHTML = '<div class="card" style="grid-column:span 2;text-align:center;cursor:default;"><div style="color:var(--text-dim);">No records yet</div></div>';
+                return;
+            }
+            const byFirm = {};
+            propRecords.forEach(r => {
+                if (!byFirm[r.firm]) byFirm[r.firm] = { fee: 0, payout: 0, count: 0 };
+                byFirm[r.firm].fee += r.fee || 0;
+                byFirm[r.firm].payout += r.payout || 0;
+                byFirm[r.firm].count++;
+            });
+            container.innerHTML = Object.entries(byFirm).map(([firm, data]) => {
+                const net = data.payout - data.fee;
+                const netCls = net >= 0 ? 'positive' : 'negative';
+                return `<div class="card" style="cursor:default;"><div style="font-weight:600;margin-bottom:8px;">${firm}</div><div style="font-size:11px;">Fee: <span class="negative">$${formatNumber(data.fee)}</span></div><div style="font-size:11px;">Payout: <span class="positive">$${formatNumber(data.payout)}</span></div><div style="font-size:13px;margin-top:4px;">Net: <span class="${netCls}">$${formatNumber(net)}</span></div></div>`;
+            }).join('');
+        }
+
+        function savePropRecord() {
+            const firm = document.getElementById('prop-firm').value;
+            const fee = parseFloat(document.getElementById('prop-challenge-fee').value) || 0;
+            const payout = parseFloat(document.getElementById('prop-payout-amount').value) || 0;
+            const date = document.getElementById('prop-record-date').value;
+            const status = document.getElementById('prop-status').value;
+            propRecords.push({ firm, fee, payout, date, status });
+            try { localStorage.setItem('prop_records', JSON.stringify(propRecords)); } catch(e) {}
+            updateTradingDisplay();
+            document.getElementById('prop-challenge-fee').value = '';
+            document.getElementById('prop-payout-amount').value = '';
+            showToast('Record added');
+        }
+
+        // ==================== PHYSIC ====================
+        async function saveBodyData() {
+            const data = {
+                date: document.getElementById('body-date').value,
+                weight: parseFloat(document.getElementById('body-weight').value),
+                muscle: parseFloat(document.getElementById('body-muscle').value),
+                fatpct: parseFloat(document.getElementById('body-fatpct').value)
+            };
+            bodyHistory.push(data);
+            try { localStorage.setItem('body_history', JSON.stringify(bodyHistory)); } catch(e) {}
+            updatePhysicDisplay();
+            const synced = await syncToN8n('body', data);
+            showToast(synced ? 'Synced ✓' : 'Body data saved');
+        }
+
+        function updatePhysicDisplay() {
+            if (bodyHistory.length > 0) {
+                const latest = bodyHistory[bodyHistory.length - 1];
+                document.getElementById('physic-current').textContent = latest.fatpct;
+                document.getElementById('stat-bodyfat').textContent = latest.fatpct + '%';
+                const current = latest.fatpct;
+                const start = 21, target = 15;
+                const progress = Math.max(0, Math.min(100, ((start - current) / (start - target)) * 100));
+                document.getElementById('physic-bar').style.width = progress + '%';
+            }
+            updateBodyChart();
+            renderBodyPhotos();
+        }
+
+        function updateBodyChart() {
+            const hist = bodyHistory.slice(-12);
+            if (!hist.length) return;
+            bodyChart.data.labels = hist.map(h => h.date?.slice(5) || '');
+            bodyChart.data.datasets[0].data = hist.map(h => h.fatpct);
+            bodyChart.update();
+        }
+
+        function renderBodyPhotos() {
+            const container = document.getElementById('body-photos-comparison');
+            if (!container) return;
+            if (bodyPhotos.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px;font-size:12px;">No progress photos yet</div>';
+                return;
+            }
+            container.innerHTML = bodyPhotos.map((p, i) => `<div style="background:var(--bg-card);border:1px solid var(--border);padding:12px;"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;color:var(--accent);">${p.date}</span><button onclick="deleteBodyPhoto(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button></div><img src="${p.src}" style="width:100%;height:80px;object-fit:cover;"></div>`).join('');
+        }
+
+        function uploadBodyPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const today = new Date().toISOString().split('T')[0];
+            const photoDate = prompt('Photo date (YYYY-MM-DD):', today);
+            if (!photoDate) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                bodyPhotos.push({ src: e.target.result, date: photoDate, weight: 0, fatpct: 0 });
+                try { localStorage.setItem('body_photos', JSON.stringify(bodyPhotos)); } catch(e) {}
+                renderBodyPhotos();
+                showToast('Photo uploaded');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function deleteBodyPhoto(idx) {
+            if (confirm('Delete this photo?')) {
+                bodyPhotos.splice(idx, 1);
+                try { localStorage.setItem('body_photos', JSON.stringify(bodyPhotos)); } catch(e) {}
+                renderBodyPhotos();
+            }
+        }
+
+        // ==================== DAILY HABITS ====================
+        async function syncDailyFromNotion() {
+            const webhookUrl = localStorage.getItem('n8n_webhook');
+            if (!webhookUrl) {
+                showToast('請先在 Settings 設定 n8n Webhook URL', true);
+                return;
+            }
+            
+            showToast('正在從 Notion 同步...');
+            
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        type: 'fetch_daily_habits',
+                        database_id: localStorage.getItem('notion_db_id') || 'e97b6953-7020-4e3d-bbf5-cf7e69b27e5f'
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Webhook failed');
+                
+                const data = await response.json();
+                
+                // 預期 n8n 回傳格式: { habits: { '2026-02-04': { trading: true, ... }, ... } }
+                if (data && data.habits) {
+                    // Merge fetched data with existing data
+                    Object.keys(data.habits).forEach(dateStr => {
+                        const notionData = data.habits[dateStr];
+                        dailyHabitsData[dateStr] = {
+                            trading: notionData.Trading || notionData.trading || false,
+                            advertise: notionData.Advertise || notionData.advertise || false,
+                            deliver: notionData.Deliever || notionData.Deliver || notionData.deliver || false,
+                            gym: notionData.Gym || notionData.gym || false,
+                            fatloss: notionData['Fat Loss'] || notionData.FatLoss || notionData.fatloss || false,
+                            ai: notionData.AI || notionData.ai || false
+                        };
+                    });
+                    
+                    localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
+                    loadDailyHabits();
+                    showToast('✓ 已從 Notion 同步 ' + Object.keys(data.habits).length + ' 天的數據');
+                } else {
+                    showToast('未收到有效數據', true);
+                }
+            } catch (error) {
+                console.error('Sync error:', error);
+                showToast('同步失敗: ' + error.message, true);
+            }
+        }
+
+        function updateDailyProgress() {
+            const checks = document.querySelectorAll('.habit-check');
+            const done = Array.from(checks).filter(c => c.checked).length;
+            const totalCount = checks.length;
+            document.getElementById('daily-done').textContent = done;
+            document.getElementById('daily-total').textContent = totalCount;
+            document.getElementById('daily-bar').style.width = (done / totalCount * 100) + '%';
+            const today = new Date().toISOString().split('T')[0];
+            const oldH = dailyHabitsData[today] || {};
+            const habits = {};
+            checks.forEach(c => { habits[c.dataset.habit] = c.checked; });
+            dailyHabitsData[today] = habits;
+            try { localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData)); } catch(e) {}
+            Object.keys(habits).forEach(h => { if(oldH[h]!==habits[h]) writeHabitToNotion(today,h,habits[h]); });
+            updateDailyHistoryTable();
+        }
+
+        function loadDailyHabits() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('daily-date').textContent = today;
+            if (!dailyHabitsData[today]) {
+                dailyHabitsData[today] = {trading:false,advertise:false,deliver:false,gym:false,fatloss:false,ai:false};
+                localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
+                createDayInNotion(today);
+            }
+            const todayHabits = dailyHabitsData[today] || {};
+            document.querySelectorAll('.habit-check').forEach(c => { c.checked = todayHabits[c.dataset.habit] === true; });
+            let streak=0;const d=new Date();
+            while(true){const ds=d.toISOString().split('T')[0];const dh=dailyHabitsData[ds];if(dh&&Object.values(dh).some(v=>v===true)){streak++;d.setDate(d.getDate()-1);}else break;}
+            document.getElementById('stat-streak').textContent = streak;
+            updateDailyProgress();
+            updateDailyHistoryTable();
+        }
+
+        function updateDailyHistoryTable() {
+            const tbody = document.getElementById('daily-history-body');
+            if (!tbody) return;
+            
+            const today = new Date();
+            const habits = ['trading', 'advertise', 'deliver', 'gym', 'fatloss', 'ai'];
+            const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+            let rows = [];
+            
+            // 從最近的日期開始往前顯示 60 天
+            for (let i = 0; i < 60; i++) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayHabits = dailyHabitsData[dateStr] || {};
+                
+                const dateLabel = `${d.getMonth() + 1}/${d.getDate()} ${dayNames[d.getDay()]}`;
+                const isToday = i === 0;
+                
+                let completed = 0;
+                let cells = '';
+                habits.forEach(h => {
+                    const done = dayHabits[h] === true;
+                    if (done) completed++;
+                    const checkStyle = done 
+                        ? 'color:#4a7c59;font-weight:bold;font-size:14px;' 
+                        : 'color:var(--text-muted);font-size:12px;';
+                    cells += `<td style="text-align:center;cursor:pointer;${checkStyle}" onclick="toggleHistoryHabit('${dateStr}','${h}')">${done ? '✓' : '−'}</td>`;
+                });
+                
+                const rowClass = isToday ? 'today-row' : '';
+                const totalStyle = completed > 0 ? 'color:var(--accent);font-weight:600;' : 'color:var(--text-muted);';
+                rows.push(`<tr class="${rowClass}"><td>${dateLabel}</td>${cells}<td style="${totalStyle}">${completed}/6</td></tr>`);
+            }
+            
+            tbody.innerHTML = rows.join('');
+        }
+
+        function toggleHistoryHabit(dateStr, habit) {
+            if (!dailyHabitsData[dateStr]) dailyHabitsData[dateStr] = {};
+            const nv = !dailyHabitsData[dateStr][habit];
+            dailyHabitsData[dateStr][habit] = nv;
+            localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
+            updateDailyHistoryTable();
+            const today = new Date().toISOString().split('T')[0];
+            if (dateStr === today) {
+                const cb = document.querySelector(`.habit-check[data-habit="${habit}"]`);
+                if (cb) { cb.checked = nv; updateDailyProgress(); return; }
+            }
+            writeHabitToNotion(dateStr, habit, nv);
+        }
+
+        // ==================== IDEAS ====================
+        async function saveIdea() {
+            const text = document.getElementById('idea-text').value;
+            const type = document.getElementById('idea-type').value;
+            if (!text) return;
+            let ideas = JSON.parse(localStorage.getItem('ideas') || '[]');
+            ideas.push({ text, type, date: new Date().toISOString().split('T')[0] });
+            localStorage.setItem('ideas', JSON.stringify(ideas));
+            document.getElementById('stat-ideas').textContent = ideas.length;
+            document.getElementById('idea-text').value = '';
+            showToast('Saved');
+        }
+
+        // ==================== INIT ====================
+        (function init() {
+            document.getElementById('wealth-quote-text').textContent = '"' + quote.text + '"';
+            document.getElementById('wealth-quote-author').textContent = '— ' + quote.author;
+            document.getElementById('goal-target').textContent = formatNumber(wealthGoal);
+            
+            if(localStorage.getItem('n8n_webhook')) document.getElementById('n8n-webhook').value = localStorage.getItem('n8n_webhook');
+            if(localStorage.getItem('openai_key')) document.getElementById('openai-key').value = localStorage.getItem('openai_key');
+            
+            document.getElementById('body-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('biz-date').value = new Date().toISOString().split('T')[0];
+            
+            updateWealthDisplay();
+            updateBizDisplay();
+            updateTradingDisplay();
+            updatePhysicDisplay();
+            loadDailyHabits();
+            renderAccountManager();
+            
+            document.getElementById('wealth-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askWealthAI(); });
+            document.getElementById('biz-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askBizAI(); });
+        })();
+    </script>
+</body>
+</html>

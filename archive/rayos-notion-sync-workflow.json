@@ -1,0 +1,129 @@
+{
+  "name": "RayOS - Notion Daily Habits Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rayos-sync",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "rayos-sync"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "e97b6953-7020-4e3d-bbf5-cf7e69b27e5f",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "options": {
+          "downloadFiles": false
+        }
+      },
+      "id": "notion-query",
+      "name": "Notion - Get Daily Habits",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [470, 300],
+      "credentials": {
+        "notionApi": {
+          "id": "YOUR_NOTION_CREDENTIAL_ID",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform Notion data to RayOS format\nconst items = $input.all();\nconst habits = {};\n\nfor (const item of items) {\n  const props = item.json.properties;\n  \n  // Get date from title (日期 field)\n  let dateStr = '';\n  if (props['日期'] && props['日期'].title && props['日期'].title[0]) {\n    dateStr = props['日期'].title[0].plain_text;\n  }\n  \n  // Skip if no valid date\n  if (!dateStr || !dateStr.match(/^\\d{4}-\\d{2}-\\d{2}$/)) {\n    continue;\n  }\n  \n  // Extract checkbox values\n  habits[dateStr] = {\n    Trading: props['Trading']?.checkbox || false,\n    Advertise: props['Advertise']?.checkbox || false,\n    Deliever: props['Deliever']?.checkbox || false,\n    Gym: props['Gym']?.checkbox || false,\n    'Fat Loss': props['Fat Loss']?.checkbox || false,\n    AI: props['AI']?.checkbox || false\n  };\n}\n\nreturn [{ json: { habits } }];"
+      },
+      "id": "transform-data",
+      "name": "Transform to RayOS Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [910, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Notion - Get Daily Habits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion - Get Daily Habits": {
+      "main": [
+        [
+          {
+            "node": "Transform to RayOS Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform to RayOS Format": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-02-04T00:00:00.000Z",
+  "versionId": "1"
+}

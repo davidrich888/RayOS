@@ -1,0 +1,177 @@
+{
+  "name": "RayOS Sync to Notion",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rayos-sync",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "rayos-sync"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "outputKey": "daily_habits",
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [
+                  { "leftValue": "={{ $json.type }}", "rightValue": "daily_habits", "operator": { "type": "string", "operation": "equals" } }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "wealth",
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [
+                  { "leftValue": "={{ $json.type }}", "rightValue": "wealth", "operator": { "type": "string", "operation": "equals" } }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "body",
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [
+                  { "leftValue": "={{ $json.type }}", "rightValue": "body", "operator": { "type": "string", "operation": "equals" } }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-1",
+      "name": "Route by Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": { "__rl": true, "value": "58da82d689ed42029274234183f77bb6", "mode": "id" },
+        "propertiesUi": {
+          "propertyValues": [
+            { "key": "Date|title", "title": "={{ $json.data.date }}" },
+            { "key": "Trading|checkbox", "checkboxValue": "={{ $json.data.trading }}" },
+            { "key": "Advertise|checkbox", "checkboxValue": "={{ $json.data.advertise }}" },
+            { "key": "Deliver|checkbox", "checkboxValue": "={{ $json.data.deliver }}" },
+            { "key": "Gym|checkbox", "checkboxValue": "={{ $json.data.gym }}" },
+            { "key": "FatLoss|checkbox", "checkboxValue": "={{ $json.data.fatloss }}" },
+            { "key": "AI|checkbox", "checkboxValue": "={{ $json.data.ai }}" },
+            { "key": "Total|number", "numberValue": "={{ $json.data.total }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notion-daily",
+      "name": "Save Daily Habits",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [720, 160],
+      "credentials": { "notionApi": { "id": "", "name": "" } }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": { "__rl": true, "value": "127c65e93b7c4008b34c86c285295387", "mode": "id" },
+        "propertiesUi": {
+          "propertyValues": [
+            { "key": "Date|title", "title": "={{ $json.data.date }}" },
+            { "key": "TotalAssets|number", "numberValue": "={{ $json.data.totalAssets }}" },
+            { "key": "活期存款|number", "numberValue": "={{ $json.data.savings }}" },
+            { "key": "定期存款|number", "numberValue": "={{ $json.data.fixedDeposit }}" },
+            { "key": "股票ETF|number", "numberValue": "={{ $json.data.stocks }}" },
+            { "key": "加密貨幣|number", "numberValue": "={{ $json.data.crypto }}" },
+            { "key": "PropFirm|number", "numberValue": "={{ $json.data.propfirm }}" },
+            { "key": "退休金|number", "numberValue": "={{ $json.data.retirement }}" },
+            { "key": "保險|number", "numberValue": "={{ $json.data.insurance }}" },
+            { "key": "債務|number", "numberValue": "={{ $json.data.debt }}" },
+            { "key": "MonthlyGrowth|number", "numberValue": "={{ $json.data.monthlyGrowth }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notion-wealth",
+      "name": "Save Wealth Snapshot",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [720, 300],
+      "credentials": { "notionApi": { "id": "", "name": "" } }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": { "__rl": true, "value": "017879729d31419eb26606ccf489a393", "mode": "id" },
+        "propertiesUi": {
+          "propertyValues": [
+            { "key": "Date|title", "title": "={{ $json.data.date }}" },
+            { "key": "Weight|number", "numberValue": "={{ $json.data.weight }}" },
+            { "key": "BodyFat|number", "numberValue": "={{ $json.data.bodyFat }}" },
+            { "key": "MuscleMass|number", "numberValue": "={{ $json.data.muscleMass }}" },
+            { "key": "Notes|rich_text", "textContent": "={{ $json.data.notes }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notion-body",
+      "name": "Save Body Record",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [720, 440],
+      "credentials": { "notionApi": { "id": "", "name": "" } }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Saved to Notion' }) }}",
+        "options": {}
+      },
+      "id": "respond-1",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [960, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Route by Type", "type": "main", "index": 0 }]]
+    },
+    "Route by Type": {
+      "main": [
+        [{ "node": "Save Daily Habits", "type": "main", "index": 0 }],
+        [{ "node": "Save Wealth Snapshot", "type": "main", "index": 0 }],
+        [{ "node": "Save Body Record", "type": "main", "index": 0 }]
+      ]
+    },
+    "Save Daily Habits": {
+      "main": [[{ "node": "Respond Success", "type": "main", "index": 0 }]]
+    },
+    "Save Wealth Snapshot": {
+      "main": [[{ "node": "Respond Success", "type": "main", "index": 0 }]]
+    },
+    "Save Body Record": {
+      "main": [[{ "node": "Respond Success", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0
+}

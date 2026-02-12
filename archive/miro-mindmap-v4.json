@@ -1,0 +1,212 @@
+{
+  "name": "Miro Mind Map Builder v4",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "miro-mindmap",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "n1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// =============================================\n// Step 1: BFS flatten tree → shape items\n// =============================================\n\nconst input = $input.first().json;\nconst LEVEL_GAP_X = 500;\nconst NODE_GAP_Y = 150;\n\n// Auto-offset\nconst sd = $getWorkflowStaticData('global');\nconst mapCount = sd.mapCount || 0;\nsd.mapCount = mapCount + 1;\nconst ROOT_X = mapCount * 5000;\nconst ROOT_Y = 0;\n\n// Reset for new run\nsd.idMapping = {};\nsd.shapeCounter = 0;\nsd.orderedOurIds = [];\nsd.boardId = input.board_id || 'uXjVLCeP6Ro=';\nsd.miroToken = input.miro_token || 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_pfOH483nNDCOCMOGbF9Tf4GWbCc';\nsd.connectorPairs = [];\n\nconst STYLES = {\n  root: { fillColor: '#1a1a2e', fontColor: '#ffffff', fontSize: '18', borderColor: '#e94560', borderWidth: '2', width: 360, height: 80 },\n  section: { fillColor: '#16213e', fontColor: '#ffffff', fontSize: '16', borderColor: '#0f3460', borderWidth: '2', width: 300, height: 65 },\n  normal: { fillColor: '#f5f5f5', fontColor: '#1a1a2e', fontSize: '14', borderColor: '#cccccc', borderWidth: '1', width: 300, height: 60 },\n  red_emphasis: { fillColor: '#fff0f0', fontColor: '#cc0000', fontSize: '14', borderColor: '#e94560', borderWidth: '2', width: 300, height: 60 },\n  blue_underline: { fillColor: '#f0f5ff', fontColor: '#0055cc', fontSize: '14', borderColor: '#4d94ff', borderWidth: '1', width: 300, height: 60 },\n  screenshot: { fillColor: '#fffde7', fontColor: '#666666', fontSize: '12', borderColor: '#ffd54f', borderWidth: '1', width: 280, height: 50 },\n  white_container: { fillColor: '#ffffff', fontColor: '#333333', fontSize: '14', borderColor: '#e0e0e0', borderWidth: '1', width: 320, height: 65 },\n  quote: { fillColor: '#f9f9f9', fontColor: '#555555', fontSize: '13', borderColor: '#aaaaaa', borderWidth: '1', width: 300, height: 60 }\n};\n\nfunction assignPositions(node, level, yStart) {\n  node._x = ROOT_X + level * LEVEL_GAP_X;\n  if (!node.children || node.children.length === 0) {\n    node._y = yStart;\n    return yStart + NODE_GAP_Y;\n  }\n  let currentY = yStart;\n  for (const child of node.children) {\n    currentY = assignPositions(child, level + 1, currentY);\n  }\n  node._y = (node.children[0]._y + node.children[node.children.length - 1]._y) / 2;\n  return currentY;\n}\n\nfunction flattenBFS(root) {\n  const items = [];\n  const queue = [{ node: root, parentOurId: null }];\n  while (queue.length > 0) {\n    const { node, parentOurId } = queue.shift();\n    const st = STYLES[node.style] || STYLES.normal;\n    \n    sd.orderedOurIds.push(node.id);\n    if (parentOurId) {\n      sd.connectorPairs.push({ from: parentOurId, to: node.id });\n    }\n    \n    items.push({\n      json: {\n        ourId: node.id,\n        apiBody: {\n          data: { content: '<p>' + node.text + '</p>', shape: 'round_rectangle' },\n          style: { fillColor: st.fillColor, fontColor: st.fontColor, fontSize: st.fontSize, borderColor: st.borderColor, borderWidth: st.borderWidth, textAlign: 'center', textAlignVertical: 'middle' },\n          geometry: { width: st.width, height: st.height },\n          position: { x: node._x, y: node._y }\n        }\n      }\n    });\n    \n    if (node.children) {\n      for (const child of node.children) {\n        queue.push({ node: child, parentOurId: node.id });\n      }\n    }\n  }\n  return items;\n}\n\nconst rootNode = input.nodes || input;\nconst tree = Array.isArray(rootNode) ? rootNode[0] : rootNode;\nassignPositions(tree, 0, ROOT_Y);\n\nreturn flattenBFS(tree);"
+      },
+      "id": "n2",
+      "name": "Prepare Shapes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "n3",
+      "name": "Loop Shapes",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.miro.com/v2/boards/{{ $getWorkflowStaticData('global').boardId }}/shapes",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.apiBody) }}",
+        "options": {}
+      },
+      "id": "n4",
+      "name": "Create Shape",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [860, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_ME",
+          "name": "Miro API Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Store Miro ID mapping using counter\nconst sd = $getWorkflowStaticData('global');\nconst idx = sd.shapeCounter || 0;\nconst ourId = sd.orderedOurIds[idx];\nconst miroId = $input.first().json.id;\n\nif (ourId && miroId) {\n  sd.idMapping[ourId] = String(miroId);\n}\nsd.shapeCounter = idx + 1;\n\nreturn [{ json: { mapped: ourId + ' → ' + miroId } }];"
+      },
+      "id": "n5",
+      "name": "Store ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1080, 200]
+    },
+    {
+      "parameters": {
+        "amount": 0.35,
+        "unit": "seconds"
+      },
+      "id": "n6",
+      "name": "Wait 350ms",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1300, 200]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Prepare connector items from stored mapping\nconst sd = $getWorkflowStaticData('global');\nconst pairs = sd.connectorPairs || [];\nconst idMap = sd.idMapping || {};\n\nconst items = [];\nfor (const p of pairs) {\n  const startId = idMap[p.from];\n  const endId = idMap[p.to];\n  if (startId && endId) {\n    items.push({\n      json: {\n        apiBody: {\n          startItem: { id: startId },\n          endItem: { id: endId },\n          shape: 'straight',\n          style: {\n            strokeColor: '#888888',\n            strokeWidth: '1.5',\n            startStrokeCap: 'none',\n            endStrokeCap: 'stealth'\n          }\n        }\n      }\n    });\n  }\n}\n\nif (items.length === 0) {\n  return [{ json: { done: true, message: 'No connectors needed' } }];\n}\n\nreturn items;"
+      },
+      "id": "n7",
+      "name": "Prepare Connectors",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 500]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "n8",
+      "name": "Loop Connectors",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [860, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.miro.com/v2/boards/{{ $getWorkflowStaticData('global').boardId }}/connectors",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.apiBody) }}",
+        "options": {}
+      },
+      "id": "n9",
+      "name": "Create Connector",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1080, 420],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_ME",
+          "name": "Miro API Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 0.35,
+        "unit": "seconds"
+      },
+      "id": "n10",
+      "name": "Wait 350ms 2",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1300, 420]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nreturn [{\n  json: {\n    success: true,\n    shapesCreated: Object.keys(sd.idMapping || {}).length,\n    connectorsCreated: (sd.connectorPairs || []).length,\n    boardUrl: 'https://miro.com/app/board/' + sd.boardId + '/'\n  }\n}];"
+      },
+      "id": "n11",
+      "name": "Final Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 680]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Prepare Shapes", "type": "main", "index": 0 }]
+      ]
+    },
+    "Prepare Shapes": {
+      "main": [
+        [{ "node": "Loop Shapes", "type": "main", "index": 0 }]
+      ]
+    },
+    "Loop Shapes": {
+      "main": [
+        [{ "node": "Create Shape", "type": "main", "index": 0 }],
+        [{ "node": "Prepare Connectors", "type": "main", "index": 0 }]
+      ]
+    },
+    "Create Shape": {
+      "main": [
+        [{ "node": "Store ID", "type": "main", "index": 0 }]
+      ]
+    },
+    "Store ID": {
+      "main": [
+        [{ "node": "Wait 350ms", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait 350ms": {
+      "main": [
+        [{ "node": "Loop Shapes", "type": "main", "index": 0 }]
+      ]
+    },
+    "Prepare Connectors": {
+      "main": [
+        [{ "node": "Loop Connectors", "type": "main", "index": 0 }]
+      ]
+    },
+    "Loop Connectors": {
+      "main": [
+        [{ "node": "Create Connector", "type": "main", "index": 0 }],
+        [{ "node": "Final Response", "type": "main", "index": 0 }]
+      ]
+    },
+    "Create Connector": {
+      "main": [
+        [{ "node": "Wait 350ms 2", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait 350ms 2": {
+      "main": [
+        [{ "node": "Loop Connectors", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1
+}

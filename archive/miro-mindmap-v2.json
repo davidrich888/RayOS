@@ -1,0 +1,62 @@
+{
+  "name": "Miro Mind Map Builder v2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "miro-mindmap",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================\n// Miro Mind Map Builder - All-in-One\n// Creates shapes + straight connectors on Miro\n// =============================================\n\nconst input = $input.first().json;\n\n// ---------- CONFIG ----------\nconst MIRO_TOKEN = input.miro_token || 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_pfOH483nNDCOCMOGbF9Tf4GWbCc';\nconst BOARD_ID = input.board_id || 'uXjVLCeP6Ro=';\nconst LEVEL_GAP_X = 500;    // 每層水平間距（像你的圖那樣寬）\nconst NODE_GAP_Y = 150;     // 同層節點垂直間距\nconst API_DELAY_MS = 300;   // Rate limit delay\n\n// Auto-offset: 每張新圖不重疊\nconst staticData = $getWorkflowStaticData('global');\nconst mapCount = staticData.mapCount || 0;\nstaticData.mapCount = mapCount + 1;\nconst ROOT_X = mapCount * 5000;\nconst ROOT_Y = 0;\n\n// ---------- STYLE MAP ----------\nconst STYLES = {\n  root: {\n    fillColor: '#1a1a2e', fontColor: '#ffffff', fontSize: '18',\n    borderColor: '#e94560', borderWidth: '2', width: 360, height: 80\n  },\n  section: {\n    fillColor: '#16213e', fontColor: '#ffffff', fontSize: '16',\n    borderColor: '#0f3460', borderWidth: '2', width: 300, height: 65\n  },\n  normal: {\n    fillColor: '#f5f5f5', fontColor: '#1a1a2e', fontSize: '14',\n    borderColor: '#cccccc', borderWidth: '1', width: 300, height: 60\n  },\n  red_emphasis: {\n    fillColor: '#fff0f0', fontColor: '#cc0000', fontSize: '14',\n    borderColor: '#e94560', borderWidth: '2', width: 300, height: 60\n  },\n  blue_underline: {\n    fillColor: '#f0f5ff', fontColor: '#0055cc', fontSize: '14',\n    borderColor: '#4d94ff', borderWidth: '1', width: 300, height: 60\n  },\n  screenshot: {\n    fillColor: '#fffde7', fontColor: '#666666', fontSize: '12',\n    borderColor: '#ffd54f', borderWidth: '1', width: 280, height: 50\n  },\n  white_container: {\n    fillColor: '#ffffff', fontColor: '#333333', fontSize: '14',\n    borderColor: '#e0e0e0', borderWidth: '1', width: 320, height: 65\n  },\n  quote: {\n    fillColor: '#f9f9f9', fontColor: '#555555', fontSize: '13',\n    borderColor: '#aaaaaa', borderWidth: '1', width: 300, height: 60\n  }\n};\n\n// ---------- HELPER: sleep ----------\nfunction sleep(ms) {\n  return new Promise(resolve => setTimeout(resolve, ms));\n}\n\n// ---------- HELPER: Miro API call ----------\nasync function miroPost(endpoint, body) {\n  const url = `https://api.miro.com/v2/boards/${BOARD_ID}/${endpoint}`;\n  try {\n    const resp = await fetch(url, {\n      method: 'POST',\n      headers: {\n        'Authorization': `Bearer ${MIRO_TOKEN}`,\n        'Content-Type': 'application/json'\n      },\n      body: JSON.stringify(body)\n    });\n    if (!resp.ok) {\n      const errText = await resp.text();\n      throw new Error(`Miro API ${resp.status}: ${errText}`);\n    }\n    return await resp.json();\n  } catch (err) {\n    return { error: err.message };\n  }\n}\n\n// ---------- STEP 1: Calculate positions ----------\nfunction countLeaves(node) {\n  if (!node.children || node.children.length === 0) return 1;\n  return node.children.reduce((sum, c) => sum + countLeaves(c), 0);\n}\n\nfunction assignPositions(node, level, yStart) {\n  node._x = ROOT_X + level * LEVEL_GAP_X;\n  \n  if (!node.children || node.children.length === 0) {\n    node._y = yStart;\n    return yStart + NODE_GAP_Y;\n  }\n  \n  let currentY = yStart;\n  for (const child of node.children) {\n    currentY = assignPositions(child, level + 1, currentY);\n  }\n  \n  // Center parent vertically among children\n  const firstY = node.children[0]._y;\n  const lastY = node.children[node.children.length - 1]._y;\n  node._y = (firstY + lastY) / 2;\n  \n  return currentY;\n}\n\n// ---------- STEP 2: BFS flatten ----------\nfunction flattenBFS(root) {\n  const shapes = [];\n  const connectorPairs = [];\n  const queue = [{ node: root, parentOurId: null }];\n  \n  while (queue.length > 0) {\n    const { node, parentOurId } = queue.shift();\n    \n    shapes.push({\n      ourId: node.id,\n      parentOurId,\n      text: node.text,\n      style: node.style || 'normal',\n      x: node._x,\n      y: node._y\n    });\n    \n    if (parentOurId) {\n      connectorPairs.push({ fromOurId: parentOurId, toOurId: node.id });\n    }\n    \n    if (node.children) {\n      for (const child of node.children) {\n        queue.push({ node: child, parentOurId: node.id });\n      }\n    }\n  }\n  \n  return { shapes, connectorPairs };\n}\n\n// ---------- STEP 3: Create everything on Miro ----------\nasync function buildMindMap(rootNode) {\n  // Calculate layout\n  assignPositions(rootNode, 0, ROOT_Y);\n  const { shapes, connectorPairs } = flattenBFS(rootNode);\n  \n  const log = [];\n  const idMap = {};  // ourId → Miro ID\n  \n  // --- Create all shapes ---\n  for (let i = 0; i < shapes.length; i++) {\n    const s = shapes[i];\n    const st = STYLES[s.style] || STYLES.normal;\n    \n    const body = {\n      data: {\n        content: `<p>${s.text}</p>`,\n        shape: 'round_rectangle'\n      },\n      style: {\n        fillColor: st.fillColor,\n        fontColor: st.fontColor,\n        fontSize: st.fontSize,\n        borderColor: st.borderColor,\n        borderWidth: st.borderWidth,\n        textAlign: 'center',\n        textAlignVertical: 'middle'\n      },\n      geometry: { width: st.width, height: st.height },\n      position: { x: s.x, y: s.y }\n    };\n    \n    const resp = await miroPost('shapes', body);\n    \n    if (resp.error) {\n      log.push(`❌ Shape \"${s.text}\": ${resp.error}`);\n    } else {\n      idMap[s.ourId] = resp.id;\n      log.push(`✅ Shape \"${s.text}\" → ${resp.id}`);\n    }\n    \n    if (i < shapes.length - 1) await sleep(API_DELAY_MS);\n  }\n  \n  // --- Create all connectors (straight lines) ---\n  let connectorsCreated = 0;\n  for (let i = 0; i < connectorPairs.length; i++) {\n    const c = connectorPairs[i];\n    const startId = idMap[c.fromOurId];\n    const endId = idMap[c.toOurId];\n    \n    if (!startId || !endId) {\n      log.push(`⚠️ Connector skipped: missing ID for ${c.fromOurId} or ${c.toOurId}`);\n      continue;\n    }\n    \n    const body = {\n      startItem: { id: startId },\n      endItem: { id: endId },\n      shape: 'straight',\n      style: {\n        strokeColor: '#888888',\n        strokeWidth: '1.5',\n        startStrokeCap: 'none',\n        endStrokeCap: 'stealth'\n      }\n    };\n    \n    const resp = await miroPost('connectors', body);\n    \n    if (resp.error) {\n      log.push(`❌ Connector: ${resp.error}`);\n    } else {\n      connectorsCreated++;\n      log.push(`✅ Connector ${c.fromOurId} → ${c.toOurId}`);\n    }\n    \n    if (i < connectorPairs.length - 1) await sleep(API_DELAY_MS);\n  }\n  \n  return {\n    success: true,\n    shapesCreated: Object.keys(idMap).length,\n    connectorsCreated,\n    totalShapes: shapes.length,\n    totalConnectors: connectorPairs.length,\n    boardUrl: `https://miro.com/app/board/${BOARD_ID}/`,\n    log\n  };\n}\n\n// ---------- MAIN ----------\nconst rootNode = input.nodes || input;\nconst tree = Array.isArray(rootNode) ? rootNode[0] : rootNode;\n\nconst result = await buildMindMap(tree);\n\nreturn [{ json: result }];"
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000002",
+      "name": "Build Mind Map",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000003",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [760, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          { "node": "Build Mind Map", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Build Mind Map": {
+      "main": [
+        [
+          { "node": "Respond", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1
+}
