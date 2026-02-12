@@ -29,6 +29,24 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 - **Data Source (Collection)**: `6b8fea6a-9249-4a7b-a36e-5cd7f6ceb61f`
 - **Fields**: Date, Weight, Muscle, Fat%, BMI(formula), Notes
 
+### YouTube 研究庫
+- **Database ID**: `76fb8600-ae96-49bc-b6c4-75f75f0ec818`
+- **Data Source (Collection)**: `39cec6aa-a921-4ce9-bbf6-26c80aacc197`
+- **位置**: 📊 RayOS Data 底下
+- **前端**: `Youtube_Lab/index.html`（YouTube Lab tab）
+- **Webhooks**: `youtube-videos`（拉取）、`update-video`（更新）、`delete-video`（刪除）
+- **Fields**: 影片標題(title), 頻道, 影片長度, 分類(multi_select), 狀態(select), 優先度(select), 縮圖網址(url), 網址(url), AI 摘要, 一句話學到, 精華片段, 我的評分(number), 我的筆記, 收藏縮圖(checkbox)
+- **Telegram Bot**: @YT_video_DB_bot — 混合用途，YouTube 連結走 YouTube 流程，其他連結走 Resource Library 流程
+
+### Resource Library
+- **Database ID**: `397a6457-079c-419e-ba44-df992b6ba1d4`
+- **Data Source (Collection)**: `f5c590e7-9670-4f23-98ab-743bcd808d62`
+- **位置**: 📊 RayOS Data 底下
+- **前端**: `Youtube_Lab/index.html`（Resource Library tab）
+- **Webhook**: `resource-library`（type 路由：fetch_resources / add_resource / delete_resource）
+- **Fields**: 標題(title), URL(url), 來源類型(select: X/Instagram/Article/YouTube/Note/Other), 原始內容(rich_text), AI 摘要(rich_text), 一句話重點(rich_text), 分類標籤(multi_select), 來源(select: manual/telegram)
+- **AI 處理**: n8n 呼叫 Claude 做分類+摘要，前端不直接呼叫 AI
+
 ### Moodboard
 - 使用 Google Drive（不是 Notion）
 - Ray 在 Drive 建立 "RayOS Moodboard" 資料夾，內有分類子資料夾
