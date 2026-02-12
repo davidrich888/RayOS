@@ -24,6 +24,12 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .line-clamp-6 {
+      display: -webkit-box;
+      -webkit-line-clamp: 6;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
@@ -845,8 +851,214 @@
 
     // === Resource Library 組件 ===
 
+    // 資源詳細彈窗組件
+    function ResourceModal({ resource, onClose, onDelete }) {
+      const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+      const [isDeleting, setIsDeleting] = useState(false);
+      const [showFullContent, setShowFullContent] = useState(false);
+      const [imgError, setImgError] = useState(false);
+
+      const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+          await fetch(RESOURCE_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: "delete_resource", pageId: resource.id })
+          });
+          onDelete(resource.id);
+          onClose();
+        } catch (err) {
+          console.error('刪除資源失敗:', err);
+          onDelete(resource.id);
+          onClose();
+        }
+        setIsDeleting(false);
+      };
+
+      const formattedDate = resource.created_time
+        ? new Date(resource.created_time).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })
+        : '';
+
+      // 用 image.thum.io 截圖
+      const screenshotUrl = resource.url ? `https://image.thum.io/get/width/800/crop/600/${resource.url}` : '';
+
+      useEffect(() => {
+        const handleEsc = (e) => {
+          if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+      }, [onClose]);
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+          <div
+            className="relative bg-neutral-900 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-neutral-700"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* 關閉按鈕 */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+
+            {/* 頂部資訊 */}
+            <div className="p-6 pb-0">
+              <div className="flex items-center gap-2 text-sm text-neutral-500 mb-2">
+                <span className="text-lg">{getSourceIcon(resource.source_type)}</span>
+                <span>{resource.source_type}</span>
+                {resource.source === "telegram" && (
+                  <span className="text-xs bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">TG</span>
+                )}
+                <span className="text-neutral-700">•</span>
+                <span>{formattedDate}</span>
+              </div>
+              <h2 className="text-lg font-semibold text-white pr-8 leading-snug">
+                {resource.title}
+              </h2>
+            </div>
+
+            {/* 網頁截圖預覽 */}
+            {resource.url && !imgError && (
+              <div className="p-6 pb-4">
+                <div className="rounded-xl overflow-hidden border border-neutral-800 bg-neutral-800">
+                  <img
+                    src={screenshotUrl}
+                    alt="網頁預覽"
+                    className="w-full object-cover max-h-[400px]"
+                    loading="lazy"
+                    onError={() => setImgError(true)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 標籤 */}
+            {(resource.tags || []).length > 0 && (
+              <div className="px-6 pb-4">
+                <div className="flex flex-wrap gap-2">
+                  {resource.tags.map(tag => (
+                    <span key={tag} className="text-sm bg-neutral-800 text-neutral-300 px-3 py-1.5 rounded-lg border border-neutral-700">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* AI 摘要 */}
+            {resource.summary && (
+              <div className="px-6 pb-4">
+                <div className="bg-neutral-800/50 rounded-xl p-4 border border-neutral-700">
+                  <div className="text-sm font-medium text-neutral-300 mb-3">🤖 AI 摘要</div>
+                  <div className="text-sm text-neutral-300 whitespace-pre-line leading-relaxed">
+                    {resource.summary}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Key Takeaway */}
+            {resource.key_takeaway && (
+              <div className="px-6 pb-4">
+                <div className="bg-gradient-to-br from-amber-900/40 to-amber-800/20 rounded-xl p-4 border border-amber-600/30">
+                  <div className="text-sm font-medium text-amber-400 mb-2">💡 一句話重點</div>
+                  <div className="text-base text-amber-200 font-medium leading-relaxed">
+                    {resource.key_takeaway}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 原始內容 */}
+            {resource.content && (
+              <div className="px-6 pb-4">
+                <div className="bg-neutral-800/30 rounded-xl p-4 border border-neutral-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-medium text-neutral-400">📄 原始內容</div>
+                    {resource.content.length > 300 && (
+                      <button
+                        onClick={() => setShowFullContent(!showFullContent)}
+                        className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+                      >
+                        {showFullContent ? "收合" : "展開全部"}
+                      </button>
+                    )}
+                  </div>
+                  <div className={`text-sm text-neutral-400 whitespace-pre-line leading-relaxed ${
+                    !showFullContent && resource.content.length > 300 ? 'line-clamp-6' : ''
+                  }`}>
+                    {resource.content}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 底部按鈕 */}
+            <div className="p-6 pt-2 flex gap-3">
+              {resource.url && (
+                <a
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-3 rounded-xl bg-white hover:bg-neutral-200 text-black font-medium text-sm text-center transition-colors flex items-center justify-center gap-2"
+                >
+                  🔗 開啟原始連結
+                </a>
+              )}
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="px-4 py-3 rounded-xl bg-neutral-800 hover:bg-red-900 text-neutral-400 hover:text-red-400 font-medium text-sm transition-colors"
+                title="刪除資源"
+              >
+                🗑️
+              </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-medium text-sm transition-colors"
+              >
+                關閉
+              </button>
+            </div>
+
+            {/* 刪除確認對話框 */}
+            {showDeleteConfirm && (
+              <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-2xl">
+                <div className="bg-neutral-800 rounded-xl p-6 mx-4 max-w-sm border border-neutral-700">
+                  <div className="text-center mb-4">
+                    <div className="text-3xl mb-2">🗑️</div>
+                    <h3 className="text-white font-semibold mb-2">確定要刪除嗎？</h3>
+                    <p className="text-neutral-400 text-sm">這會同時從 Notion 資料庫中移除此資源</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="flex-1 py-2 rounded-lg bg-neutral-700 text-white text-sm font-medium hover:bg-neutral-600 transition-colors"
+                    >
+                      取消
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="flex-1 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-500 transition-colors disabled:opacity-50"
+                    >
+                      {isDeleting ? '刪除中...' : '確定刪除'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     // 資源卡片組件
-    function ResourceCard({ resource, onDelete }) {
+    function ResourceCard({ resource, onDelete, onOpenModal }) {
       const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
       const [isDeleting, setIsDeleting] = useState(false);
 
@@ -873,7 +1085,10 @@
         : '';
 
       return (
-        <div className="bg-neutral-900 rounded-xl border border-neutral-800 hover:border-neutral-700 transition-all p-5 flex flex-col gap-3 relative">
+        <div
+          className="bg-neutral-900 rounded-xl border border-neutral-800 hover:border-neutral-700 transition-all p-5 flex flex-col gap-3 relative cursor-pointer group"
+          onClick={() => onOpenModal(resource)}
+        >
           {/* 頂部：來源 icon + 類型 + 日期 + 刪除 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -886,7 +1101,7 @@
             <div className="flex items-center gap-2">
               <span className="text-xs text-neutral-600">{formattedDate}</span>
               <button
-                onClick={() => setShowDeleteConfirm(true)}
+                onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
                 className="text-neutral-600 hover:text-red-400 transition-colors text-sm p-1"
                 title="刪除"
               >
@@ -917,17 +1132,23 @@
             ))}
           </div>
 
-          {/* 原始連結 */}
-          {resource.url && (
-            <a
-              href={resource.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-neutral-500 hover:text-neutral-300 truncate transition-colors mt-auto"
-            >
-              🔗 {resource.url}
-            </a>
-          )}
+          {/* 底部：連結 + 查看詳情 */}
+          <div className="flex items-center justify-between mt-auto">
+            {resource.url ? (
+              <a
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-xs text-neutral-500 hover:text-neutral-300 truncate transition-colors max-w-[60%]"
+              >
+                🔗 {resource.url}
+              </a>
+            ) : <span />}
+            <span className="text-xs text-neutral-600 group-hover:text-neutral-400 transition-colors">
+              📖 查看詳情
+            </span>
+          </div>
 
           {/* 刪除確認 */}
           {showDeleteConfirm && (
@@ -1086,6 +1307,7 @@
       const [loading, setLoading] = useState(true);
       const [searchQuery, setSearchQuery] = useState("");
       const [selectedCategory, setSelectedCategory] = useState("全部");
+      const [selectedResource, setSelectedResource] = useState(null);
 
 
       // 初始化：從 localStorage 讀取快取，同時從 webhook 拉取最新
@@ -1217,7 +1439,7 @@
           ) : filteredResources.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredResources.map(resource => (
-                <ResourceCard key={resource.id} resource={resource} onDelete={handleDelete} />
+                <ResourceCard key={resource.id} resource={resource} onDelete={handleDelete} onOpenModal={setSelectedResource} />
               ))}
             </div>
           ) : (
@@ -1229,6 +1451,15 @@
                 {resources.length === 0 ? "點「快速收集」開始新增" : "試試調整篩選條件"}
               </p>
             </div>
+          )}
+
+          {/* Resource Modal */}
+          {selectedResource && (
+            <ResourceModal
+              resource={selectedResource}
+              onClose={() => setSelectedResource(null)}
+              onDelete={handleDelete}
+            />
           )}
         </main>
       );
