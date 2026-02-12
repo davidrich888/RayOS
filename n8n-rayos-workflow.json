@@ -117,6 +117,15 @@
               },
               "renameOutput": true,
               "outputKey": "update_idea"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "" },
+                "conditions": [{ "leftValue": "={{ $json.body.type }}", "rightValue": "create_weekly_entries", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create_weekly_entries"
             }
           ]
         },
@@ -650,7 +659,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\"status\":\"ok\",\"version\":\"RayOS Sync Hub v2.0\",\"types\":[\"fetch_habits\",\"update_habit\",\"create_day\",\"fetch_body\",\"create_body\",\"update_body\",\"fetch_wealth\",\"create_wealth\",\"fetch_ideas\",\"create_idea\",\"update_idea\"]}",
+        "responseBody": "={\"status\":\"ok\",\"version\":\"RayOS Sync Hub v2.1\",\"types\":[\"fetch_habits\",\"update_habit\",\"create_day\",\"fetch_body\",\"create_body\",\"update_body\",\"fetch_wealth\",\"create_wealth\",\"fetch_ideas\",\"create_idea\",\"update_idea\",\"create_weekly_entries\"]}",
         "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
       },
       "id": "f8a1b2c3-0001-4e00-a000-000000000014",
@@ -658,6 +667,58 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [520, 2100]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "// 建立未來 7 天的 Daily Habits 項目\n// 先查詢現有項目，再逐天建立不存在的\nconst startDate = $json.body?.start_date || new Date().toISOString().split('T')[0];\nconst DB_ID = '58da82d689ed42029274234183f77bb6';\nconst NOTION_API = 'https://api.notion.com/v1';\n\n// 取得 credential header（n8n 會自動注入）\nconst queryRes = await this.helpers.httpRequest({\n  method: 'POST',\n  url: `${NOTION_API}/databases/${DB_ID}/query`,\n  body: { page_size: 100 },\n  headers: { 'Notion-Version': '2022-06-28' },\n  authentication: 'genericCredentialType',\n});\n\n// 建立現有日期 Set\nconst existing = new Set();\nfor (const page of (queryRes.results || [])) {\n  const dateStr = page.properties?.Date?.title?.[0]?.plain_text || '';\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(dateStr)) existing.add(dateStr);\n}\n\nconst results = [];\nlet created = 0, skipped = 0;\nconst start = new Date(startDate + 'T00:00:00');\n\nfor (let i = 0; i < 7; i++) {\n  const d = new Date(start);\n  d.setDate(d.getDate() + i);\n  const ds = d.toISOString().split('T')[0];\n  \n  if (existing.has(ds)) {\n    skipped++;\n    results.push({ date: ds, action: 'skipped' });\n    continue;\n  }\n  \n  try {\n    const page = await this.helpers.httpRequest({\n      method: 'POST',\n      url: `${NOTION_API}/pages`,\n      headers: { 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },\n      body: {\n        parent: { database_id: DB_ID },\n        properties: {\n          'Date': { title: [{ text: { content: ds } }] },\n          'Trading': { checkbox: false },\n          'Advertise': { checkbox: false },\n          'Deliver': { checkbox: false },\n          'Gym': { checkbox: false },\n          'FatLoss': { checkbox: false },\n          'AI': { checkbox: false },\n          '\\u65e5\\u671f': { date: { start: ds } }\n        }\n      },\n      authentication: 'genericCredentialType',\n    });\n    created++;\n    results.push({ date: ds, action: 'created', pageId: page.id });\n  } catch (e) {\n    results.push({ date: ds, action: 'error', error: e.message });\n  }\n}\n\nreturn [{ json: { success: true, created, skipped, results } }];"
+      },
+      "id": "f8a1b2c3-0005-4e00-a000-000000000001",
+      "name": "Create Weekly Entries",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 2300],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE_AFTER_IMPORT", "name": "Notion API" } }
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }, { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }] } }
+      },
+      "id": "f8a1b2c3-0005-4e00-a000-000000000002",
+      "name": "Respond Weekly",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [780, 2300]
+    },
+
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtDay": [0],
+              "triggerAtHour": 23,
+              "triggerAtMinute": 59
+            }
+          ]
+        }
+      },
+      "id": "f8a1b2c3-0005-4e00-a000-000000000003",
+      "name": "Weekly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 2500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 每週日 23:59 自動建立下週 7 天\n// 從明天開始算\nconst tomorrow = new Date();\ntomorrow.setDate(tomorrow.getDate() + 1);\nconst startDate = tomorrow.toISOString().split('T')[0];\nreturn [{ json: { body: { start_date: startDate } } }];"
+      },
+      "id": "f8a1b2c3-0005-4e00-a000-000000000004",
+      "name": "Prepare Schedule Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 2500]
     }
   ],
   "connections": {
@@ -677,6 +738,7 @@
         [{ "node": "Query Ideas", "type": "main", "index": 0 }],
         [{ "node": "Prepare Idea Create", "type": "main", "index": 0 }],
         [{ "node": "Prepare Idea Update", "type": "main", "index": 0 }],
+        [{ "node": "Create Weekly Entries", "type": "main", "index": 0 }],
         [{ "node": "Respond Health", "type": "main", "index": 0 }]
       ]
     },
@@ -708,7 +770,10 @@
     "Format Idea Create Response": { "main": [[{ "node": "Respond Idea Create", "type": "main", "index": 0 }]] },
     "Prepare Idea Update": { "main": [[{ "node": "Update Idea Page", "type": "main", "index": 0 }]] },
     "Update Idea Page": { "main": [[{ "node": "Format Idea Update Response", "type": "main", "index": 0 }]] },
-    "Format Idea Update Response": { "main": [[{ "node": "Respond Idea Update", "type": "main", "index": 0 }]] }
+    "Format Idea Update Response": { "main": [[{ "node": "Respond Idea Update", "type": "main", "index": 0 }]] },
+    "Create Weekly Entries": { "main": [[{ "node": "Respond Weekly", "type": "main", "index": 0 }]] },
+    "Weekly Schedule": { "main": [[{ "node": "Prepare Schedule Input", "type": "main", "index": 0 }]] },
+    "Prepare Schedule Input": { "main": [[{ "node": "Create Weekly Entries", "type": "main", "index": 0 }]] }
   },
   "pinData": {},
   "settings": {

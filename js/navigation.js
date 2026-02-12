@@ -28,7 +28,7 @@ function go(section) {
 
     switch (section) {
         case 'daily':
-            if (typeof loadDailyHabits === 'function') loadDailyHabits(true);
+            if (typeof loadDailyHabits === 'function') loadDailyHabits();
             if (firstVisit && canSync && typeof syncDailyFromNotionDirect === 'function') syncDailyFromNotionDirect(true);
             break;
         case 'ideas':

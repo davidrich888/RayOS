@@ -86,21 +86,11 @@ async function syncDailyFromNotionDirect(silent = false) {
         localStorage.setItem('notion_page_index', JSON.stringify(notionPageIndex));
         localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
         console.log('[RayOS Direct] Synced', count, 'days, pageIndex:', Object.keys(notionPageIndex).length);
-        loadDailyHabits(true); // skipNotionCreate — we'll handle it below
+        loadDailyHabits();
         updateSyncDot();
         if (!silent) showToast('✓ 已同步 ' + count + ' 天');
         syncInProgress = false;
-        // Auto-create today if not in Notion yet
-        const today = new Date().toISOString().split('T')[0];
-        if (!notionPageIndex[today]) {
-            console.log('[RayOS Direct] Today', today, 'not in Notion — creating');
-            if (!dailyHabitsData[today]) {
-                dailyHabitsData[today] = {trading:false,advertise:false,deliver:false,gym:false,fatloss:false,ai:false};
-                localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
-            }
-            await createDayInNotionDirect(today);
-            loadDailyHabits(true);
-        }
+        // 不自動建立今天的 Notion 項目，等使用者勾選時再建立
         return true;
     } catch (e) {
         console.error('[RayOS Direct] Sync error:', e);
@@ -428,12 +418,74 @@ function checkNewDay() {
         if (!dailyHabitsData[now]) {
             dailyHabitsData[now] = {trading:false,advertise:false,deliver:false,gym:false,fatloss:false,ai:false};
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
-            createDayInNotion(now);
         }
+        // 不自動建立 Notion 項目，等使用者勾選時再建立
         loadDailyHabits();
         showToast('🌅 新的一天 ' + now);
     }
 }
 setInterval(checkNewDay, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewDay(); });
+
+// === 批次建立未來 7 天 ===
+async function createNext7Days() {
+    const statusEl = document.getElementById('create-week-status');
+    if (!statusEl) return;
+    statusEl.textContent = '⏳ 正在建立...';
+
+    const today = new Date();
+    let created = 0, skipped = 0;
+
+    // Notion Direct API 路徑
+    if (hasNotionDirect()) {
+        try {
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(today);
+                d.setDate(d.getDate() + i);
+                const dateStr = d.toISOString().split('T')[0];
+                if (notionPageIndex[dateStr]) {
+                    skipped++;
+                    continue;
+                }
+                if (!dailyHabitsData[dateStr]) {
+                    dailyHabitsData[dateStr] = {trading:false,advertise:false,deliver:false,gym:false,fatloss:false,ai:false};
+                }
+                await createDayInNotionDirect(dateStr);
+                created++;
+            }
+            localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
+            statusEl.textContent = '✅ 完成！建立 ' + created + ' 天，跳過 ' + skipped + ' 天（已存在）';
+            // 重新同步以更新畫面
+            await syncDailyFromNotionDirect(true);
+        } catch (e) {
+            statusEl.textContent = '❌ 建立失敗: ' + e.message;
+        }
+        return;
+    }
+
+    // N8N 路徑
+    const url = getN8nUrl();
+    if (url) {
+        try {
+            const startDate = today.toISOString().split('T')[0];
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'create_weekly_entries', start_date: startDate })
+            });
+            const data = await res.json();
+            if (data.success) {
+                statusEl.textContent = '✅ 完成！建立 ' + (data.created || 0) + ' 天，跳過 ' + (data.skipped || 0) + ' 天';
+                await syncDailyFromNotion(true);
+            } else {
+                statusEl.textContent = '❌ 建立失敗: ' + (data.error || '未知錯誤');
+            }
+        } catch (e) {
+            statusEl.textContent = '❌ N8N 請求失敗: ' + e.message;
+        }
+        return;
+    }
+
+    statusEl.textContent = '❌ 請先設定 Notion Token 或 n8n URL';
+}
 

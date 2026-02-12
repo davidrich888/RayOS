@@ -41,7 +41,7 @@
     updateTradingDisplay();
     loadBodyProgressFromDrive(); // Load cached body progress photos before physic display
     updatePhysicDisplay();
-    loadDailyHabits(true); // skipNotionCreate on init — wait for sync
+    loadDailyHabits();
     renderAccountManager();
     updateSyncDot();
     updateBodySyncDot();
@@ -76,7 +76,7 @@
         setTimeout(async () => {
             const ok = await syncDailyFromNotionDirect(true);
             if (!ok) {
-                loadDailyHabits(true);
+                loadDailyHabits();
             }
         }, 500);
         // Auto-sync: Notion Direct (Wealth + Accounts + Ideas + Videos)
