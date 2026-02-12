@@ -851,6 +851,158 @@
 
     // === Resource Library 組件 ===
 
+    // 平台嵌入組件 — 自動偵測 URL 類型，嵌入原始貼文/影片
+    function PlatformEmbed({ url }) {
+      const containerRef = useRef(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(false);
+      const mountedRef = useRef(true);
+      const loadedRef = useRef(false);
+
+      const embedInfo = useMemo(() => {
+        if (!url) return null;
+        // X/Twitter
+        const tweetMatch = url.match(/https?:\/\/(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/);
+        if (tweetMatch) return { type: 'twitter', tweetId: tweetMatch[1] };
+        // Instagram
+        if (url.match(/https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\//)) return { type: 'instagram' };
+        // YouTube
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+        if (ytMatch) return { type: 'youtube', videoId: ytMatch[1] };
+        return null;
+      }, [url]);
+
+      useEffect(() => {
+        mountedRef.current = true;
+        loadedRef.current = false;
+
+        if (!embedInfo || embedInfo.type === 'youtube') {
+          setLoading(false);
+          loadedRef.current = true;
+          return;
+        }
+
+        // 超時 fallback
+        const timer = setTimeout(() => {
+          if (mountedRef.current && !loadedRef.current) {
+            setError(true);
+            setLoading(false);
+          }
+        }, 15000);
+
+        // 載入外部 script（如果還沒載入）
+        const ensureScript = (src) => {
+          if (!document.querySelector(`script[src="${src}"]`)) {
+            const s = document.createElement('script');
+            s.src = src;
+            s.async = true;
+            document.body.appendChild(s);
+          }
+        };
+
+        if (embedInfo.type === 'twitter') {
+          ensureScript('https://platform.twitter.com/widgets.js');
+          // 等 twttr 載入完成，再建立推文嵌入
+          const poll = setInterval(() => {
+            if (window.twttr?.widgets?.createTweet && containerRef.current) {
+              clearInterval(poll);
+              // 安全清空容器
+              while (containerRef.current.firstChild) {
+                containerRef.current.removeChild(containerRef.current.firstChild);
+              }
+              window.twttr.widgets.createTweet(
+                embedInfo.tweetId,
+                containerRef.current,
+                { theme: 'dark', conversation: 'none', dnt: true }
+              ).then((el) => {
+                if (mountedRef.current) {
+                  loadedRef.current = true;
+                  setLoading(false);
+                  if (!el) setError(true); // createTweet 回傳 null 表示推文不存在
+                }
+              }).catch(() => {
+                if (mountedRef.current) {
+                  loadedRef.current = true;
+                  setError(true);
+                  setLoading(false);
+                }
+              });
+            }
+          }, 200);
+          return () => { mountedRef.current = false; clearInterval(poll); clearTimeout(timer); };
+        }
+
+        if (embedInfo.type === 'instagram') {
+          ensureScript('https://www.instagram.com/embed.js');
+          const poll = setInterval(() => {
+            if (window.instgrm?.Embeds?.process) {
+              clearInterval(poll);
+              window.instgrm.Embeds.process();
+              if (mountedRef.current) {
+                loadedRef.current = true;
+                setLoading(false);
+              }
+            }
+          }, 200);
+          return () => { mountedRef.current = false; clearInterval(poll); clearTimeout(timer); };
+        }
+
+        return () => { mountedRef.current = false; clearTimeout(timer); };
+      }, [embedInfo]);
+
+      if (!embedInfo) return null;
+
+      return (
+        <div className="px-6 pb-4">
+          <div className="bg-neutral-800/30 rounded-xl p-4 border border-neutral-800 overflow-hidden">
+            <div className="text-sm font-medium text-neutral-400 mb-3">👁️ 原始貼文預覽</div>
+
+            {loading && !error && (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-pulse text-neutral-500 text-sm">載入嵌入內容中...</div>
+              </div>
+            )}
+
+            {error && (
+              <div className="text-center py-4">
+                <div className="text-neutral-500 text-sm mb-2">無法載入嵌入預覽</div>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-400 hover:underline">
+                  點擊開啟原始連結 →
+                </a>
+              </div>
+            )}
+
+            {embedInfo.type === 'twitter' && (
+              <div ref={containerRef} className="flex justify-center [&>*]:!mt-0 [&>*]:!mb-0" />
+            )}
+
+            {embedInfo.type === 'instagram' && (
+              <div ref={containerRef} className="flex justify-center">
+                <blockquote
+                  className="instagram-media"
+                  data-instgrm-permalink={url}
+                  data-instgrm-version="14"
+                  style={{ maxWidth: '540px', width: '100%', margin: '0 auto' }}
+                />
+              </div>
+            )}
+
+            {embedInfo.type === 'youtube' && (
+              <div className="aspect-video rounded-lg overflow-hidden">
+                <iframe
+                  src={'https://www.youtube.com/embed/' + embedInfo.videoId}
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     // 資源詳細彈窗組件
     function ResourceModal({ resource, onClose, onDelete }) {
       const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -916,6 +1068,9 @@
                 {resource.title}
               </h2>
             </div>
+
+            {/* 平台嵌入 — X 推文、IG 貼文、YT 影片 */}
+            <PlatformEmbed url={resource.url} />
 
             {/* Key Takeaway — 最醒目，放最上面 */}
             {resource.key_takeaway && (
