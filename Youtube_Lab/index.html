@@ -225,8 +225,17 @@
       const iframeRef = useRef(null);
 
       const getVideoId = (url) => {
-        const match = url?.match(/[?&]v=([^&]+)/);
-        return match ? match[1] : null;
+        if (!url) return null;
+        // youtube.com/watch?v=ID
+        let match = url.match(/[?&]v=([^&]+)/);
+        if (match) return match[1];
+        // youtu.be/ID
+        match = url.match(/youtu\.be\/([^?&/]+)/);
+        if (match) return match[1];
+        // youtube.com/embed/ID 或 youtube.com/shorts/ID
+        match = url.match(/youtube\.com\/(?:embed|shorts)\/([^?&/]+)/);
+        if (match) return match[1];
+        return null;
       };
 
       const videoId = getVideoId(video.url);
@@ -835,7 +844,9 @@
       const getThumbnail = (video) => {
         if (video.thumbnail) return video.thumbnail;
         if (video.url) {
-          const match = video.url.match(/[?&]v=([^&]+)/);
+          let match = video.url.match(/[?&]v=([^&]+)/);
+          if (!match) match = video.url.match(/youtu\.be\/([^?&/]+)/);
+          if (!match) match = video.url.match(/youtube\.com\/(?:embed|shorts)\/([^?&/]+)/);
           if (match) return `https://i.ytimg.com/vi/${match[1]}/hqdefault.jpg`;
         }
         return '';
