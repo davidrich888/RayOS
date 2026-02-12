@@ -856,8 +856,6 @@
       const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
       const [isDeleting, setIsDeleting] = useState(false);
       const [showFullContent, setShowFullContent] = useState(false);
-      const [imgError, setImgError] = useState(false);
-
       const handleDelete = async () => {
         setIsDeleting(true);
         try {
@@ -879,9 +877,6 @@
       const formattedDate = resource.created_time
         ? new Date(resource.created_time).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })
         : '';
-
-      // 用 image.thum.io 截圖
-      const screenshotUrl = resource.url ? `https://image.thum.io/get/width/800/crop/600/${resource.url}` : '';
 
       useEffect(() => {
         const handleEsc = (e) => {
@@ -922,30 +917,14 @@
               </h2>
             </div>
 
-            {/* 網頁截圖預覽 */}
-            {resource.url && !imgError && (
-              <div className="p-6 pb-4">
-                <div className="rounded-xl overflow-hidden border border-neutral-800 bg-neutral-800">
-                  <img
-                    src={screenshotUrl}
-                    alt="網頁預覽"
-                    className="w-full object-cover max-h-[400px]"
-                    loading="lazy"
-                    onError={() => setImgError(true)}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* 標籤 */}
-            {(resource.tags || []).length > 0 && (
+            {/* Key Takeaway — 最醒目，放最上面 */}
+            {resource.key_takeaway && (
               <div className="px-6 pb-4">
-                <div className="flex flex-wrap gap-2">
-                  {resource.tags.map(tag => (
-                    <span key={tag} className="text-sm bg-neutral-800 text-neutral-300 px-3 py-1.5 rounded-lg border border-neutral-700">
-                      {tag}
-                    </span>
-                  ))}
+                <div className="bg-gradient-to-br from-amber-900/40 to-amber-800/20 rounded-xl p-4 border border-amber-600/30">
+                  <div className="text-sm font-medium text-amber-400 mb-2">💡 一句話重點</div>
+                  <div className="text-base text-amber-200 font-medium leading-relaxed">
+                    {resource.key_takeaway}
+                  </div>
                 </div>
               </div>
             )}
@@ -962,14 +941,15 @@
               </div>
             )}
 
-            {/* Key Takeaway */}
-            {resource.key_takeaway && (
+            {/* 標籤 */}
+            {(resource.tags || []).length > 0 && (
               <div className="px-6 pb-4">
-                <div className="bg-gradient-to-br from-amber-900/40 to-amber-800/20 rounded-xl p-4 border border-amber-600/30">
-                  <div className="text-sm font-medium text-amber-400 mb-2">💡 一句話重點</div>
-                  <div className="text-base text-amber-200 font-medium leading-relaxed">
-                    {resource.key_takeaway}
-                  </div>
+                <div className="flex flex-wrap gap-2">
+                  {resource.tags.map(tag => (
+                    <span key={tag} className="text-sm bg-neutral-800 text-neutral-300 px-3 py-1.5 rounded-lg border border-neutral-700">
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
@@ -998,24 +978,40 @@
               </div>
             )}
 
-            {/* 底部按鈕 */}
-            <div className="p-6 pt-2 flex gap-3">
-              {resource.url && (
+            {/* URL 預覽卡片 */}
+            {resource.url && (
+              <div className="px-6 pb-4">
                 <a
                   href={resource.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3 rounded-xl bg-white hover:bg-neutral-200 text-black font-medium text-sm text-center transition-colors flex items-center justify-center gap-2"
+                  className="block bg-neutral-800/50 rounded-xl p-4 border border-neutral-700 hover:border-neutral-500 transition-colors group"
                 >
-                  🔗 開啟原始連結
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-neutral-700 flex items-center justify-center text-lg flex-shrink-0">
+                      {getSourceIcon(resource.source_type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-neutral-300 group-hover:text-white transition-colors truncate">
+                        {resource.url}
+                      </div>
+                      <div className="text-xs text-neutral-500 mt-0.5">
+                        點擊開啟原始連結 →
+                      </div>
+                    </div>
+                  </div>
                 </a>
-              )}
+              </div>
+            )}
+
+            {/* 底部按鈕 */}
+            <div className="p-6 pt-2 flex justify-end gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className="px-4 py-3 rounded-xl bg-neutral-800 hover:bg-red-900 text-neutral-400 hover:text-red-400 font-medium text-sm transition-colors"
                 title="刪除資源"
               >
-                🗑️
+                🗑️ 刪除
               </button>
               <button
                 onClick={onClose}
