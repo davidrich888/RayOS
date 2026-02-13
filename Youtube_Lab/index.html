@@ -1335,17 +1335,51 @@
       const [content, setContent] = useState("");
       const [sourceType, setSourceType] = useState("X");
       const [isSubmitting, setIsSubmitting] = useState(false);
+      const [submitStatus, setSubmitStatus] = useState(""); // 顯示送出進度
+      const [submitError, setSubmitError] = useState(""); // 顯示錯誤訊息
+
+      // 自動偵測 URL 類型
+      const isIgUrl = useMemo(() => url.toLowerCase().includes('instagram.com'), [url]);
+      const isXUrl = useMemo(() => url.toLowerCase().includes('x.com') || url.toLowerCase().includes('twitter.com'), [url]);
+      // 只有 X/Twitter 支援自動抓取；IG 因需登入，無法伺服器端抓取
+      const isAutoFetchUrl = isXUrl;
+
+      // URL 變更時自動偵測來源類型
+      const handleUrlChange = (newUrl) => {
+        setUrl(newUrl);
+        setSubmitError("");
+        const u = newUrl.toLowerCase();
+        if (u.includes('instagram.com')) {
+          setSourceType('Instagram');
+        } else if (u.includes('x.com') || u.includes('twitter.com')) {
+          setSourceType('X');
+        } else if (u.includes('youtube.com') || u.includes('youtu.be')) {
+          setSourceType('YouTube');
+        }
+      };
+
+      // 判斷是否可以送出：X URL 只需 URL、其他需要內容
+      const canSubmit = isAutoFetchUrl ? url.trim().length > 0 : content.trim().length > 0;
 
       const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!content.trim()) return;
+        if (!canSubmit) return;
 
         setIsSubmitting(true);
+        setSubmitError("");
+
+        // X URL 走伺服器端抓取
+        if (isAutoFetchUrl) {
+          setSubmitStatus("正在抓取推文內容...");
+        } else {
+          setSubmitStatus("正在送出給 AI 分析...");
+        }
+
         const payload = {
           type: "add_resource",
           data: {
             url: url.trim(),
-            content: content.trim(),
+            content: content.trim(), // IG/X 可以是空字串，n8n 會自動抓取
             source_type: sourceType,
             source: "manual",
           }
@@ -1353,39 +1387,33 @@
 
         try {
           console.log("📤 送出 Resource payload:", JSON.stringify(payload, null, 2));
+          setSubmitStatus("AI 正在分析分類中...");
           const res = await fetch(RESOURCE_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
           const data = await res.json();
+
+          // 檢查回傳是否有效
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
           onAdd(data);
-          // 清空表單
           setUrl("");
           setContent("");
           setSourceType("X");
           setIsOpen(false);
+          setSubmitStatus("");
         } catch (err) {
           console.error('新增資源失敗:', err);
-          // webhook 還沒建好時，用 mock 回傳測試
-          const mockResponse = {
-            id: "mock-" + Date.now(),
-            title: content.trim().substring(0, 30) + "...",
-            url: url.trim(),
-            content: content.trim(),
-            source_type: sourceType,
-            summary: "（AI 摘要待產生 — n8n webhook 尚未連接）",
-            key_takeaway: "（待 AI 處理）",
-            tags: [],
-            source: "manual",
-            created_time: new Date().toISOString(),
-          };
-          console.log("⚠️ Webhook 未連接，使用 mock 資料:", mockResponse);
-          onAdd(mockResponse);
-          setUrl("");
-          setContent("");
-          setSourceType("X");
-          setIsOpen(false);
+          if (isAutoFetchUrl && !content.trim()) {
+            setSubmitError("無法自動抓取推文內容，請手動複製推文文字貼到內容欄位");
+          } else {
+            setSubmitError("送出失敗，請稍後再試");
+          }
+          setSubmitStatus("");
         }
         setIsSubmitting(false);
       };
@@ -1419,32 +1447,65 @@
                 ))}
               </div>
 
-              {/* URL */}
-              <input
-                type="url"
-                placeholder="URL（可選）"
-                value={url}
-                onChange={e => setUrl(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-200 text-sm outline-none focus:border-neutral-600 transition-colors placeholder-neutral-600"
-              />
+              {/* URL — 放在最上面，優先輸入 */}
+              <div>
+                <input
+                  type="url"
+                  placeholder="貼上 URL（X 連結會自動抓取推文內容）"
+                  value={url}
+                  onChange={e => handleUrlChange(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-200 text-sm outline-none focus:border-neutral-600 transition-colors placeholder-neutral-600"
+                />
+                {/* URL 類型偵測提示 */}
+                {isXUrl && (
+                  <div className="mt-1.5 flex items-center gap-1.5 text-xs">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-green-400/80">系統會自動抓取推文內容，不用手動貼</span>
+                  </div>
+                )}
+                {isIgUrl && (
+                  <div className="mt-1.5 flex items-center gap-1.5 text-xs">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span className="text-amber-400/80">IG 需要手動複製貼文內容貼到下方</span>
+                  </div>
+                )}
+              </div>
 
-              {/* 內容 */}
+              {/* 內容 — 只有 X URL 時為選填，IG 和其他都必填 */}
               <textarea
-                placeholder="貼上內容或寫下筆記...（必填）"
+                placeholder={isAutoFetchUrl
+                  ? "內容（選填 — 系統會自動抓取推文）"
+                  : isIgUrl
+                    ? "請複製 IG 貼文內容貼在這裡...（必填）"
+                    : "貼上內容或寫下筆記...（必填）"}
                 value={content}
-                onChange={e => setContent(e.target.value)}
-                required
-                rows={4}
+                onChange={e => { setContent(e.target.value); setSubmitError(""); }}
+                rows={isAutoFetchUrl && !content ? 2 : 4}
                 className="w-full px-4 py-3 rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-200 text-sm outline-none focus:border-neutral-600 transition-colors placeholder-neutral-600 resize-none"
               />
 
-              {/* 送出 */}
+              {/* 錯誤訊息 */}
+              {submitError && (
+                <div className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+                  {submitError}
+                </div>
+              )}
+
+              {/* 送出進度 */}
+              {isSubmitting && submitStatus && (
+                <div className="flex items-center gap-2 text-sm text-neutral-400">
+                  <span className="inline-block w-3 h-3 border-2 border-neutral-500 border-t-white rounded-full animate-spin" />
+                  {submitStatus}
+                </div>
+              )}
+
+              {/* 送出按鈕 */}
               <button
                 type="submit"
-                disabled={!content.trim() || isSubmitting}
+                disabled={!canSubmit || isSubmitting}
                 className="px-6 py-2.5 rounded-xl bg-white text-black font-medium text-sm hover:bg-neutral-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "處理中..." : "送出給 AI 分類"}
+                {isSubmitting ? "處理中..." : isXUrl ? "自動抓取推文並分析" : "送出給 AI 分類"}
               </button>
             </form>
           )}

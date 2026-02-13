@@ -44,8 +44,14 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 - **位置**: 📊 RayOS Data 底下
 - **前端**: `Youtube_Lab/index.html`（Resource Library tab）
 - **Webhook**: `resource-library`（type 路由：fetch_resources / add_resource / delete_resource）
+- **n8n Workflow ID**: `vM3L8XI0sbu3uRZL`
 - **Fields**: 標題(title), URL(url), 來源類型(select: X/Instagram/Article/YouTube/Note/Other), 原始內容(rich_text), AI 摘要(rich_text), 一句話重點(rich_text), 分類標籤(multi_select), 來源(select: manual/telegram)
 - **AI 處理**: n8n 呼叫 Claude 做分類+摘要，前端不直接呼叫 AI
+- **URL 自動抓取**:
+  - X/Twitter URL → n8n 透過 oEmbed API (`publish.twitter.com/oembed`) 自動抓取推文內容，前端不需手動貼
+  - Instagram URL → oEmbed 不可靠（需 Meta 認證），前端要求用戶手動貼上貼文內容
+  - 其他 URL → 用戶需提供內容，走原有流程
+- **n8n add_resource 流程**: Webhook → 路由 → 判斷URL類型(Switch) → [X: oEmbed抓取 / IG: oEmbed嘗試 / 其他: 直接] → 準備AI分類 → Claude API → 解析 → 存入Notion → 回傳
 
 ### Moodboard
 - 使用 Google Drive（不是 Notion）
@@ -86,6 +92,8 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 | 中文亂碼 | encoding 問題 | 確保 UTF-8，byte-level 檢查 |
 | Sync 後舊資料殘留 | merge 邏輯沒有清除舊值 | 用完整替換而非合併 |
 | 未來日期顯示空 row | History table 固定生成 60 天 | 只顯示 dailyHabitsData 中存在的日期 |
+| IG/X URL 分析出登入頁面 | 前端 fetch 社群 URL 拿到登入頁 HTML | 走 n8n server-side oEmbed 抓取 |
+| IG oEmbed 回傳空白 | Meta 要求 Graph API 認證 | 前端要求用戶手動貼上 IG 內容 |
 
 ## 工作規則
 1. 先讀懂相關檔案，再動手改東西
