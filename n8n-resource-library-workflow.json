@@ -1,0 +1,1534 @@
+{
+    "updatedAt": "2026-02-12T20:02:43.833Z",
+    "createdAt": "2026-02-12T12:47:17.071Z",
+    "id": "vM3L8XI0sbu3uRZL",
+    "name": "Resource Library API",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "path": "resource-library",
+                "httpMethod": "POST",
+                "responseMode": "responseNode",
+                "options": {
+                    "rawBody": false
+                }
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                0,
+                0
+            ],
+            "id": "rl-webhook",
+            "name": "Webhook",
+            "webhookId": "resource-library"
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.body.type }}",
+                                        "rightValue": "fetch_resources",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputLabel": "Fetch"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.body.type }}",
+                                        "rightValue": "add_resource",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputLabel": "Add"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.body.type }}",
+                                        "rightValue": "delete_resource",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputLabel": "Delete"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3.2,
+            "position": [
+                220,
+                0
+            ],
+            "id": "rl-switch",
+            "name": "\u8def\u7531"
+        },
+        {
+            "parameters": {
+                "resource": "databasePage",
+                "operation": "getAll",
+                "databaseId": {
+                    "__rl": true,
+                    "value": "397a6457-079c-419e-ba44-df992b6ba1d4",
+                    "mode": "id"
+                },
+                "returnAll": true,
+                "options": {
+                    "downloadFiles": false
+                },
+                "simple": false
+            },
+            "type": "n8n-nodes-base.notion",
+            "typeVersion": 2.2,
+            "position": [
+                460,
+                -200
+            ],
+            "id": "rl-fetch-notion",
+            "name": "\u62c9\u53d6\u6240\u6709\u8cc7\u6e90",
+            "credentials": {
+                "notionApi": {
+                    "id": "5DghYzfNUQHZpTdf",
+                    "name": "YT_Lab"
+                }
+            },
+            "alwaysOutputData": true,
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const items = $input.all();\n\nconst resources = items.map(item => {\n  const props = item.json.properties || item.json;\n\n  // \u5b89\u5168\u5730\u53d6\u5f97\u5c6c\u6027\u503c\n  const getTitle = (p) => {\n    if (!p) return '';\n    if (p.title && Array.isArray(p.title)) return p.title.map(t => t.plain_text || '').join('');\n    return '';\n  };\n\n  const getRichText = (p) => {\n    if (!p) return '';\n    if (p.rich_text && Array.isArray(p.rich_text)) return p.rich_text.map(t => t.plain_text || '').join('');\n    return '';\n  };\n\n  const getUrl = (p) => {\n    if (!p) return '';\n    return p.url || '';\n  };\n\n  const getSelect = (p) => {\n    if (!p || !p.select) return '';\n    return p.select.name || '';\n  };\n\n  const getMultiSelect = (p) => {\n    if (!p || !p.multi_select) return [];\n    return p.multi_select.map(s => s.name);\n  };\n\n  return {\n    id: item.json.id,\n    title: getTitle(props['\u6a19\u984c']),\n    url: getUrl(props['URL']),\n    source_type: getSelect(props['\u4f86\u6e90\u985e\u578b']),\n    content: getRichText(props['\u539f\u59cb\u5167\u5bb9']),\n    summary: getRichText(props['AI \u6458\u8981']),\n    key_takeaway: getRichText(props['\u4e00\u53e5\u8a71\u91cd\u9ede']),\n    tags: getMultiSelect(props['\u5206\u985e\u6a19\u7c64']),\n    source: getSelect(props['\u4f86\u6e90']),\n    created_time: item.json.created_time || ''\n  };\n});\n\n// \u6309\u5efa\u7acb\u6642\u9593\u5012\u5e8f\nresources.sort((a, b) => new Date(b.created_time) - new Date(a.created_time));\n\nreturn [{ json: { resources } }];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                680,
+                -200
+            ],
+            "id": "rl-format-fetch",
+            "name": "\u683c\u5f0f\u5316\u8cc7\u6e90\u5217\u8868",
+            "alwaysOutputData": true
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify($json.resources) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                900,
+                -200
+            ],
+            "id": "rl-respond-fetch",
+            "name": "\u56de\u50b3\u8cc7\u6e90\u5217\u8868"
+        },
+        {
+            "parameters": {
+                "jsCode": "const data = $json.body.data;\nconst content = data.content || '';\nconst url = data.url || '';\nconst sourceType = data.source_type || 'Note';\n\nconst prompt = `\u4f60\u662f\u4e00\u500b\u77e5\u8b58\u7ba1\u7406\u52a9\u624b\u3002\u5206\u6790\u4ee5\u4e0b\u5167\u5bb9\u4e26\u7528\u7e41\u9ad4\u4e2d\u6587\u56de\u7b54\u3002\n\n\u539f\u59cb\u5167\u5bb9\uff1a\n${content}\n\n\u4f86\u6e90\u7db2\u5740\uff1a${url || '\u7121'}\n\u4f86\u6e90\u985e\u578b\uff1a${sourceType}\n\n\u8acb\u56b4\u683c\u6309\u7167\u4ee5\u4e0b\u683c\u5f0f\u56de\u7b54\uff08\u6bcf\u500b\u6a19\u7c64\u5404\u4f54\u4e00\u884c\uff0c\u4e0d\u8981\u52a0\u5176\u4ed6\u5167\u5bb9\uff09\uff1a\n\n\u3010\u6a19\u984c\u3011\u7528\u4e00\u53e5\u8a71\u6982\u62ec\u6b64\u5167\u5bb9\uff0815\u5b57\u4ee5\u5167\uff0c\u4e0d\u52a0\u6a19\u9ede\uff09\n\u3010AI\u6458\u8981\u30112-3\u53e5\u8a71\u6458\u8981\u6838\u5fc3\u5167\u5bb9\n\u3010\u4e00\u53e5\u8a71\u91cd\u9ede\u3011\u6700\u6838\u5fc3\u7684\u6536\u7a6b\uff0c\u7528\u4e00\u53e5\u8a71\u8868\u9054\n\u3010\u5206\u985e\u6a19\u7c64\u3011\u5f9e\u4ee5\u4e0b\u9078\u9805\u4e2d\u9078\u64c71-3\u500b\uff0c\u7528\u9017\u865f\u5206\u9694\uff1aMoney/Business, AI/Tech, Trading, Content Creation, Mindset, Tools, Learning`;\n\nreturn [{\n  json: {\n    body: {\n      model: 'claude-sonnet-4-20250514',\n      max_tokens: 1024,\n      messages: [{ role: 'user', content: prompt }]\n    },\n    originalData: {\n      url: url,\n      content: content,\n      sourceType: sourceType,\n      source: data.source || 'manual'\n    }\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                980,
+                0
+            ],
+            "id": "rl-add-prep",
+            "name": "\u6e96\u5099AI\u5206\u985e"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.anthropic.com/v1/messages",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "x-api-key",
+                            "value": "YOUR_ANTHROPIC_API_KEY"
+                        },
+                        {
+                            "name": "anthropic-version",
+                            "value": "2023-06-01"
+                        },
+                        {
+                            "name": "content-type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify($json.body) }}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                1200,
+                0
+            ],
+            "id": "rl-add-ai",
+            "name": "AI\u5206\u985e\u6458\u8981"
+        },
+        {
+            "parameters": {
+                "jsCode": "const aiResponse = $json.content[0].text;\nconst originalData = $('\u6e96\u5099AI\u5206\u985e').item.json.originalData;\n\nfunction extract(text, tag) {\n  const regex = new RegExp('\u3010' + tag + '\u3011\\\\s*(.+?)(?=\\\\n\u3010|$)', 's');\n  const match = text.match(regex);\n  return match ? match[1].trim() : '';\n}\n\nconst title = extract(aiResponse, '\u6a19\u984c');\nconst summary = extract(aiResponse, 'AI\u6458\u8981');\nconst keyTakeaway = extract(aiResponse, '\u4e00\u53e5\u8a71\u91cd\u9ede');\nconst tagsRaw = extract(aiResponse, '\u5206\u985e\u6a19\u7c64');\n\nconst tagEmojiMap = {\n  'Money/Business': '\ud83d\udcb0 Money/Business',\n  'AI/Tech': '\ud83e\udd16 AI/Tech',\n  'Trading': '\ud83d\udcc8 Trading',\n  'Content Creation': '\ud83d\udcf9 Content Creation',\n  'Mindset': '\ud83e\udde0 Mindset',\n  'Tools': '\ud83d\udd27 Tools',\n  'Learning': '\ud83d\udcda Learning'\n};\n\nconst tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean).map(t => {\n  return tagEmojiMap[t] || t;\n});\n\nreturn [{\n  json: {\n    title: title || originalData.content.substring(0, 20) + '...',\n    url: originalData.url,\n    content: originalData.content,\n    sourceType: originalData.sourceType,\n    summary: summary,\n    keyTakeaway: keyTakeaway,\n    tags: tags,\n    source: originalData.source\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1420,
+                0
+            ],
+            "id": "rl-add-parse",
+            "name": "\u89e3\u6790AI\u56de\u50b3"
+        },
+        {
+            "parameters": {
+                "resource": "databasePage",
+                "databaseId": {
+                    "__rl": true,
+                    "value": "397a6457-079c-419e-ba44-df992b6ba1d4",
+                    "mode": "id"
+                },
+                "title": "={{ $json.title }}",
+                "propertiesUi": {
+                    "propertyValues": [
+                        {
+                            "key": "URL|url",
+                            "urlValue": "={{ $json.url }}"
+                        },
+                        {
+                            "key": "\u4f86\u6e90\u985e\u578b|select",
+                            "selectValue": "={{ $json.sourceType }}"
+                        },
+                        {
+                            "key": "\u539f\u59cb\u5167\u5bb9|rich_text",
+                            "textContent": "={{ $json.content.substring(0, 2000) }}"
+                        },
+                        {
+                            "key": "AI \u6458\u8981|rich_text",
+                            "textContent": "={{ $json.summary }}"
+                        },
+                        {
+                            "key": "\u4e00\u53e5\u8a71\u91cd\u9ede|rich_text",
+                            "textContent": "={{ $json.keyTakeaway }}"
+                        },
+                        {
+                            "key": "\u4f86\u6e90|select",
+                            "selectValue": "={{ $json.source }}"
+                        },
+                        {
+                            "key": "\u5206\u985e\u6a19\u7c64|multi_select",
+                            "multiSelectValue": "={{ $json.tags.join(', ') }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.notion",
+            "typeVersion": 2.2,
+            "position": [
+                1640,
+                0
+            ],
+            "id": "rl-add-notion",
+            "name": "\u5b58\u5165Notion",
+            "credentials": {
+                "notionApi": {
+                    "id": "5DghYzfNUQHZpTdf",
+                    "name": "YT_Lab"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const notionPage = $json;\nconst prevData = $('\u89e3\u6790AI\u56de\u50b3').item.json;\n\nreturn [{\n  json: {\n    id: notionPage.id,\n    title: prevData.title,\n    url: prevData.url,\n    content: prevData.content,\n    source_type: prevData.sourceType,\n    summary: prevData.summary,\n    key_takeaway: prevData.keyTakeaway,\n    tags: prevData.tags,\n    source: prevData.source,\n    created_time: notionPage.created_time || new Date().toISOString()\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1860,
+                0
+            ],
+            "id": "rl-add-format",
+            "name": "\u683c\u5f0f\u5316\u56de\u50b3"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                2080,
+                0
+            ],
+            "id": "rl-respond-add",
+            "name": "\u56de\u50b3\u65b0\u8cc7\u6e90"
+        },
+        {
+            "parameters": {
+                "resource": "block",
+                "operation": "delete",
+                "blockId": "={{ $json.body.pageId }}"
+            },
+            "type": "n8n-nodes-base.notion",
+            "typeVersion": 2.2,
+            "position": [
+                460,
+                200
+            ],
+            "id": "rl-delete-notion",
+            "name": "\u522a\u9664\u8cc7\u6e90",
+            "credentials": {
+                "notionApi": {
+                    "id": "5DghYzfNUQHZpTdf",
+                    "name": "YT_Lab"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ success: true }) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                680,
+                200
+            ],
+            "id": "rl-respond-delete",
+            "name": "\u56de\u50b3\u522a\u9664\u7d50\u679c"
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": false,
+                                    "leftValue": "",
+                                    "typeValidation": "loose",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.body.data.url || '' }}",
+                                        "rightValue": "instagram.com",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputLabel": "Instagram"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": false,
+                                    "leftValue": "",
+                                    "typeValidation": "loose",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.body.data.url || '' }}",
+                                        "rightValue": "x.com",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    },
+                                    {
+                                        "leftValue": "={{ $json.body.data.url || '' }}",
+                                        "rightValue": "twitter.com",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "or"
+                            },
+                            "renameOutput": true,
+                            "outputLabel": "X/Twitter"
+                        }
+                    ]
+                },
+                "options": {
+                    "fallbackOutput": "extra"
+                }
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3.2,
+            "position": [
+                380,
+                0
+            ],
+            "id": "url-type-switch",
+            "name": "\u5224\u65b7URL\u985e\u578b"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "=https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=YOUR_APIFY_API_TOKEN",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify({ directUrls: [$json.body.data.url], resultsLimit: 1, resultsType: 'posts' }) }}",
+                "options": {
+                    "timeout": 60000
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                580,
+                -120
+            ],
+            "id": "ig-apify",
+            "name": "Apify\u6293\u53d6IG",
+            "onError": "continueRegularOutput",
+            "alwaysOutputData": true
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "=https://publish.twitter.com/oembed?url={{ $json.body.data.url }}&dnt=true",
+                "options": {
+                    "timeout": 10000
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                580,
+                120
+            ],
+            "id": "x-oembed",
+            "name": "\u6293\u53d6X\u5167\u5bb9",
+            "onError": "continueRegularOutput",
+            "alwaysOutputData": true
+        },
+        {
+            "parameters": {
+                "jsCode": "// Apify \u56de\u50b3\u7684\u662f\u9663\u5217\uff0c\u53d6\u7b2c\u4e00\u7b46\nconst items = $input.all();\nconst originalData = $('\u5224\u65b7URL\u985e\u578b').item.json.body.data;\n\n// \u5982\u679c\u7528\u6236\u5df2\u7d93\u63d0\u4f9b\u4e86\u8db3\u5920\u7684\u5167\u5bb9\uff08>20\u5b57\uff09\uff0c\u76f4\u63a5\u4f7f\u7528\nif (originalData.content && originalData.content.trim().length > 20) {\n  return [{\n    json: {\n      body: {\n        data: {\n          url: originalData.url,\n          content: originalData.content,\n          source_type: 'Instagram',\n          source: originalData.source || 'manual'\n        }\n      }\n    }\n  }];\n}\n\n// \u5617\u8a66\u5f9e Apify \u56de\u61c9\u4e2d\u63d0\u53d6\u5167\u5bb9\nlet fetchedContent = '';\nconst post = items[0]?.json;\n\nif (post && post.caption) {\n  const owner = post.ownerUsername || post.ownerFullName || '';\n  const caption = post.caption || '';\n  const likes = post.likesCount != null ? post.likesCount : '';\n  const comments = post.commentsCount != null ? post.commentsCount : '';\n  const hashtags = (post.hashtags || []).join(' ');\n\n  fetchedContent = '';\n  if (owner) fetchedContent += '[@' + owner + ' \\u7684 Instagram \\u8cbc\\u6587]\\n';\n  fetchedContent += caption;\n  if (likes !== '' || comments !== '') {\n    fetchedContent += '\\n\\n---\\n';\n    if (likes !== '') fetchedContent += '\\u2764\\ufe0f ' + likes + ' \\u8b9a';\n    if (comments !== '') fetchedContent += '  \\ud83d\\udcac ' + comments + ' \\u7559\\u8a00';\n  }\n  if (hashtags) fetchedContent += '\\n' + hashtags;\n}\n\n// Apify \u5931\u6557\u7684 fallback\nif (!fetchedContent) {\n  fetchedContent = originalData.content || ('Instagram \\u8cbc\\u6587: ' + originalData.url);\n}\n\nreturn [{\n  json: {\n    body: {\n      data: {\n        url: originalData.url,\n        content: fetchedContent.substring(0, 2000),\n        source_type: 'Instagram',\n        source: originalData.source || 'manual'\n      }\n    }\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                780,
+                -120
+            ],
+            "id": "ig-format",
+            "name": "\u6574\u7406Apify\u6293\u53d6\u7d50\u679c",
+            "onError": "continueRegularOutput",
+            "alwaysOutputData": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const oembedResponse = $json;\nconst originalData = $('\u5224\u65b7URL\u985e\u578b').item.json.body.data;\n\n// \u5982\u679c\u7528\u6236\u5df2\u7d93\u63d0\u4f9b\u4e86\u8db3\u5920\u7684\u5167\u5bb9\uff08>20\u5b57\uff09\uff0c\u76f4\u63a5\u4f7f\u7528\nif (originalData.content && originalData.content.trim().length > 20) {\n  return [{\n    json: {\n      body: {\n        data: {\n          url: originalData.url,\n          content: originalData.content,\n          source_type: 'X',\n          source: originalData.source || 'manual'\n        }\n      }\n    }\n  }];\n}\n\n// \u5f9e oEmbed HTML \u4e2d\u63d0\u53d6\u63a8\u6587\u6587\u5b57\nlet fetchedContent = '';\nif (oembedResponse.html) {\n  // Twitter oEmbed html: <blockquote><p>tweet text</p>...</blockquote>\n  const textMatch = oembedResponse.html.match(/<p[^>]*>([\\s\\S]*?)<\\/p>/g);\n  if (textMatch) {\n    fetchedContent = textMatch\n      .map(p => p.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '\"').replace(/&#39;/g, \"'\").trim())\n      .filter(t => t && !t.startsWith('\\u2014'))\n      .join('\\n');\n  }\n}\n\nif (oembedResponse.author_name) {\n  fetchedContent = '[@' + oembedResponse.author_name + ' \u7684\u63a8\u6587]\\n' + fetchedContent;\n}\n\n// \u5982\u679c oEmbed \u5931\u6557\nconst textOnly = fetchedContent.replace(/\\[@[^\\]]+\\]\\n/, '').trim();\nif (!textOnly) {\n  fetchedContent = originalData.content || ('X \u63a8\u6587: ' + originalData.url);\n}\n\nreturn [{\n  json: {\n    body: {\n      data: {\n        url: originalData.url,\n        content: fetchedContent.substring(0, 2000),\n        source_type: 'X',\n        source: originalData.source || 'manual'\n      }\n    }\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                780,
+                120
+            ],
+            "id": "x-format",
+            "name": "\u6574\u7406X\u6293\u53d6\u7d50\u679c",
+            "onError": "continueRegularOutput",
+            "alwaysOutputData": true
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "\u8def\u7531",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u8def\u7531": {
+            "main": [
+                [
+                    {
+                        "node": "\u62c9\u53d6\u6240\u6709\u8cc7\u6e90",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "\u5224\u65b7URL\u985e\u578b",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "\u522a\u9664\u8cc7\u6e90",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u62c9\u53d6\u6240\u6709\u8cc7\u6e90": {
+            "main": [
+                [
+                    {
+                        "node": "\u683c\u5f0f\u5316\u8cc7\u6e90\u5217\u8868",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u683c\u5f0f\u5316\u8cc7\u6e90\u5217\u8868": {
+            "main": [
+                [
+                    {
+                        "node": "\u56de\u50b3\u8cc7\u6e90\u5217\u8868",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u6e96\u5099AI\u5206\u985e": {
+            "main": [
+                [
+                    {
+                        "node": "AI\u5206\u985e\u6458\u8981",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI\u5206\u985e\u6458\u8981": {
+            "main": [
+                [
+                    {
+                        "node": "\u89e3\u6790AI\u56de\u50b3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u89e3\u6790AI\u56de\u50b3": {
+            "main": [
+                [
+                    {
+                        "node": "\u5b58\u5165Notion",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u5b58\u5165Notion": {
+            "main": [
+                [
+                    {
+                        "node": "\u683c\u5f0f\u5316\u56de\u50b3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u683c\u5f0f\u5316\u56de\u50b3": {
+            "main": [
+                [
+                    {
+                        "node": "\u56de\u50b3\u65b0\u8cc7\u6e90",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u522a\u9664\u8cc7\u6e90": {
+            "main": [
+                [
+                    {
+                        "node": "\u56de\u50b3\u522a\u9664\u7d50\u679c",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u5224\u65b7URL\u985e\u578b": {
+            "main": [
+                [
+                    {
+                        "node": "Apify\u6293\u53d6IG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "\u6293\u53d6X\u5167\u5bb9",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "\u6e96\u5099AI\u5206\u985e",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Apify\u6293\u53d6IG": {
+            "main": [
+                [
+                    {
+                        "node": "\u6574\u7406Apify\u6293\u53d6\u7d50\u679c",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u6293\u53d6X\u5167\u5bb9": {
+            "main": [
+                [
+                    {
+                        "node": "\u6574\u7406X\u6293\u53d6\u7d50\u679c",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u6574\u7406Apify\u6293\u53d6\u7d50\u679c": {
+            "main": [
+                [
+                    {
+                        "node": "\u6e96\u5099AI\u5206\u985e",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "\u6574\u7406X\u6293\u53d6\u7d50\u679c": {
+            "main": [
+                [
+                    {
+                        "node": "\u6e96\u5099AI\u5206\u985e",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": null,
+    "versionId": "ee615a2e-984b-4349-b865-61d85c6096e0",
+    "activeVersionId": "ee615a2e-984b-4349-b865-61d85c6096e0",
+    "versionCounter": 26,
+    "triggerCount": 1,
+    "shared": [
+        {
+            "updatedAt": "2026-02-12T12:47:17.075Z",
+            "createdAt": "2026-02-12T12:47:17.075Z",
+            "role": "workflow:owner",
+            "workflowId": "vM3L8XI0sbu3uRZL",
+            "projectId": "8OrJOE8M2xLMvnsL",
+            "project": {
+                "updatedAt": "2026-01-25T14:36:06.994Z",
+                "createdAt": "2026-01-25T14:36:02.440Z",
+                "id": "8OrJOE8M2xLMvnsL",
+                "name": "Ray Wang <david86726@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "03159ccd-5472-42e5-8e03-30e255e2141d",
+                "projectRelations": [
+                    {
+                        "updatedAt": "2026-01-25T14:36:02.440Z",
+                        "createdAt": "2026-01-25T14:36:02.440Z",
+                        "userId": "03159ccd-5472-42e5-8e03-30e255e2141d",
+                        "projectId": "8OrJOE8M2xLMvnsL",
+                        "user": {
+                            "updatedAt": "2026-02-13T18:40:42.000Z",
+                            "createdAt": "2026-01-25T14:36:01.005Z",
+                            "id": "03159ccd-5472-42e5-8e03-30e255e2141d",
+                            "email": "david86726@gmail.com",
+                            "firstName": "Ray",
+                            "lastName": "Wang",
+                            "personalizationAnswers": null,
+                            "settings": {
+                                "userActivated": true,
+                                "firstSuccessfulWorkflowId": "-Tk5ry_1IYjRF21joiIgq",
+                                "userActivatedAt": 1770048130752,
+                                "npsSurvey": {
+                                    "waitingForResponse": true,
+                                    "ignoredCount": 1,
+                                    "lastShownAt": 1770328858274
+                                }
+                            },
+                            "disabled": false,
+                            "mfaEnabled": false,
+                            "lastActiveAt": "2026-02-13",
+                            "isPending": false
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "tags": [],
+    "activeVersion": {
+        "updatedAt": "2026-02-12T20:02:43.834Z",
+        "createdAt": "2026-02-12T20:02:43.834Z",
+        "versionId": "ee615a2e-984b-4349-b865-61d85c6096e0",
+        "workflowId": "vM3L8XI0sbu3uRZL",
+        "nodes": [
+            {
+                "parameters": {
+                    "path": "resource-library",
+                    "httpMethod": "POST",
+                    "responseMode": "responseNode",
+                    "options": {
+                        "rawBody": false
+                    }
+                },
+                "type": "n8n-nodes-base.webhook",
+                "typeVersion": 2,
+                "position": [
+                    0,
+                    0
+                ],
+                "id": "rl-webhook",
+                "name": "Webhook",
+                "webhookId": "resource-library"
+            },
+            {
+                "parameters": {
+                    "rules": {
+                        "values": [
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 2
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.body.type }}",
+                                            "rightValue": "fetch_resources",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            }
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputLabel": "Fetch"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 2
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.body.type }}",
+                                            "rightValue": "add_resource",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            }
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputLabel": "Add"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 2
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.body.type }}",
+                                            "rightValue": "delete_resource",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            }
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputLabel": "Delete"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.switch",
+                "typeVersion": 3.2,
+                "position": [
+                    220,
+                    0
+                ],
+                "id": "rl-switch",
+                "name": "\u8def\u7531"
+            },
+            {
+                "parameters": {
+                    "resource": "databasePage",
+                    "operation": "getAll",
+                    "databaseId": {
+                        "__rl": true,
+                        "value": "397a6457-079c-419e-ba44-df992b6ba1d4",
+                        "mode": "id"
+                    },
+                    "returnAll": true,
+                    "options": {
+                        "downloadFiles": false
+                    },
+                    "simple": false
+                },
+                "type": "n8n-nodes-base.notion",
+                "typeVersion": 2.2,
+                "position": [
+                    460,
+                    -200
+                ],
+                "id": "rl-fetch-notion",
+                "name": "\u62c9\u53d6\u6240\u6709\u8cc7\u6e90",
+                "credentials": {
+                    "notionApi": {
+                        "id": "5DghYzfNUQHZpTdf",
+                        "name": "YT_Lab"
+                    }
+                },
+                "alwaysOutputData": true,
+                "onError": "continueRegularOutput"
+            },
+            {
+                "parameters": {
+                    "jsCode": "const items = $input.all();\n\nconst resources = items.map(item => {\n  const props = item.json.properties || item.json;\n\n  // \u5b89\u5168\u5730\u53d6\u5f97\u5c6c\u6027\u503c\n  const getTitle = (p) => {\n    if (!p) return '';\n    if (p.title && Array.isArray(p.title)) return p.title.map(t => t.plain_text || '').join('');\n    return '';\n  };\n\n  const getRichText = (p) => {\n    if (!p) return '';\n    if (p.rich_text && Array.isArray(p.rich_text)) return p.rich_text.map(t => t.plain_text || '').join('');\n    return '';\n  };\n\n  const getUrl = (p) => {\n    if (!p) return '';\n    return p.url || '';\n  };\n\n  const getSelect = (p) => {\n    if (!p || !p.select) return '';\n    return p.select.name || '';\n  };\n\n  const getMultiSelect = (p) => {\n    if (!p || !p.multi_select) return [];\n    return p.multi_select.map(s => s.name);\n  };\n\n  return {\n    id: item.json.id,\n    title: getTitle(props['\u6a19\u984c']),\n    url: getUrl(props['URL']),\n    source_type: getSelect(props['\u4f86\u6e90\u985e\u578b']),\n    content: getRichText(props['\u539f\u59cb\u5167\u5bb9']),\n    summary: getRichText(props['AI \u6458\u8981']),\n    key_takeaway: getRichText(props['\u4e00\u53e5\u8a71\u91cd\u9ede']),\n    tags: getMultiSelect(props['\u5206\u985e\u6a19\u7c64']),\n    source: getSelect(props['\u4f86\u6e90']),\n    created_time: item.json.created_time || ''\n  };\n});\n\n// \u6309\u5efa\u7acb\u6642\u9593\u5012\u5e8f\nresources.sort((a, b) => new Date(b.created_time) - new Date(a.created_time));\n\nreturn [{ json: { resources } }];"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    680,
+                    -200
+                ],
+                "id": "rl-format-fetch",
+                "name": "\u683c\u5f0f\u5316\u8cc7\u6e90\u5217\u8868",
+                "alwaysOutputData": true
+            },
+            {
+                "parameters": {
+                    "respondWith": "json",
+                    "responseBody": "={{ JSON.stringify($json.resources) }}",
+                    "options": {
+                        "responseHeaders": {
+                            "entries": [
+                                {
+                                    "name": "Access-Control-Allow-Origin",
+                                    "value": "*"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": "n8n-nodes-base.respondToWebhook",
+                "typeVersion": 1.1,
+                "position": [
+                    900,
+                    -200
+                ],
+                "id": "rl-respond-fetch",
+                "name": "\u56de\u50b3\u8cc7\u6e90\u5217\u8868"
+            },
+            {
+                "parameters": {
+                    "jsCode": "const data = $json.body.data;\nconst content = data.content || '';\nconst url = data.url || '';\nconst sourceType = data.source_type || 'Note';\n\nconst prompt = `\u4f60\u662f\u4e00\u500b\u77e5\u8b58\u7ba1\u7406\u52a9\u624b\u3002\u5206\u6790\u4ee5\u4e0b\u5167\u5bb9\u4e26\u7528\u7e41\u9ad4\u4e2d\u6587\u56de\u7b54\u3002\n\n\u539f\u59cb\u5167\u5bb9\uff1a\n${content}\n\n\u4f86\u6e90\u7db2\u5740\uff1a${url || '\u7121'}\n\u4f86\u6e90\u985e\u578b\uff1a${sourceType}\n\n\u8acb\u56b4\u683c\u6309\u7167\u4ee5\u4e0b\u683c\u5f0f\u56de\u7b54\uff08\u6bcf\u500b\u6a19\u7c64\u5404\u4f54\u4e00\u884c\uff0c\u4e0d\u8981\u52a0\u5176\u4ed6\u5167\u5bb9\uff09\uff1a\n\n\u3010\u6a19\u984c\u3011\u7528\u4e00\u53e5\u8a71\u6982\u62ec\u6b64\u5167\u5bb9\uff0815\u5b57\u4ee5\u5167\uff0c\u4e0d\u52a0\u6a19\u9ede\uff09\n\u3010AI\u6458\u8981\u30112-3\u53e5\u8a71\u6458\u8981\u6838\u5fc3\u5167\u5bb9\n\u3010\u4e00\u53e5\u8a71\u91cd\u9ede\u3011\u6700\u6838\u5fc3\u7684\u6536\u7a6b\uff0c\u7528\u4e00\u53e5\u8a71\u8868\u9054\n\u3010\u5206\u985e\u6a19\u7c64\u3011\u5f9e\u4ee5\u4e0b\u9078\u9805\u4e2d\u9078\u64c71-3\u500b\uff0c\u7528\u9017\u865f\u5206\u9694\uff1aMoney/Business, AI/Tech, Trading, Content Creation, Mindset, Tools, Learning`;\n\nreturn [{\n  json: {\n    body: {\n      model: 'claude-sonnet-4-20250514',\n      max_tokens: 1024,\n      messages: [{ role: 'user', content: prompt }]\n    },\n    originalData: {\n      url: url,\n      content: content,\n      sourceType: sourceType,\n      source: data.source || 'manual'\n    }\n  }\n}];"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    980,
+                    0
+                ],
+                "id": "rl-add-prep",
+                "name": "\u6e96\u5099AI\u5206\u985e"
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "https://api.anthropic.com/v1/messages",
+                    "sendHeaders": true,
+                    "headerParameters": {
+                        "parameters": [
+                            {
+                                "name": "x-api-key",
+                                "value": "YOUR_ANTHROPIC_API_KEY"
+                            },
+                            {
+                                "name": "anthropic-version",
+                                "value": "2023-06-01"
+                            },
+                            {
+                                "name": "content-type",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    "sendBody": true,
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify($json.body) }}",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    1200,
+                    0
+                ],
+                "id": "rl-add-ai",
+                "name": "AI\u5206\u985e\u6458\u8981"
+            },
+            {
+                "parameters": {
+                    "jsCode": "const aiResponse = $json.content[0].text;\nconst originalData = $('\u6e96\u5099AI\u5206\u985e').item.json.originalData;\n\nfunction extract(text, tag) {\n  const regex = new RegExp('\u3010' + tag + '\u3011\\\\s*(.+?)(?=\\\\n\u3010|$)', 's');\n  const match = text.match(regex);\n  return match ? match[1].trim() : '';\n}\n\nconst title = extract(aiResponse, '\u6a19\u984c');\nconst summary = extract(aiResponse, 'AI\u6458\u8981');\nconst keyTakeaway = extract(aiResponse, '\u4e00\u53e5\u8a71\u91cd\u9ede');\nconst tagsRaw = extract(aiResponse, '\u5206\u985e\u6a19\u7c64');\n\nconst tagEmojiMap = {\n  'Money/Business': '\ud83d\udcb0 Money/Business',\n  'AI/Tech': '\ud83e\udd16 AI/Tech',\n  'Trading': '\ud83d\udcc8 Trading',\n  'Content Creation': '\ud83d\udcf9 Content Creation',\n  'Mindset': '\ud83e\udde0 Mindset',\n  'Tools': '\ud83d\udd27 Tools',\n  'Learning': '\ud83d\udcda Learning'\n};\n\nconst tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean).map(t => {\n  return tagEmojiMap[t] || t;\n});\n\nreturn [{\n  json: {\n    title: title || originalData.content.substring(0, 20) + '...',\n    url: originalData.url,\n    content: originalData.content,\n    sourceType: originalData.sourceType,\n    summary: summary,\n    keyTakeaway: keyTakeaway,\n    tags: tags,\n    source: originalData.source\n  }\n}];"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    1420,
+                    0
+                ],
+                "id": "rl-add-parse",
+                "name": "\u89e3\u6790AI\u56de\u50b3"
+            },
+            {
+                "parameters": {
+                    "resource": "databasePage",
+                    "databaseId": {
+                        "__rl": true,
+                        "value": "397a6457-079c-419e-ba44-df992b6ba1d4",
+                        "mode": "id"
+                    },
+                    "title": "={{ $json.title }}",
+                    "propertiesUi": {
+                        "propertyValues": [
+                            {
+                                "key": "URL|url",
+                                "urlValue": "={{ $json.url }}"
+                            },
+                            {
+                                "key": "\u4f86\u6e90\u985e\u578b|select",
+                                "selectValue": "={{ $json.sourceType }}"
+                            },
+                            {
+                                "key": "\u539f\u59cb\u5167\u5bb9|rich_text",
+                                "textContent": "={{ $json.content.substring(0, 2000) }}"
+                            },
+                            {
+                                "key": "AI \u6458\u8981|rich_text",
+                                "textContent": "={{ $json.summary }}"
+                            },
+                            {
+                                "key": "\u4e00\u53e5\u8a71\u91cd\u9ede|rich_text",
+                                "textContent": "={{ $json.keyTakeaway }}"
+                            },
+                            {
+                                "key": "\u4f86\u6e90|select",
+                                "selectValue": "={{ $json.source }}"
+                            },
+                            {
+                                "key": "\u5206\u985e\u6a19\u7c64|multi_select",
+                                "multiSelectValue": "={{ $json.tags.join(', ') }}"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.notion",
+                "typeVersion": 2.2,
+                "position": [
+                    1640,
+                    0
+                ],
+                "id": "rl-add-notion",
+                "name": "\u5b58\u5165Notion",
+                "credentials": {
+                    "notionApi": {
+                        "id": "5DghYzfNUQHZpTdf",
+                        "name": "YT_Lab"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "jsCode": "const notionPage = $json;\nconst prevData = $('\u89e3\u6790AI\u56de\u50b3').item.json;\n\nreturn [{\n  json: {\n    id: notionPage.id,\n    title: prevData.title,\n    url: prevData.url,\n    content: prevData.content,\n    source_type: prevData.sourceType,\n    summary: prevData.summary,\n    key_takeaway: prevData.keyTakeaway,\n    tags: prevData.tags,\n    source: prevData.source,\n    created_time: notionPage.created_time || new Date().toISOString()\n  }\n}];"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    1860,
+                    0
+                ],
+                "id": "rl-add-format",
+                "name": "\u683c\u5f0f\u5316\u56de\u50b3"
+            },
+            {
+                "parameters": {
+                    "respondWith": "json",
+                    "responseBody": "={{ JSON.stringify($json) }}",
+                    "options": {
+                        "responseHeaders": {
+                            "entries": [
+                                {
+                                    "name": "Access-Control-Allow-Origin",
+                                    "value": "*"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": "n8n-nodes-base.respondToWebhook",
+                "typeVersion": 1.1,
+                "position": [
+                    2080,
+                    0
+                ],
+                "id": "rl-respond-add",
+                "name": "\u56de\u50b3\u65b0\u8cc7\u6e90"
+            },
+            {
+                "parameters": {
+                    "resource": "block",
+                    "operation": "delete",
+                    "blockId": "={{ $json.body.pageId }}"
+                },
+                "type": "n8n-nodes-base.notion",
+                "typeVersion": 2.2,
+                "position": [
+                    460,
+                    200
+                ],
+                "id": "rl-delete-notion",
+                "name": "\u522a\u9664\u8cc7\u6e90",
+                "credentials": {
+                    "notionApi": {
+                        "id": "5DghYzfNUQHZpTdf",
+                        "name": "YT_Lab"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "respondWith": "json",
+                    "responseBody": "={{ JSON.stringify({ success: true }) }}",
+                    "options": {
+                        "responseHeaders": {
+                            "entries": [
+                                {
+                                    "name": "Access-Control-Allow-Origin",
+                                    "value": "*"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": "n8n-nodes-base.respondToWebhook",
+                "typeVersion": 1.1,
+                "position": [
+                    680,
+                    200
+                ],
+                "id": "rl-respond-delete",
+                "name": "\u56de\u50b3\u522a\u9664\u7d50\u679c"
+            },
+            {
+                "parameters": {
+                    "rules": {
+                        "values": [
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "loose",
+                                        "version": 2
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.body.data.url || '' }}",
+                                            "rightValue": "instagram.com",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "contains"
+                                            }
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputLabel": "Instagram"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": false,
+                                        "leftValue": "",
+                                        "typeValidation": "loose",
+                                        "version": 2
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.body.data.url || '' }}",
+                                            "rightValue": "x.com",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "contains"
+                                            }
+                                        },
+                                        {
+                                            "leftValue": "={{ $json.body.data.url || '' }}",
+                                            "rightValue": "twitter.com",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "contains"
+                                            }
+                                        }
+                                    ],
+                                    "combinator": "or"
+                                },
+                                "renameOutput": true,
+                                "outputLabel": "X/Twitter"
+                            }
+                        ]
+                    },
+                    "options": {
+                        "fallbackOutput": "extra"
+                    }
+                },
+                "type": "n8n-nodes-base.switch",
+                "typeVersion": 3.2,
+                "position": [
+                    380,
+                    0
+                ],
+                "id": "url-type-switch",
+                "name": "\u5224\u65b7URL\u985e\u578b"
+            },
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "=https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=YOUR_APIFY_API_TOKEN",
+                    "sendBody": true,
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify({ directUrls: [$json.body.data.url], resultsLimit: 1, resultsType: 'posts' }) }}",
+                    "options": {
+                        "timeout": 60000
+                    }
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    580,
+                    -120
+                ],
+                "id": "ig-apify",
+                "name": "Apify\u6293\u53d6IG",
+                "onError": "continueRegularOutput",
+                "alwaysOutputData": true
+            },
+            {
+                "parameters": {
+                    "method": "GET",
+                    "url": "=https://publish.twitter.com/oembed?url={{ $json.body.data.url }}&dnt=true",
+                    "options": {
+                        "timeout": 10000
+                    }
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    580,
+                    120
+                ],
+                "id": "x-oembed",
+                "name": "\u6293\u53d6X\u5167\u5bb9",
+                "onError": "continueRegularOutput",
+                "alwaysOutputData": true
+            },
+            {
+                "parameters": {
+                    "jsCode": "// Apify \u56de\u50b3\u7684\u662f\u9663\u5217\uff0c\u53d6\u7b2c\u4e00\u7b46\nconst items = $input.all();\nconst originalData = $('\u5224\u65b7URL\u985e\u578b').item.json.body.data;\n\n// \u5982\u679c\u7528\u6236\u5df2\u7d93\u63d0\u4f9b\u4e86\u8db3\u5920\u7684\u5167\u5bb9\uff08>20\u5b57\uff09\uff0c\u76f4\u63a5\u4f7f\u7528\nif (originalData.content && originalData.content.trim().length > 20) {\n  return [{\n    json: {\n      body: {\n        data: {\n          url: originalData.url,\n          content: originalData.content,\n          source_type: 'Instagram',\n          source: originalData.source || 'manual'\n        }\n      }\n    }\n  }];\n}\n\n// \u5617\u8a66\u5f9e Apify \u56de\u61c9\u4e2d\u63d0\u53d6\u5167\u5bb9\nlet fetchedContent = '';\nconst post = items[0]?.json;\n\nif (post && post.caption) {\n  const owner = post.ownerUsername || post.ownerFullName || '';\n  const caption = post.caption || '';\n  const likes = post.likesCount != null ? post.likesCount : '';\n  const comments = post.commentsCount != null ? post.commentsCount : '';\n  const hashtags = (post.hashtags || []).join(' ');\n\n  fetchedContent = '';\n  if (owner) fetchedContent += '[@' + owner + ' \\u7684 Instagram \\u8cbc\\u6587]\\n';\n  fetchedContent += caption;\n  if (likes !== '' || comments !== '') {\n    fetchedContent += '\\n\\n---\\n';\n    if (likes !== '') fetchedContent += '\\u2764\\ufe0f ' + likes + ' \\u8b9a';\n    if (comments !== '') fetchedContent += '  \\ud83d\\udcac ' + comments + ' \\u7559\\u8a00';\n  }\n  if (hashtags) fetchedContent += '\\n' + hashtags;\n}\n\n// Apify \u5931\u6557\u7684 fallback\nif (!fetchedContent) {\n  fetchedContent = originalData.content || ('Instagram \\u8cbc\\u6587: ' + originalData.url);\n}\n\nreturn [{\n  json: {\n    body: {\n      data: {\n        url: originalData.url,\n        content: fetchedContent.substring(0, 2000),\n        source_type: 'Instagram',\n        source: originalData.source || 'manual'\n      }\n    }\n  }\n}];"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    780,
+                    -120
+                ],
+                "id": "ig-format",
+                "name": "\u6574\u7406IG\u6293\u53d6\u7d50\u679c",
+                "onError": "continueRegularOutput",
+                "alwaysOutputData": true
+            },
+            {
+                "parameters": {
+                    "jsCode": "const oembedResponse = $json;\nconst originalData = $('\u5224\u65b7URL\u985e\u578b').item.json.body.data;\n\n// \u5982\u679c\u7528\u6236\u5df2\u7d93\u63d0\u4f9b\u4e86\u8db3\u5920\u7684\u5167\u5bb9\uff08>20\u5b57\uff09\uff0c\u76f4\u63a5\u4f7f\u7528\nif (originalData.content && originalData.content.trim().length > 20) {\n  return [{\n    json: {\n      body: {\n        data: {\n          url: originalData.url,\n          content: originalData.content,\n          source_type: 'X',\n          source: originalData.source || 'manual'\n        }\n      }\n    }\n  }];\n}\n\n// \u5f9e oEmbed HTML \u4e2d\u63d0\u53d6\u63a8\u6587\u6587\u5b57\nlet fetchedContent = '';\nif (oembedResponse.html) {\n  // Twitter oEmbed html: <blockquote><p>tweet text</p>...</blockquote>\n  const textMatch = oembedResponse.html.match(/<p[^>]*>([\\s\\S]*?)<\\/p>/g);\n  if (textMatch) {\n    fetchedContent = textMatch\n      .map(p => p.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '\"').replace(/&#39;/g, \"'\").trim())\n      .filter(t => t && !t.startsWith('\\u2014'))\n      .join('\\n');\n  }\n}\n\nif (oembedResponse.author_name) {\n  fetchedContent = '[@' + oembedResponse.author_name + ' \u7684\u63a8\u6587]\\n' + fetchedContent;\n}\n\n// \u5982\u679c oEmbed \u5931\u6557\nconst textOnly = fetchedContent.replace(/\\[@[^\\]]+\\]\\n/, '').trim();\nif (!textOnly) {\n  fetchedContent = originalData.content || ('X \u63a8\u6587: ' + originalData.url);\n}\n\nreturn [{\n  json: {\n    body: {\n      data: {\n        url: originalData.url,\n        content: fetchedContent.substring(0, 2000),\n        source_type: 'X',\n        source: originalData.source || 'manual'\n      }\n    }\n  }\n}];"
+                },
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    780,
+                    120
+                ],
+                "id": "x-format",
+                "name": "\u6574\u7406X\u6293\u53d6\u7d50\u679c",
+                "onError": "continueRegularOutput",
+                "alwaysOutputData": true
+            }
+        ],
+        "connections": {
+            "Webhook": {
+                "main": [
+                    [
+                        {
+                            "node": "\u8def\u7531",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u8def\u7531": {
+                "main": [
+                    [
+                        {
+                            "node": "\u62c9\u53d6\u6240\u6709\u8cc7\u6e90",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "\u5224\u65b7URL\u985e\u578b",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "\u522a\u9664\u8cc7\u6e90",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u62c9\u53d6\u6240\u6709\u8cc7\u6e90": {
+                "main": [
+                    [
+                        {
+                            "node": "\u683c\u5f0f\u5316\u8cc7\u6e90\u5217\u8868",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u683c\u5f0f\u5316\u8cc7\u6e90\u5217\u8868": {
+                "main": [
+                    [
+                        {
+                            "node": "\u56de\u50b3\u8cc7\u6e90\u5217\u8868",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u6e96\u5099AI\u5206\u985e": {
+                "main": [
+                    [
+                        {
+                            "node": "AI\u5206\u985e\u6458\u8981",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "AI\u5206\u985e\u6458\u8981": {
+                "main": [
+                    [
+                        {
+                            "node": "\u89e3\u6790AI\u56de\u50b3",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u89e3\u6790AI\u56de\u50b3": {
+                "main": [
+                    [
+                        {
+                            "node": "\u5b58\u5165Notion",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u5b58\u5165Notion": {
+                "main": [
+                    [
+                        {
+                            "node": "\u683c\u5f0f\u5316\u56de\u50b3",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u683c\u5f0f\u5316\u56de\u50b3": {
+                "main": [
+                    [
+                        {
+                            "node": "\u56de\u50b3\u65b0\u8cc7\u6e90",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u522a\u9664\u8cc7\u6e90": {
+                "main": [
+                    [
+                        {
+                            "node": "\u56de\u50b3\u522a\u9664\u7d50\u679c",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u5224\u65b7URL\u985e\u578b": {
+                "main": [
+                    [
+                        {
+                            "node": "Apify\u6293\u53d6IG",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "\u6293\u53d6X\u5167\u5bb9",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "\u6e96\u5099AI\u5206\u985e",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Apify\u6293\u53d6IG": {
+                "main": [
+                    [
+                        {
+                            "node": "\u6574\u7406Apify\u6293\u53d6\u7d50\u679c",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u6293\u53d6X\u5167\u5bb9": {
+                "main": [
+                    [
+                        {
+                            "node": "\u6574\u7406X\u6293\u53d6\u7d50\u679c",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u6574\u7406Apify\u6293\u53d6\u7d50\u679c": {
+                "main": [
+                    [
+                        {
+                            "node": "\u6e96\u5099AI\u5206\u985e",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "\u6574\u7406X\u6293\u53d6\u7d50\u679c": {
+                "main": [
+                    [
+                        {
+                            "node": "\u6e96\u5099AI\u5206\u985e",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
+        },
+        "authors": "Ray Wang",
+        "name": null,
+        "description": null,
+        "autosaved": false,
+        "workflowPublishHistory": [
+            {
+                "createdAt": "2026-02-12T20:02:44.024Z",
+                "id": 89,
+                "workflowId": "vM3L8XI0sbu3uRZL",
+                "versionId": "ee615a2e-984b-4349-b865-61d85c6096e0",
+                "event": "activated",
+                "userId": "03159ccd-5472-42e5-8e03-30e255e2141d"
+            },
+            {
+                "createdAt": "2026-02-12T20:02:44.452Z",
+                "id": 90,
+                "workflowId": "vM3L8XI0sbu3uRZL",
+                "versionId": "ee615a2e-984b-4349-b865-61d85c6096e0",
+                "event": "activated",
+                "userId": "03159ccd-5472-42e5-8e03-30e255e2141d"
+            }
+        ]
+    }
+}

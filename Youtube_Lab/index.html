@@ -1084,6 +1084,32 @@
               </div>
             )}
 
+            {/* 貼文內文 — Apify/oEmbed 抓到的原始內容 */}
+            {resource.content && (resource.source_type === 'Instagram' || resource.source_type === 'X') && (
+              <div className="px-6 pb-4">
+                <div className="bg-neutral-800/30 rounded-xl p-4 border border-neutral-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-medium text-neutral-400">
+                      {resource.source_type === 'Instagram' ? '📸' : '🐦'} 貼文內文
+                    </div>
+                    {resource.content.length > 300 && (
+                      <button
+                        onClick={() => setShowFullContent(!showFullContent)}
+                        className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+                      >
+                        {showFullContent ? "收合" : "展開全部"}
+                      </button>
+                    )}
+                  </div>
+                  <div className={`text-sm text-neutral-300 whitespace-pre-line leading-relaxed ${
+                    !showFullContent && resource.content.length > 300 ? 'line-clamp-6' : ''
+                  }`}>
+                    {resource.content}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* AI 摘要 */}
             {resource.summary && (
               <div className="px-6 pb-4">
@@ -1109,8 +1135,8 @@
               </div>
             )}
 
-            {/* 原始內容 */}
-            {resource.content && (
+            {/* 原始內容 — IG/X 的已經在「貼文內文」顯示，這裡只給其他類型用 */}
+            {resource.content && resource.source_type !== 'Instagram' && resource.source_type !== 'X' && (
               <div className="px-6 pb-4">
                 <div className="bg-neutral-800/30 rounded-xl p-4 border border-neutral-800">
                   <div className="flex items-center justify-between mb-3">
@@ -1341,8 +1367,8 @@
       // 自動偵測 URL 類型
       const isIgUrl = useMemo(() => url.toLowerCase().includes('instagram.com'), [url]);
       const isXUrl = useMemo(() => url.toLowerCase().includes('x.com') || url.toLowerCase().includes('twitter.com'), [url]);
-      // 只有 X/Twitter 支援自動抓取；IG 因需登入，無法伺服器端抓取
-      const isAutoFetchUrl = isXUrl;
+      // X/Twitter 和 Instagram 都支援自動抓取（IG 透過 Apify）
+      const isAutoFetchUrl = isXUrl || isIgUrl;
 
       // URL 變更時自動偵測來源類型
       const handleUrlChange = (newUrl) => {
@@ -1368,9 +1394,9 @@
         setIsSubmitting(true);
         setSubmitError("");
 
-        // X URL 走伺服器端抓取
+        // X/IG URL 走伺服器端抓取
         if (isAutoFetchUrl) {
-          setSubmitStatus("正在抓取推文內容...");
+          setSubmitStatus(isXUrl ? "正在抓取推文內容..." : "正在透過 Apify 抓取 IG 貼文...");
         } else {
           setSubmitStatus("正在送出給 AI 分析...");
         }
@@ -1409,7 +1435,7 @@
         } catch (err) {
           console.error('新增資源失敗:', err);
           if (isAutoFetchUrl && !content.trim()) {
-            setSubmitError("無法自動抓取推文內容，請手動複製推文文字貼到內容欄位");
+            setSubmitError(isXUrl ? "無法自動抓取推文內容，請手動複製推文文字貼到內容欄位" : "無法自動抓取 IG 貼文，請手動複製貼文內容貼到內容欄位");
           } else {
             setSubmitError("送出失敗，請稍後再試");
           }
@@ -1451,7 +1477,7 @@
               <div>
                 <input
                   type="url"
-                  placeholder="貼上 URL（X 連結會自動抓取推文內容）"
+                  placeholder="貼上 URL（X / IG 連結會自動抓取內容）"
                   value={url}
                   onChange={e => handleUrlChange(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-200 text-sm outline-none focus:border-neutral-600 transition-colors placeholder-neutral-600"
@@ -1465,8 +1491,8 @@
                 )}
                 {isIgUrl && (
                   <div className="mt-1.5 flex items-center gap-1.5 text-xs">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
-                    <span className="text-amber-400/80">IG 需要手動複製貼文內容貼到下方</span>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-green-400/80">系統會透過 Apify 自動抓取 IG 貼文內容，不用手動貼</span>
                   </div>
                 )}
               </div>
@@ -1505,7 +1531,7 @@
                 disabled={!canSubmit || isSubmitting}
                 className="px-6 py-2.5 rounded-xl bg-white text-black font-medium text-sm hover:bg-neutral-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "處理中..." : isXUrl ? "自動抓取推文並分析" : "送出給 AI 分類"}
+                {isSubmitting ? "處理中..." : isAutoFetchUrl ? (isXUrl ? "自動抓取推文並分析" : "自動抓取 IG 貼文並分析") : "送出給 AI 分類"}
               </button>
             </form>
           )}

@@ -49,9 +49,10 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 - **AI 處理**: n8n 呼叫 Claude 做分類+摘要，前端不直接呼叫 AI
 - **URL 自動抓取**:
   - X/Twitter URL → n8n 透過 oEmbed API (`publish.twitter.com/oembed`) 自動抓取推文內容，前端不需手動貼
-  - Instagram URL → oEmbed 不可靠（需 Meta 認證），前端要求用戶手動貼上貼文內容
+  - Instagram URL → n8n 透過 Apify (`apify/instagram-scraper`) 自動抓取貼文 caption、按讚數、留言數，前端不需手動貼
   - 其他 URL → 用戶需提供內容，走原有流程
-- **n8n add_resource 流程**: Webhook → 路由 → 判斷URL類型(Switch) → [X: oEmbed抓取 / IG: oEmbed嘗試 / 其他: 直接] → 準備AI分類 → Claude API → 解析 → 存入Notion → 回傳
+- **Apify 設定**: API Token 存在 n8n workflow HTTP Request 節點中，每月 $5 免費額度
+- **n8n add_resource 流程**: Webhook → 路由 → 判斷URL類型(Switch) → [X: oEmbed抓取 / IG: Apify抓取 / 其他: 直接] → 準備AI分類 → Claude API → 解析 → 存入Notion → 回傳
 
 ### Moodboard
 - 使用 Google Drive（不是 Notion）
@@ -92,8 +93,9 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 | 中文亂碼 | encoding 問題 | 確保 UTF-8，byte-level 檢查 |
 | Sync 後舊資料殘留 | merge 邏輯沒有清除舊值 | 用完整替換而非合併 |
 | 未來日期顯示空 row | History table 固定生成 60 天 | 只顯示 dailyHabitsData 中存在的日期 |
-| IG/X URL 分析出登入頁面 | 前端 fetch 社群 URL 拿到登入頁 HTML | 走 n8n server-side oEmbed 抓取 |
-| IG oEmbed 回傳空白 | Meta 要求 Graph API 認證 | 前端要求用戶手動貼上 IG 內容 |
+| X URL 分析出登入頁面 | 前端 fetch 社群 URL 拿到登入頁 HTML | 走 n8n server-side oEmbed 抓取 |
+| IG Apify 抓取失敗 | 私人帳號或 Apify 額度用完 | fallback 到用戶手動貼內容 |
+| IG Apify 超時 | Apify scraper 執行時間較長 | timeout 設 60 秒，超時走 fallback |
 
 ## 工作規則
 1. 先讀懂相關檔案，再動手改東西
