@@ -1,10 +1,11 @@
 {
   "actors": {
     "twitter": {
-      "actor_id": "apidojo/tweet-scraper",
-      "description": "抓取指定 X/Twitter 帳號的最新推文",
+      "actor_id": "kaitoeasyapi/twitter-x-data-tweet-scraper-pay-per-result-cheapest",
+      "description": "搜尋 X/Twitter 推文（按關鍵字搜尋，支援最新排序）",
       "timeout_seconds": 120,
-      "notes": "到 Apify Store 搜尋 'tweet scraper'，選一個評分高的。actor_id 格式為 'username/actor-name'"
+      "search_terms": ["Claude AI workflow", "AI automation use case", "prop firm trading bot"],
+      "notes": "$0.25/1K tweets，支援 searchTerms 搜尋。apidojo/tweet-scraper 需要另外租用，此 actor 免費可用"
     },
     "instagram": {
       "actor_id": "apify/instagram-scraper",

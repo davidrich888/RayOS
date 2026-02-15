@@ -13,9 +13,9 @@ Ray 的個人 AI 管家系統，由兩個 N8N workflow 組成，透過 Telegram 
 - **YouTube 追蹤 DB**: `b57a9c1760784b93b003f221262ff635`
 
 ## Apify Actors
-- Twitter: `apidojo/tweet-scraper`
+- Twitter/X: `kaitoeasyapi/twitter-x-data-tweet-scraper-pay-per-result-cheapest`（搜尋推文用）
 - Instagram: `apify/instagram-scraper`
-- YouTube: `bernardo/youtube-scraper`
+- YouTube: 改用免費 Atom RSS feed（不用 Apify）
 
 ## 檔案結構
 - `workflows/` — N8N workflow JSON，匯入 n8n 使用

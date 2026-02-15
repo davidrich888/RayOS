@@ -43,3 +43,42 @@
 - 資訊來源從 RSS + YouTube Atom → Apify（X + IG + YouTube）
 - 從 Notion 動態載入 YouTube 訂閱頻道（保留原有功能）
 - 帳號清單定義在 Code 節點頂部，對應 configs/ 資料夾的設定
+
+## v5.1 — 每日資訊整理（2026-02-16）
+
+### 變更
+- 從純 Apify 改為混合模式：RSS + YouTube Atom + Apify IG
+- X/Twitter 暫時跳過（Apify actor 尚未啟用）
+- YouTube 改用免費 Atom RSS feed（不需要 Apify）
+- Credential IDs 從 placeholder 更新為實際值
+
+## v5.2 — 每日資訊整理（2026-02-16）
+
+### 新功能
+- 每則消息底下附上可點擊的來源超連結（<a href="URL">來源</a>）
+- RSS items 擷取 <link> 標籤作為來源 URL
+- YouTube Atom entries 擷取 <link href="..."> 作為來源 URL
+- IG posts 附上原始貼文 URL
+- YouTube 時效從 48 小時延長至 72 小時
+
+### Prompt 偏好調整
+- 最重視「實際應用分享」（人們怎麼用 AI/工具的真實心得和成果）
+- 降低純知識型新聞的權重
+- 資料時效要求從 24 小時改為 72 小時
+- 過濾掉超過 72 小時的舊資訊
+
+### n8n 清理
+- 刪除舊版 workflow：每日資訊整理 v4、點子收集 v2、點子收集 v2.3
+
+## v5.3 — 每日資訊整理（2026-02-16）
+
+### 新功能
+- 加入 X/Twitter 資料來源（Apify actor: kaitoeasyapi/twitter-x-data-tweet-scraper-pay-per-result-cheapest）
+- 搜尋關鍵字：Claude AI workflow、AI automation use case、prop firm trading bot
+- X 推文放在 feed 最前面（因為是最重要的來源）
+- 每則推文包含 @username、推文內容、讚數、轉推數、連結
+
+### Prompt 調整
+- 強調「最重視 X/Twitter 上的實際應用分享」
+- 加入過濾垃圾推文和 bot 內容的指令
+- 統計新增 X 則數
