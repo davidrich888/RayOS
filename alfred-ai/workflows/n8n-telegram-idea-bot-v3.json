@@ -3,18 +3,24 @@
   "nodes": [
     {
       "parameters": {
-        "updates": ["message", "callback_query"],
+        "updates": [
+          "message",
+          "callback_query"
+        ],
         "additionalFields": {}
       },
       "id": "tg-trigger-001",
       "name": "Telegram Trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.1,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -24,8 +30,20 @@
           "values": [
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [{ "leftValue": "={{ $json.callback_query }}", "rightValue": "", "operator": { "type": "string", "operation": "exists" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.callback_query }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists"
+                    }
+                  }
+                ],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -33,8 +51,20 @@
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [{ "leftValue": "={{ $json.message }}", "rightValue": "", "operator": { "type": "string", "operation": "exists" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists"
+                    }
+                  }
+                ],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -48,15 +78,37 @@
       "name": "Route Event Type",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [220, 300]
+      "position": [
+        220,
+        300
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": false, "leftValue": "" },
+          "options": {
+            "caseSensitive": false,
+            "leftValue": ""
+          },
           "conditions": [
-            { "id": "f1", "leftValue": "={{ $json.message.text.length }}", "rightValue": 2, "operator": { "type": "number", "operation": "gt" } },
-            { "id": "f2", "leftValue": "={{ $json.message.text }}", "rightValue": "/", "operator": { "type": "string", "operation": "notStartsWith" } }
+            {
+              "id": "f1",
+              "leftValue": "={{ $json.message.text.length }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "f2",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/",
+              "operator": {
+                "type": "string",
+                "operation": "notStartsWith"
+              }
+            }
           ],
           "combinator": "and"
         }
@@ -65,7 +117,10 @@
       "name": "Filter Short & Commands",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2,
-      "position": [440, 400]
+      "position": [
+        440,
+        400
+      ]
     },
     {
       "parameters": {
@@ -75,7 +130,10 @@
       "name": "Build Claude Messages",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 400]
+      "position": [
+        660,
+        400
+      ]
     },
     {
       "parameters": {
@@ -84,26 +142,42 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-api-key", "value": "={{ $credentials.httpHeaderAuth.value }}" },
-            { "name": "anthropic-version", "value": "2023-06-01" },
-            { "name": "content-type", "value": "application/json" }
+            {
+              "name": "x-api-key",
+              "value": "={{ $credentials.httpHeaderAuth.value }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, system: $('Build Claude Messages').first().json.systemPrompt || '你是 Ray 的 AI 管家 Alfred。你既是 Ray 的點子分析師，也是他的日常 AI 助手。\\n\\n收到訊息後，請先判斷這是哪一種：\\n\\n📺 YouTube 追蹤的特徵：\\n- 包含 youtube.com、youtu.be 連結或 YouTube 頻道 handle（@xxx）\\n- 提到「追蹤」「訂閱」「加入」+ 頻道名\\n- 「追蹤關鍵字：xxx」或「搜尋關鍵字：xxx」的格式\\n- 明確要求監控某個 YouTube 內容來源\\n\\n💡 點子/想法的特徵：\\n- 提出新的商業計畫、產品 idea、內容方向、專案構想\\n- 句型常見：「我想要做...」「如果做一個...」「有一個 idea」「我在想...是不是可以...」\\n- 描述具體的行動計畫或目標\\n- 關於新的投資策略、交易方法\\n\\n💬 一般對話的特徵：\\n- 問你問題（「你是誰」「給我網址」「怎麼用」）\\n- 閒聊、打招呼（「你好」「早安」）\\n- 對之前回覆的追問或反應（但不是新點子）\\n- 請求幫忙做某件事（「幫我查...」「翻譯...」）\\n\\n■ 若是 📺 YouTube 追蹤：\\n1. 判斷是「頻道追蹤」還是「關鍵字搜尋」\\n2. 用繁體中文回覆確認訊息（1-2句）\\n3. 結尾加 ---JSON---：\\n\\n---JSON---\\n{\"title\": \"頻道名或關鍵字\", \"type\": \"📺 YouTube頻道\" 或 \"🔍 搜尋關鍵字\", \"channel_url\": \"https://...\", \"channel_id\": \"\"}\\n\\n注意：\\n- channel_url 只有頻道才需要填，關鍵字留空字串\\n- channel_id 留空字串，系統會自動解析\\n- 如果用戶給的是 @handle 格式，channel_url 填 https://www.youtube.com/@handle\\n\\n■ 若是 💡 點子/想法：\\n1. 用繁體中文友善地分析這個想法（3-5句）\\n2. 結尾加 ---JSON---：\\n\\n---JSON---\\n{\"title\": \"想法摘要（30字內）\", \"type\": \"選一個：💰 賣錢點子 / 📹 影片點子 / 🛠️ 工具/自動化 / 📝 內容點子 / 🌟 人生目標 / 🤔 其他\", \"priority\": \"選一個：🔥 高 / ⭐ 中 / 📌 低\", \"notes\": \"原始訊息 + 分析重點\"}\\n\\n■ 若是 💬 一般對話：\\n- 直接用繁體中文友善回覆\\n- 絕對不要加 ---JSON---\\n\\n■ 若是延續之前的對話且之前在討論點子：\\n- 繼續深入討論，並在最後更新 ---JSON--- 分類\\n\\n重要規則：\\n- 只有真正的新點子或 YouTube 追蹤請求才加 ---JSON---，一般聊天絕對不加\\n- 回覆中不要使用 Markdown 特殊字元（* _ ` [ ]），用純文字即可\\n- 如果需要強調，用全形括號【】或 emoji 標注', messages: $json.messages }) }}",
         "options": {
-          "response": { "response": { "responseFormat": "json" } }
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
         }
       },
       "id": "claude-001",
       "name": "Claude Analyze",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [880, 400],
+      "position": [
+        880,
+        400
+      ],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "ANTHROPIC_CREDENTIAL_ID",
+          "id": "WWmI3Lnd1wXqanNm",
           "name": "Anthropic API Key"
         }
       }
@@ -116,7 +190,10 @@
       "name": "Parse + Store State",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 400]
+      "position": [
+        1100,
+        400
+      ]
     },
     {
       "parameters": {
@@ -124,10 +201,27 @@
           "values": [
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "" },
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
                 "conditions": [
-                  { "leftValue": "={{ $json.isIdea }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } },
-                  { "leftValue": "={{ $json.isYouTube }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } }
+                  {
+                    "leftValue": "={{ $json.isIdea }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.isYouTube }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true"
+                    }
+                  }
                 ],
                 "combinator": "and"
               },
@@ -136,10 +230,27 @@
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "" },
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
                 "conditions": [
-                  { "leftValue": "={{ $json.isIdea }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } },
-                  { "leftValue": "={{ $json.isYouTube }}", "rightValue": false, "operator": { "type": "boolean", "operation": "false" } }
+                  {
+                    "leftValue": "={{ $json.isIdea }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.isYouTube }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false"
+                    }
+                  }
                 ],
                 "combinator": "and"
               },
@@ -148,8 +259,20 @@
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [{ "leftValue": "={{ $json.isIdea }}", "rightValue": false, "operator": { "type": "boolean", "operation": "false" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.isIdea }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false"
+                    }
+                  }
+                ],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -163,7 +286,10 @@
       "name": "Route Idea vs Chat",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [1320, 400]
+      "position": [
+        1320,
+        400
+      ]
     },
     {
       "parameters": {
@@ -173,7 +299,10 @@
       "name": "Resolve Channel ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1540, 250]
+      "position": [
+        1540,
+        250
+      ]
     },
     {
       "parameters": {
@@ -183,11 +312,14 @@
       "name": "Save to YouTube DB",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1760, 250],
+      "position": [
+        1760,
+        250
+      ],
       "credentials": {
         "notionApi": {
-          "id": "NOTION_CREDENTIAL_ID",
-          "name": "Alfred Notion"
+          "id": "ixkhHExGT30Z2UWZ",
+          "name": "Alfred AI"
         }
       }
     },
@@ -201,11 +333,14 @@
       "name": "Send YT Confirm",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1980, 250],
+      "position": [
+        1980,
+        250
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -217,7 +352,10 @@
       "name": "Build Reply Payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1540, 450]
+      "position": [
+        1540,
+        450
+      ]
     },
     {
       "parameters": {
@@ -231,11 +369,14 @@
       "name": "Send Analysis + Buttons",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1760, 450],
+      "position": [
+        1760,
+        450
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -249,11 +390,14 @@
       "name": "Send Chat Reply",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1540, 550],
+      "position": [
+        1540,
+        550
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -265,11 +409,14 @@
       "name": "Extract + Answer Callback",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 200],
+      "position": [
+        440,
+        200
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -279,8 +426,20 @@
           "values": [
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [{ "leftValue": "={{ $json.callbackData }}", "rightValue": "save_idea", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.callbackData }}",
+                    "rightValue": "save_idea",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -288,8 +447,20 @@
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [{ "leftValue": "={{ $json.callbackData }}", "rightValue": "skip_idea", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.callbackData }}",
+                    "rightValue": "skip_idea",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -297,8 +468,20 @@
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "" },
-                "conditions": [{ "leftValue": "={{ $json.callbackData }}", "rightValue": "discuss_more", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.callbackData }}",
+                    "rightValue": "discuss_more",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -312,7 +495,10 @@
       "name": "Route Callback",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [700, 200]
+      "position": [
+        700,
+        200
+      ]
     },
     {
       "parameters": {
@@ -322,14 +508,28 @@
       "name": "Retrieve State",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [940, 100]
+      "position": [
+        940,
+        100
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "" },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
           "conditions": [
-            { "id": "err-check", "leftValue": "={{ $json.error }}", "rightValue": true, "operator": { "type": "boolean", "operation": "false" } }
+            {
+              "id": "err-check",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
           ],
           "combinator": "and"
         }
@@ -338,26 +538,51 @@
       "name": "Has Valid Idea?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1120, 100]
+      "position": [
+        1120,
+        100
+      ]
     },
     {
       "parameters": {
         "resource": "databasePage",
         "operation": "create",
-        "databaseId": { "__rl": true, "value": "ed035c908cc04b7b999ef0c023557add", "mode": "id" },
+        "databaseId": {
+          "__rl": true,
+          "value": "ed035c908cc04b7b999ef0c023557add",
+          "mode": "id"
+        },
         "title": "={{ $json.title }}",
         "propertiesUi": {
           "propertyValues": [
-            { "key": "類型|select", "selectValue": "={{ $json.type }}" },
-            { "key": "狀態|select", "selectValue": "💡 新想法" },
-            { "key": "優先度|select", "selectValue": "={{ $json.priority }}" },
-            { "key": "建立日期|date", "dateValue": "={{ $json.date }}" }
+            {
+              "key": "類型|select",
+              "selectValue": "={{ $json.type }}"
+            },
+            {
+              "key": "狀態|select",
+              "selectValue": "💡 新想法"
+            },
+            {
+              "key": "優先度|select",
+              "selectValue": "={{ $json.priority }}"
+            },
+            {
+              "key": "建立日期|date",
+              "dateValue": "={{ $json.date }}"
+            }
           ]
         },
         "blockUi": {
           "blockValues": [
-            { "type": "paragraph", "textContent": "={{ $json.notes }}" },
-            { "type": "paragraph", "textContent": "={{ '\\n--- Alfred 分析 ---\\n' + $json.analysis }}" }
+            {
+              "type": "paragraph",
+              "textContent": "={{ $json.notes }}"
+            },
+            {
+              "type": "paragraph",
+              "textContent": "={{ '\\n--- Alfred 分析 ---\\n' + $json.analysis }}"
+            }
           ]
         }
       },
@@ -365,11 +590,14 @@
       "name": "Save to Notion Ideas",
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
-      "position": [1300, 100],
+      "position": [
+        1300,
+        100
+      ],
       "credentials": {
         "notionApi": {
-          "id": "NOTION_CREDENTIAL_ID",
-          "name": "Alfred Notion"
+          "id": "ixkhHExGT30Z2UWZ",
+          "name": "Alfred AI"
         }
       }
     },
@@ -381,7 +609,10 @@
       "name": "Build Save Confirmation",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1500, 100]
+      "position": [
+        1500,
+        100
+      ]
     },
     {
       "parameters": {
@@ -391,11 +622,14 @@
       "name": "Remove Buttons (Save)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1700, 100],
+      "position": [
+        1700,
+        100
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -409,11 +643,14 @@
       "name": "Send Save Confirm",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1900, 100],
+      "position": [
+        1900,
+        100
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -425,7 +662,10 @@
       "name": "Clear State (Skip)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [940, -50]
+      "position": [
+        940,
+        -50
+      ]
     },
     {
       "parameters": {
@@ -435,11 +675,14 @@
       "name": "Remove Buttons (Skip)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1160, -50],
+      "position": [
+        1160,
+        -50
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -453,11 +696,14 @@
       "name": "Send Skip Reply",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1380, -50],
+      "position": [
+        1380,
+        -50
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -469,7 +715,10 @@
       "name": "Build Discuss Reply",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [940, 200]
+      "position": [
+        940,
+        200
+      ]
     },
     {
       "parameters": {
@@ -479,11 +728,14 @@
       "name": "Remove Buttons (Discuss)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1160, 200],
+      "position": [
+        1160,
+        200
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -497,11 +749,14 @@
       "name": "Send Discuss Reply",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1380, 200],
+      "position": [
+        1380,
+        200
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -515,11 +770,14 @@
       "name": "Send Error Reply",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1300, -100],
+      "position": [
+        1300,
+        -100
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     },
@@ -531,95 +789,302 @@
       "name": "Remove Buttons (Error)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1120, -100],
+      "position": [
+        1120,
+        -100
+      ],
       "credentials": {
         "telegramApi": {
-          "id": "TELEGRAM_CREDENTIAL_ID",
-          "name": "Alfred Bot"
+          "id": "BCP0r7DgDFjUN976",
+          "name": "Alfred AI"
         }
       }
     }
   ],
   "connections": {
     "Telegram Trigger": {
-      "main": [[{ "node": "Route Event Type", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Route Event Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Route Event Type": {
       "main": [
-        [{ "node": "Extract + Answer Callback", "type": "main", "index": 0 }],
-        [{ "node": "Filter Short & Commands", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Extract + Answer Callback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter Short & Commands",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Filter Short & Commands": {
-      "main": [[{ "node": "Build Claude Messages", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Build Claude Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Build Claude Messages": {
-      "main": [[{ "node": "Claude Analyze", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Claude Analyze",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Claude Analyze": {
-      "main": [[{ "node": "Parse + Store State", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Parse + Store State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parse + Store State": {
-      "main": [[{ "node": "Route Idea vs Chat", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Route Idea vs Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Route Idea vs Chat": {
       "main": [
-        [{ "node": "Resolve Channel ID", "type": "main", "index": 0 }],
-        [{ "node": "Build Reply Payload", "type": "main", "index": 0 }],
-        [{ "node": "Send Chat Reply", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Resolve Channel ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Reply Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Chat Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Resolve Channel ID": {
-      "main": [[{ "node": "Save to YouTube DB", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Save to YouTube DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Save to YouTube DB": {
-      "main": [[{ "node": "Send YT Confirm", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Send YT Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Build Reply Payload": {
-      "main": [[{ "node": "Send Analysis + Buttons", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Send Analysis + Buttons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Extract + Answer Callback": {
-      "main": [[{ "node": "Route Callback", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Route Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Route Callback": {
       "main": [
-        [{ "node": "Retrieve State", "type": "main", "index": 0 }],
-        [{ "node": "Clear State (Skip)", "type": "main", "index": 0 }],
-        [{ "node": "Build Discuss Reply", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Retrieve State",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clear State (Skip)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Discuss Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Retrieve State": {
-      "main": [[{ "node": "Has Valid Idea?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Has Valid Idea?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Has Valid Idea?": {
       "main": [
-        [{ "node": "Save to Notion Ideas", "type": "main", "index": 0 }],
-        [{ "node": "Remove Buttons (Error)", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Save to Notion Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Remove Buttons (Error)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Remove Buttons (Error)": {
-      "main": [[{ "node": "Send Error Reply", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Send Error Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Save to Notion Ideas": {
-      "main": [[{ "node": "Build Save Confirmation", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Build Save Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Build Save Confirmation": {
-      "main": [[{ "node": "Remove Buttons (Save)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Remove Buttons (Save)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Remove Buttons (Save)": {
-      "main": [[{ "node": "Send Save Confirm", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Send Save Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Clear State (Skip)": {
-      "main": [[{ "node": "Remove Buttons (Skip)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Remove Buttons (Skip)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Remove Buttons (Skip)": {
-      "main": [[{ "node": "Send Skip Reply", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Send Skip Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Build Discuss Reply": {
-      "main": [[{ "node": "Remove Buttons (Discuss)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Remove Buttons (Discuss)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Remove Buttons (Discuss)": {
-      "main": [[{ "node": "Send Discuss Reply", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Send Discuss Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -629,7 +1094,23 @@
     "errorWorkflow": ""
   },
   "staticData": null,
-  "tags": [{ "name": "telegram" }, { "name": "notion" }, { "name": "ai" }, { "name": "youtube" }, { "name": "alfred" }],
+  "tags": [
+    {
+      "name": "telegram"
+    },
+    {
+      "name": "notion"
+    },
+    {
+      "name": "ai"
+    },
+    {
+      "name": "youtube"
+    },
+    {
+      "name": "alfred"
+    }
+  ],
   "triggerCount": 1,
   "pinData": {}
 }
