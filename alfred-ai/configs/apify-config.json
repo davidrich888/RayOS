@@ -1,0 +1,24 @@
+{
+  "actors": {
+    "twitter": {
+      "actor_id": "apidojo/tweet-scraper",
+      "description": "抓取指定 X/Twitter 帳號的最新推文",
+      "timeout_seconds": 120,
+      "notes": "到 Apify Store 搜尋 'tweet scraper'，選一個評分高的。actor_id 格式為 'username/actor-name'"
+    },
+    "instagram": {
+      "actor_id": "apify/instagram-scraper",
+      "description": "抓取指定 Instagram 帳號的最新貼文",
+      "timeout_seconds": 120,
+      "notes": "Apify 官方維護的 IG scraper，相對穩定"
+    },
+    "youtube": {
+      "actor_id": "bernardo/youtube-scraper",
+      "description": "抓取指定 YouTube 頻道/關鍵字的最新影片",
+      "timeout_seconds": 120,
+      "notes": "也可用 streamers/youtube-scraper，視需求調整"
+    }
+  },
+  "api_base_url": "https://api.apify.com/v2",
+  "notes": "Apify API Token 必須存在 n8n 的 HTTP Header Auth credential 中，不要寫在這裡"
+}

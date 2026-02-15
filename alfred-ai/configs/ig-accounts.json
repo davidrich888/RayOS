@@ -1,0 +1,10 @@
+{
+  "accounts": [
+    "openai",
+    "anthropicai"
+  ],
+  "keywords": [],
+  "lookback_hours": 24,
+  "max_posts_per_account": 3,
+  "notes": "修改這個檔案後，需要同步更新 n8n workflow 中 'Fetch All Sources via Apify' 節點的帳號清單"
+}

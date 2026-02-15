@@ -1,0 +1,156 @@
+{
+  "name": "Ray AI 管家 — 每日資訊整理 v5.0",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 8 * * *" }]
+        }
+      },
+      "id": "schedule-001",
+      "name": "Every Day 8AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 300]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 20 * * *" }]
+        }
+      },
+      "id": "schedule-002",
+      "name": "Every Day 8PM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===== v5.0: 用 Apify 統一抓取 X/IG/YouTube =====\n// 透過 n8n credential 取得 API tokens\n\nconst apifyCredentials = await this.helpers.getCredentials('httpHeaderAuth');\nconst APIFY_TOKEN = apifyCredentials.value;\n\nconst notionCredentials = await this.helpers.getCredentials('notionApi');\nconst NOTION_TOKEN = notionCredentials.apiKey;\n\n// ===== 設定區（對應 configs/ 資料夾的設定） =====\n\n// X/Twitter 帳號（對應 configs/x-accounts.json）\nconst xAccounts = [\n  '@AnthropicAI',\n  '@OpenAI',\n  '@skirano',\n  '@kabortz',\n  '@alexalbert__',\n  '@hwchase17'\n];\nconst xKeywords = ['AI agent', 'Claude Code', 'prop firm', 'n8n automation'];\n\n// Instagram 帳號（對應 configs/ig-accounts.json）\nconst igAccounts = [\n  'openai',\n  'anthropicai'\n];\n\n// YouTube 固定頻道（對應 configs/yt-channels.json）\nconst ytFixedChannels = [\n  { name: 'Anthropic', url: 'https://www.youtube.com/@anthropic-ai' }\n];\nconst ytKeywords = ['AI automation', 'Claude Code', 'prop firm trading', 'n8n workflow'];\n\n// Apify Actor IDs（對應 configs/apify-config.json）\nconst TWITTER_ACTOR = 'apidojo/tweet-scraper';\nconst IG_ACTOR = 'apify/instagram-scraper';\nconst YT_ACTOR = 'bernardo/youtube-scraper';\n\nconst APIFY_BASE = 'https://api.apify.com/v2';\nconst TIMEOUT = 120000; // 2 分鐘\n\n// ===== 工具函式 =====\n\nasync function runApifyActor(actorId, input) {\n  try {\n    const encodedActorId = actorId.replace('/', '~');\n    const response = await this.helpers.httpRequest({\n      method: 'POST',\n      url: `${APIFY_BASE}/acts/${encodedActorId}/run-sync-get-dataset-items`,\n      headers: {\n        'Authorization': `Bearer ${APIFY_TOKEN}`,\n        'Content-Type': 'application/json'\n      },\n      body: input,\n      json: true,\n      timeout: TIMEOUT\n    });\n    return { success: true, data: response };\n  } catch (e) {\n    return { success: false, error: e.message, actorId };\n  }\n}\n\n// ===== 從 Notion 載入動態 YouTube 訂閱 =====\n\nlet notionChannels = [];\nlet notionKeywords = [];\n\ntry {\n  const DB_ID = 'b57a9c1760784b93b003f221262ff635';\n  const notionRes = await this.helpers.httpRequest({\n    method: 'POST',\n    url: `https://api.notion.com/v1/databases/${DB_ID}/query`,\n    headers: {\n      'Authorization': `Bearer ${NOTION_TOKEN}`,\n      'Notion-Version': '2022-06-28',\n      'Content-Type': 'application/json'\n    },\n    body: {\n      filter: {\n        property: '狀態',\n        select: { equals: '✅ 啟用' }\n      }\n    },\n    json: true\n  });\n\n  for (const page of (notionRes.results || [])) {\n    const props = page.properties;\n    const type = props['類型']?.select?.name || '';\n    const name = props['Name']?.title?.[0]?.plain_text || '';\n    if (type === '📺 頻道') {\n      const channelId = props['Channel ID']?.rich_text?.[0]?.plain_text || '';\n      const channelUrl = props['URL']?.url || '';\n      if (name) notionChannels.push({ name, channelId, channelUrl });\n    } else if (type === '🔍 關鍵字') {\n      if (name) notionKeywords.push(name);\n    }\n  }\n} catch (e) {\n  // Notion 載入失敗，繼續用固定清單\n}\n\n// 合併固定 + Notion 的 YouTube 來源\nconst allYtChannels = [...ytFixedChannels];\nfor (const ch of notionChannels) {\n  if (!allYtChannels.find(c => c.name === ch.name)) {\n    allYtChannels.push({ name: ch.name, url: ch.channelUrl || '' });\n  }\n}\nconst allYtKeywords = [...new Set([...ytKeywords, ...notionKeywords])];\n\n// ===== 並行執行三個 Apify 抓取 =====\n\nconst log = { x: 0, ig: 0, yt: 0, errors: [] };\n\n// 準備 Apify 輸入\nconst twitterInput = {\n  startUrls: xAccounts.map(handle => ({\n    url: `https://twitter.com/${handle.replace('@', '')}`\n  })),\n  maxItems: xAccounts.length * 5,\n  sort: 'Latest'\n};\n\nconst igInput = {\n  directUrls: igAccounts.map(acc => `https://www.instagram.com/${acc}/`),\n  resultsLimit: igAccounts.length * 3,\n  resultsType: 'posts'\n};\n\nconst ytInput = {\n  searchKeywords: allYtKeywords.join(', '),\n  maxResults: 15,\n  startUrls: allYtChannels\n    .filter(ch => ch.url)\n    .map(ch => ({ url: ch.url }))\n};\n\n// 同時啟動三個抓取\nconst [xResult, igResult, ytResult] = await Promise.allSettled([\n  runApifyActor.call(this, TWITTER_ACTOR, twitterInput),\n  runApifyActor.call(this, IG_ACTOR, igInput),\n  runApifyActor.call(this, YT_ACTOR, ytInput)\n]);\n\n// ===== 處理結果 =====\n\nlet feedText = '';\n\n// --- X/Twitter ---\nif (xResult.status === 'fulfilled' && xResult.value.success && Array.isArray(xResult.value.data)) {\n  const tweets = xResult.value.data;\n  log.x = tweets.length;\n  if (tweets.length > 0) {\n    feedText += '\\n\\n--- 🐦 X/Twitter ---\\n';\n    for (const tweet of tweets.slice(0, 20)) {\n      const author = tweet.author?.userName || tweet.user?.screen_name || '未知';\n      const text = (tweet.text || tweet.full_text || '').substring(0, 300);\n      const likes = tweet.likeCount || tweet.favorite_count || 0;\n      const date = tweet.createdAt || tweet.created_at || '';\n      feedText += `- [@${author}] ${text}\\n  ❤️ ${likes} | ${date}\\n`;\n    }\n  }\n} else {\n  const errMsg = xResult.status === 'rejected' ? xResult.reason : (xResult.value?.error || '未知錯誤');\n  log.errors.push(`X/Twitter 抓取失敗: ${errMsg}`);\n  feedText += '\\n\\n--- 🐦 X/Twitter ---\\n（抓取失敗，請檢查 Apify actor 設定）\\n';\n}\n\n// --- Instagram ---\nif (igResult.status === 'fulfilled' && igResult.value.success && Array.isArray(igResult.value.data)) {\n  const posts = igResult.value.data;\n  log.ig = posts.length;\n  if (posts.length > 0) {\n    feedText += '\\n\\n--- 📸 Instagram ---\\n';\n    for (const post of posts.slice(0, 10)) {\n      const owner = post.ownerUsername || post.owner?.username || '未知';\n      const caption = (post.caption || '').substring(0, 300);\n      const likes = post.likesCount || post.likes?.count || 0;\n      feedText += `- [@${owner}] ${caption}\\n  ❤️ ${likes}\\n`;\n    }\n  }\n} else {\n  const errMsg = igResult.status === 'rejected' ? igResult.reason : (igResult.value?.error || '未知錯誤');\n  log.errors.push(`Instagram 抓取失敗: ${errMsg}`);\n  feedText += '\\n\\n--- 📸 Instagram ---\\n（抓取失敗，請檢查 Apify actor 設定）\\n';\n}\n\n// --- YouTube ---\nif (ytResult.status === 'fulfilled' && ytResult.value.success && Array.isArray(ytResult.value.data)) {\n  const videos = ytResult.value.data;\n  log.yt = videos.length;\n  if (videos.length > 0) {\n    feedText += '\\n\\n--- 🎬 YouTube ---\\n';\n    for (const video of videos.slice(0, 15)) {\n      const channel = video.channelName || video.channel || '未知';\n      const title = video.title || '';\n      const views = video.viewCount || video.views || 0;\n      const date = video.date || video.uploadDate || '';\n      feedText += `- [${channel}] ${title}\\n  👁️ ${views} views | ${date}\\n`;\n    }\n  }\n} else {\n  const errMsg = ytResult.status === 'rejected' ? ytResult.reason : (ytResult.value?.error || '未知錯誤');\n  log.errors.push(`YouTube 抓取失敗: ${errMsg}`);\n  feedText += '\\n\\n--- 🎬 YouTube ---\\n（抓取失敗，請檢查 Apify actor 設定）\\n';\n}\n\n// 如果全部失敗\nif (log.x === 0 && log.ig === 0 && log.yt === 0) {\n  feedText = '（今日所有來源都抓取失敗，請手動檢查 Apify 設定和額度）\\n\\n錯誤清單：\\n' + log.errors.join('\\n');\n}\n\nreturn [{ json: {\n  feedText,\n  xCount: log.x,\n  igCount: log.ig,\n  ytCount: log.yt,\n  errors: log.errors,\n  totalCount: log.x + log.ig + log.yt\n} }];"
+      },
+      "id": "code-fetch-all",
+      "name": "Fetch All Sources via Apify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APIFY_CREDENTIAL_ID",
+          "name": "Apify API Token"
+        },
+        "notionApi": {
+          "id": "NOTION_CREDENTIAL_ID",
+          "name": "Alfred Notion"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $credentials.httpHeaderAuth.value }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'claude-sonnet-4-5-20250929', max_tokens: 3000, system: '你是 Ray 的個人資訊助理 Alfred。\\n\\nRay 是一個 YouTube 內容創作者，專注於 Prop Firm 交易教學，同時也在開發 AI 自動化工具（RayOS）。\\n\\n以下是過去 24 小時從 X/Twitter、Instagram、YouTube 收集到的資訊。請幫我：\\n\\n1. 從所有來源中，挑出最值得我關注的 8-10 則\\n2. 分類為：🤖 AI/Tech、📈 Trading、🎬 Content Creation\\n3. 每則用 2-3 句繁體中文摘要\\n4. 標註來源平台（X/IG/YT）\\n5. 標註「⚡ 行動建議」：我需要馬上做什麼嗎？\\n\\n過濾標準（優先度由高到低）：\\n- 可以直接用在我工作流程的工具或方法\\n- 交易產業的重大變化或新規定\\n- 值得我拍影片講的話題\\n- 內容創作的新趨勢或平台變化\\n\\n過濾掉：\\n- 純炒作、沒有實質內容的推文\\n- 跟我領域完全無關的技術新聞\\n- 重複的資訊（不同來源講同一件事只留一則）\\n\\n輸出格式（使用 Telegram HTML 標籤）：\\n\\n<b>📊 Alfred 每日情報</b>\\n\\n<b>🤖 AI/Tech</b>\\n1. [X] 標題\\n   摘要內容\\n   ⚡ 行動建議（如果有）\\n\\n2. [YT] 標題\\n   摘要內容\\n\\n<b>📈 Trading</b>\\n1. [IG] 標題\\n   摘要內容\\n\\n<b>🎬 Content Creation</b>\\n1. ...\\n\\n---\\n🎯 今日最重要的一件事：{AI 挑出最值得關注的}\\n📌 本週趨勢觀察：{如果有明顯趨勢的話}\\n\\n重要規則：\\n- 使用 HTML 標籤格式化（<b>粗體</b>、<i>斜體</i>）\\n- 絕對不要用 Markdown 的 * 或 ** 或 ` 格式\\n- 如果需要顯示 < > 符號，用 &lt; &gt; 替代\\n- 保持訊息乾淨，不附連結', messages: [{ role: 'user', content: '以下是今天的資訊 feeds（X/Twitter ' + $json.xCount + ' 則 + Instagram ' + $json.igCount + ' 則 + YouTube ' + $json.ytCount + ' 支）：\\n' + $json.feedText + '\\n\\n請整理成每日摘要。' }] }) }}",
+        "options": {
+          "response": { "response": { "responseFormat": "json" } },
+          "timeout": 60000
+        }
+      },
+      "id": "claude-digest-001",
+      "name": "Claude Curate Digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [580, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 格式化摘要 + 分段（避免 Telegram 4096 字元限制）\nconst content = $input.first().json;\nlet text = '';\n\nif (content.content && content.content[0] && content.content[0].text) {\n  text = content.content[0].text;\n} else {\n  text = '⚠️ Claude API 回覆異常，請手動檢查 workflow。';\n}\n\n// 移除 Markdown 格式，保留 HTML\ntext = text.replace(/\\*\\*/g, '');\ntext = text.replace(/\\*/g, '');\n\n// 加上日期和簽名\nconst now = new Date();\nconst taipeiOffset = 8 * 60;\nconst taipeiTime = new Date(now.getTime() + (taipeiOffset + now.getTimezoneOffset()) * 60000);\nconst today = taipeiTime.toISOString().split('T')[0];\nconst hour = taipeiTime.getHours();\nconst period = hour < 14 ? '☀️ 早安' : '🌙 晚安';\n\n// 加上抓取統計\nconst fetchNode = $('Fetch All Sources via Apify').first().json;\nconst stats = `📊 來源統計：X ${fetchNode.xCount || 0} 則 / IG ${fetchNode.igCount || 0} 則 / YT ${fetchNode.ytCount || 0} 支`;\n\ntext += `\\n\\n---\\n📅 ${today} ${period} | ${stats}\\n🤖 Ray AI 管家 Alfred v5`;\n\n// 分段處理（Telegram 單則訊息上限 4096 字元）\nconst MAX_LEN = 4000;\nif (text.length <= MAX_LEN) {\n  return [{ json: { digest: text, parseMode: 'HTML' } }];\n}\n\nconst sections = text.split('\\n\\n');\nconst messages = [];\nlet current = '';\nfor (const section of sections) {\n  if ((current + '\\n\\n' + section).length > MAX_LEN && current.length > 0) {\n    messages.push(current.trim());\n    current = section;\n  } else {\n    current = current ? current + '\\n\\n' + section : section;\n  }\n}\nif (current.trim()) messages.push(current.trim());\n\nreturn messages.map((msg) => ({ json: { digest: msg, parseMode: 'HTML' } }));"
+      },
+      "id": "code-format-001",
+      "name": "Format Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 400]
+    },
+    {
+      "parameters": {
+        "chatId": "925855884",
+        "text": "={{ $json.digest }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "tg-send-digest",
+      "name": "Send Daily Digest",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1140, 400],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Alfred Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "925855884",
+        "text": "={{ '⚠️ Alfred Daily Digest 執行出錯\\n\\n錯誤節點：' + $json.execution?.error?.node || '未知' + '\\n錯誤訊息：' + $json.execution?.error?.message || '未知錯誤' + '\\n\\n請到 n8n 檢查 workflow 執行紀錄。' }}",
+        "additionalFields": {}
+      },
+      "id": "tg-send-error",
+      "name": "Send Error Notification",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1140, 600],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Alfred Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every Day 8AM": {
+      "main": [[{ "node": "Fetch All Sources via Apify", "type": "main", "index": 0 }]]
+    },
+    "Every Day 8PM": {
+      "main": [[{ "node": "Fetch All Sources via Apify", "type": "main", "index": 0 }]]
+    },
+    "Fetch All Sources via Apify": {
+      "main": [[{ "node": "Claude Curate Digest", "type": "main", "index": 0 }]]
+    },
+    "Claude Curate Digest": {
+      "main": [[{ "node": "Format Digest", "type": "main", "index": 0 }]]
+    },
+    "Format Digest": {
+      "main": [[{ "node": "Send Daily Digest", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "timezone": "Asia/Taipei"
+  },
+  "staticData": null,
+  "tags": [{ "name": "telegram" }, { "name": "daily-digest" }, { "name": "ai" }, { "name": "apify" }, { "name": "youtube" }, { "name": "twitter" }, { "name": "instagram" }, { "name": "alfred" }],
+  "triggerCount": 2,
+  "pinData": {}
+}

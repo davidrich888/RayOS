@@ -1,0 +1,12 @@
+{
+  "channels": [
+    {
+      "name": "Anthropic",
+      "url": "https://www.youtube.com/@anthropic-ai"
+    }
+  ],
+  "keywords": ["AI automation", "Claude Code", "prop firm trading", "n8n workflow"],
+  "lookback_hours": 48,
+  "max_videos_per_channel": 3,
+  "notes": "YouTube 頻道也會從 Notion YouTube 追蹤 DB 動態載入，這裡只放固定追蹤的頻道"
+}

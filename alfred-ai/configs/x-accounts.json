@@ -1,0 +1,14 @@
+{
+  "accounts": [
+    "@AnthropicAI",
+    "@OpenAI",
+    "@skirano",
+    "@kabortz",
+    "@alexalbert__",
+    "@hwchase17"
+  ],
+  "keywords": ["AI agent", "Claude Code", "prop firm", "n8n automation"],
+  "lookback_hours": 24,
+  "max_tweets_per_account": 5,
+  "notes": "修改這個檔案後，需要同步更新 n8n workflow 中 'Fetch All Sources via Apify' 節點的帳號清單"
+}
