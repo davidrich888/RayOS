@@ -37,15 +37,15 @@
   <script type="text/babel">
     const { useState, useMemo, useEffect, useRef } = React;
 
-    const API_URL = "https://david86726.app.n8n.cloud/webhook/youtube-videos";
-    const UPDATE_API_URL = "https://david86726.app.n8n.cloud/webhook/update-video";
-    const DELETE_API_URL = "https://david86726.app.n8n.cloud/webhook/delete-video";
+    const API_URL = "/api/youtube-videos";
+    const UPDATE_API_URL = "/api/update-video";
+    const DELETE_API_URL = "/api/delete-video";
 
     const categories = ["全部", "交易", "AI 自動化", "商業", "健身", "兩性", "人生", "美學"];
     const statuses = ["全部", "待看", "進行中", "已完成"];
 
     // === Resource Library 常數 ===
-    const RESOURCE_WEBHOOK_URL = "https://david86726.app.n8n.cloud/webhook/resource-library"; // placeholder，等 n8n 建好再確認
+    const RESOURCE_WEBHOOK_URL = "/api/resource-library";
     const RESOURCE_CACHE_KEY = "rayos_resource_library";
 
     const resourceCategories = [
