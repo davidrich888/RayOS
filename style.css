@@ -433,15 +433,17 @@
             .daily-column:nth-child(3) { grid-column: span 1; }
             .daily-column:nth-child(3) iframe { min-height: 300px !important; }
             .daily-history-wrapper { max-height: 350px; -webkit-overflow-scrolling: touch; }
-            .daily-history-wrapper thead th { font-size: 14px; padding: 8px 2px; }
-            .daily-history-wrapper thead th:first-child { font-size: 9px; }
+            .daily-history-wrapper { overflow-x: auto; }
+            .daily-history-wrapper thead th { font-size: 13px; padding: 8px 3px; }
+            .daily-history-wrapper thead th:first-child { font-size: 9px; min-width: 52px; }
             .daily-history-wrapper thead th:last-child { font-size: 9px; }
-            .daily-history-wrapper tbody td { padding: 6px 2px; font-size: 11px; }
-            #habits-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
-            .habit-item { padding: 8px !important; }
-            .habit-icon { font-size: 20px !important; }
-            .habit-name { font-size: 10px !important; }
-            .habit-time { font-size: 8px; }
+            .daily-history-wrapper tbody td { padding: 6px 3px; font-size: 12px; }
+            .daily-history-wrapper tbody td:first-child { font-size: 10px; white-space: nowrap; }
+            #habits-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; }
+            .habit-item { padding: 10px 6px !important; min-height: 70px; }
+            .habit-icon { font-size: 22px !important; }
+            .habit-name { font-size: 9px !important; }
+            .habit-time { font-size: 7px; }
             
             /* ===== TRADING SECTION ===== */
             #trading .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
@@ -493,7 +495,7 @@
             .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
             .cards { grid-template-columns: 1fr; }
             .summary-grid { grid-template-columns: 1fr; }
-            #habits-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            #habits-grid { grid-template-columns: repeat(3, 1fr) !important; }
             .header { padding-left: 58px; }
             .mobile-menu-btn { width: 44px; height: 44px; font-size: 18px; }
             .moodboard-title { font-size: 22px; letter-spacing: 4px; }
