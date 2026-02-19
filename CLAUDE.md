@@ -22,6 +22,8 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
   - `FatLoss` → frontend key: `fatloss` ⚠️ Notion 欄位名是 "FatLoss"（不是 "Fat Loss"）
   - `Gym` → frontend key: `gym`
   - `AI` → frontend key: `ai`
+  - `NoFap` → frontend key: `nofap`
+- **三態機制**: 前端支援 null/true/false 三態，Notion checkbox 只有 true/false（null 寫入為 false）
 - **Title field**: `Name`（格式為日期字串，如 "2026-02-12"）
 
 ### Physic Tracker
@@ -106,6 +108,19 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 
 ## 部署流程
 程式碼推到 GitHub → Vercel 自動部署，不需要手動操作
+
+## 檔案結構
+- index.html — 主頁面（單一 HTML 檔）
+- style.css — 樣式
+- js/ — JavaScript 模組（ai-engine, business, charts, daily, trading, wealth...）
+- api/ — API 路由（notion.js）
+- icons/ — PWA 圖示
+- workflows/ — n8n workflow JSON 備份
+- alfred-ai/ — AI 管家系統（Telegram Bot + N8N）
+- Youtube_Lab/ — YouTube 研究庫前端
+- archive/ — 舊版備份和棄用檔案
+- sw.js — Service Worker（PWA）
+- manifest.json / package.json / vercel.json — 設定檔
 
 ## 常用指令
 ```bash

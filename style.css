@@ -212,12 +212,13 @@
         /* Habit Items */
         .habit-item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: var(--bg-input); border: 1px solid var(--border); cursor: pointer; transition: all 0.3s; }
         .habit-item:hover { border-color: var(--text-muted); }
-        .habit-item:has(input:checked) { background: var(--accent-dim); border-color: var(--accent); }
-        .habit-item input { display: none; }
+        .habit-item.state-true { background: var(--accent-dim); border-color: var(--accent); }
+        .habit-item.state-false { background: rgba(230,57,70,0.15); border-color: var(--danger); }
         .habit-icon { font-size: 28px; }
         .habit-name { font-size: 12px; font-weight: 600; }
         .habit-time { font-size: 10px; color: var(--text-muted); }
-        .habit-item:has(input:checked) .habit-name { color: var(--accent); }
+        .habit-item.state-true .habit-name { color: var(--accent); }
+        .habit-item.state-false .habit-name { color: var(--danger); }
         
         /* Photo Gallery */
         .photo-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }

@@ -445,12 +445,13 @@
                         <div class="form-section" style="padding:16px;flex:1;">
                             <div class="form-title" style="font-size:14px;">✓ Daily Habits</div>
                             <div id="habits-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="trading" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">📈</span><span class="habit-name" style="font-size:12px;">Trading</span><span class="habit-time">4小時</span></label>
-                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="advertise" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">📣</span><span class="habit-name" style="font-size:12px;">Advertise</span><span class="habit-time">2小時</span></label>
-                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="deliver" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">📦</span><span class="habit-name" style="font-size:12px;">Deliver</span><span class="habit-time">2小時</span></label>
-                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="gym" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">💪</span><span class="habit-name" style="font-size:12px;">Gym</span><span class="habit-time">2小時</span></label>
-                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="fatloss" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">🥗</span><span class="habit-name" style="font-size:12px;">Fat Loss</span><span class="habit-time">2小時</span></label>
-                                <label class="habit-item" style="padding:12px;"><input type="checkbox" class="habit-check" data-habit="ai" onchange="updateDailyProgress()"><span class="habit-icon" style="font-size:24px;">🤖</span><span class="habit-name" style="font-size:12px;">AI</span><span class="habit-time">2小時</span></label>
+                                <div class="habit-item" data-habit="trading" onclick="cycleHabit('trading')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">📈</span><span class="habit-name" style="font-size:12px;">Trading</span><span class="habit-time">4小時</span></div>
+                                <div class="habit-item" data-habit="advertise" onclick="cycleHabit('advertise')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">📣</span><span class="habit-name" style="font-size:12px;">Advertise</span><span class="habit-time">2小時</span></div>
+                                <div class="habit-item" data-habit="deliver" onclick="cycleHabit('deliver')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">📦</span><span class="habit-name" style="font-size:12px;">Deliver</span><span class="habit-time">2小時</span></div>
+                                <div class="habit-item" data-habit="gym" onclick="cycleHabit('gym')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">💪</span><span class="habit-name" style="font-size:12px;">Gym</span><span class="habit-time">2小時</span></div>
+                                <div class="habit-item" data-habit="fatloss" onclick="cycleHabit('fatloss')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">🏃</span><span class="habit-name" style="font-size:12px;">Fat Loss</span><span class="habit-time">2小時</span></div>
+                                <div class="habit-item" data-habit="ai" onclick="cycleHabit('ai')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">🤖</span><span class="habit-name" style="font-size:12px;">AI</span><span class="habit-time">2小時</span></div>
+                                <div class="habit-item" data-habit="nofap" onclick="cycleHabit('nofap')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">🔫</span><span class="habit-name" style="font-size:12px;">NoFap</span></div>
                             </div>
                         </div>
                     </div>
@@ -468,8 +469,9 @@
                                             <th>📣</th>
                                             <th>📦</th>
                                             <th>💪</th>
-                                            <th>🥗</th>
+                                            <th>🏃</th>
                                             <th>🤖</th>
+                                            <th>🔫</th>
                                             <th>Total</th>
                                         </tr>
                                     </thead>

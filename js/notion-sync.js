@@ -7,7 +7,7 @@ const ACCOUNTS_DB_ID = '21e464db5e3e456ea7f324d951a11244';
 const IDEAS_DB_ID = 'ed035c908cc04b7b999ef0c023557add';
 const VIDEOS_DB_ID = '76fb8600ae9649bcb6c475f75f0ec818';
 const BODY_DS_ID = '6b8fea6a-9249-4a7b-a36e-5cd7f6ceb61f';
-const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI'};
+const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI', nofap:'NoFap'};
 const NOTION_API = 'https://api.notion.com/v1';
 let notionPageIndex = JSON.parse(localStorage.getItem('notion_page_index') || '{}');
 let syncInProgress = false;
@@ -73,12 +73,13 @@ async function syncDailyFromNotionDirect(silent = false) {
             if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) continue;
             newPageIndex[dateStr] = page.id;
             dailyHabitsData[dateStr] = {
-                trading: props['Trading']?.checkbox || false,
-                advertise: props['Advertise']?.checkbox || false,
-                deliver: props['Deliver']?.checkbox || props['Deliever']?.checkbox || false,
-                gym: props['Gym']?.checkbox || false,
-                fatloss: props['FatLoss']?.checkbox || props['Fat Loss']?.checkbox || false,
-                ai: props['AI']?.checkbox || false
+                trading: props['Trading']?.checkbox === true ? true : null,
+                advertise: props['Advertise']?.checkbox === true ? true : null,
+                deliver: (props['Deliver']?.checkbox || props['Deliever']?.checkbox) === true ? true : null,
+                gym: props['Gym']?.checkbox === true ? true : null,
+                fatloss: (props['FatLoss']?.checkbox || props['Fat Loss']?.checkbox) === true ? true : null,
+                ai: props['AI']?.checkbox === true ? true : null,
+                nofap: props['NoFap']?.checkbox === true ? true : null
             };
             count++;
         }
@@ -129,7 +130,8 @@ async function createDayInNotionDirect(dateStr) {
             'Deliver': { checkbox: !!habits.deliver },
             'Gym': { checkbox: !!habits.gym },
             'FatLoss': { checkbox: !!habits.fatloss },
-            'AI': { checkbox: !!habits.ai }
+            'AI': { checkbox: !!habits.ai },
+            'NoFap': { checkbox: !!habits.nofap }
         };
         // Add date property
         props['\u65e5\u671f'] = { date: { start: dateStr } };
@@ -189,12 +191,13 @@ async function syncDailyFromNotion(silent = false) {
             Object.keys(data.habits).forEach(dateStr => {
                 const nd = data.habits[dateStr];
                 dailyHabitsData[dateStr] = {
-                    trading: nd.Trading || nd.trading || false,
-                    advertise: nd.Advertise || nd.advertise || false,
-                    deliver: nd.Deliver || nd.Deliever || nd.deliver || false,
-                    gym: nd.Gym || nd.gym || false,
-                    fatloss: nd.FatLoss || nd['Fat Loss'] || nd.fatloss || false,
-                    ai: nd.AI || nd.ai || false
+                    trading: (nd.Trading || nd.trading) === true ? true : null,
+                    advertise: (nd.Advertise || nd.advertise) === true ? true : null,
+                    deliver: (nd.Deliver || nd.Deliever || nd.deliver) === true ? true : null,
+                    gym: (nd.Gym || nd.gym) === true ? true : null,
+                    fatloss: (nd.FatLoss || nd['Fat Loss'] || nd.fatloss) === true ? true : null,
+                    ai: (nd.AI || nd.ai) === true ? true : null,
+                    nofap: (nd.NoFap || nd.nofap) === true ? true : null
                 };
             });
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
@@ -416,7 +419,7 @@ function checkNewDay() {
     if (now !== curDay) {
         curDay = now;
         if (!dailyHabitsData[now]) {
-            dailyHabitsData[now] = {trading:false,advertise:false,deliver:false,gym:false,fatloss:false,ai:false};
+            dailyHabitsData[now] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null};
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
         }
         // 不自動建立 Notion 項目，等使用者勾選時再建立
@@ -448,7 +451,7 @@ async function createNext7Days() {
                     continue;
                 }
                 if (!dailyHabitsData[dateStr]) {
-                    dailyHabitsData[dateStr] = {trading:false,advertise:false,deliver:false,gym:false,fatloss:false,ai:false};
+                    dailyHabitsData[dateStr] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null};
                 }
                 await createDayInNotionDirect(dateStr);
                 created++;
