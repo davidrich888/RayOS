@@ -115,10 +115,14 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 - js/ — JavaScript 模組（ai-engine, business, charts, daily, trading, wealth...）
 - api/ — API 路由（notion.js）
 - icons/ — PWA 圖示
-- workflows/ — n8n workflow JSON 備份
-- alfred-ai/ — AI 管家系統（Telegram Bot + N8N）
+- workflows/ — n8n workflow JSON（RayOS 正式 workflow）
 - Youtube_Lab/ — YouTube 研究庫前端
 - archive/ — 舊版備份和棄用檔案
+  - alfred-ai/ — 已停用的 AI 管家系統（Telegram Bot + N8N）
+  - html-backups/ — 舊版 HTML 備份
+  - workflows/ — 舊版 n8n workflow
+  - miro/ — Miro 心智圖相關（屬 FundwithRay 02 專案）
+  - scripts/ — 舊版工具腳本
 - sw.js — Service Worker（PWA）
 - manifest.json / package.json / vercel.json — 設定檔
 
