@@ -73,6 +73,5 @@ function updateWealthDisplay() {
     }
     const aiSuggestion = document.getElementById('wealth-ai-suggestion');
     if (aiSuggestion) aiSuggestion.innerHTML = '<strong>目標進度：</strong> ' + ((wealthHistory[wealthHistory.length-1]?.totalAssets || 0) / wealthGoal * 100).toFixed(1) + '%';
-    // Auto-trigger AI analysis on wealth display update
-    autoAnalyze('wealth');
+    if (typeof autoAnalyze === 'function') autoAnalyze('wealth');
 }
