@@ -69,6 +69,14 @@ function updateWealthDisplay() {
             document.getElementById('display-yearly').textContent = (yg > 0 ? '+' : '') + yg.toFixed(2) + '%';
             document.getElementById('display-yearly').className = 'summary-value ' + (yg >= 0 ? 'positive' : 'negative');
         }
+        const mdd = lat.mdd;
+        if (mdd !== null && mdd !== undefined && mdd !== 0) {
+            document.getElementById('display-mdd').textContent = formatMoney(mdd);
+            document.getElementById('display-mdd').className = 'summary-value negative';
+        } else {
+            document.getElementById('display-mdd').textContent = '0';
+            document.getElementById('display-mdd').className = 'summary-value';
+        }
         updateWealthChart();
     }
     const aiSuggestion = document.getElementById('wealth-ai-suggestion');
