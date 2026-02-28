@@ -84,11 +84,10 @@
             <div class="header">
                 <div class="page-title">Wealth</div>
                 <div class="header-actions">
-                    <span class="sync-dot off" id="wealth-sync-dot"></span>
-                    <button class="btn" onclick="syncWealthFromNotion()">Sync Notion</button>
+                    <button class="btn" onclick="syncWealthFromGoogleSheets()">Sync</button>
                     <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <button class="btn" onclick="syncAccountsFromNotion();showModal('account-modal')">Accounts</button>
-                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/127c65e93b7c4008b34c86c285295387','_blank')">Notion</button>
+                    <button class="btn" onclick="showModal('account-modal')">Accounts</button>
+                    <button class="btn btn-accent" onclick="window.open('https://docs.google.com/spreadsheets/d/1CLhLI2H0ciP6F5yh7sXK4Cnp07XAGDTUOph3DX-9KBk','_blank')">Google Sheet</button>
                 </div>
             </div>
             <div class="content">
@@ -142,17 +141,7 @@
                             <div class="chart-wrapper"><canvas id="wealthChart"></canvas></div>
                         </div>
                         
-                        <div class="tabs">
-                            <div class="tab active" onclick="setWealthTab('snapshot',this)">📊 Monthly Snapshot</div>
-                            <div class="tab" onclick="setWealthTab('expense',this)">💳 Expense Analysis</div>
-                        </div>
-                        <div id="tab-snapshot">
-                            <div style="text-align:center;margin-bottom:20px;">
-                                <button class="btn btn-accent" onclick="toggleWealthForm()" id="wealth-form-toggle">📝 New Snapshot</button>
-                            </div>
-                            <div id="wealth-form" style="display:none;"></div>
-                        </div>
-                        <div id="tab-expense" style="display:none;">
+                        <div id="tab-expense">
                             <div class="form-section">
                                 <div class="form-title">📤 Import Credit Card Statement</div>
                                 <textarea class="form-input" id="expense-paste" rows="3" placeholder="Paste CSV: date,description,amount" style="width:100%;"></textarea>
@@ -762,21 +751,9 @@
 
     <div class="modal-overlay" id="account-modal">
         <div class="modal" style="max-width:600px;">
-            <div class="modal-title">Manage Accounts</div>
-            <div id="account-manager-list" style="max-height:300px;overflow-y:auto;margin-bottom:16px;"></div>
-            <div class="form-section" style="margin:0;">
-                <div class="form-title">Add New Account</div>
-                <div class="form-row">
-                    <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="new-account-name" placeholder="Account name"></div>
-                    <div class="form-group"><label class="form-label">Platform</label><input type="text" class="form-input" id="new-account-platform" placeholder="Bank"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label class="form-label">Category</label><select class="form-input" id="new-account-category"><option value="備用金">💵 備用金</option><option value="活期存款">🏦 活期存款</option><option value="股票ETF">📈 股票/ETF</option><option value="加密貨幣">🪙 加密貨幣</option><option value="債務">💳 債務</option></select></div>
-                    <div class="form-group"><label class="form-label">Currency</label><select class="form-input" id="new-account-currency"><option value="TWD">TWD</option><option value="USD">USD</option><option value="USDT">USDT</option></select></div>
-                </div>
-                <div class="form-actions"><button class="btn btn-accent" onclick="addAccount()">Add</button></div>
-            </div>
-            <div class="form-actions" style="margin-top:16px;"><button class="btn" onclick="hideModal('account-modal')">Close</button></div>
+            <div class="modal-title">Accounts</div>
+            <div id="account-manager-list" style="max-height:400px;overflow-y:auto;margin-bottom:16px;"></div>
+            <div class="form-actions" style="justify-content:center;"><button class="btn" onclick="hideModal('account-modal')">Close</button></div>
         </div>
     </div>
 
@@ -853,6 +830,7 @@
     <script src="js/state.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/notion-sync.js"></script>
+    <script src="js/gsheets-wealth.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/wealth.js"></script>

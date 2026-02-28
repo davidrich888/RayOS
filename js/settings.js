@@ -203,8 +203,9 @@ function resetData() {
         updateWealthDisplay();
         loadDailyHabits();
         hideModal('settings-modal');
-        showToast('Data reset — syncing from Notion...');
+        showToast('Data reset — syncing...');
         syncDailyFromNotionDirect(true);
+        syncWealthFromGoogleSheets(true);
     }
 }
 

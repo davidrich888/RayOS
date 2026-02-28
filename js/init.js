@@ -45,7 +45,6 @@
     renderAccountManager();
     updateSyncDot();
     updateBodySyncDot();
-    updateWealthSyncDot();
     updateIdeasSyncDot();
     updateModelBadges();
     // 清除舊的 ideas localStorage（已改為 Notion-first）
@@ -70,7 +69,11 @@
         }
     }
     
-    // 🔄 頁面載入自動從 Notion 同步最新資料
+    // 🔄 Wealth + Accounts: sync from Google Sheets (no auth required)
+    setTimeout(() => syncWealthFromGoogleSheets(true), 1500);
+    setTimeout(() => syncAccountsFromGoogleSheets(true), 2000);
+
+    // 🔄 其他 Notion-dependent syncs
     if (hasNotionDirect() || getN8nUrl()) {
         // Daily Habits: 優先用 Notion Direct，失敗才 fallback n8n
         setTimeout(async () => {
@@ -79,10 +82,8 @@
                 loadDailyHabits();
             }
         }, 500);
-        // Auto-sync: Notion Direct (Wealth + Accounts + Ideas + Videos)
+        // Auto-sync: Notion Direct (Ideas + Videos)
         if (hasNotionDirect()) {
-            setTimeout(() => syncWealthFromNotion(true), 1500);
-            setTimeout(() => syncAccountsFromNotion(true), 2000);
             setTimeout(() => syncIdeasFromNotionDirect(true), 2500);
             setTimeout(() => syncVideosFromNotion(true), 3000);
         }

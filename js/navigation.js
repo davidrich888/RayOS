@@ -37,9 +37,9 @@ function go(section) {
             break;
         case 'wealth':
             if (typeof updateWealthDisplay === 'function') updateWealthDisplay();
-            if (firstVisit && canSync) {
-                if (typeof syncWealthFromNotion === 'function') syncWealthFromNotion(true);
-                if (typeof syncAccountsFromNotion === 'function') syncAccountsFromNotion(true);
+            if (firstVisit) {
+                if (typeof syncWealthFromGoogleSheets === 'function') syncWealthFromGoogleSheets(true);
+                if (typeof syncAccountsFromGoogleSheets === 'function') syncAccountsFromGoogleSheets(true);
             }
             break;
         case 'physic':
