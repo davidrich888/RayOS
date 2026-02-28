@@ -23,107 +23,73 @@ function parseGvizDate(val) {
         }
         return val;
     }
-    if (val.v && typeof val.v === 'string') return parseGvizDate(val.v);
     return '';
 }
 
-// Fetch a single sheet and return parsed rows
-async function fetchGoogleSheet(sheetName) {
+// Get cell value by index from a gviz row, returns null if missing
+function getCellVal(row, idx) {
+    if (!row.c || !row.c[idx]) return null;
+    return row.c[idx].v;
+}
+
+// Fetch raw gviz table (cols + rows with cell arrays)
+async function fetchGoogleSheetRaw(sheetName) {
     const url = GSHEETS_BASE + encodeURIComponent(sheetName);
     const res = await fetch(url);
     if (!res.ok) throw new Error('Google Sheets fetch failed: ' + res.status);
     const text = await res.text();
     const data = parseGvizResponse(text);
     if (!data.table) throw new Error('No table in response');
-    const cols = data.table.cols.map(c => c.label || '');
-    const rows = (data.table.rows || []).map(row => {
-        const obj = {};
-        row.c.forEach((cell, i) => {
-            if (cell) {
-                // Date cells have .v as "Date(y,m,d)"
-                if (cell.v !== null && cell.v !== undefined) {
-                    obj[cols[i]] = cell.v;
-                    obj['_raw_' + i] = cell;
-                }
-            }
-        });
-        return obj;
-    });
-    return { cols, rows };
+    return data.table;
 }
 
 // Sync wealth history from Google Sheets (replaces syncWealthFromNotion)
+// 月週期紀錄 columns: A=日期, B=資產總額(不含負債), C=資產總額(含負債), D=MDD, E=月增率%, F=年增率%
+// 細項紀錄 columns: A=日期, B=緊急備用金, C=活期存款, D=股票/ETF, E=加密貨幣, F=外幣存款, G=債務
 async function syncWealthFromGoogleSheets(silent = false) {
     if (!silent) showToast('Syncing wealth from Google Sheets...');
     try {
-        // Fetch both sheets in parallel
-        const [monthlyData, detailData] = await Promise.all([
-            fetchGoogleSheet('資產 月週期紀錄'),
-            fetchGoogleSheet('資產 細項紀錄')
+        const [monthlyTable, detailTable] = await Promise.all([
+            fetchGoogleSheetRaw('資產 月週期紀錄'),
+            fetchGoogleSheetRaw('資產 細項紀錄')
         ]);
 
         // Build detail lookup by date
         const detailByDate = {};
-        detailData.rows.forEach(row => {
-            // First column is date
-            const dateRaw = row['_raw_0'];
-            const date = dateRaw ? parseGvizDate(dateRaw.v) : '';
-            if (!date) return;
-            // Category columns: map sheet names to internal names
+        const catMap = ['', '備用金', '活期存款', '股票ETF', '加密貨幣', '外幣存款', '債務'];
+        (detailTable.rows || []).forEach(row => {
+            const dateStr = parseGvizDate(getCellVal(row, 0));
+            if (!dateStr) return;
             const cats = {};
-            detailData.cols.forEach((col, i) => {
-                if (i === 0) return; // skip date column
-                const name = col.trim();
-                if (!name) return;
-                // Map sheet category names to internal names
-                let key = name;
-                if (name === '緊急備用金') key = '備用金';
-                if (name === '股票/ETF') key = '股票ETF';
-                const val = row[name];
-                if (val !== undefined && val !== null) cats[key] = val;
-            });
-            detailByDate[date] = cats;
+            for (let i = 1; i <= 6; i++) {
+                const v = getCellVal(row, i);
+                if (v !== null && catMap[i]) cats[catMap[i]] = v;
+            }
+            detailByDate[dateStr] = cats;
         });
 
         // Build wealthHistory from monthly data
         const records = [];
-        monthlyData.rows.forEach(row => {
-            const dateRaw = row['_raw_0'];
-            const date = dateRaw ? parseGvizDate(dateRaw.v) : '';
-            if (!date) return;
+        (monthlyTable.rows || []).forEach(row => {
+            const dateStr = parseGvizDate(getCellVal(row, 0));
+            if (!dateStr) return;
 
-            // Map columns by index (header names may vary)
-            const cols = monthlyData.cols;
-            const record = {
-                date: date,
-                totalAssets: 0,
-                netWorth: 0,
-                monthlyGrowth: null,
-                yearlyGrowth: null,
-                categories: detailByDate[date] || {}
-            };
+            const totalAssets = getCellVal(row, 1) || 0;  // B: 資產總額(不含負債)
+            const netWorth = getCellVal(row, 2) || 0;     // C: 資產總額(含負債)
+            const mdd = getCellVal(row, 3);                // D: MDD
+            const monthlyRaw = getCellVal(row, 4);         // E: 月增率%
+            const yearlyRaw = getCellVal(row, 5);          // F: 年增率%
 
-            // Parse columns by label matching
-            cols.forEach((col, i) => {
-                const label = col.trim();
-                const val = row[label];
-                if (val === undefined || val === null) return;
-                if (label === '總資產' || label === 'TotalAssets') record.totalAssets = val;
-                else if (label === '淨值' || label === 'NetWorth') record.netWorth = val;
-                else if (label === 'MDD') record.mdd = val;
-                else if (label === '月增長' || label === '月增長%' || label === 'MonthlyGrowth') {
-                    // Sheet stores as decimal (0.05 = 5%), convert to percentage
-                    record.monthlyGrowth = typeof val === 'number' ? val * 100 : null;
-                }
-                else if (label === '年增長' || label === '年增長%' || label === 'YearlyGrowth') {
-                    record.yearlyGrowth = typeof val === 'number' ? val * 100 : null;
-                }
+            records.push({
+                date: dateStr,
+                totalAssets: totalAssets,
+                netWorth: netWorth || totalAssets,
+                mdd: mdd,
+                // Sheet stores as decimal (0.05 = 5%), convert to percentage
+                monthlyGrowth: typeof monthlyRaw === 'number' ? monthlyRaw * 100 : null,
+                yearlyGrowth: typeof yearlyRaw === 'number' ? yearlyRaw * 100 : null,
+                categories: detailByDate[dateStr] || {}
             });
-
-            // Fallback: if netWorth is 0 but totalAssets exists
-            if (!record.netWorth && record.totalAssets) record.netWorth = record.totalAssets;
-
-            records.push(record);
         });
 
         // Sort by date ascending
@@ -145,31 +111,40 @@ async function syncWealthFromGoogleSheets(silent = false) {
 }
 
 // Sync accounts from Google Sheets (replaces syncAccountsFromNotion)
+// 資產盤點 sheet has no proper header labels — use column index
+// Layout: A=名稱, B=平台, C=幣別, D=分類, ... (structure TBD, parse what we can)
 async function syncAccountsFromGoogleSheets(silent = false) {
     if (!silent) showToast('Syncing accounts from Google Sheets...');
     try {
-        const data = await fetchGoogleSheet('資產盤點');
+        const table = await fetchGoogleSheetRaw('資產盤點');
 
+        // The sheet has no standard header row (all labels empty).
+        // Try to detect account rows: rows with a non-empty string in first column
+        // that look like account names (not summary/header rows).
         const parsed = [];
-        data.rows.forEach(row => {
-            // Map columns by label
-            const name = row['名稱'] || row['Name'] || '';
-            if (!name) return;
-            const platform = row['平台'] || row['Platform'] || '';
-            const category = row['分類'] || row['Category'] || '';
-            const currency = row['幣別'] || row['Currency'] || 'TWD';
-            const amount = row['金額'] || row['Amount'] || 0;
-            const twdValue = row['台幣值'] || row['台幣現值'] || row['TWD Value'] || 0;
-            const rate = row['匯率'] || row['Rate'] || 0;
-            const interestRate = row['利率'] || row['Interest Rate'] || 0;
-            const description = row['說明'] || row['Description'] || '';
-            const sortOrder = row['排序'] || row['Sort'] || 0;
+        (table.rows || []).forEach(row => {
+            const name = getCellVal(row, 0);
+            if (!name || typeof name !== 'string') return;
+            // Skip rows that look like headers/totals (contain keywords)
+            if (name.includes('目標') || name.includes('總額') || name.includes('合計')) return;
 
-            parsed.push({
-                name, platform, category, currency,
-                amount, twdValue, rate, interestRate,
-                description, sortOrder
-            });
+            const platform = getCellVal(row, 1) || '';
+            const currency = getCellVal(row, 2) || 'TWD';
+            const category = getCellVal(row, 3) || '';
+            const amount = getCellVal(row, 4) || 0;
+            const twdValue = getCellVal(row, 5) || 0;
+
+            // Only include rows that have a meaningful name
+            if (name.trim()) {
+                parsed.push({
+                    name: name.trim(),
+                    platform: typeof platform === 'string' ? platform : '',
+                    category: typeof category === 'string' ? category : '',
+                    currency: typeof currency === 'string' ? currency : 'TWD',
+                    amount: typeof amount === 'number' ? amount : 0,
+                    twdValue: typeof twdValue === 'number' ? twdValue : 0
+                });
+            }
         });
 
         if (parsed.length > 0) {
@@ -178,6 +153,8 @@ async function syncAccountsFromGoogleSheets(silent = false) {
             renderAccountManager();
             if (!silent) showToast('Synced ' + accounts.length + ' accounts');
             console.log('[RayOS GSheets] Accounts synced:', accounts.length);
+        } else {
+            console.log('[RayOS GSheets] No accounts parsed — sheet structure may need adjustment');
         }
     } catch (e) {
         console.error('[RayOS GSheets] Accounts sync error:', e);
