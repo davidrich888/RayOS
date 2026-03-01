@@ -140,6 +140,7 @@
         
         /* Summary Grid */
         .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        #wealth .summary-grid { grid-template-columns: repeat(5, 1fr); }
         .summary-item { background: var(--bg-card); border: 1px solid var(--border); padding: 16px; text-align: center; cursor: pointer; transition: all 0.3s; }
         .summary-item:hover { border-color: var(--text-muted); }
         .summary-label { font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
@@ -335,27 +336,27 @@
             
             /* --- Header: wrap buttons --- */
             .header { padding: 10px 12px; padding-top: calc(10px + env(safe-area-inset-top)); padding-left: calc(62px + env(safe-area-inset-left)); flex-wrap: wrap; gap: 8px; }
-            .header .page-title { font-size: 12px; letter-spacing: 2px; }
+            .header .page-title { font-size: 13px; letter-spacing: 2px; }
             .header-actions { gap: 4px; flex-wrap: wrap; }
-            .header-actions .btn { padding: 5px 8px; font-size: 9px; }
+            .header-actions .btn { padding: 6px 10px; font-size: 10px; }
             .header-actions .sync-dot { margin-right: 2px; }
             
             /* --- Content --- */
             .content { padding: 10px; }
             
             /* --- Dashboard Stats Row --- */
-            .stats-row { grid-template-columns: repeat(3, 1fr) !important; padding: 10px; gap: 4px; }
-            .stat-box { padding: 8px 2px; }
-            .stat-value { font-size: 20px; }
-            .stat-label { font-size: 7px; letter-spacing: 0.5px; }
+            .stats-row { grid-template-columns: repeat(3, 1fr) !important; padding: 10px; gap: 6px; }
+            .stat-box { padding: 10px 4px; }
+            .stat-value { font-size: 22px; }
+            .stat-label { font-size: 9px; letter-spacing: 0.5px; }
             
             /* --- Dashboard Cards --- */
             .cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
             .card { padding: 12px; }
             .card-icon { font-size: 20px; }
             .card-title { font-size: 15px; }
-            .card-desc { font-size: 10px; }
-            .card-badge { font-size: 8px; padding: 2px 6px; }
+            .card-desc { font-size: 11px; }
+            .card-badge { font-size: 9px; padding: 2px 6px; }
             
             /* --- Moodboard --- */
             .moodboard-title { font-size: 28px; letter-spacing: 6px; }
@@ -384,9 +385,9 @@
             .form-row { flex-direction: column; gap: 8px; }
             .form-group { min-width: 0; }
             .form-input, .form-select { padding: 8px 10px; font-size: 13px; }
-            .form-label { font-size: 9px; }
+            .form-label { font-size: 10px; }
             .form-actions { flex-wrap: wrap; }
-            .section-label { font-size: 9px; margin-bottom: 10px; }
+            .section-label { font-size: 10px; margin-bottom: 10px; }
             
             /* --- Buttons --- */
             .btn { padding: 8px 14px; font-size: 11px; }
@@ -394,9 +395,10 @@
             
             /* --- Summary Grid --- */
             .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            #wealth .summary-grid { grid-template-columns: repeat(3, 1fr); }
             .summary-item { padding: 12px 8px; min-width: 0; }
             .summary-value { font-size: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-            .summary-label { font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .summary-label { font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             
             /* --- Charts --- */
             .chart-container { padding: 12px; }
@@ -404,9 +406,9 @@
             .chart-header { flex-direction: column; align-items: flex-start; gap: 8px; }
             .chart-title { font-size: 15px; }
             .chart-tabs { flex-wrap: wrap; gap: 4px; }
-            .chart-tab { padding: 4px 8px; font-size: 9px; }
+            .chart-tab { padding: 5px 9px; font-size: 10px; }
             .chart-toggle { flex-wrap: nowrap; }
-            .chart-toggle-btn { padding: 4px 10px; font-size: 9px; }
+            .chart-toggle-btn { padding: 5px 10px; font-size: 10px; }
             
             /* --- Tabs --- */
             .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -417,9 +419,9 @@
             .wealth-layout { gap: 16px; }
             .wealth-quote-goal { grid-template-columns: 1fr !important; gap: 12px !important; }
             #wealth .wealth-sidebar { margin-top: 12px; }
-            #wealth .chart-tabs { gap: 3px; }
-            #wealth .chart-tab { padding: 3px 6px; font-size: 8px; }
-            #wealth .chart-toggle-btn { padding: 3px 8px; font-size: 8px; }
+            #wealth .chart-tabs { gap: 4px; }
+            #wealth .chart-tab { padding: 4px 8px; font-size: 9px; }
+            #wealth .chart-toggle-btn { padding: 4px 9px; font-size: 9px; }
             .account-row { grid-template-columns: 1fr 40px 100px 24px; font-size: 11px; gap: 6px; }
             .account-name { font-size: 12px; }
             .category-total { font-size: 11px; }
@@ -442,17 +444,17 @@
             #habits-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; }
             .habit-item { padding: 10px 6px !important; min-height: 70px; }
             .habit-icon { font-size: 22px !important; }
-            .habit-name { font-size: 9px !important; }
-            .habit-time { font-size: 7px; }
+            .habit-name { font-size: 10px !important; }
+            .habit-time { font-size: 8px; }
             
             /* ===== TRADING SECTION ===== */
             #trading .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
             #trading .summary-item { padding: 10px 6px; min-width: 0; }
-            #trading .summary-value { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-            #trading .summary-label { font-size: 7px; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #trading .summary-value { font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #trading .summary-label { font-size: 8px; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             #trading .chart-wrapper { height: 180px; }
-            .monthly-table { font-size: 8px; }
-            .monthly-table th, .monthly-table td { padding: 3px 1px; min-width: 22px; text-align: center; }
+            .monthly-table { font-size: 9px; }
+            .monthly-table th, .monthly-table td { padding: 4px 2px; min-width: 22px; text-align: center; }
             .monthly-table th:first-child, .monthly-table td:first-child { min-width: 34px; text-align: left; }
             #trading .form-section .form-title { font-size: 12px; }
             #trading .form-row .form-group .form-label { font-size: 8px; }
@@ -461,14 +463,14 @@
             #prop-challenges { grid-template-columns: 1fr !important; }
             #tab-propfirm .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
             #tab-propfirm .summary-item { padding: 10px 6px; min-width: 0; }
-            #tab-propfirm .summary-value { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-            #tab-propfirm .summary-label { font-size: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #tab-propfirm .summary-value { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #tab-propfirm .summary-label { font-size: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             
             /* ===== BUSINESS SECTION ===== */
             .business-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
             .business-stat { padding: 12px 8px; }
             .business-stat-value { font-size: 22px; }
-            .business-stat-label { font-size: 9px; }
+            .business-stat-label { font-size: 10px; }
             .business-selector { gap: 6px; }
             .business-chip { padding: 6px 10px; font-size: 10px; }
             
@@ -493,8 +495,10 @@
         /* ===== SMALL PHONE (≤400px) ===== */
         @media (max-width: 400px) {
             .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
+            .stat-value { font-size: 20px; }
             .cards { grid-template-columns: 1fr; }
             .summary-grid { grid-template-columns: 1fr; }
+            #wealth .summary-grid { grid-template-columns: repeat(2, 1fr); }
             #habits-grid { grid-template-columns: repeat(3, 1fr) !important; }
             .header { padding-left: 58px; }
             .mobile-menu-btn { width: 44px; height: 44px; font-size: 18px; }
