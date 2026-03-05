@@ -142,18 +142,22 @@ function renderWeeklyProgress() {
         { key: 'Email', icon: '📧', label: 'Email' }
     ];
 
-    el.innerHTML = platforms.map(p => {
-        const count = platformCounts[p.key] || 0;
-        const target = WEEKLY_TARGETS[p.key];
-        const pct = Math.min(100, Math.round(count / target * 100));
-        const done = count >= target;
-        return `<div class="content-platform-box${done ? ' done' : ''}" title="${p.key}: ${count}/${target}">
-            <div class="content-platform-icon">${p.icon}</div>
-            <div class="content-platform-label">${p.label}</div>
-            <div class="content-platform-count">${count}/${target}</div>
-            <div class="content-platform-bar"><div class="content-platform-fill" style="width:${pct}%"></div></div>
-        </div>`;
-    }).join('');
+    const totalDone = Object.keys(WEEKLY_TARGETS).reduce((s, k) => s + (platformCounts[k] || 0), 0);
+    const totalTarget = Object.values(WEEKLY_TARGETS).reduce((s, v) => s + v, 0);
+
+    el.innerHTML = `<div class="content-progress-bar">` +
+        platforms.map(p => {
+            const count = platformCounts[p.key] || 0;
+            const target = WEEKLY_TARGETS[p.key];
+            const done = count >= target;
+            return `<div class="content-progress-item${done ? ' done' : ''}" title="${p.key}: ${count}/${target}">
+                <span class="content-progress-icon">${p.icon}</span>
+                <span class="content-progress-label">${p.label}</span>
+                <span class="content-progress-count">${count}/${target}</span>
+            </div>`;
+        }).join('<span class="content-progress-sep">·</span>') +
+        `</div>
+        <div class="content-progress-total">${totalDone}/${totalTarget}</div>`;
 }
 
 // === Tab switching ===
