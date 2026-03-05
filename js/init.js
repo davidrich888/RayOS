@@ -46,6 +46,7 @@
     updateSyncDot();
     updateBodySyncDot();
     updateIdeasSyncDot();
+    updateContentSyncDot();
     updateModelBadges();
     // 清除舊的 ideas localStorage（已改為 Notion-first）
     localStorage.removeItem('ideas_data');
@@ -82,10 +83,11 @@
                 loadDailyHabits();
             }
         }, 500);
-        // Auto-sync: Notion Direct (Ideas + Videos)
+        // Auto-sync: Notion Direct (Ideas + Videos + Content)
         if (hasNotionDirect()) {
             setTimeout(() => syncIdeasFromNotionDirect(true), 2500);
             setTimeout(() => syncVideosFromNotion(true), 3000);
+            setTimeout(() => syncContentFromNotion(true), 3500);
         }
         // Body auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
         if (getN8nUrl() && !hasNotionDirect()) {

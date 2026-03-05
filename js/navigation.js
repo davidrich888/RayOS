@@ -31,6 +31,10 @@ function go(section) {
             if (typeof loadDailyHabits === 'function') loadDailyHabits();
             if (firstVisit && canSync && typeof syncDailyFromNotionDirect === 'function') syncDailyFromNotionDirect(true);
             break;
+        case 'content':
+            if (typeof renderContentSection === 'function') renderContentSection();
+            if (firstVisit && canSync && typeof syncContentFromNotion === 'function') syncContentFromNotion(true);
+            break;
         case 'ideas':
             if (typeof renderIdeasList === 'function') renderIdeasList();
             if (firstVisit && canSync && typeof syncIdeasFromNotionDirect === 'function') syncIdeasFromNotionDirect(true);

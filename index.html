@@ -29,6 +29,7 @@
         <div class="nav-item" data-section="wealth"><span class="nav-icon">$</span><span>Wealth</span></div>
         <div class="nav-item" data-section="trading"><span class="nav-icon">📈</span><span>Trading</span></div>
         <div class="nav-item" data-section="business"><span class="nav-icon">📊</span><span>Business</span></div>
+        <div class="nav-item" data-section="content"><span class="nav-icon">📝</span><span>Content</span></div>
         <div class="nav-item" data-section="ideas"><span class="nav-icon">💡</span><span>Ideas</span></div>
         <div class="nav-item" data-section="lifecoach"><span class="nav-icon">🧠</span><span>AI Coach</span></div>
         <div class="nav-item" data-section="information"><span class="nav-icon">📖</span><span>Information</span></div>
@@ -62,6 +63,7 @@
                 <div class="stat-box" onclick="go('physic')"><div class="stat-value" id="stat-bodyfat">--</div><div class="stat-label">Body Fat</div></div>
                 <div class="stat-box" onclick="go('wealth')"><div class="stat-value" id="stat-wealth">--</div><div class="stat-label">Total Assets</div></div>
                 <div class="stat-box" onclick="go('business')"><div class="stat-value" id="stat-mrr">$0</div><div class="stat-label">MRR</div></div>
+                <div class="stat-box" onclick="go('content')"><div class="stat-value" id="stat-content">0/13</div><div class="stat-label">Content</div></div>
                 <div class="stat-box" onclick="go('ideas')"><div class="stat-value" id="stat-ideas">0</div><div class="stat-label">Ideas</div></div>
                 <div class="stat-box" onclick="go('information')"><div class="stat-value" id="stat-learning">0</div><div class="stat-label">Learning</div></div>
             </div>
@@ -72,6 +74,7 @@
                     <div class="card" onclick="go('physic')"><div class="card-header"><span class="card-icon">🥷</span><span class="card-badge">TRACK</span></div><div class="card-title">Physic</div><div class="card-desc">體重・體脂・進度</div></div>
                     <div class="card" onclick="go('wealth')"><div class="card-header"><span class="card-icon">$</span><span class="card-badge">TRACK</span></div><div class="card-title">Wealth</div><div class="card-desc">資產・消費・目標</div></div>
                     <div class="card" onclick="go('business')"><div class="card-header"><span class="card-icon">📊</span><span class="card-badge">GROW</span></div><div class="card-title">Business</div><div class="card-desc">Skool・MRR・Members</div></div>
+                    <div class="card" onclick="go('content')"><div class="card-header"><span class="card-icon">📝</span><span class="card-badge">CREATE</span></div><div class="card-title">Content</div><div class="card-desc">靈感池・產出追蹤</div></div>
                     <div class="card" onclick="go('ideas')"><div class="card-header"><span class="card-icon">💡</span><span class="card-badge">CAPTURE</span></div><div class="card-title">Ideas</div><div class="card-desc">靈感・點子・計劃</div></div>
                     <div class="card" onclick="go('lifecoach')"><div class="card-header"><span class="card-icon">🧠</span><span class="card-badge">AI</span></div><div class="card-title">Life Coach</div><div class="card-desc">AI 人生導師</div></div>
                     <div class="card" onclick="go('information')"><div class="card-header"><span class="card-icon">📖</span><span class="card-badge">LEARN</span></div><div class="card-title">Information</div><div class="card-desc">YouTube Lab</div></div>
@@ -482,6 +485,70 @@
             </div>
         </section>
 
+        <!-- CONTENT -->
+        <section class="section" id="content">
+            <div class="header">
+                <div class="page-title">Content</div>
+                <div class="header-actions">
+                    <span class="sync-dot off" id="content-sync-dot"></span>
+                    <button class="btn" onclick="syncContentFromNotion()">Sync</button>
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/60354141f1fe4f858b065f0101a72e89','_blank')">Notion</button>
+                </div>
+            </div>
+            <div class="content">
+                <!-- Weekly Progress -->
+                <div class="form-section" style="padding:16px;margin-bottom:16px;">
+                    <div class="form-title">本週產出進度</div>
+                    <div id="content-weekly-progress" class="content-progress-row"></div>
+                </div>
+
+                <!-- Tabs -->
+                <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn content-tab-btn active" data-tab="inspiration" onclick="setContentTab('inspiration')">靈感池</button>
+                    <button class="btn content-tab-btn" data-tab="production" onclick="setContentTab('production')">產出追蹤</button>
+                </div>
+
+                <!-- Pillar filters (inspiration tab only) -->
+                <div id="content-filters" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+                    <button class="btn btn-small content-pillar-btn active" data-pillar="all" onclick="setContentPillarFilter('all')">全部</button>
+                    <button class="btn btn-small content-pillar-btn" data-pillar="Prop Firm 實戰" onclick="setContentPillarFilter('Prop Firm 實戰')">Prop Firm</button>
+                    <button class="btn btn-small content-pillar-btn" data-pillar="程式交易" onclick="setContentPillarFilter('程式交易')">程式交易</button>
+                    <button class="btn btn-small content-pillar-btn" data-pillar="交易心態" onclick="setContentPillarFilter('交易心態')">心態</button>
+                    <button class="btn btn-small content-pillar-btn" data-pillar="AI 自動化" onclick="setContentPillarFilter('AI 自動化')">AI</button>
+                    <button class="btn btn-small content-pillar-btn" data-pillar="個人成長" onclick="setContentPillarFilter('個人成長')">成長</button>
+                </div>
+
+                <!-- Production tab area (hidden by default) -->
+                <div id="content-production-area" style="display:none;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div class="form-section" style="padding:16px;">
+                            <div class="form-title">最近產出</div>
+                            <div id="content-recent-list" style="max-height:300px;overflow-y:auto;"></div>
+                        </div>
+                        <div class="form-section" style="padding:16px;">
+                            <div class="form-title">支柱平衡</div>
+                            <div style="height:220px;"><canvas id="pillarChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main list (ideas or empty) -->
+                <div id="content-list"></div>
+
+                <!-- Quick Actions -->
+                <div class="form-section" style="padding:16px;margin-top:16px;">
+                    <div class="form-title">Quick Actions</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <div class="content-quick-action" onclick="navigator.clipboard.writeText('/ideas');showToast('已複製 /ideas')">沒靈感？跑 /ideas</div>
+                        <div class="content-quick-action" onclick="navigator.clipboard.writeText('transcribe → /extract-units → /reels-batch');showToast('已複製三步驟')">拍完片？跑三步驟</div>
+                        <div class="content-quick-action" onclick="navigator.clipboard.writeText('/save performance');showToast('已複製 /save performance')">記表現 /save performance</div>
+                        <div class="content-quick-action" onclick="navigator.clipboard.writeText('/weekly-review');showToast('已複製 /weekly-review')">週覆盤 /weekly-review</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- IDEAS -->
         <section class="section" id="ideas">
             <div class="header">
@@ -841,6 +908,7 @@
     <script src="js/physic.js"></script>
     <script src="js/daily.js"></script>
     <script src="js/ideas.js"></script>
+    <script src="js/content.js"></script>
     <script src="js/init.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
