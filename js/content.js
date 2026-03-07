@@ -201,7 +201,7 @@ function renderInspirationPool() {
 
     container.innerHTML = filtered.map(idea => {
         const interestStars = idea.interest || '';
-        const statusOptions = ['💡 新想法', '🔍 研究中', '🚀 執行中', '✅ 已完成', '❌ 放棄'].map(s =>
+        const statusOptions = ['💡 新想法', '🚀 執行中', '✅ 已完成', '📌 保留', '🏁 已做過', '❌ 放棄'].map(s =>
             `<option value="${s}" ${s === idea.status ? 'selected' : ''}>${s}</option>`
         ).join('');
         return `<div class="content-idea-card">
