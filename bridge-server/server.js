@@ -78,7 +78,7 @@ app.post('/run', (req, res) => {
 
   console.log(`[Bridge] Executing: ${fullPrompt}`);
 
-  const claude = spawn('claude', ['-p', fullPrompt, '--verbose'], {
+  const claude = spawn('claude', ['-p', fullPrompt], {
     cwd: CLAUDE_CWD,
     env: { ...process.env, PATH: process.env.PATH },
     timeout: 300000 // 5 min
