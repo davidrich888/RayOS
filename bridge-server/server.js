@@ -78,33 +78,54 @@ app.post('/run', (req, res) => {
 
   console.log(`[Bridge] Executing: ${fullPrompt}`);
 
+  // Clean env: remove CLAUDECODE to avoid nested session detection
+  const cleanEnv = { ...process.env };
+  delete cleanEnv.CLAUDECODE;
+
   const claude = spawn('claude', ['-p', fullPrompt], {
     cwd: CLAUDE_CWD,
-    env: { ...process.env, PATH: process.env.PATH },
-    timeout: 300000 // 5 min
+    env: cleanEnv
   });
 
   let stdout = '';
   let stderr = '';
+  let finished = false;
+
+  // Manual timeout (5 min)
+  const timer = setTimeout(() => {
+    if (!finished) {
+      console.log(`[Bridge] Timeout after 5 min, killing process`);
+      claude.kill('SIGTERM');
+    }
+  }, 300000);
 
   claude.stdout.on('data', (data) => {
-    stdout += data.toString();
+    const chunk = data.toString();
+    stdout += chunk;
+    console.log(`[Bridge] stdout chunk (${chunk.length} chars)`);
   });
 
   claude.stderr.on('data', (data) => {
-    stderr += data.toString();
+    const chunk = data.toString();
+    stderr += chunk;
+    console.log(`[Bridge] stderr: ${chunk.trim()}`);
   });
 
-  claude.on('close', (code) => {
-    console.log(`[Bridge] Done (code ${code}), output length: ${stdout.length}`);
+  claude.on('close', (code, signal) => {
+    finished = true;
+    clearTimeout(timer);
+    console.log(`[Bridge] Done (code ${code}, signal ${signal}), stdout: ${stdout.length}, stderr: ${stderr.length}`);
     if (code === 0) {
       res.json({ success: true, output: stdout, command: fullPrompt });
     } else {
-      res.json({ success: false, output: stdout, error: stderr || `Process exited with code ${code}`, command: fullPrompt });
+      const errDetail = stderr || `Process exited with code ${code}` + (signal ? `, signal ${signal}` : '');
+      res.json({ success: false, output: stdout, error: errDetail, command: fullPrompt });
     }
   });
 
   claude.on('error', (err) => {
+    finished = true;
+    clearTimeout(timer);
     console.error(`[Bridge] Spawn error:`, err);
     res.status(500).json({ success: false, error: err.message });
   });
