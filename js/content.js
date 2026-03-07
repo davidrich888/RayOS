@@ -422,13 +422,13 @@ async function runBridgeCommand(command, args) {
         } else {
             const errMsg = data.error || 'Unknown error';
             if (statusEl) {
-                statusEl.innerHTML = '<span style="color:#e63946;">&#9679;</span> 失敗: ' + errMsg;
+                statusEl.innerHTML = '<span style="color:#ff6b6b;">&#9679;</span> <span style="color:#ff6b6b;">失敗:</span> ' + errMsg;
             }
             showToast(command + ' 失敗: ' + errMsg, true);
         }
     } catch (e) {
         if (statusEl) {
-            statusEl.innerHTML = '<span style="color:#e63946;">&#9679;</span> 連線失敗: ' + e.message;
+            statusEl.innerHTML = '<span style="color:#ff6b6b;">&#9679;</span> <span style="color:#ff6b6b;">連線失敗:</span> ' + e.message;
         }
         showToast('Bridge 連線失敗: ' + e.message, true);
     } finally {
