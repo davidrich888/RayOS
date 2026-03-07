@@ -201,14 +201,16 @@ function renderInspirationPool() {
 
     container.innerHTML = filtered.map(idea => {
         const interestStars = idea.interest || '';
-        const statusOptions = ['💡 新想法', '🚀 執行中', '✅ 已完成', '📌 保留', '🏁 已做過', '❌ 放棄'].map(s =>
+        const statusOptions = ['💡 新想法', '⭐ 核准', '✅ 已完成', '📌 保留', '🏁 已做過', '❌ 放棄'].map(s =>
             `<option value="${s}" ${s === idea.status ? 'selected' : ''}>${s}</option>`
         ).join('');
         const strikethrough = (idea.status === '❌ 放棄' || idea.status === '🏁 已做過');
-        return `<div class="content-idea-card"${strikethrough ? ' style="opacity:0.5"' : ''}>
+        const approved = idea.status === '⭐ 核准';
+        const cardStyle = strikethrough ? ' style="opacity:0.5"' : approved ? ' style="border:1px solid var(--accent);box-shadow:0 0 12px rgba(212,197,169,0.25)"' : '';
+        return `<div class="content-idea-card"${cardStyle}>
             <div class="content-idea-stars">${interestStars || '—'}</div>
             <div class="content-idea-body">
-                <div class="content-idea-text"${strikethrough ? ' style="text-decoration:line-through"' : ''}>${idea.text}</div>
+                <div class="content-idea-text"${strikethrough ? ' style="text-decoration:line-through"' : approved ? ' style="color:var(--accent);font-weight:600"' : ''}>${idea.text}</div>
                 <div class="content-idea-meta">
                     ${idea.pillar ? `<span class="content-tag pillar">${idea.pillar}</span>` : ''}
                     ${idea.hookType ? `<span class="content-tag hook">${idea.hookType}</span>` : ''}
