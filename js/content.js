@@ -27,12 +27,6 @@ async function syncContentIdeasFromNotion(silent = false) {
     try {
         const data = await notionFetch('/databases/' + IDEAS_DB_ID + '/query', 'POST', {
             page_size: 100,
-            filter: {
-                or: [
-                    { property: '類型', select: { equals: '📹 影片點子' } },
-                    { property: '類型', select: { equals: '📝 內容點子' } }
-                ]
-            },
             sorts: [{ property: '建立日期', direction: 'descending' }]
         });
         if (data.results) {
@@ -40,14 +34,14 @@ async function syncContentIdeasFromNotion(silent = false) {
                 const p = page.properties;
                 return {
                     id: page.id,
-                    text: p['想法']?.title?.[0]?.plain_text || '',
-                    type: p['類型']?.select?.name || '',
+                    text: p['主題']?.title?.[0]?.plain_text || '',
+                    type: p['來源']?.select?.name || '',
                     status: p['狀態']?.select?.name || '💡 新想法',
-                    priority: p['優先度']?.select?.name || '⭐ 中',
+                    priority: p['優先級']?.select?.name || '⭐ 中',
                     pillar: p['支柱']?.select?.name || '',
-                    hookType: p['Hook 類型']?.select?.name || '',
-                    interest: p['興趣度']?.select?.name || '',
-                    date: p['建立日期']?.date?.start || '',
+                    hookType: '',
+                    interest: '',
+                    date: p['建立日期']?.created_time || '',
                     notes: p['備註']?.rich_text?.[0]?.plain_text || ''
                 };
             }).filter(i => i.text);
@@ -275,9 +269,11 @@ function renderPillarChart() {
     const labels = Object.keys(pillarCounts);
     const data = Object.values(pillarCounts);
     const colors = {
+        'Prop Firm實戰': '#e63946',
         'Prop Firm 實戰': '#e63946',
         '程式交易': '#457b9d',
         '交易心態': '#e6a817',
+        'AI自動化': '#7b2d8e',
         'AI 自動化': '#7b2d8e',
         '個人成長': '#4a7c59'
     };
