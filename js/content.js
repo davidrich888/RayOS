@@ -172,6 +172,9 @@ function setContentPillarFilter(pillar) {
     renderContentSection();
 }
 
+// === Idea page content cache ===
+const ideaContentCache = {};
+
 // === Inspiration Pool ===
 function renderInspirationPool() {
     const container = document.getElementById('content-list');
@@ -201,7 +204,8 @@ function renderInspirationPool() {
         const strikethrough = (idea.status === '❌ 放棄' || idea.status === '🏁 已做過');
         const approved = idea.status === '⭐ 核准';
         const cardStyle = strikethrough ? ' style="opacity:0.5"' : approved ? ' style="border:1.5px solid var(--accent);background:rgba(212,197,169,0.15);box-shadow:0 0 20px rgba(212,197,169,0.35)"' : '';
-        return `<div class="content-idea-card"${cardStyle}>
+        const cached = ideaContentCache[idea.id];
+        return `<div class="content-idea-card" id="idea-card-${idea.id}" onclick="toggleIdeaDetail('${idea.id}', event)"${cardStyle}>
             <div class="content-idea-stars">${interestStars || '—'}</div>
             <div class="content-idea-body">
                 <div class="content-idea-text"${strikethrough ? ' style="text-decoration:line-through"' : approved ? ' style="color:var(--accent);font-weight:600"' : ''}>${idea.text}</div>
@@ -213,9 +217,159 @@ function renderInspirationPool() {
                 </div>
                 ${idea.notes ? `<div class="content-idea-notes">${idea.notes}</div>` : ''}
             </div>
-            <select class="form-input content-idea-select" onchange="updateContentIdeaStatus('${idea.id}',this.value)">${statusOptions}</select>
+            <select class="form-input content-idea-select" onchange="updateContentIdeaStatus('${idea.id}',this.value)" onclick="event.stopPropagation()">${statusOptions}</select>
+            <div class="content-idea-detail" id="idea-detail-${idea.id}">${cached || ''}</div>
         </div>`;
     }).join('');
+}
+
+// === Toggle idea detail (expand/collapse) ===
+async function toggleIdeaDetail(ideaId, event) {
+    // Don't toggle when clicking the select dropdown
+    if (event.target.tagName === 'SELECT' || event.target.tagName === 'OPTION') return;
+    // Don't toggle when clicking links inside the detail
+    if (event.target.tagName === 'A') return;
+
+    const card = document.getElementById('idea-card-' + ideaId);
+    const detail = document.getElementById('idea-detail-' + ideaId);
+    if (!card || !detail) return;
+
+    const isExpanded = card.classList.contains('expanded');
+    if (isExpanded) {
+        card.classList.remove('expanded');
+        return;
+    }
+
+    card.classList.add('expanded');
+
+    // If already cached, just show
+    if (ideaContentCache[ideaId]) {
+        detail.innerHTML = ideaContentCache[ideaId];
+        return;
+    }
+
+    // Fetch from Notion blocks API
+    detail.innerHTML = '<div class="detail-loading">載入中...</div>';
+    try {
+        const data = await notionFetch('/blocks/' + ideaId + '/children?page_size=100', 'GET');
+        if (data.results && data.results.length) {
+            // For table blocks, fetch their children (table_rows)
+            const blocks = data.results;
+            for (let i = 0; i < blocks.length; i++) {
+                if (blocks[i].type === 'table' && blocks[i].has_children) {
+                    const tableData = await notionFetch('/blocks/' + blocks[i].id + '/children?page_size=100', 'GET');
+                    if (tableData.results) {
+                        // Insert table_rows right after the table block
+                        blocks.splice(i + 1, 0, ...tableData.results);
+                        i += tableData.results.length;
+                    }
+                }
+            }
+            const html = renderNotionBlocks(blocks);
+            ideaContentCache[ideaId] = html;
+            detail.innerHTML = html;
+        } else {
+            detail.innerHTML = '<div class="detail-loading">無內容 — 在 Notion 中新增靈感來源</div>';
+        }
+    } catch (e) {
+        console.error('[RayOS Content] Fetch page blocks error:', e);
+        detail.innerHTML = '<div class="detail-loading">載入失敗: ' + e.message + '</div>';
+    }
+}
+
+// === Render Notion blocks to HTML ===
+function renderNotionBlocks(blocks) {
+    let html = '';
+    let inTable = false;
+    let tableRows = [];
+
+    for (const block of blocks) {
+        // Close table if we hit a non-table-row block
+        if (inTable && block.type !== 'table_row') {
+            html += renderTable(tableRows);
+            inTable = false;
+            tableRows = [];
+        }
+
+        switch (block.type) {
+            case 'heading_1':
+                html += '<h1>' + richTextToHtml(block.heading_1.rich_text) + '</h1>';
+                break;
+            case 'heading_2':
+                html += '<h2>' + richTextToHtml(block.heading_2.rich_text) + '</h2>';
+                break;
+            case 'heading_3':
+                html += '<h2>' + richTextToHtml(block.heading_3.rich_text) + '</h2>';
+                break;
+            case 'paragraph':
+                const text = richTextToHtml(block.paragraph.rich_text);
+                if (text) html += '<p>' + text + '</p>';
+                break;
+            case 'bulleted_list_item':
+                html += '<ul><li>' + richTextToHtml(block.bulleted_list_item.rich_text) + '</li></ul>';
+                break;
+            case 'numbered_list_item':
+                html += '<ol><li>' + richTextToHtml(block.numbered_list_item.rich_text) + '</li></ol>';
+                break;
+            case 'table':
+                inTable = true;
+                tableRows = [];
+                break;
+            case 'table_row':
+                if (!inTable) { inTable = true; tableRows = []; }
+                tableRows.push(block.table_row.cells);
+                break;
+            case 'divider':
+                html += '<hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">';
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (inTable && tableRows.length) {
+        html += renderTable(tableRows);
+    }
+
+    // Merge consecutive same-type lists
+    html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
+
+    return html || '<div class="detail-loading">無詳細內容</div>';
+}
+
+function renderTable(rows) {
+    if (!rows.length) return '';
+    let html = '<table>';
+    rows.forEach((row, i) => {
+        html += '<tr>';
+        row.forEach(cell => {
+            const tag = i === 0 ? 'th' : 'td';
+            html += '<' + tag + '>' + richTextToHtml(cell) + '</' + tag + '>';
+        });
+        html += '</tr>';
+    });
+    html += '</table>';
+    return html;
+}
+
+function richTextToHtml(richTextArr) {
+    if (!richTextArr || !richTextArr.length) return '';
+    return richTextArr.map(rt => {
+        let text = escapeHtml(rt.plain_text || '');
+        if (rt.annotations) {
+            if (rt.annotations.bold) text = '<strong>' + text + '</strong>';
+            if (rt.annotations.italic) text = '<em>' + text + '</em>';
+            if (rt.annotations.code) text = '<code style="background:var(--bg-input);padding:1px 4px;border-radius:3px;">' + text + '</code>';
+        }
+        if (rt.href) {
+            text = '<a href="' + escapeHtml(rt.href) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + text + '</a>';
+        }
+        return text;
+    }).join('');
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // === Production Log ===

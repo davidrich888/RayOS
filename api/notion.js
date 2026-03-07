@@ -19,15 +19,19 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-        const notionRes = await fetch('https://api.notion.com/v1' + path, {
-            method: method || 'POST',
+        const fetchMethod = method || 'POST';
+        const fetchOpts = {
+            method: fetchMethod,
             headers: {
                 'Authorization': 'Bearer ' + token,
                 'Content-Type': 'application/json',
                 'Notion-Version': '2022-06-28'
-            },
-            body: body ? JSON.stringify(body) : undefined
-        });
+            }
+        };
+        if (fetchMethod !== 'GET' && body) {
+            fetchOpts.body = JSON.stringify(body);
+        }
+        const notionRes = await fetch('https://api.notion.com/v1' + path, fetchOpts);
 
         const data = await notionRes.json();
 
