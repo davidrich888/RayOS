@@ -82,7 +82,7 @@ app.post('/run', (req, res) => {
   const cleanEnv = { ...process.env };
   delete cleanEnv.CLAUDECODE;
 
-  const claude = spawn('claude', ['-p', fullPrompt, '--dangerously-skip-permissions', '--mcp-config', '{"mcpServers":{}}', '--strict-mcp-config'], {
+  const claude = spawn('claude', ['-p', fullPrompt, '--dangerously-skip-permissions'], {
     cwd: CLAUDE_CWD,
     env: cleanEnv
   });
@@ -97,7 +97,7 @@ app.post('/run', (req, res) => {
       console.log(`[Bridge] Timeout after 5 min, killing process`);
       claude.kill('SIGTERM');
     }
-  }, 300000);
+  }, 600000); // 10 min
 
   claude.stdout.on('data', (data) => {
     const chunk = data.toString();
