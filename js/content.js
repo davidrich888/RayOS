@@ -206,7 +206,7 @@ function renderInspirationPool() {
         ).join('');
         const strikethrough = (idea.status === '❌ 放棄' || idea.status === '🏁 已做過');
         const approved = idea.status === '⭐ 核准';
-        const cardStyle = strikethrough ? ' style="opacity:0.5"' : approved ? ' style="border:1px solid var(--accent);box-shadow:0 0 12px rgba(212,197,169,0.25)"' : '';
+        const cardStyle = strikethrough ? ' style="opacity:0.5"' : approved ? ' style="border:1px solid var(--accent);background:rgba(212,197,169,0.08);box-shadow:0 0 16px rgba(212,197,169,0.2)"' : '';
         return `<div class="content-idea-card"${cardStyle}>
             <div class="content-idea-stars">${interestStars || '—'}</div>
             <div class="content-idea-body">
