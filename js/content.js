@@ -5,6 +5,7 @@ let contentIdeas = [];
 let contentLog = [];
 let contentTab = 'inspiration';
 let contentPillarFilter = 'all';
+let contentStatusFilter = 'all';
 
 const CONTENT_LOG_DB_ID = '60354141f1fe4f858b065f0101a72e89';
 
@@ -172,6 +173,15 @@ function setContentPillarFilter(pillar) {
     renderContentSection();
 }
 
+// === Status filter ===
+function setContentStatusFilter(status) {
+    contentStatusFilter = status;
+    document.querySelectorAll('.content-status-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.content-status-btn[data-status="${status}"]`);
+    if (btn) btn.classList.add('active');
+    renderContentSection();
+}
+
 // === Idea page content cache ===
 const ideaContentCache = {};
 
@@ -181,10 +191,14 @@ function renderInspirationPool() {
     if (!container) return;
 
     let filtered = contentIdeas;
+    if (contentStatusFilter !== 'all') {
+        filtered = filtered.filter(i => i.status === contentStatusFilter);
+    }
     if (contentPillarFilter !== 'all') {
         filtered = filtered.filter(i => i.pillar === contentPillarFilter);
     }
 
+    document.getElementById('content-status-filters').style.display = '';
     document.getElementById('content-filters').style.display = '';
     document.getElementById('content-production-area').style.display = 'none';
 
@@ -377,6 +391,7 @@ function renderProductionLog() {
     const container = document.getElementById('content-list');
     if (!container) return;
 
+    document.getElementById('content-status-filters').style.display = 'none';
     document.getElementById('content-filters').style.display = 'none';
     document.getElementById('content-production-area').style.display = '';
 
