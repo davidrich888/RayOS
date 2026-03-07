@@ -204,10 +204,11 @@ function renderInspirationPool() {
         const statusOptions = ['💡 新想法', '🚀 執行中', '✅ 已完成', '📌 保留', '🏁 已做過', '❌ 放棄'].map(s =>
             `<option value="${s}" ${s === idea.status ? 'selected' : ''}>${s}</option>`
         ).join('');
-        return `<div class="content-idea-card">
+        const strikethrough = (idea.status === '❌ 放棄' || idea.status === '🏁 已做過');
+        return `<div class="content-idea-card"${strikethrough ? ' style="opacity:0.5"' : ''}>
             <div class="content-idea-stars">${interestStars || '—'}</div>
             <div class="content-idea-body">
-                <div class="content-idea-text">${idea.text}</div>
+                <div class="content-idea-text"${strikethrough ? ' style="text-decoration:line-through"' : ''}>${idea.text}</div>
                 <div class="content-idea-meta">
                     ${idea.pillar ? `<span class="content-tag pillar">${idea.pillar}</span>` : ''}
                     ${idea.hookType ? `<span class="content-tag hook">${idea.hookType}</span>` : ''}
