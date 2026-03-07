@@ -539,6 +539,10 @@
 
         .content-quick-action { background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 12px; color: var(--text-dim); cursor: pointer; transition: all 0.3s; }
         .content-quick-action:hover { border-color: var(--accent); color: var(--accent); }
+        .content-quick-action:active { transform: scale(0.97); }
+
+        #bridge-output-content { font-family: 'Inter', monospace; word-break: break-word; }
+        #bridge-output-modal .modal { width: 95%; }
 
         /* ===== SMALL PHONE (≤400px) ===== */
         @media (max-width: 400px) {

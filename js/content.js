@@ -357,3 +357,91 @@ function updateContentSyncDot() {
     const d = document.getElementById('content-sync-dot');
     if (d) d.className = 'sync-dot ' + (hasNotionDirect() ? 'on' : 'off');
 }
+
+// === Bridge Server Remote Execution ===
+let bridgeRunning = false;
+
+function hasBridge() {
+    return !!(localStorage.getItem('bridge_url') && localStorage.getItem('bridge_token'));
+}
+
+async function runBridgeCommand(command, args) {
+    if (bridgeRunning) {
+        showToast('已有指令執行中，請稍候', true);
+        return;
+    }
+    if (!hasBridge()) {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(command + (args ? ' ' + args : ''));
+        showToast('Bridge 未設定，已複製指令到剪貼簿');
+        return;
+    }
+
+    const bridgeUrl = localStorage.getItem('bridge_url');
+    const bridgeToken = localStorage.getItem('bridge_token');
+    const statusEl = document.getElementById('bridge-status');
+
+    bridgeRunning = true;
+    if (statusEl) {
+        statusEl.style.display = '';
+        statusEl.innerHTML = '<span style="color:var(--accent);">&#9679;</span> 正在執行 <code>' + command + '</code>...';
+    }
+
+    // Disable all quick action buttons
+    document.querySelectorAll('.content-quick-action').forEach(b => {
+        b.style.opacity = '0.5';
+        b.style.pointerEvents = 'none';
+    });
+
+    try {
+        const res = await fetch(bridgeUrl + '/run', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + bridgeToken
+            },
+            body: JSON.stringify({ command, args: args || '' })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            // Show output in modal
+            document.getElementById('bridge-output-title').textContent = command;
+            document.getElementById('bridge-output-content').textContent = data.output;
+            document.getElementById('bridge-output-modal').style.display = 'flex';
+
+            if (statusEl) {
+                statusEl.innerHTML = '<span style="color:#4a7c59;">&#9679;</span> ' + command + ' 完成';
+                setTimeout(() => { statusEl.style.display = 'none'; }, 5000);
+            }
+
+            // Auto sync content from Notion
+            syncContentFromNotion(true);
+            showToast('&#10003; ' + command + ' 執行完成');
+        } else {
+            const errMsg = data.error || 'Unknown error';
+            if (statusEl) {
+                statusEl.innerHTML = '<span style="color:#e63946;">&#9679;</span> 失敗: ' + errMsg;
+            }
+            showToast(command + ' 失敗: ' + errMsg, true);
+        }
+    } catch (e) {
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color:#e63946;">&#9679;</span> 連線失敗: ' + e.message;
+        }
+        showToast('Bridge 連線失敗: ' + e.message, true);
+    } finally {
+        bridgeRunning = false;
+        document.querySelectorAll('.content-quick-action').forEach(b => {
+            b.style.opacity = '';
+            b.style.pointerEvents = '';
+        });
+    }
+}
+
+function copyBridgeOutput() {
+    const content = document.getElementById('bridge-output-content').textContent;
+    navigator.clipboard.writeText(content);
+    showToast('已複製輸出內容');
+}

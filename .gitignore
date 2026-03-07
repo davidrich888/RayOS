@@ -4,3 +4,5 @@ index.html.backup
 .vercel
 n8n-telegram-daily-digest.json
 n8n-telegram-idea-bot.json
+bridge-server/.env
+bridge-server/node_modules/

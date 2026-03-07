@@ -7,10 +7,14 @@ function saveSettings() {
     const aiModel = document.getElementById('ai-model').value;
     const aiProfile = document.getElementById('ai-profile').value;
     const driveUrl = document.getElementById('drive-script-url').value.replace(/\/+$/, '');
+    const bridgeUrl = document.getElementById('bridge-url').value.replace(/\/+$/, '');
+    const bridgeToken = document.getElementById('bridge-token').value;
     if (notionToken) localStorage.setItem('notion_token', notionToken);
     if (webhook) localStorage.setItem('n8n_webhook', webhook);
     if (apiKey) localStorage.setItem('anthropic_key', apiKey);
     if (driveUrl) localStorage.setItem('drive_script_url', driveUrl);
+    if (bridgeUrl) localStorage.setItem('bridge_url', bridgeUrl);
+    if (bridgeToken) localStorage.setItem('bridge_token', bridgeToken);
     localStorage.setItem('ai_model', aiModel);
     localStorage.setItem('ai_profile', aiProfile);
     updateSyncDot();
@@ -31,6 +35,7 @@ function saveSettings() {
 const EXPORT_KEYS = [
     'notion_token', 'n8n_webhook', 'anthropic_key',
     'ai_model', 'ai_profile', 'drive_script_url',
+    'bridge_url', 'bridge_token',
     'wealth_goal', 'physic_goal', 'wealth_quote'
 ];
 
@@ -41,6 +46,8 @@ const EXPORT_KEY_LABELS = {
     'ai_model': 'AI Model',
     'ai_profile': 'AI Profile',
     'drive_script_url': 'Drive Script URL',
+    'bridge_url': 'Bridge Server URL',
+    'bridge_token': 'Bridge Auth Token',
     'wealth_goal': 'Wealth Goal',
     'physic_goal': 'Physic Goal',
     'wealth_quote': 'Wealth Quote'

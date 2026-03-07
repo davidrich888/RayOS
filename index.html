@@ -537,10 +537,25 @@
                 <div class="form-section" style="padding:16px;margin-top:16px;">
                     <div class="form-title">Quick Actions</div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <div class="content-quick-action" onclick="navigator.clipboard.writeText('/ideas');showToast('已複製 /ideas')">沒靈感？跑 /ideas</div>
-                        <div class="content-quick-action" onclick="navigator.clipboard.writeText('transcribe → /extract-units → /reels-batch');showToast('已複製三步驟')">拍完片？跑三步驟</div>
-                        <div class="content-quick-action" onclick="navigator.clipboard.writeText('/save performance');showToast('已複製 /save performance')">記表現 /save performance</div>
-                        <div class="content-quick-action" onclick="navigator.clipboard.writeText('/weekly-review');showToast('已複製 /weekly-review')">週覆盤 /weekly-review</div>
+                        <div class="content-quick-action" onclick="runBridgeCommand('/ideas')" id="qa-ideas">沒靈感？跑 /ideas</div>
+                        <div class="content-quick-action" onclick="runBridgeCommand('/weekly-review')" id="qa-review">週覆盤 /weekly-review</div>
+                        <div class="content-quick-action" onclick="runBridgeCommand('/ig-post')" id="qa-ig">產 IG 貼文 /ig-post</div>
+                        <div class="content-quick-action" onclick="runBridgeCommand('/waterfall')" id="qa-waterfall">全平台 /waterfall</div>
+                    </div>
+                    <div id="bridge-status" style="font-size:10px;color:var(--text-muted);margin-top:8px;display:none;"></div>
+                </div>
+
+                <!-- Bridge Output Modal -->
+                <div class="modal-overlay" id="bridge-output-modal" style="display:none;">
+                    <div class="modal" style="max-width:700px;max-height:85vh;display:flex;flex-direction:column;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                            <div class="modal-title" id="bridge-output-title">Output</div>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-small" onclick="copyBridgeOutput()">複製</button>
+                                <button class="btn btn-small" onclick="hideModal('bridge-output-modal')">關閉</button>
+                            </div>
+                        </div>
+                        <div id="bridge-output-content" style="flex:1;overflow-y:auto;font-size:13px;line-height:1.7;color:var(--text-dim);white-space:pre-wrap;padding:16px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;"></div>
                     </div>
                 </div>
             </div>
@@ -661,6 +676,15 @@
                 <label class="form-label">n8n Webhook URL（進階，可選）</label>
                 <input type="text" class="form-input" id="n8n-webhook" placeholder="https://your-n8n.com/webhook/rayos-sync">
                 <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">若不使用 Notion Token，可用 n8n 中轉。有 Notion Token 時此欄可留空</div>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">Bridge Server URL（Claude Code 遠端執行）</label>
+                <input type="text" class="form-input" id="bridge-url" placeholder="http://100.86.95.10:3000">
+                <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">Mac Mini 上的 Bridge Server 位址（需 Tailscale）</div>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">Bridge Auth Token</label>
+                <input type="password" class="form-input" id="bridge-token" placeholder="your-secret-token">
             </div>
             <div class="form-group" style="margin-bottom:16px;">
                 <label class="form-label">n8n 同步狀態</label>

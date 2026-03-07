@@ -32,6 +32,8 @@
     if(localStorage.getItem('anthropic_key')) document.getElementById('anthropic-key').value = localStorage.getItem('anthropic_key');
     if(localStorage.getItem('ai_model')) document.getElementById('ai-model').value = localStorage.getItem('ai_model');
     if(localStorage.getItem('ai_profile')) document.getElementById('ai-profile').value = localStorage.getItem('ai_profile');
+    if(localStorage.getItem('bridge_url')) document.getElementById('bridge-url').value = localStorage.getItem('bridge_url');
+    if(localStorage.getItem('bridge_token')) document.getElementById('bridge-token').value = localStorage.getItem('bridge_token');
     
     document.getElementById('body-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('biz-date').value = new Date().toISOString().split('T')[0];
