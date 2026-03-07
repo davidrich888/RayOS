@@ -82,7 +82,7 @@ app.post('/run', (req, res) => {
   const cleanEnv = { ...process.env };
   delete cleanEnv.CLAUDECODE;
 
-  const claude = spawn('claude', ['-p', fullPrompt], {
+  const claude = spawn('claude', ['-p', fullPrompt, '--dangerously-skip-permissions', '--mcp-config', '{"mcpServers":{}}', '--strict-mcp-config'], {
     cwd: CLAUDE_CWD,
     env: cleanEnv
   });
