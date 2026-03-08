@@ -544,6 +544,8 @@
 
         .content-log-item { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
         .content-log-item:last-child { border-bottom: none; }
+        .content-log-item.clickable { cursor: pointer; border-radius: 6px; padding: 10px 8px; margin: 0 -8px; transition: background 0.2s; }
+        .content-log-item.clickable:hover { background: var(--bg-input); }
         .content-log-icon { font-size: 18px; flex-shrink: 0; }
         .content-log-info { flex: 1; min-width: 0; }
         .content-log-title { font-weight: 500; font-size: 13px; }

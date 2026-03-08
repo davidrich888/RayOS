@@ -386,6 +386,65 @@ function escapeHtml(str) {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// === Content Log Detail Cache ===
+const logDetailCache = {};
+
+// === Open log item detail modal ===
+async function openLogItemDetail(logItem) {
+    const modal = document.getElementById('content-detail-modal');
+    const titleEl = document.getElementById('content-detail-title');
+    const metaEl = document.getElementById('content-detail-meta');
+    const bodyEl = document.getElementById('content-detail-body');
+    if (!modal) return;
+
+    titleEl.textContent = logItem.title;
+    const platformIcon = { 'YouTube': '🎬', 'IG Reels': '📱', 'IG 輪播': '🎠', 'Skool': '💬', 'Email': '📧' }[logItem.platform] || '📄';
+    const statusColor = { '草稿': 'var(--text-muted)', '待審': '#e6a817', '已核': '#4a7c59', '已發布': 'var(--accent)' }[logItem.status] || 'var(--text-dim)';
+    metaEl.innerHTML = `${platformIcon} ${logItem.platform} · ${logItem.date}${logItem.pillar ? ' · ' + logItem.pillar : ''} · <span style="color:${statusColor}">${logItem.status}</span>${logItem.source ? ' · 來源: ' + logItem.source : ''}`;
+    bodyEl.innerHTML = '<div class="detail-loading">載入中...</div>';
+    modal.style.display = 'flex';
+
+    // Find matching idea by title
+    const matchedIdea = contentIdeas.find(i => i.text === logItem.title);
+    const pageId = matchedIdea ? matchedIdea.id : null;
+
+    if (!pageId) {
+        bodyEl.innerHTML = '<div class="detail-loading">找不到對應的 Idea 頁面。請確認靈感池中有同名項目。</div>';
+        return;
+    }
+
+    // Check cache
+    if (logDetailCache[pageId]) {
+        bodyEl.innerHTML = logDetailCache[pageId];
+        return;
+    }
+
+    // Fetch Notion blocks
+    try {
+        const data = await notionFetch('/blocks/' + pageId + '/children?page_size=100', 'GET');
+        if (data.results && data.results.length) {
+            const blocks = data.results;
+            for (let i = 0; i < blocks.length; i++) {
+                if (blocks[i].type === 'table' && blocks[i].has_children) {
+                    const tableData = await notionFetch('/blocks/' + blocks[i].id + '/children?page_size=100', 'GET');
+                    if (tableData.results) {
+                        blocks.splice(i + 1, 0, ...tableData.results);
+                        i += tableData.results.length;
+                    }
+                }
+            }
+            const html = renderNotionBlocks(blocks);
+            logDetailCache[pageId] = html;
+            bodyEl.innerHTML = html;
+        } else {
+            bodyEl.innerHTML = '<div class="detail-loading">此頁面尚無內容</div>';
+        }
+    } catch (e) {
+        console.error('[RayOS Content] Log detail fetch error:', e);
+        bodyEl.innerHTML = '<div class="detail-loading">載入失敗: ' + e.message + '</div>';
+    }
+}
+
 // === Production Log ===
 function renderProductionLog() {
     const container = document.getElementById('content-list');
@@ -403,10 +462,10 @@ function renderProductionLog() {
         if (recent.length === 0) {
             recentEl.innerHTML = '<div style="color:var(--text-muted);padding:12px;">尚無記錄。用 /waterfall 或 /ig-post 開始產出！</div>';
         } else {
-            recentEl.innerHTML = recent.map(c => {
+            recentEl.innerHTML = recent.map((c, idx) => {
                 const platformIcon = { 'YouTube': '🎬', 'IG Reels': '📱', 'IG 輪播': '🎠', 'Skool': '💬', 'Email': '📧' }[c.platform] || '📄';
                 const statusColor = { '草稿': 'var(--text-muted)', '待審': '#e6a817', '已核': '#4a7c59', '已發布': 'var(--accent)' }[c.status] || 'var(--text-dim)';
-                return `<div class="content-log-item">
+                return `<div class="content-log-item clickable" onclick="openLogItemDetail(contentLog[${idx}])">
                     <span class="content-log-icon">${platformIcon}</span>
                     <div class="content-log-info">
                         <div class="content-log-title">${c.title}</div>
