@@ -189,8 +189,9 @@ app.post('/run', (req, res) => {
     return res.status(403).json({ success: false, error: `Command not allowed: ${baseCommand}` });
   }
 
-  // Sanitize args: only allow Chinese, English, numbers, spaces, basic punctuation
-  if (args && !/^[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9\s.,!?_\-/]+$/.test(args)) {
+  // Sanitize args: allow Chinese, English, numbers, spaces, CJK punctuation, common symbols
+  // Block shell-dangerous chars: ` $ ; | & > < \ { } ( ) but allow fullwidth variants
+  if (args && !/^[\u4e00-\u9fff\u3400-\u4dbf\u3000-\u303f\uff00-\uffef\u2010-\u2027\u2030-\u205ea-zA-Z0-9\s.,!?_\-/:'"@#%^*+=~\[\]]+$/.test(args)) {
     return res.status(400).json({ success: false, error: 'Invalid characters in args' });
   }
 

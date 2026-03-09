@@ -603,6 +603,20 @@ async function triggerAutoResearch(ideaId, title) {
         if (data.success && data.output) {
             await writeResearchToNotion(ideaId, data.output);
             delete ideaContentCache[ideaId];
+            // Auto-refresh if card is expanded
+            const card = document.getElementById('idea-card-' + ideaId);
+            const detail = document.getElementById('idea-detail-' + ideaId);
+            if (card && card.classList.contains('expanded') && detail) {
+                detail.innerHTML = '<div class="detail-loading">重新載入...</div>';
+                try {
+                    const blocksRes = await notionFetch('/blocks/' + ideaId + '/children?page_size=100');
+                    const html = renderNotionBlocks(blocksRes.results || []);
+                    ideaContentCache[ideaId] = html;
+                    detail.innerHTML = html;
+                } catch (err) {
+                    detail.innerHTML = '<div style="color:var(--text-dim);">載入失敗</div>';
+                }
+            }
             showToast('Research Brief 已生成');
         } else {
             console.error('[RayOS] Auto-research failed:', data.error);
@@ -763,6 +777,12 @@ let bridgeRunning = false;
 
 function hasBridge() {
     return !!(localStorage.getItem('bridge_url') && localStorage.getItem('bridge_token'));
+}
+
+function promptBridgeCommand(command, placeholder) {
+    const input = prompt(placeholder || '輸入參數');
+    if (!input || !input.trim()) return;
+    runBridgeCommand(command, input.trim());
 }
 
 async function runBridgeCommand(command, args) {
