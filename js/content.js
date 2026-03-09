@@ -243,6 +243,11 @@ async function toggleIdeaDetail(ideaId, event) {
     if (event.target.tagName === 'SELECT' || event.target.tagName === 'OPTION') return;
     // Don't toggle when clicking links inside the detail
     if (event.target.tagName === 'A') return;
+    // Don't toggle when clicking inside expanded detail area (allows text selection)
+    const detail = document.getElementById('idea-detail-' + ideaId);
+    if (detail && detail.contains(event.target)) return;
+    // Don't toggle if user has text selected (mid-selection click)
+    if (window.getSelection && window.getSelection().toString().length > 0) return;
 
     const card = document.getElementById('idea-card-' + ideaId);
     const detail = document.getElementById('idea-detail-' + ideaId);
@@ -281,7 +286,7 @@ async function toggleIdeaDetail(ideaId, event) {
             }
             const html = renderNotionBlocks(blocks);
             ideaContentCache[ideaId] = html;
-            detail.innerHTML = html;
+            detail.innerHTML = `<button class="btn btn-small" onclick="event.stopPropagation();copyIdeaDetail('${ideaId}')" style="float:right;margin:0 0 8px 8px;font-size:10px;">📋 Copy</button>` + html;
         } else {
             detail.innerHTML = '<div class="detail-loading">無內容 — 在 Notion 中新增靈感來源</div>';
         }
@@ -380,6 +385,14 @@ function richTextToHtml(richTextArr) {
         }
         return text;
     }).join('');
+}
+
+function copyIdeaDetail(ideaId) {
+    const detail = document.getElementById('idea-detail-' + ideaId);
+    if (!detail) return;
+    const text = detail.innerText;
+    navigator.clipboard.writeText(text);
+    showToast('已複製內容');
 }
 
 function escapeHtml(str) {
