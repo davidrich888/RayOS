@@ -440,11 +440,10 @@ async function createNext7Days() {
     // Find the earliest gap start: scan existing dates to find the last consecutive date before today
     function buildDateRange() {
         const dates = [];
-        // Collect all known dates from notionPageIndex and dailyHabitsData
-        const knownDates = new Set([
-            ...Object.keys(notionPageIndex || {}),
-            ...Object.keys(dailyHabitsData || {})
-        ]);
+        // Only check notionPageIndex — dates in dailyHabitsData may be local-only (not in Notion)
+        const knownDates = new Set(
+            Object.keys(notionPageIndex || {})
+        );
         if (knownDates.size === 0) {
             // No existing data — just create today + 6 future days
             for (let i = 0; i < 7; i++) {
