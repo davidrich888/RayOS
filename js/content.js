@@ -250,7 +250,6 @@ async function toggleIdeaDetail(ideaId, event) {
     if (window.getSelection && window.getSelection().toString().length > 0) return;
 
     const card = document.getElementById('idea-card-' + ideaId);
-    const detail = document.getElementById('idea-detail-' + ideaId);
     if (!card || !detail) return;
 
     const isExpanded = card.classList.contains('expanded');
