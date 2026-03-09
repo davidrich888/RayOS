@@ -567,9 +567,173 @@ async function updateContentIdeaStatus(ideaId, newStatus) {
         await notionFetch('/pages/' + ideaId, 'PATCH', {
             properties: { '狀態': { select: { name: newStatus } } }
         });
+        // Auto-trigger research brief when idea is approved
+        if (newStatus === '⭐ 核准') {
+            triggerAutoResearch(ideaId, idea.title);
+        }
     } catch (e) {
         showToast('狀態更新失敗: ' + e.message, true);
     }
+}
+
+// === Auto Research on Approval ===
+async function triggerAutoResearch(ideaId, title) {
+    if (!hasBridge()) {
+        console.log('[RayOS] Bridge not configured, skipping auto-research');
+        return;
+    }
+
+    showToast('Research Brief 產生中...（背景執行）');
+
+    const bridgeUrl = localStorage.getItem('bridge_url');
+    const bridgeToken = localStorage.getItem('bridge_token');
+
+    try {
+        const res = await fetch(bridgeUrl + '/run', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + bridgeToken
+            },
+            body: JSON.stringify({ command: '/research', args: title })
+        });
+
+        const data = await res.json();
+
+        if (data.success && data.output) {
+            await writeResearchToNotion(ideaId, data.output);
+            delete ideaContentCache[ideaId];
+            showToast('Research Brief 已生成');
+        } else {
+            console.error('[RayOS] Auto-research failed:', data.error);
+            showToast('Research Brief 生成失敗', true);
+        }
+    } catch (e) {
+        console.error('[RayOS] Auto-research error:', e);
+        showToast('Research Brief 生成失敗: ' + e.message, true);
+    }
+}
+
+async function writeResearchToNotion(ideaId, markdown) {
+    if (!hasNotionDirect()) return;
+
+    const blocks = markdownToNotionBlocks(markdown);
+    if (!blocks.length) return;
+
+    // Notion API: max 100 blocks per request
+    for (let i = 0; i < blocks.length; i += 100) {
+        const chunk = blocks.slice(i, i + 100);
+        await notionFetch('/blocks/' + ideaId + '/children', 'PATCH', {
+            children: chunk
+        });
+    }
+}
+
+function markdownToNotionBlocks(md) {
+    const lines = md.split('\n');
+    const blocks = [];
+    let i = 0;
+
+    while (i < lines.length) {
+        const line = lines[i];
+
+        if (!line.trim()) { i++; continue; }
+
+        // Divider
+        if (/^---+$/.test(line.trim())) {
+            blocks.push({ type: 'divider', divider: {} });
+            i++; continue;
+        }
+
+        // Heading 1
+        if (/^# [^#]/.test(line)) {
+            blocks.push({ type: 'heading_1', heading_1: { rich_text: [{ type: 'text', text: { content: line.slice(2).trim() } }] } });
+            i++; continue;
+        }
+
+        // Heading 2
+        if (/^## [^#]/.test(line)) {
+            blocks.push({ type: 'heading_2', heading_2: { rich_text: [{ type: 'text', text: { content: line.slice(3).trim() } }] } });
+            i++; continue;
+        }
+
+        // Heading 3
+        if (/^### /.test(line)) {
+            blocks.push({ type: 'heading_3', heading_3: { rich_text: [{ type: 'text', text: { content: line.slice(4).trim() } }] } });
+            i++; continue;
+        }
+
+        // Blockquote
+        if (line.startsWith('> ')) {
+            blocks.push({ type: 'quote', quote: { rich_text: [{ type: 'text', text: { content: line.slice(2).trim() } }] } });
+            i++; continue;
+        }
+
+        // Table (collect consecutive | rows)
+        if (line.trim().startsWith('|')) {
+            const tableLines = [];
+            while (i < lines.length && lines[i].trim().startsWith('|')) {
+                const tl = lines[i].trim();
+                // Skip separator rows (|---|---|)
+                if (!/^\|[\s\-:|]+\|$/.test(tl)) {
+                    tableLines.push(tl);
+                }
+                i++;
+            }
+            if (tableLines.length > 0) {
+                const cells = tableLines.map(tl =>
+                    tl.split('|').slice(1, -1).map(c => c.trim())
+                );
+                const width = Math.max(...cells.map(r => r.length));
+                // Pad rows to same width
+                const padded = cells.map(row => {
+                    while (row.length < width) row.push('');
+                    return row;
+                });
+                blocks.push({
+                    type: 'table',
+                    table: {
+                        table_width: width,
+                        has_column_header: true,
+                        has_row_header: false,
+                        children: padded.map(row => ({
+                            type: 'table_row',
+                            table_row: {
+                                cells: row.map(c => [{ type: 'text', text: { content: c } }])
+                            }
+                        }))
+                    }
+                });
+            }
+            continue;
+        }
+
+        // Checkbox list
+        if (line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]')) {
+            const checked = line.trim().startsWith('- [x]');
+            blocks.push({ type: 'to_do', to_do: { rich_text: [{ type: 'text', text: { content: line.trim().slice(6).trim() } }], checked } });
+            i++; continue;
+        }
+
+        // Bullet list
+        if (/^[-*] /.test(line.trim())) {
+            blocks.push({ type: 'bulleted_list_item', bulleted_list_item: { rich_text: [{ type: 'text', text: { content: line.trim().slice(2).trim() } }] } });
+            i++; continue;
+        }
+
+        // Numbered list
+        if (/^\d+\. /.test(line.trim())) {
+            const text = line.trim().replace(/^\d+\.\s*/, '');
+            blocks.push({ type: 'numbered_list_item', numbered_list_item: { rich_text: [{ type: 'text', text: { content: text } }] } });
+            i++; continue;
+        }
+
+        // Paragraph (default)
+        blocks.push({ type: 'paragraph', paragraph: { rich_text: [{ type: 'text', text: { content: line.trim() } }] } });
+        i++;
+    }
+
+    return blocks;
 }
 
 // === Dashboard stat box ===
