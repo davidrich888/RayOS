@@ -31,7 +31,7 @@
         <div class="nav-item" data-section="business"><span class="nav-icon">📊</span><span>Business</span></div>
         <div class="nav-item" data-section="content"><span class="nav-icon">📝</span><span>Content</span></div>
         <div class="nav-item" data-section="ideas"><span class="nav-icon">💡</span><span>Ideas</span></div>
-        <div class="nav-item" data-section="lifecoach"><span class="nav-icon">🧠</span><span>AI Coach</span></div>
+        <div class="nav-item" data-section="lifecoach"><span class="nav-icon">🤖</span><span>AI Agents</span></div>
         <div class="nav-item" data-section="information"><span class="nav-icon">📖</span><span>Information</span></div>
     </nav>
     
@@ -76,7 +76,7 @@
                     <div class="card" onclick="go('business')"><div class="card-header"><span class="card-icon">📊</span><span class="card-badge">GROW</span></div><div class="card-title">Business</div><div class="card-desc">Skool・MRR・Members</div></div>
                     <div class="card" onclick="go('content')"><div class="card-header"><span class="card-icon">📝</span><span class="card-badge">CREATE</span></div><div class="card-title">Content</div><div class="card-desc">靈感池・產出追蹤</div></div>
                     <div class="card" onclick="go('ideas')"><div class="card-header"><span class="card-icon">💡</span><span class="card-badge">CAPTURE</span></div><div class="card-title">Ideas</div><div class="card-desc">靈感・點子・計劃</div></div>
-                    <div class="card" onclick="go('lifecoach')"><div class="card-header"><span class="card-icon">🧠</span><span class="card-badge">AI</span></div><div class="card-title">Life Coach</div><div class="card-desc">AI 人生導師</div></div>
+                    <div class="card" onclick="go('lifecoach')"><div class="card-header"><span class="card-icon">🤖</span><span class="card-badge">13</span></div><div class="card-title">AI Agents</div><div class="card-desc">自動化 Agent 總覽</div></div>
                     <div class="card" onclick="go('information')"><div class="card-header"><span class="card-icon">📖</span><span class="card-badge">LEARN</span></div><div class="card-title">Information</div><div class="card-desc">YouTube Lab</div></div>
                 </div>
             </div>
@@ -622,41 +622,109 @@
         <!-- AI LIFE COACH -->
         <section class="section" id="lifecoach">
             <div class="header">
-                <div class="page-title">AI Life Coach</div>
+                <div class="page-title">AI Agents</div>
                 <div class="header-actions">
                     <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <span class="ai-model-badge" style="font-size:11px;color:var(--text-dim);"></span>
+                    <button class="btn btn-accent" onclick="window.open('https://david86726.app.n8n.cloud','_blank')">Open N8N ↗</button>
                 </div>
             </div>
             <div class="content">
-                <div class="form-section" style="margin-bottom:16px;padding:16px;">
-                    <div class="form-title">📊 Life Overview</div>
-                    <div id="life-overview" class="stats-row"></div>
+                <div class="stats-row" style="margin-bottom:20px;">
+                    <div class="stat-card"><div class="stat-value">13</div><div class="stat-label">Total Workflows</div></div>
+                    <div class="stat-card"><div class="stat-value">5</div><div class="stat-label">Decision Agents</div></div>
+                    <div class="stat-card"><div class="stat-value">5</div><div class="stat-label">Data Sync</div></div>
+                    <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Tools</div></div>
                 </div>
-                <div class="ai-panel" style="border-radius:12px;">
-                    <div class="ai-header">
-                        <div class="ai-icon">🧠</div>
-                        <div class="ai-title">AI Life Coach</div>
-                        <span class="ai-model-badge"></span>
-                    </div>
-                    <div class="ai-content" style="max-height:500px;">
-                        <div class="ai-suggestion" id="life-ai-suggestion">Loading...</div>
-                    </div>
-                    <div class="ai-chat">
-                        <div class="ai-input-wrap">
-                            <input type="text" class="ai-input" id="life-ai-input" placeholder="問任何人生問題... 我會參考你所有的數據和學習紀錄">
-                            <button class="ai-send" onclick="askLifeAI()">→</button>
+
+                <div class="form-section" style="padding:16px;margin-bottom:16px;">
+                    <div class="form-title">🎯 Decision Agents — 主動推送決策，TG 一鍵審核</div>
+                    <div style="display:grid;gap:12px;margin-top:12px;">
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(212,197,169,0.08);border-radius:8px;border-left:3px solid #4CAF50;">
+                            <div style="font-size:24px;">📊</div>
+                            <div style="flex:1;">
+                                <div style="font-weight:600;color:var(--text-primary);font-size:14px;">Analyst（週報）</div>
+                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">每週日 09:00 — 分析 YT/IG/內容表現 → Claude Haiku 產出週報 → TG 推送（✅/❌）→ 寫入 Notion Review DB</div>
+                            </div>
+                            <div style="font-size:10px;color:#4CAF50;white-space:nowrap;">● Active</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(212,197,169,0.08);border-radius:8px;border-left:3px solid #4CAF50;">
+                            <div style="font-size:24px;">🧠</div>
+                            <div style="flex:1;">
+                                <div style="font-weight:600;color:var(--text-primary);font-size:14px;">Strategist（選題推薦）</div>
+                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">每週一 09:00 — 讀競品+Content Log+Memory → 分析支柱/競品/Hook缺口 → 推薦 3 選題 → TG 推送（✅/❌）→ 寫入 Notion Ideas DB</div>
+                            </div>
+                            <div style="font-size:10px;color:#4CAF50;white-space:nowrap;">● Active</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(212,197,169,0.08);border-radius:8px;border-left:3px solid #4CAF50;">
+                            <div style="font-size:24px;">🔔</div>
+                            <div style="flex:1;">
+                                <div style="font-weight:600;color:var(--text-primary);font-size:14px;">TG Handler（審核處理）</div>
+                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">即時觸發 — 你在 TG 按 ✅/❌ → 更新 Notion Review DB 狀態 → TG 確認通知</div>
+                            </div>
+                            <div style="font-size:10px;color:#4CAF50;white-space:nowrap;">● Active</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(212,197,169,0.08);border-radius:8px;border-left:3px solid #4CAF50;">
+                            <div style="font-size:24px;">🕵️</div>
+                            <div style="flex:1;">
+                                <div style="font-weight:600;color:var(--text-primary);font-size:14px;">每日競品報告</div>
+                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">每天 09:00 — YouTube API 抓 23 個競品頻道新長片 → Claude Haiku 分析（標題模式/切入角度/機會/威脅）→ Notion DB + TG 報告</div>
+                            </div>
+                            <div style="font-size:10px;color:#4CAF50;white-space:nowrap;">● Active</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(212,197,169,0.08);border-radius:8px;border-left:3px solid #4CAF50;">
+                            <div style="font-size:24px;">📈</div>
+                            <div style="flex:1;">
+                                <div style="font-weight:600;color:var(--text-primary);font-size:14px;">週度競品洞察</div>
+                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">每週日 10:00 — 讀取本週競品累積數據 → Claude Haiku 深度分析（市場熱點/爆量驗證/空白點/趨勢）→ TG 策略報告</div>
+                            </div>
+                            <div style="font-size:10px;color:#4CAF50;white-space:nowrap;">● Active</div>
                         </div>
                     </div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-section" style="padding:16px;">
-                        <div class="form-title">📚 Video Knowledge Base</div>
-                        <div id="video-knowledge-summary" style="font-size:12px;color:var(--text-muted);">載入中...</div>
+                        <div class="form-title">🔄 Data Sync — 自動同步數據</div>
+                        <div style="display:grid;gap:8px;margin-top:10px;font-size:12px;">
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;">
+                                <span style="color:var(--text-muted);">YT 主頻道同步</span><span style="color:var(--text-dim);">週日 02:00</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;">
+                                <span style="color:var(--text-muted);">TFT Story 同步</span><span style="color:var(--text-dim);">週日 02:00</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;">
+                                <span style="color:var(--text-muted);">IG Profile 月報</span><span style="color:var(--text-dim);">每月 1 號</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;">
+                                <span style="color:var(--text-muted);">IG Reels 週報</span><span style="color:var(--text-dim);">週日 02:30</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;">
+                                <span style="color:var(--text-muted);">Skool → Sheet + CK</span><span style="color:var(--text-dim);">每 2 天</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-section" style="padding:16px;">
-                        <div class="form-title">🧠 AI Memory</div>
-                        <div id="ai-memory-panel" style="font-size:12px;max-height:200px;overflow-y:auto;"></div>
+                        <div class="form-title">🔧 Tools — Webhook 觸發</div>
+                        <div style="display:grid;gap:8px;margin-top:10px;font-size:12px;">
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;">
+                                <span style="color:var(--text-muted);">Agent Memory Read</span><span style="color:var(--text-dim);">Webhook</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;">
+                                <span style="color:var(--text-muted);">Agent Memory Write</span><span style="color:var(--text-dim);">Webhook</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;">
+                                <span style="color:var(--text-muted);">Weekly Review Data</span><span style="color:var(--text-dim);">Webhook</span>
+                            </div>
+                        </div>
+                        <div class="form-title" style="margin-top:16px;">🚧 Coming Next</div>
+                        <div style="display:grid;gap:8px;margin-top:10px;font-size:12px;">
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;opacity:0.5;">
+                                <span style="color:var(--text-muted);">Producer（內容生產）</span><span style="color:var(--text-dim);">Phase 2</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;opacity:0.5;">
+                                <span style="color:var(--text-muted);">Distribution（自動發布）</span><span style="color:var(--text-dim);">Phase 3</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
