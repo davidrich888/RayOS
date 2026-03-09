@@ -1,6 +1,15 @@
-// AI Agents — N8N execution status
-const N8N_BASE = 'https://david86726.app.n8n.cloud/api/v1';
+// AI Agents — N8N execution status (proxied via /api/n8n to avoid CORS)
 const N8N_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMzE1OWNjZC01NDcyLTQyZTUtOGUwMy0zMGUyNTVlMjE0MWQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzcwOTAyNDE3fQ.00291E8JEI0bcmFaKCzYVA0rmGkAkGHVrcLi5p_vxng';
+
+async function n8nFetch(apiPath) {
+    const res = await fetch('/api/n8n', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: apiPath, apiKey: N8N_API_KEY })
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    return res.json();
+}
 
 let agentExecChart = null;
 let agentDataLoaded = false;
@@ -25,14 +34,7 @@ async function loadAgentExecutions() {
         if (!statusEl) continue;
 
         try {
-            const res = await fetch(`${N8N_BASE}/executions?workflowId=${wfId}&limit=10`, {
-                headers: { 'X-N8N-API-KEY': N8N_API_KEY }
-            });
-            if (!res.ok) {
-                statusEl.textContent = 'API error';
-                continue;
-            }
-            const data = await res.json();
+            const data = await n8nFetch(`/executions?workflowId=${wfId}&limit=10`);
             const execs = data.data || [];
 
             if (!execs.length) {
