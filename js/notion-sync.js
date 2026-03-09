@@ -428,22 +428,67 @@ function checkNewDay() {
 setInterval(checkNewDay, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewDay(); });
 
-// === 批次建立未來 7 天 ===
+// === 批次建立：回補空缺 + 未來 7 天 ===
 async function createNext7Days() {
     const statusEl = document.getElementById('create-week-status');
     if (!statusEl) return;
-    statusEl.textContent = '⏳ 正在建立...';
+    statusEl.textContent = '⏳ 正在檢查空缺並建立...';
 
     const today = new Date();
-    let created = 0, skipped = 0;
+    const todayStr = today.toISOString().split('T')[0];
+
+    // Find the earliest gap start: scan existing dates to find the last consecutive date before today
+    function buildDateRange() {
+        const dates = [];
+        // Collect all known dates from notionPageIndex and dailyHabitsData
+        const knownDates = new Set([
+            ...Object.keys(notionPageIndex || {}),
+            ...Object.keys(dailyHabitsData || {})
+        ]);
+        if (knownDates.size === 0) {
+            // No existing data — just create today + 6 future days
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(today);
+                d.setDate(d.getDate() + i);
+                dates.push(d.toISOString().split('T')[0]);
+            }
+            return dates;
+        }
+
+        // Find the earliest date that should be backfilled (max 90 days back to avoid runaway)
+        const sortedDates = [...knownDates].filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+        const oldestExisting = sortedDates[0];
+        const newestExisting = sortedDates[sortedDates.length - 1];
+
+        // Start from the day after the oldest existing date, scan for gaps up to today+6
+        const startDate = new Date(oldestExisting);
+        startDate.setDate(startDate.getDate() + 1);
+        const endDate = new Date(today);
+        endDate.setDate(endDate.getDate() + 6);
+
+        // Cap backfill to 90 days before today
+        const maxBackfill = new Date(today);
+        maxBackfill.setDate(maxBackfill.getDate() - 90);
+        const effectiveStart = startDate < maxBackfill ? maxBackfill : startDate;
+
+        const cursor = new Date(effectiveStart);
+        while (cursor <= endDate) {
+            const ds = cursor.toISOString().split('T')[0];
+            if (!knownDates.has(ds)) {
+                dates.push(ds);
+            }
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        return dates;
+    }
+
+    let created = 0, skipped = 0, backfilled = 0;
 
     // Notion Direct API 路徑
     if (hasNotionDirect()) {
         try {
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(today);
-                d.setDate(d.getDate() + i);
-                const dateStr = d.toISOString().split('T')[0];
+            const datesToCreate = buildDateRange();
+            for (const dateStr of datesToCreate) {
                 if (notionPageIndex[dateStr]) {
                     skipped++;
                     continue;
@@ -452,10 +497,17 @@ async function createNext7Days() {
                     dailyHabitsData[dateStr] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null};
                 }
                 await createDayInNotionDirect(dateStr);
-                created++;
+                if (dateStr < todayStr) {
+                    backfilled++;
+                } else {
+                    created++;
+                }
             }
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
-            statusEl.textContent = '✅ 完成！建立 ' + created + ' 天，跳過 ' + skipped + ' 天（已存在）';
+            let msg = '✅ 完成！';
+            if (backfilled > 0) msg += '回補 ' + backfilled + ' 天，';
+            msg += '建立 ' + created + ' 天，跳過 ' + skipped + ' 天（已存在）';
+            statusEl.textContent = msg;
             // 重新同步以更新畫面
             await syncDailyFromNotionDirect(true);
         } catch (e) {
