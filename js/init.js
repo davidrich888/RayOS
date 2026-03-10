@@ -49,6 +49,12 @@
     updateBodySyncDot();
     updateIdeasSyncDot();
     updateContentSyncDot();
+    // YT Studio: set default filter button active
+    const ytDefaultBtn = document.querySelector('.yt-studio-filter-btn[data-filter="Next One"]');
+    if (ytDefaultBtn) ytDefaultBtn.classList.add('active');
+    // YT Studio sync dot
+    const ytSyncDot = document.getElementById('ytstudio-sync-dot');
+    if (ytSyncDot) ytSyncDot.className = 'sync-dot ' + (hasNotionDirect() ? 'on' : 'off');
     updateModelBadges();
     // 清除舊的 ideas localStorage（已改為 Notion-first）
     localStorage.removeItem('ideas_data');

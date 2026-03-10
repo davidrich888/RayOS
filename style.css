@@ -559,6 +559,40 @@
         #bridge-output-content { font-family: 'Inter', monospace; word-break: break-word; }
         #bridge-output-modal .modal { width: 95%; }
 
+        /* ===== YT STUDIO ===== */
+        .yt-studio-filter-btn.active { background: var(--accent); color: var(--bg); }
+        .yt-studio-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 8px; transition: border-color 0.3s; cursor: pointer; }
+        .yt-studio-card:hover { border-color: var(--text-muted); }
+        .yt-studio-card.expanded { border-color: var(--accent); }
+        .yt-studio-card.yt-done { opacity: 0.5; }
+        .yt-studio-card-main { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+        .yt-studio-card-body { flex: 1; min-width: 0; }
+        .yt-studio-card-title { font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+        .yt-studio-card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+        .yt-studio-card-desc { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+        .yt-studio-card-action { flex-shrink: 0; }
+        .content-tag.yt-next { background: rgba(212, 197, 169, 0.15); color: var(--accent); font-weight: 500; }
+        .content-tag.yt-done-tag { background: rgba(74, 124, 89, 0.15); color: #4a7c59; }
+        .content-tag.yt-progress { background: rgba(230, 168, 23, 0.12); color: #e6a817; }
+        .yt-studio-research-btn { background: var(--accent) !important; color: var(--bg) !important; border-color: var(--accent) !important; font-weight: 600; }
+        .yt-studio-research-btn:hover { opacity: 0.85; }
+        .yt-studio-status-badge { font-size: 12px; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
+        .yt-studio-status-badge.done { background: rgba(74, 124, 89, 0.15); color: #4a7c59; }
+        .yt-studio-status-badge.researched { background: rgba(69, 123, 157, 0.15); color: #7fb8d4; }
+        .yt-studio-status-badge.researching { background: rgba(230, 168, 23, 0.15); color: #e6a817; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .yt-studio-detail { display: none; width: 100%; border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; }
+        .yt-studio-card.expanded .yt-studio-detail { display: block; }
+        .yt-studio-detail h1 { font-size: 15px; color: var(--text-main); margin: 16px 0 8px; font-weight: 600; }
+        .yt-studio-detail h2 { font-size: 14px; color: var(--accent); margin: 14px 0 6px; font-weight: 600; }
+        .yt-studio-detail a { color: var(--accent); text-decoration: underline; word-break: break-all; }
+        .yt-studio-detail p { font-size: 13px; line-height: 1.6; color: var(--text-dim); margin: 4px 0; }
+        .yt-studio-detail ul, .yt-studio-detail ol { font-size: 13px; color: var(--text-dim); padding-left: 20px; margin: 4px 0; }
+        .yt-studio-detail table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+        .yt-studio-detail th { background: var(--bg-input); color: var(--accent); padding: 6px 10px; text-align: left; border: 1px solid var(--border); }
+        .yt-studio-detail td { padding: 6px 10px; border: 1px solid var(--border); color: var(--text-dim); }
+        .yt-studio-detail hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
         /* ===== SMALL PHONE (≤400px) ===== */
         @media (max-width: 400px) {
             .stats-row { grid-template-columns: repeat(2, 1fr) !important; }

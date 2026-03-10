@@ -35,6 +35,10 @@ function go(section) {
             if (typeof renderContentSection === 'function') renderContentSection();
             if (firstVisit && canSync && typeof syncContentFromNotion === 'function') syncContentFromNotion(true);
             break;
+        case 'ytstudio':
+            if (typeof renderYTStudio === 'function') renderYTStudio();
+            if (firstVisit && canSync && typeof syncYTStudioFromNotion === 'function') syncYTStudioFromNotion(true);
+            break;
         case 'ideas':
             if (typeof renderIdeasList === 'function') renderIdeasList();
             if (firstVisit && canSync && typeof syncIdeasFromNotionDirect === 'function') syncIdeasFromNotionDirect(true);
