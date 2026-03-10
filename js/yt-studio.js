@@ -191,32 +191,22 @@ function copyYTDetail(pageId) {
     showToast('已複製內容');
 }
 
-// === Run Research via Bridge Server ===
+// === Run Research via N8N Webhook ===
+const YT_RESEARCH_WEBHOOK = 'https://david86726.app.n8n.cloud/webhook/yt-research';
+
 async function runYTResearch(pageId) {
     const item = ytStudioItems.find(i => i.id === pageId);
     if (!item) return;
 
-    if (!hasBridge()) {
-        navigator.clipboard.writeText('/research ' + item.title);
-        showToast('Bridge 未設定，已複製指令到剪貼簿');
-        return;
-    }
-
     ytStudioResearching[pageId] = true;
     renderYTStudio();
-    showToast('🔍 正在研究「' + item.title + '」...');
-
-    const bridgeUrl = localStorage.getItem('bridge_url');
-    const bridgeToken = localStorage.getItem('bridge_token');
+    showToast('🔍 正在研究「' + item.title + '」（約 30-60 秒）...');
 
     try {
-        const res = await fetch(bridgeUrl + '/run', {
+        const res = await fetch(YT_RESEARCH_WEBHOOK, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + bridgeToken
-            },
-            body: JSON.stringify({ command: '/research', args: item.title })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic: item.title })
         });
 
         const data = await res.json();
@@ -232,29 +222,7 @@ async function runYTResearch(pageId) {
             showToast('✓ Research Brief 已寫入「' + item.title + '」');
 
             // If card is expanded, reload detail
-            const card = document.getElementById('yt-card-' + pageId);
-            if (card && card.classList.contains('expanded')) {
-                const detail = document.getElementById('yt-detail-' + pageId);
-                if (detail) {
-                    detail.innerHTML = '<div class="detail-loading">重新載入...</div>';
-                    const blocksRes = await notionFetch('/blocks/' + pageId + '/children?page_size=100', 'GET');
-                    if (blocksRes.results) {
-                        const blocks = blocksRes.results;
-                        for (let i = 0; i < blocks.length; i++) {
-                            if (blocks[i].type === 'table' && blocks[i].has_children) {
-                                const tableData = await notionFetch('/blocks/' + blocks[i].id + '/children?page_size=100', 'GET');
-                                if (tableData.results) {
-                                    blocks.splice(i + 1, 0, ...tableData.results);
-                                    i += tableData.results.length;
-                                }
-                            }
-                        }
-                        const html = renderNotionBlocks(blocks);
-                        ytStudioDetailCache[pageId] = html;
-                        detail.innerHTML = `<button class="btn btn-small" onclick="event.stopPropagation();copyYTDetail('${pageId}')" style="float:right;margin:0 0 8px 8px;font-size:10px;">📋 Copy</button>` + html;
-                    }
-                }
-            }
+            await reloadYTCardDetail(pageId);
         } else {
             showToast('Research 失敗: ' + (data.error || 'Unknown error'), true);
         }
@@ -264,6 +232,31 @@ async function runYTResearch(pageId) {
     } finally {
         delete ytStudioResearching[pageId];
         renderYTStudio();
+    }
+}
+
+// Reload expanded card detail from Notion
+async function reloadYTCardDetail(pageId) {
+    const card = document.getElementById('yt-card-' + pageId);
+    if (!card || !card.classList.contains('expanded')) return;
+    const detail = document.getElementById('yt-detail-' + pageId);
+    if (!detail) return;
+    detail.innerHTML = '<div class="detail-loading">重新載入...</div>';
+    const blocksRes = await notionFetch('/blocks/' + pageId + '/children?page_size=100', 'GET');
+    if (blocksRes.results) {
+        const blocks = blocksRes.results;
+        for (let i = 0; i < blocks.length; i++) {
+            if (blocks[i].type === 'table' && blocks[i].has_children) {
+                const tableData = await notionFetch('/blocks/' + blocks[i].id + '/children?page_size=100', 'GET');
+                if (tableData.results) {
+                    blocks.splice(i + 1, 0, ...tableData.results);
+                    i += tableData.results.length;
+                }
+            }
+        }
+        const html = renderNotionBlocks(blocks);
+        ytStudioDetailCache[pageId] = html;
+        detail.innerHTML = `<button class="btn btn-small" onclick="event.stopPropagation();copyYTDetail('${pageId}')" style="float:right;margin:0 0 8px 8px;font-size:10px;">📋 Copy</button>` + html;
     }
 }
 
