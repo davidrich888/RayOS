@@ -65,6 +65,90 @@ const AGENT_META = {
     }
 };
 
+// Info metadata — Data Sync + Tools detail info
+const INFO_META = {
+    'yt-main-sync': {
+        name: 'YT 主頻道同步',
+        icon: '📺',
+        schedule: '每週日 02:00（UTC+8）',
+        purpose: '用 YouTube Data API v3 抓取主頻道（FUNDwithRay）的訂閱數、總觀看、影片數等關鍵指標，寫入 performance-tracker.md 和 MEMORY.md。',
+        sources: ['YouTube Data API v3'],
+        outputs: ['performance-tracker.md', 'MEMORY.md', 'TG 通知'],
+        flow: 'Auto Task 觸發 → YT API 拉數據 → 更新 Markdown → TG 通知變化',
+        taskId: 'yt-channel-snapshot'
+    },
+    'tft-story-sync': {
+        name: 'TFT Story 同步',
+        icon: '🎬',
+        schedule: '每週日 02:00（UTC+8）',
+        purpose: '同步第二頻道 TFT Story（@tftmembers）的訂閱數、影片數、總觀看，追蹤學員故事頻道的成長。',
+        sources: ['YouTube Data API v3'],
+        outputs: ['performance-tracker.md', 'MEMORY.md', 'TG 通知'],
+        flow: 'Auto Task 觸發 → YT API 拉 TFT Story 數據 → 更新 Markdown → TG 通知',
+        taskId: 'yt-channel-snapshot'
+    },
+    'ig-profile-monthly': {
+        name: 'IG Profile 月報',
+        icon: '📸',
+        schedule: '每月 1 號',
+        purpose: '用 Apify Instagram Profile Scraper 抓取 @fundwithray 的 follower 數、貼文數等指標，每月追蹤 IG 成長趨勢。',
+        sources: ['Apify instagram-profile-scraper'],
+        outputs: ['performance-tracker.md', 'MEMORY.md', 'TG 通知'],
+        flow: 'Auto Task 觸發 → Apify 爬取 IG Profile → 更新 Markdown → TG 通知',
+        taskId: 'ig-data-update'
+    },
+    'ig-reels-weekly': {
+        name: 'IG Reels 週報',
+        icon: '🎞️',
+        schedule: '每週日 02:30（UTC+8）',
+        purpose: '抓取近期 IG Reels 的播放、按讚、留言數據，分析哪些 Reels 表現好/差，追蹤日更策略的成效。',
+        sources: ['Apify instagram-profile-scraper'],
+        outputs: ['performance-tracker.md（IG 區塊）', 'TG 通知'],
+        flow: 'Auto Task 觸發 → Apify 爬取 IG Reels → 分析表現 → 更新 Tracker → TG 通知',
+        taskId: 'ig-data-update'
+    },
+    'skool-sync': {
+        name: 'Skool → Sheet + CK',
+        icon: '🏫',
+        schedule: '每 2 天（N8N Workflow 自動觸發）',
+        purpose: '從 Skool 匯出炒股黑客 + TFT 成員名單，同步到 Google Sheet（Master Sheet）和 ConvertKit（Email 自動標籤）。偵測新加入/退出的成員。',
+        sources: ['Skool Export API（炒股黑客 + TFT）'],
+        outputs: ['Google Sheet（Master Sheet）', 'ConvertKit（標籤：炒股黑客/TFT付費/TFT退出）', 'TG 通知（新成員/退出者）'],
+        flow: 'N8N Schedule → Skool Export → Diff 比對 → Sheet 更新 → ConvertKit Tag → TG Notify',
+        n8nId: 'kcf28BPi8d5nyjIo'
+    },
+    'agent-memory-read': {
+        name: 'Agent Memory Read',
+        icon: '🧠',
+        schedule: '即時觸發（Webhook）',
+        purpose: '讓 Claude Code 的 /ideas、/waterfall 等指令能讀取 Agent Memory（N8N 存的高影響力記憶），輔助選題和內容決策。',
+        sources: ['Claude Code 指令呼叫'],
+        outputs: ['JSON 回傳：過往高影響力記憶列表'],
+        flow: 'Claude curl POST → N8N Webhook → 讀取 Memory Store → 回傳 JSON',
+        webhook: true
+    },
+    'agent-memory-write': {
+        name: 'Agent Memory Write',
+        icon: '💾',
+        schedule: '即時觸發（Webhook）',
+        purpose: '讓 Claude Code 指令執行完畢後能寫回記憶（選題推薦、內容表現等），形成跨 session 的學習迴路。',
+        sources: ['Claude Code 指令呼叫'],
+        outputs: ['N8N Memory Store（新增一筆記憶）'],
+        flow: 'Claude curl POST（title/type/summary/score/tags）→ N8N Webhook → 寫入 Memory → 回傳確認',
+        webhook: true
+    },
+    'weekly-review-data': {
+        name: 'Weekly Review Data',
+        icon: '📊',
+        schedule: '即時觸發（Webhook）',
+        purpose: '被 /weekly-review 指令呼叫，從 N8N 拉取 YT Analytics、IG 數據、Email 表現等原始數據，供 Claude 分析後產出週報。',
+        sources: ['YouTube Analytics', 'IG Apify', 'ConvertKit API'],
+        outputs: ['JSON 回傳：本週各平台數據'],
+        flow: 'Claude curl POST → N8N Webhook → 並行拉取 YT/IG/CK 數據 → 聚合 → 回傳 JSON',
+        webhook: true
+    }
+};
+
 async function n8nFetch(apiPath) {
     const res = await fetch('/api/n8n', {
         method: 'POST',
@@ -316,15 +400,100 @@ function toggleAgentDetail(row) {
     });
 }
 
+// Info detail panel — click to expand/collapse (Data Sync + Tools)
+function toggleInfoDetail(row) {
+    const infoId = row.dataset.info;
+    const meta = INFO_META[infoId];
+    if (!meta) return;
+
+    // If already expanded, collapse
+    const existing = row.nextElementSibling;
+    if (existing && existing.classList.contains('info-detail-panel')) {
+        existing.style.maxHeight = '0';
+        existing.style.opacity = '0';
+        existing.style.padding = '0 10px';
+        setTimeout(() => existing.remove(), 200);
+        row.style.borderRadius = '6px';
+        return;
+    }
+
+    // Collapse any other open info panels
+    document.querySelectorAll('.info-detail-panel').forEach(p => {
+        const parentRow = p.previousElementSibling;
+        if (parentRow) parentRow.style.borderRadius = '6px';
+        p.remove();
+    });
+
+    const panel = document.createElement('div');
+    panel.className = 'info-detail-panel';
+    panel.style.cssText = 'max-height:0;opacity:0;overflow:hidden;transition:all 0.25s ease;background:rgba(212,197,169,0.04);border:1px solid rgba(212,197,169,0.12);border-top:none;border-radius:0 0 6px 6px;padding:0 10px;font-size:11px;color:var(--text-dim);line-height:1.7;';
+
+    // Build link section
+    let linkHtml = '';
+    if (meta.n8nId) {
+        linkHtml = `<a href="https://david86726.app.n8n.cloud/workflow/${meta.n8nId}" target="_blank" style="font-size:10px;color:var(--accent);text-decoration:none;">Open in N8N ↗</a>`;
+    } else if (meta.taskId) {
+        linkHtml = `<span style="font-size:10px;color:var(--text-dim);">Auto Task ID: ${meta.taskId}</span>`;
+    } else if (meta.webhook) {
+        linkHtml = `<span style="font-size:10px;color:var(--text-dim);">Type: Webhook Endpoint</span>`;
+    }
+
+    panel.innerHTML = `
+        <div style="padding:10px 0;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;">
+                <div>
+                    <div style="font-weight:600;color:var(--accent);font-size:10px;text-transform:uppercase;margin-bottom:2px;">觸發時間</div>
+                    <div>${meta.schedule}</div>
+                </div>
+                <div>
+                    <div style="font-weight:600;color:var(--accent);font-size:10px;text-transform:uppercase;margin-bottom:2px;">資料來源</div>
+                    <div>${meta.sources.map(s => `<span style="display:inline-block;background:rgba(76,175,80,0.15);color:#4CAF50;padding:1px 5px;border-radius:3px;margin:1px 2px 1px 0;font-size:9px;">${s}</span>`).join('')}</div>
+                </div>
+                <div style="grid-column:1/-1;">
+                    <div style="font-weight:600;color:var(--accent);font-size:10px;text-transform:uppercase;margin-bottom:2px;">用途</div>
+                    <div>${meta.purpose}</div>
+                </div>
+                <div style="grid-column:1/-1;">
+                    <div style="font-weight:600;color:var(--accent);font-size:10px;text-transform:uppercase;margin-bottom:2px;">輸出目的地</div>
+                    <div>${meta.outputs.map(o => `<span style="display:inline-block;background:rgba(33,150,243,0.15);color:#2196F3;padding:1px 5px;border-radius:3px;margin:1px 2px 1px 0;font-size:9px;">${o}</span>`).join('')}</div>
+                </div>
+                <div style="grid-column:1/-1;">
+                    <div style="font-weight:600;color:var(--accent);font-size:10px;text-transform:uppercase;margin-bottom:2px;">流程</div>
+                    <div style="font-family:monospace;font-size:10px;color:var(--text);background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:4px;">${meta.flow}</div>
+                </div>
+            </div>
+            <div style="margin-top:8px;text-align:right;">${linkHtml}</div>
+        </div>
+    `;
+
+    row.style.borderRadius = '6px 6px 0 0';
+    row.after(panel);
+
+    requestAnimationFrame(() => {
+        panel.style.maxHeight = '400px';
+        panel.style.opacity = '1';
+        panel.style.padding = '0 10px';
+    });
+}
+
 // Load when navigating to AI Agents page
 document.addEventListener('DOMContentLoaded', () => {
-    // Attach click handlers to agent rows
+    // Attach click handlers to agent rows (Decision Agents)
     document.querySelectorAll('.agent-row[data-wf]').forEach(row => {
         row.style.cursor = 'pointer';
         row.style.transition = 'background 0.15s ease';
         row.addEventListener('click', () => toggleAgentDetail(row));
         row.addEventListener('mouseenter', () => { row.style.background = 'rgba(212,197,169,0.14)'; });
         row.addEventListener('mouseleave', () => { row.style.background = 'rgba(212,197,169,0.08)'; });
+    });
+
+    // Attach click handlers to info rows (Data Sync + Tools)
+    document.querySelectorAll('.info-row[data-info]').forEach(row => {
+        row.style.cursor = 'pointer';
+        row.style.transition = 'background 0.15s ease';
+        row.addEventListener('click', () => toggleInfoDetail(row));
+        row.addEventListener('mouseenter', () => { row.style.background = 'rgba(212,197,169,0.10)'; });
+        row.addEventListener('mouseleave', () => { row.style.background = 'rgba(255,255,255,0.03)'; });
     });
 
     const observer = new MutationObserver(() => {
