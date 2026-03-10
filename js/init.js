@@ -32,6 +32,10 @@
     if(localStorage.getItem('anthropic_key')) document.getElementById('anthropic-key').value = localStorage.getItem('anthropic_key');
     if(localStorage.getItem('ai_model')) document.getElementById('ai-model').value = localStorage.getItem('ai_model');
     if(localStorage.getItem('ai_profile')) document.getElementById('ai-profile').value = localStorage.getItem('ai_profile');
+    // Migrate bridge port 3000 → 3001 (3000 conflicts with 100xMONEY dev server)
+    if(localStorage.getItem('bridge_url') && localStorage.getItem('bridge_url').includes(':3000')) {
+        localStorage.setItem('bridge_url', localStorage.getItem('bridge_url').replace(':3000', ':3001'));
+    }
     if(localStorage.getItem('bridge_url')) document.getElementById('bridge-url').value = localStorage.getItem('bridge_url');
     if(localStorage.getItem('bridge_token')) document.getElementById('bridge-token').value = localStorage.getItem('bridge_token');
     
