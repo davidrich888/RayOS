@@ -33,11 +33,10 @@ function go(section) {
             break;
         case 'content':
             if (typeof renderContentSection === 'function') renderContentSection();
-            if (firstVisit && canSync && typeof syncContentFromNotion === 'function') syncContentFromNotion(true);
-            break;
-        case 'ytstudio':
-            if (typeof renderYTStudio === 'function') renderYTStudio();
-            if (firstVisit && canSync && typeof syncYTStudioFromNotion === 'function') syncYTStudioFromNotion(true);
+            if (firstVisit && canSync) {
+                if (typeof syncContentFromNotion === 'function') syncContentFromNotion(true);
+                if (typeof syncYTStudioFromNotion === 'function') syncYTStudioFromNotion(true);
+            }
             break;
         case 'ideas':
             if (typeof renderIdeasList === 'function') renderIdeasList();

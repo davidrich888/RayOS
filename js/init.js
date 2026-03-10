@@ -49,10 +49,7 @@
     updateBodySyncDot();
     updateIdeasSyncDot();
     updateContentSyncDot();
-    // YT Studio: set default filter button active
-    const ytDefaultBtn = document.querySelector('.yt-studio-filter-btn[data-filter="Next One"]');
-    if (ytDefaultBtn) ytDefaultBtn.classList.add('active');
-    // YT Studio sync dot
+    // YT Studio sync dot (now inside Content tab)
     const ytSyncDot = document.getElementById('ytstudio-sync-dot');
     if (ytSyncDot) ytSyncDot.className = 'sync-dot ' + (hasNotionDirect() ? 'on' : 'off');
     updateModelBadges();

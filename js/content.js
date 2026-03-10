@@ -104,9 +104,22 @@ async function syncContentFromNotion(silent = false) {
 // === Render main entry ===
 function renderContentSection() {
     renderWeeklyProgress();
-    if (contentTab === 'inspiration') {
+    // Hide all tab areas first
+    const ytArea = document.getElementById('content-ytstudio-area');
+    if (ytArea) ytArea.style.display = 'none';
+
+    if (contentTab === 'ytstudio') {
+        document.getElementById('content-status-filters').style.display = 'none';
+        document.getElementById('content-filters').style.display = 'none';
+        document.getElementById('content-production-area').style.display = 'none';
+        document.getElementById('content-list').style.display = 'none';
+        if (ytArea) ytArea.style.display = '';
+        if (typeof renderYTStudio === 'function') renderYTStudio();
+    } else if (contentTab === 'inspiration') {
+        document.getElementById('content-list').style.display = '';
         renderInspirationPool();
     } else {
+        document.getElementById('content-list').style.display = '';
         renderProductionLog();
     }
     updateContentStats();

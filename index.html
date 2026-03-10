@@ -30,7 +30,6 @@
         <div class="nav-item" data-section="wealth"><span class="nav-icon">$</span><span>Wealth</span></div>
         <div class="nav-item" data-section="trading"><span class="nav-icon">📈</span><span>Trading</span></div>
         <div class="nav-item" data-section="content"><span class="nav-icon">📝</span><span>Content</span></div>
-        <div class="nav-item" data-section="ytstudio"><span class="nav-icon">🎬</span><span>YT 工作室</span></div>
         <div class="nav-item" data-section="business"><span class="nav-icon">📊</span><span>Business</span></div>
         <div class="nav-item" data-section="ideas"><span class="nav-icon">💡</span><span>Ideas</span></div>
         <div class="nav-item" data-section="information"><span class="nav-icon">📖</span><span>Information</span></div>
@@ -76,7 +75,7 @@
                     <div class="card" onclick="go('wealth')"><div class="card-header"><span class="card-icon">$</span><span class="card-badge">TRACK</span></div><div class="card-title">Wealth</div><div class="card-desc">資產・消費・目標</div></div>
                     <div class="card" onclick="go('business')"><div class="card-header"><span class="card-icon">📊</span><span class="card-badge">GROW</span></div><div class="card-title">Business</div><div class="card-desc">Skool・MRR・Members</div></div>
                     <div class="card" onclick="go('content')"><div class="card-header"><span class="card-icon">📝</span><span class="card-badge">CREATE</span></div><div class="card-title">Content</div><div class="card-desc">靈感池・產出追蹤</div></div>
-                    <div class="card" onclick="go('ytstudio')"><div class="card-header"><span class="card-icon">🎬</span><span class="card-badge">FILM</span></div><div class="card-title">YT 工作室</div><div class="card-desc">準上架・Research</div></div>
+                    <div class="card" onclick="go('content');setTimeout(()=>setContentTab('ytstudio'),50)"><div class="card-header"><span class="card-icon">🎬</span><span class="card-badge">FILM</span></div><div class="card-title">YT 工作室</div><div class="card-desc">準上架・Research</div></div>
                     <div class="card" onclick="go('ideas')"><div class="card-header"><span class="card-icon">💡</span><span class="card-badge">CAPTURE</span></div><div class="card-title">Ideas</div><div class="card-desc">靈感・點子・計劃</div></div>
                     <div class="card" onclick="go('lifecoach')"><div class="card-header"><span class="card-icon">🤖</span><span class="card-badge">13</span></div><div class="card-title">AI Agents</div><div class="card-desc">自動化 Agent 總覽</div></div>
                     <div class="card" onclick="go('information')"><div class="card-header"><span class="card-icon">📖</span><span class="card-badge">LEARN</span></div><div class="card-title">Information</div><div class="card-desc">YouTube Lab</div></div>
@@ -506,6 +505,7 @@
                 <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
                     <button class="btn content-tab-btn active" data-tab="inspiration" onclick="setContentTab('inspiration')">靈感池</button>
                     <button class="btn content-tab-btn" data-tab="production" onclick="setContentTab('production')">產出追蹤</button>
+                    <button class="btn content-tab-btn" data-tab="ytstudio" onclick="setContentTab('ytstudio')">🎬 YT 工作室</button>
                 </div>
 
                 <!-- Status filters (inspiration tab only) -->
@@ -540,6 +540,20 @@
                             <div style="height:220px;"><canvas id="pillarChart"></canvas></div>
                         </div>
                     </div>
+                </div>
+
+                <!-- YT Studio tab area (hidden by default) -->
+                <div id="content-ytstudio-area" style="display:none;">
+                    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+                        <span class="sync-dot off" id="ytstudio-sync-dot" style="margin-right:4px;"></span>
+                        <button class="btn btn-small yt-studio-filter-btn active" data-filter="Next One" onclick="setYTStudioFilter('Next One')">🎯 Next One</button>
+                        <button class="btn btn-small yt-studio-filter-btn" data-filter="in-progress" onclick="setYTStudioFilter('in-progress')">🔧 製作中</button>
+                        <button class="btn btn-small yt-studio-filter-btn" data-filter="Done" onclick="setYTStudioFilter('Done')">✅ Done</button>
+                        <button class="btn btn-small yt-studio-filter-btn" data-filter="all" onclick="setYTStudioFilter('all')">全部</button>
+                        <button class="btn btn-small" onclick="syncYTStudioFromNotion()" style="margin-left:auto;">Sync</button>
+                        <button class="btn btn-small btn-accent" onclick="window.open('https://www.notion.so/10f629ef6a1380bb98d1c91986441940','_blank')">Notion</button>
+                    </div>
+                    <div id="yt-studio-list"></div>
                 </div>
 
                 <!-- Main list (ideas or empty) -->
@@ -587,31 +601,6 @@
                         <div id="content-detail-body" class="content-idea-detail" style="display:block;flex:1;overflow-y:auto;border-top:1px solid var(--border);padding-top:12px;"></div>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- YT STUDIO -->
-        <section class="section" id="ytstudio">
-            <div class="header">
-                <div class="page-title">YT 工作室（準上架）</div>
-                <div class="header-actions">
-                    <span class="sync-dot off" id="ytstudio-sync-dot"></span>
-                    <button class="btn" onclick="syncYTStudioFromNotion()">Sync</button>
-                    <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/10f629ef6a1380bb98d1c91986441940','_blank')">Notion</button>
-                </div>
-            </div>
-            <div class="content">
-                <!-- Filter buttons -->
-                <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
-                    <button class="btn btn-small yt-studio-filter-btn" data-filter="Next One" onclick="setYTStudioFilter('Next One')">🎯 Next One</button>
-                    <button class="btn btn-small yt-studio-filter-btn" data-filter="in-progress" onclick="setYTStudioFilter('in-progress')">🔧 製作中</button>
-                    <button class="btn btn-small yt-studio-filter-btn" data-filter="Done" onclick="setYTStudioFilter('Done')">✅ Done</button>
-                    <button class="btn btn-small yt-studio-filter-btn" data-filter="all" onclick="setYTStudioFilter('all')">全部</button>
-                </div>
-
-                <!-- Video list -->
-                <div id="yt-studio-list"></div>
             </div>
         </section>
 
