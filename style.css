@@ -561,7 +561,13 @@
 
         /* ===== YT STUDIO ===== */
         .yt-studio-filter-btn.active { background: var(--accent); color: var(--bg); }
-        .yt-studio-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 8px; transition: border-color 0.3s; cursor: pointer; }
+        .yt-studio-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 8px; transition: border-color 0.3s, opacity 0.2s, transform 0.2s; cursor: pointer; }
+        .yt-studio-card.yt-dragging { opacity: 0.35; transform: scale(0.98); }
+        .yt-studio-card.yt-drag-over-top { border-top: 2px solid var(--accent); padding-top: 12px; }
+        .yt-studio-card.yt-drag-over-bottom { border-bottom: 2px solid var(--accent); padding-bottom: 12px; }
+        .yt-drag-handle { cursor: grab; color: var(--text-muted); font-size: 16px; line-height: 1; padding: 2px 4px 2px 0; user-select: none; opacity: 0.4; transition: opacity 0.2s; }
+        .yt-studio-card:hover .yt-drag-handle { opacity: 0.8; }
+        .yt-studio-card.expanded .yt-drag-handle { display: none; }
         .yt-studio-card:hover { border-color: var(--text-muted); }
         .yt-studio-card.expanded { border-color: var(--accent); }
         .yt-studio-card.yt-done { opacity: 0.5; }

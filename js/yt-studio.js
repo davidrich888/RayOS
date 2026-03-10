@@ -7,6 +7,8 @@ let ytStudioItems = [];
 let ytStudioFilter = 'Next One';
 const ytStudioDetailCache = {};
 let ytStudioResearching = {};
+let ytDragSrcIndex = null;
+let ytDragDidDrag = false;
 
 // === Sync from Notion ===
 async function syncYTStudioFromNotion(silent = false) {
@@ -18,7 +20,10 @@ async function syncYTStudioFromNotion(silent = false) {
     try {
         const data = await notionFetch('/databases/' + YT_STUDIO_DB_ID + '/query', 'POST', {
             page_size: 100,
-            sorts: [{ property: '發布日期', direction: 'ascending' }]
+            sorts: [
+                { property: '排序', direction: 'ascending' },
+                { property: '發布日期', direction: 'ascending' }
+            ]
         });
         if (data.results) {
             ytStudioItems = data.results.map(page => {
@@ -30,6 +35,7 @@ async function syncYTStudioFromNotion(silent = false) {
                     publishDate: p['發布日期']?.date?.start || '',
                     progress: p['進度']?.multi_select?.map(s => s.name) || [],
                     type: p['類型']?.multi_select?.map(s => s.name) || [],
+                    sortOrder: p['排序']?.number ?? null,
                     hasChildren: page.has_children || false
                 };
             }).filter(i => i.title);
@@ -64,18 +70,7 @@ function renderYTStudio() {
     const container = document.getElementById('yt-studio-list');
     if (!container) return;
 
-    let filtered = ytStudioItems;
-    if (ytStudioFilter !== 'all') {
-        if (ytStudioFilter === 'in-progress') {
-            // Has progress tags other than Next One and Done
-            filtered = filtered.filter(i =>
-                !i.progress.includes('Done') &&
-                i.progress.some(p => p !== 'Next One')
-            );
-        } else {
-            filtered = filtered.filter(i => i.progress.includes(ytStudioFilter));
-        }
-    }
+    const filtered = getYTFilteredItems();
 
     if (filtered.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">沒有符合條件的影片</div>';
@@ -83,7 +78,7 @@ function renderYTStudio() {
         return;
     }
 
-    container.innerHTML = filtered.map(item => {
+    container.innerHTML = filtered.map((item, idx) => {
         const isDone = item.progress.includes('Done');
         const isResearching = ytStudioResearching[item.id];
         const cached = ytStudioDetailCache[item.id];
@@ -106,8 +101,11 @@ function renderYTStudio() {
 
         const cardClass = isDone ? ' yt-done' : '';
 
-        return `<div class="yt-studio-card${cardClass}" id="yt-card-${item.id}" onclick="toggleYTStudioDetail('${item.id}', event)">
+        return `<div class="yt-studio-card${cardClass}" id="yt-card-${item.id}" draggable="true" data-yt-idx="${idx}" data-yt-id="${item.id}"
+            ondragstart="ytDragStart(event)" ondragover="ytDragOver(event)" ondragenter="ytDragEnter(event)" ondragleave="ytDragLeave(event)" ondrop="ytDrop(event)" ondragend="ytDragEnd(event)"
+            onclick="toggleYTStudioDetail('${item.id}', event)">
             <div class="yt-studio-card-main">
+                <div class="yt-drag-handle" title="拖曳排序">⠿</div>
                 <div class="yt-studio-card-body">
                     <div class="yt-studio-card-title">${escapeHtml(item.title)}</div>
                     <div class="yt-studio-card-meta">
@@ -130,6 +128,7 @@ function renderYTStudio() {
 
 // === Toggle detail (expand/collapse) ===
 async function toggleYTStudioDetail(pageId, event) {
+    if (ytDragDidDrag) { ytDragDidDrag = false; return; }
     if (event.target.tagName === 'BUTTON') return;
     if (event.target.tagName === 'A') return;
     const detail = document.getElementById('yt-detail-' + pageId);
@@ -266,6 +265,127 @@ async function runYTResearch(pageId) {
         delete ytStudioResearching[pageId];
         renderYTStudio();
     }
+}
+
+// === Drag and Drop ===
+function ytDragStart(e) {
+    const card = e.target.closest('.yt-studio-card');
+    if (!card) return;
+    // Don't drag expanded cards (user is reading content)
+    if (card.classList.contains('expanded')) { e.preventDefault(); return; }
+    ytDragSrcIndex = parseInt(card.dataset.ytIdx);
+    ytDragDidDrag = true;
+    card.classList.add('yt-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', card.dataset.ytIdx);
+}
+
+function ytDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function ytDragEnter(e) {
+    e.preventDefault();
+    const card = e.target.closest('.yt-studio-card');
+    if (!card || parseInt(card.dataset.ytIdx) === ytDragSrcIndex) return;
+    // Remove all existing indicators
+    document.querySelectorAll('.yt-studio-card.yt-drag-over-top, .yt-studio-card.yt-drag-over-bottom').forEach(c => {
+        c.classList.remove('yt-drag-over-top', 'yt-drag-over-bottom');
+    });
+    const targetIdx = parseInt(card.dataset.ytIdx);
+    card.classList.add(targetIdx > ytDragSrcIndex ? 'yt-drag-over-bottom' : 'yt-drag-over-top');
+}
+
+function ytDragLeave(e) {
+    const card = e.target.closest('.yt-studio-card');
+    if (!card) return;
+    // Only remove if actually leaving the card (not entering a child)
+    if (!card.contains(e.relatedTarget)) {
+        card.classList.remove('yt-drag-over-top', 'yt-drag-over-bottom');
+    }
+}
+
+function ytDrop(e) {
+    e.preventDefault();
+    const card = e.target.closest('.yt-studio-card');
+    if (!card) return;
+    card.classList.remove('yt-drag-over-top', 'yt-drag-over-bottom');
+
+    const fromIdx = ytDragSrcIndex;
+    const toIdx = parseInt(card.dataset.ytIdx);
+    if (fromIdx === null || fromIdx === toIdx) return;
+
+    // Get the currently filtered list to find the actual items
+    let filtered = getYTFilteredItems();
+    const movedItem = filtered[fromIdx];
+    if (!movedItem) return;
+
+    // Reorder in the filtered context — find positions in main array
+    const fromMainIdx = ytStudioItems.indexOf(movedItem);
+    const targetItem = filtered[toIdx];
+    const toMainIdx = ytStudioItems.indexOf(targetItem);
+
+    // Remove from old position and insert at new
+    ytStudioItems.splice(fromMainIdx, 1);
+    const newToIdx = ytStudioItems.indexOf(targetItem);
+    if (fromIdx < toIdx) {
+        ytStudioItems.splice(newToIdx + 1, 0, movedItem);
+    } else {
+        ytStudioItems.splice(newToIdx, 0, movedItem);
+    }
+
+    renderYTStudio();
+    ytSyncSortOrderToNotion();
+}
+
+function ytDragEnd(e) {
+    ytDragSrcIndex = null;
+    document.querySelectorAll('.yt-studio-card.yt-dragging, .yt-studio-card.yt-drag-over-top, .yt-studio-card.yt-drag-over-bottom').forEach(c => {
+        c.classList.remove('yt-dragging', 'yt-drag-over-top', 'yt-drag-over-bottom');
+    });
+}
+
+function getYTFilteredItems() {
+    let filtered = ytStudioItems;
+    if (ytStudioFilter !== 'all') {
+        if (ytStudioFilter === 'in-progress') {
+            filtered = filtered.filter(i =>
+                !i.progress.includes('Done') &&
+                i.progress.some(p => p !== 'Next One')
+            );
+        } else {
+            filtered = filtered.filter(i => i.progress.includes(ytStudioFilter));
+        }
+    }
+    return filtered;
+}
+
+// Write sort order back to Notion (debounced, background)
+let ytSortTimer = null;
+function ytSyncSortOrderToNotion() {
+    clearTimeout(ytSortTimer);
+    ytSortTimer = setTimeout(async () => {
+        console.log('[RayOS YT Studio] Syncing sort order to Notion...');
+        const updates = ytStudioItems.map((item, idx) => ({ id: item.id, order: (idx + 1) * 10 }));
+        let ok = 0;
+        for (const u of updates) {
+            try {
+                await notionFetch('/pages/' + u.id, 'PATCH', {
+                    properties: { '排序': { number: u.order } }
+                });
+                ok++;
+            } catch (e) {
+                if (ok === 0 && e.message && e.message.includes('排序')) {
+                    showToast('請先在 Notion DB 新增「排序」Number 欄位', true);
+                    return;
+                }
+                console.warn('[RayOS YT Studio] Sort write failed for', u.id, e.message);
+            }
+        }
+        console.log('[RayOS YT Studio] Sort synced:', ok + '/' + updates.length);
+        if (ok > 0) showToast('✓ 排序已同步 Notion');
+    }, 800);
 }
 
 // === Dashboard stat ===
