@@ -128,7 +128,7 @@ def fetch_via_apify(video_id: str) -> Optional[dict]:
             timeout=120,
         )
 
-        if resp.status_code != 200:
+        if resp.status_code not in (200, 201):
             print(f'[Layer 3] Apify HTTP {resp.status_code}: {resp.text[:200]}', file=sys.stderr)
             return None
 

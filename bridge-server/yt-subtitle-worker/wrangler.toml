@@ -1,0 +1,6 @@
+name = "yt-subtitle-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+AUTH_TOKEN = "rayos-yt-sub-2026"

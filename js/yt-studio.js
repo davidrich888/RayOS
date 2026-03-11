@@ -96,7 +96,7 @@ function renderYTStudio() {
         } else if (cached || item._hasResearch) {
             actionBtn = '<span class="yt-studio-status-badge researched">📊 已研究</span>';
         } else {
-            actionBtn = `<button class="btn btn-small yt-studio-research-btn" onclick="event.stopPropagation();runYTResearch('${item.id}')" title="跑深度研究">🔍 Research</button>`;
+            actionBtn = `<button class="btn btn-small yt-studio-research-btn" onclick="event.stopPropagation();runYTResearch('${item.id}')" title="研究+標題+描述">🔍 研究+標題+描述</button>`;
         }
 
         const cardClass = isDone ? ' yt-done' : '';
@@ -198,7 +198,7 @@ async function runYTResearch(pageId) {
 
     ytStudioResearching[pageId] = true;
     renderYTStudio();
-    showToast('🔍 正在研究「' + item.title + '」（100x Content Brain，約 30-60 秒）...');
+    showToast('🔍 正在研究+標題+描述「' + item.title + '」（約 60-90 秒）...');
 
     try {
         console.log('[RayOS Research] Calling N8N webhook for:', item.title);
@@ -243,7 +243,7 @@ async function runYTResearch(pageId) {
             delete ytStudioDetailCache[pageId];
             item._hasResearch = true;
 
-            showToast('✓ Research Brief 已寫入「' + item.title + '」');
+            showToast('✓ 研究+標題+描述 已寫入「' + item.title + '」');
 
             // If card is expanded, reload detail
             await reloadYTCardDetail(pageId);

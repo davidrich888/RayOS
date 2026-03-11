@@ -801,6 +801,55 @@ function updateContentSyncDot() {
     if (d) d.className = 'sync-dot ' + (hasNotionDirect() ? 'on' : 'off');
 }
 
+// === Quick Research (N8N: research + title + description) ===
+function promptQuickResearch() {
+    const topic = prompt('輸入研究主題（會同時產出標題+描述）');
+    if (!topic || !topic.trim()) return;
+    runQuickResearch(topic.trim());
+}
+
+async function runQuickResearch(topic) {
+    if (!hasNotionDirect()) {
+        showToast('請先在 Settings 設定 Notion Token', true);
+        return;
+    }
+
+    showToast('🔍 正在研究「' + topic + '」+ 標題 + 描述（約 60-90 秒）...');
+
+    try {
+        const res = await fetch('https://david86726.app.n8n.cloud/webhook/yt-research', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic })
+        });
+
+        if (!res.ok) {
+            showToast('研究失敗: N8N HTTP ' + res.status, true);
+            return;
+        }
+
+        let data;
+        try {
+            data = await res.json();
+        } catch (e) {
+            showToast('研究失敗: 回傳格式錯誤', true);
+            return;
+        }
+
+        if (data.success && data.output) {
+            // Show output in modal
+            document.getElementById('bridge-output-title').textContent = '研究 + 標題 + 描述：' + topic;
+            document.getElementById('bridge-output-content').textContent = data.output;
+            document.getElementById('bridge-output-modal').style.display = 'flex';
+            showToast('✓ 研究 + 標題 + 描述 已完成');
+        } else {
+            showToast('研究失敗: ' + (data.error || '無產出'), true);
+        }
+    } catch (e) {
+        showToast('研究連線失敗: ' + e.message, true);
+    }
+}
+
 // === Bridge Server Remote Execution ===
 let bridgeRunning = false;
 
