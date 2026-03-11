@@ -577,7 +577,7 @@
         .yt-studio-card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
         .yt-studio-card-desc { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
         .yt-studio-card-action { flex-shrink: 0; }
-        .content-tag.yt-next { background: rgba(212, 197, 169, 0.15); color: var(--accent); font-weight: 500; }
+        .content-tag.yt-next { background: rgba(220, 38, 38, 0.15); color: #ef4444; font-weight: 600; border: 1px solid rgba(220, 38, 38, 0.25); }
         .content-tag.yt-done-tag { background: rgba(74, 124, 89, 0.15); color: #4a7c59; }
         .content-tag.yt-progress { background: rgba(230, 168, 23, 0.12); color: #e6a817; }
         .yt-studio-research-btn { background: var(--accent) !important; color: var(--bg) !important; border-color: var(--accent) !important; font-weight: 600; }
