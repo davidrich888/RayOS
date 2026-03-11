@@ -201,6 +201,7 @@ async function runYTResearch(pageId) {
     showToast('🔍 正在研究「' + item.title + '」（100x Content Brain，約 30-60 秒）...');
 
     try {
+        console.log('[RayOS Research] Calling N8N webhook for:', item.title);
         const res = await fetch('https://david86726.app.n8n.cloud/webhook/yt-research', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -210,11 +211,33 @@ async function runYTResearch(pageId) {
             })
         });
 
-        const data = await res.json();
+        if (!res.ok) {
+            console.error('[RayOS Research] N8N HTTP error:', res.status, res.statusText);
+            showToast('Research 失敗: N8N HTTP ' + res.status, true);
+            return;
+        }
+
+        let data;
+        try {
+            data = await res.json();
+        } catch (parseErr) {
+            console.error('[RayOS Research] JSON parse error:', parseErr);
+            showToast('Research 失敗: 回傳格式錯誤', true);
+            return;
+        }
+
+        console.log('[RayOS Research] N8N response:', { success: data.success, hasOutput: !!data.output, outputLen: data.output?.length });
 
         if (data.success && data.output) {
             // Write research output to Notion page body
-            await writeResearchToNotion(pageId, data.output);
+            showToast('📝 Research 完成，正在寫入 Notion...');
+            try {
+                await writeResearchToNotion(pageId, data.output);
+            } catch (notionErr) {
+                console.error('[RayOS Research] Notion write failed:', notionErr);
+                showToast('Research 產出成功但 Notion 寫入失敗: ' + notionErr.message, true);
+                return;
+            }
 
             // Clear cache so it reloads
             delete ytStudioDetailCache[pageId];
@@ -225,7 +248,8 @@ async function runYTResearch(pageId) {
             // If card is expanded, reload detail
             await reloadYTCardDetail(pageId);
         } else {
-            showToast('Research 失敗: ' + (data.error || 'Unknown error'), true);
+            console.error('[RayOS Research] N8N returned failure:', data);
+            showToast('Research 失敗: ' + (data.error || JSON.stringify(data).slice(0, 100)), true);
         }
     } catch (e) {
         console.error('[RayOS YT Studio] Research error:', e);

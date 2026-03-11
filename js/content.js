@@ -614,7 +614,13 @@ async function triggerAutoResearch(ideaId, title) {
         const data = await res.json();
 
         if (data.success && data.output) {
-            await writeResearchToNotion(ideaId, data.output);
+            try {
+                await writeResearchToNotion(ideaId, data.output);
+            } catch (notionErr) {
+                console.error('[RayOS] Auto-research Notion write failed:', notionErr);
+                showToast('Research 產出成功但 Notion 寫入失敗: ' + notionErr.message, true);
+                return;
+            }
             delete ideaContentCache[ideaId];
             // Auto-refresh if card is expanded
             const card = document.getElementById('idea-card-' + ideaId);
@@ -632,8 +638,8 @@ async function triggerAutoResearch(ideaId, title) {
             }
             showToast('Research Brief 已生成');
         } else {
-            console.error('[RayOS] Auto-research failed:', data.error);
-            showToast('Research Brief 生成失敗', true);
+            console.error('[RayOS] Auto-research failed:', data);
+            showToast('Research Brief 生成失敗: ' + (data.error || 'N8N 回傳無資料'), true);
         }
     } catch (e) {
         console.error('[RayOS] Auto-research error:', e);
@@ -642,17 +648,27 @@ async function triggerAutoResearch(ideaId, title) {
 }
 
 async function writeResearchToNotion(ideaId, markdown) {
-    if (!hasNotionDirect()) return;
+    if (!hasNotionDirect()) {
+        throw new Error('Notion 未設定（Settings → Notion API Token）');
+    }
 
     const blocks = markdownToNotionBlocks(markdown);
-    if (!blocks.length) return;
+    if (!blocks.length) {
+        throw new Error('Markdown 轉換後無 blocks（內容可能為空）');
+    }
+
+    console.log('[RayOS] Writing', blocks.length, 'blocks to Notion page:', ideaId);
 
     // Notion API: max 100 blocks per request
     for (let i = 0; i < blocks.length; i += 100) {
         const chunk = blocks.slice(i, i + 100);
-        await notionFetch('/blocks/' + ideaId + '/children', 'PATCH', {
+        const res = await notionFetch('/blocks/' + ideaId + '/children', 'PATCH', {
             children: chunk
         });
+        if (res.error || res.status === 'error' || res.code) {
+            throw new Error('Notion API: ' + (res.message || res.error || JSON.stringify(res).slice(0, 200)));
+        }
+        console.log('[RayOS] Written chunk', Math.floor(i / 100) + 1, '/', Math.ceil(blocks.length / 100));
     }
 }
 
