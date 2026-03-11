@@ -361,24 +361,40 @@ function ytSyncSortOrderToNotion() {
     clearTimeout(ytSortTimer);
     ytSortTimer = setTimeout(async () => {
         console.log('[RayOS YT Studio] Syncing sort order to Notion...');
-        const updates = ytStudioItems.map((item, idx) => ({ id: item.id, order: (idx + 1) * 10 }));
+        // Only update items whose sort order actually changed
+        const updates = ytStudioItems.map((item, idx) => {
+            const newOrder = (idx + 1) * 10;
+            return { id: item.id, title: item.title, order: newOrder, oldOrder: item.sortOrder };
+        }).filter(u => u.order !== u.oldOrder);
+
+        if (updates.length === 0) {
+            console.log('[RayOS YT Studio] No sort changes needed');
+            return;
+        }
+
+        console.log('[RayOS YT Studio] Updating', updates.length, 'items sort order');
         let ok = 0;
         for (const u of updates) {
             try {
                 await notionFetch('/pages/' + u.id, 'PATCH', {
                     properties: { '排序': { number: u.order } }
                 });
+                // Update local sortOrder to match
+                const item = ytStudioItems.find(i => i.id === u.id);
+                if (item) item.sortOrder = u.order;
                 ok++;
             } catch (e) {
                 if (ok === 0 && e.message && e.message.includes('排序')) {
                     showToast('請先在 Notion DB 新增「排序」Number 欄位', true);
                     return;
                 }
-                console.warn('[RayOS YT Studio] Sort write failed for', u.id, e.message);
+                console.error('[RayOS YT Studio] Sort write FAILED for', u.title, ':', e.message);
+                showToast('排序同步失敗: ' + e.message, true);
+                return;
             }
         }
         console.log('[RayOS YT Studio] Sort synced:', ok + '/' + updates.length);
-        if (ok > 0) showToast('✓ 排序已同步 Notion');
+        if (ok > 0) showToast('✓ 排序已同步 Notion (' + ok + ' 筆)');
     }, 800);
 }
 
