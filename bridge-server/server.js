@@ -71,7 +71,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// YouTube subtitle extraction via yt-dlp
+// YouTube subtitle extraction via youtube-transcript-api (Python)
 app.get('/yt-subtitle', (req, res) => {
   const token = req.headers['authorization']?.replace('Bearer ', '') || req.query.token;
   if (!AUTH_TOKEN || token !== AUTH_TOKEN) {
@@ -83,90 +83,30 @@ app.get('/yt-subtitle', (req, res) => {
     return res.status(400).json({ success: false, error: 'Invalid video ID' });
   }
 
-  const url = `https://www.youtube.com/watch?v=${videoId}`;
-  const outDir = '/tmp/yt-subs';
-  const outTemplate = `${outDir}/${videoId}`;
-
   const { execSync } = require('child_process');
+  const scriptPath = path.join(__dirname, 'fetch_subtitles.py');
 
-  try { execSync(`mkdir -p ${outDir}`, { shell: '/bin/bash' }); } catch (e) { /* ignore */ }
-  try { execSync(`rm -f ${outDir}/${videoId}.*`, { shell: '/bin/bash' }); } catch (e) { /* ignore */ }
-
-  // Use execSync for reliability (spawn close event can fire before file write)
   try {
-    execSync(`yt-dlp --write-auto-sub --write-sub --sub-lang en,zh-Hant,zh-Hans --skip-download --sub-format vtt --no-check-certificates --retries 2 -o ${outTemplate} ${url}`, {
-      timeout: 15000,
+    const output = execSync(`python3 "${scriptPath}" "${videoId}"`, {
+      timeout: 150000,
       stdio: ['pipe', 'pipe', 'pipe'],
-      shell: '/bin/bash'
+      shell: '/bin/bash',
+      env: { ...process.env, APIFY_API_TOKEN: process.env.APIFY_API_TOKEN || '' }
     });
+
+    const result = JSON.parse(output.toString('utf-8'));
+    console.log(`[yt-subtitle] ${videoId}: hasSubtitles=${result.hasSubtitles}, lang=${result.language || 'N/A'}, segments=${result.transcription?.length || 0}`);
+    res.json(result);
   } catch (e) {
-    // yt-dlp may exit non-zero even if some subs downloaded (e.g. 429 on one lang but not another)
-    console.log(`[yt-subtitle] yt-dlp exited with error (may still have partial subs): ${e.message?.slice(0, 200)}`);
-  }
-
-  {
-    const files = fs.readdirSync(outDir).filter(f => f.startsWith(videoId) && f.endsWith('.vtt'));
-
-    if (files.length === 0) {
-      return res.json({
-        success: true,
-        videoId,
-        hasSubtitles: false,
-        transcription: [],
-        message: 'No subtitles available'
-      });
-    }
-
-    // Read the first subtitle file found
-    const subFile = `${outDir}/${files[0]}`;
-    const lang = files[0].replace(`${videoId}.`, '').replace('.vtt', '');
-    const vttContent = fs.readFileSync(subFile, 'utf-8');
-
-    // Parse VTT to structured format (similar to RapidAPI output)
-    const lines = vttContent.split('\n');
-    const transcription = [];
-    let currentTime = null;
-
-    for (const line of lines) {
-      const timeMatch = line.match(/^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->/);
-      if (timeMatch) {
-        currentTime = timeMatch[1];
-        // Convert HH:MM:SS.mmm to seconds
-        const parts = currentTime.split(':');
-        const seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
-        currentTime = seconds;
-      } else if (currentTime !== null && line.trim() && !line.startsWith('WEBVTT') && !line.startsWith('Kind:') && !line.startsWith('Language:')) {
-        // Strip VTT tags like <c> </c> <00:00:01.234>
-        const cleanText = line.replace(/<[^>]+>/g, '').trim();
-        if (cleanText) {
-          transcription.push({
-            start: currentTime,
-            text: cleanText
-          });
-          currentTime = null;
-        }
-      }
-    }
-
-    // Deduplicate (VTT often has duplicate lines)
-    const seen = new Set();
-    const deduped = transcription.filter(t => {
-      const key = t.text;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-
-    // Clean up files
-    try { execSync(`rm -f ${outDir}/${videoId}.*`, { shell: '/bin/bash' }); } catch (e) { /* ignore */ }
-
+    console.error(`[yt-subtitle] Error for ${videoId}:`, e.message?.slice(0, 300));
+    // Try to parse stderr for useful info
+    const stderr = e.stderr?.toString('utf-8') || '';
     res.json({
       success: true,
       videoId,
-      hasSubtitles: true,
-      language: lang,
-      transcription: deduped,
-      lengthInSeconds: deduped.length > 0 ? Math.ceil(deduped[deduped.length - 1].start) : 0
+      hasSubtitles: false,
+      transcription: [],
+      message: `Subtitle fetch failed: ${stderr.slice(0, 200) || e.message?.slice(0, 200)}`
     });
   }
 });
