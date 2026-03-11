@@ -201,7 +201,7 @@ function buildSystemPrompt() {
     // Ideas
     const ideasNew = ideasData.filter(i => i.status === '💡 新想法').length;
     const ideasActive = ideasData.filter(i => i.status === '🚀 執行中').length;
-    const ideasDone = ideasData.filter(i => i.status === '✅ 已完成').length;
+    const ideasDone = ideasData.filter(i => i.status === '✅ 已採納').length;
     prompt += `\n- Ideas: ${ideasData.length} total (${ideasNew} new, ${ideasActive} active, ${ideasDone} done)`;
     // Video knowledge
     prompt += `\n- Learning: ${videoKnowledge.length} videos in library`;
@@ -275,7 +275,7 @@ function getAIContext() {
 
     // Ideas
     context += `\n\n=== IDEAS ===
-- Total: ${ideasData.length} (New: ${ideasData.filter(i => i.status === '💡 新想法').length}, Active: ${ideasData.filter(i => i.status === '🚀 執行中').length}, Done: ${ideasData.filter(i => i.status === '✅ 已完成').length})`;
+- Total: ${ideasData.length} (New: ${ideasData.filter(i => i.status === '💡 新想法').length}, Active: ${ideasData.filter(i => i.status === '🚀 執行中').length}, Done: ${ideasData.filter(i => i.status === '✅ 已採納').length})`;
 
     return context;
 }

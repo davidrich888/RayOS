@@ -225,10 +225,10 @@ function renderInspirationPool() {
 
     container.innerHTML = filtered.map(idea => {
         const interestStars = idea.interest || '';
-        const statusOptions = ['💡 新想法', '⭐ 核准', '✅ 已完成', '📌 保留', '🏁 已做過', '❌ 放棄'].map(s =>
+        const statusOptions = ['💡 新想法', '⭐ 核准', '✅ 已採納', '📌 保留', '🏁 已做過', '❌ 放棄'].map(s =>
             `<option value="${s}" ${s === idea.status ? 'selected' : ''}>${s}</option>`
         ).join('');
-        const strikethrough = (idea.status === '❌ 放棄' || idea.status === '🏁 已做過');
+        const strikethrough = (idea.status === '❌ 放棄' || idea.status === '🏁 已做過' || idea.status === '✅ 已採納');
         const approved = idea.status === '⭐ 核准';
         const cardStyle = strikethrough ? ' style="opacity:0.5"' : approved ? ' style="border:1.5px solid var(--accent);background:rgba(212,197,169,0.15);box-shadow:0 0 20px rgba(212,197,169,0.35)"' : '';
         const cached = ideaContentCache[idea.id];
@@ -574,6 +574,19 @@ async function updateContentIdeaStatus(ideaId, newStatus) {
     // Also update in main ideasData if loaded
     const mainIdea = ideasData.find(i => i.id === ideaId);
     if (mainIdea) mainIdea.status = newStatus;
+
+    // Record feedback to AI memory for learning preferences
+    const feedbackMap = {
+        '⭐ 核准': '👍 喜歡這個選題',
+        '✅ 已採納': '🎬 採納要拍',
+        '❌ 放棄': '👎 不想做這個選題'
+    };
+    if (feedbackMap[newStatus] && typeof saveAIMemory === 'function') {
+        const pillar = idea.pillar ? `[${idea.pillar}]` : '';
+        const hook = idea.hookType ? `Hook:${idea.hookType}` : '';
+        const meta = [pillar, hook].filter(Boolean).join(' ');
+        saveAIMemory(`選題回饋 ${feedbackMap[newStatus]}：「${idea.text || idea.title}」${meta ? ' ' + meta : ''}`);
+    }
 
     if (!hasNotionDirect()) return;
     try {
