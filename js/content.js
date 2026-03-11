@@ -579,6 +579,7 @@ async function updateContentIdeaStatus(ideaId, newStatus) {
     const feedbackMap = {
         '⭐ 核准': '👍 喜歡',
         '✅ 已採納': '🎬 採納要拍',
+        '📌 保留': '📌 有興趣但先不拍',
         '❌ 放棄': '👎 不要'
     };
     if (feedbackMap[newStatus]) {
@@ -602,7 +603,7 @@ async function updateContentIdeaStatus(ideaId, newStatus) {
                     title: '選題回饋：' + title,
                     type: '選題偏好',
                     summary: summary,
-                    score: newStatus === '✅ 已採納' ? 5 : newStatus === '⭐ 核准' ? 4 : 1,
+                    score: newStatus === '✅ 已採納' ? 5 : newStatus === '⭐ 核准' ? 4 : newStatus === '📌 保留' ? 3 : 1,
                     platform: 'YouTube',
                     tags: ['選題回饋', pillar, newStatus].filter(Boolean),
                     source: 'RayOS Content'
