@@ -575,17 +575,40 @@ async function updateContentIdeaStatus(ideaId, newStatus) {
     const mainIdea = ideasData.find(i => i.id === ideaId);
     if (mainIdea) mainIdea.status = newStatus;
 
-    // Record feedback to AI memory for learning preferences
+    // Record feedback to AI memory (local Alfred + N8N Agent Memory for /ideas)
     const feedbackMap = {
-        '⭐ 核准': '👍 喜歡這個選題',
+        '⭐ 核准': '👍 喜歡',
         '✅ 已採納': '🎬 採納要拍',
-        '❌ 放棄': '👎 不想做這個選題'
+        '❌ 放棄': '👎 不要'
     };
-    if (feedbackMap[newStatus] && typeof saveAIMemory === 'function') {
-        const pillar = idea.pillar ? `[${idea.pillar}]` : '';
-        const hook = idea.hookType ? `Hook:${idea.hookType}` : '';
-        const meta = [pillar, hook].filter(Boolean).join(' ');
-        saveAIMemory(`選題回饋 ${feedbackMap[newStatus]}：「${idea.text || idea.title}」${meta ? ' ' + meta : ''}`);
+    if (feedbackMap[newStatus]) {
+        const title = idea.text || idea.title || '';
+        const pillar = idea.pillar || '';
+        const hook = idea.hookType || '';
+        const label = feedbackMap[newStatus];
+        const summary = `${label}：「${title}」${pillar ? ' [' + pillar + ']' : ''}${hook ? ' Hook:' + hook : ''}`;
+
+        // Local Alfred AI memory
+        if (typeof saveAIMemory === 'function') saveAIMemory('選題回饋 ' + summary);
+
+        // N8N Agent Memory (for /ideas command in Claude Code)
+        const n8nBase = typeof getN8nUrl === 'function' && getN8nUrl();
+        if (n8nBase) {
+            const webhookUrl = n8nBase.replace(/\/webhook\/.*$/, '/webhook/agent-memory-write');
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: '選題回饋：' + title,
+                    type: '選題偏好',
+                    summary: summary,
+                    score: newStatus === '✅ 已採納' ? 5 : newStatus === '⭐ 核准' ? 4 : 1,
+                    platform: 'YouTube',
+                    tags: ['選題回饋', pillar, newStatus].filter(Boolean),
+                    source: 'RayOS Content'
+                })
+            }).catch(() => {}); // Fire and forget
+        }
     }
 
     if (!hasNotionDirect()) return;
