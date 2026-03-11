@@ -191,29 +191,22 @@ function copyYTDetail(pageId) {
     showToast('已複製內容');
 }
 
-// === Run Research via Vercel API Route ===
+// === Run Research via N8N 100x Content Brain Workflow ===
 async function runYTResearch(pageId) {
     const item = ytStudioItems.find(i => i.id === pageId);
     if (!item) return;
 
-    const anthropicKey = localStorage.getItem('anthropic_key');
-    if (!anthropicKey) {
-        showToast('請先在 Settings 填入 Anthropic API Key', true);
-        return;
-    }
-
     ytStudioResearching[pageId] = true;
     renderYTStudio();
-    showToast('🔍 正在研究「' + item.title + '」（約 30-60 秒）...');
+    showToast('🔍 正在研究「' + item.title + '」（100x Content Brain，約 30-60 秒）...');
 
     try {
-        const res = await fetch('/api/research', {
+        const res = await fetch('https://david86726.app.n8n.cloud/webhook/yt-research', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 topic: item.title,
-                anthropic_key: anthropicKey,
-                youtube_api_key: 'AIzaSyADZrHaZcsYtbFAwDLvaY0V28FTozSxpDk'
+                pageId: pageId
             })
         });
 
