@@ -31,7 +31,6 @@
         <div class="nav-item" data-section="trading"><span class="nav-icon">📈</span><span>Trading</span></div>
         <div class="nav-item" data-section="content"><span class="nav-icon">📝</span><span>Content</span></div>
         <div class="nav-item" data-section="business"><span class="nav-icon">📊</span><span>Business</span></div>
-        <div class="nav-item" data-section="ideas"><span class="nav-icon">💡</span><span>Ideas</span></div>
         <div class="nav-item" data-section="information"><span class="nav-icon">📖</span><span>Information</span></div>
     </nav>
     
@@ -64,7 +63,6 @@
                 <div class="stat-box" onclick="go('wealth')"><div class="stat-value" id="stat-wealth">--</div><div class="stat-label">Total Assets</div></div>
                 <div class="stat-box" onclick="go('business')"><div class="stat-value" id="stat-mrr">$0</div><div class="stat-label">MRR</div></div>
                 <div class="stat-box" onclick="go('content')"><div class="stat-value" id="stat-content">0/13</div><div class="stat-label">Content</div></div>
-                <div class="stat-box" onclick="go('ideas')"><div class="stat-value" id="stat-ideas">0</div><div class="stat-label">Ideas</div></div>
                 <div class="stat-box" onclick="go('information')"><div class="stat-value" id="stat-learning">0</div><div class="stat-label">Learning</div></div>
             </div>
 
@@ -76,7 +74,6 @@
                     <div class="card" onclick="go('business')"><div class="card-header"><span class="card-icon">📊</span><span class="card-badge">GROW</span></div><div class="card-title">Business</div><div class="card-desc">Skool・MRR・Members</div></div>
                     <div class="card" onclick="go('content')"><div class="card-header"><span class="card-icon">📝</span><span class="card-badge">CREATE</span></div><div class="card-title">Content</div><div class="card-desc">靈感池・產出追蹤</div></div>
                     <div class="card" onclick="go('content');setTimeout(()=>setContentTab('ytstudio'),50)"><div class="card-header"><span class="card-icon">🎬</span><span class="card-badge">FILM</span></div><div class="card-title">YT 工作室</div><div class="card-desc">準上架・Research</div></div>
-                    <div class="card" onclick="go('ideas')"><div class="card-header"><span class="card-icon">💡</span><span class="card-badge">CAPTURE</span></div><div class="card-title">Ideas</div><div class="card-desc">靈感・點子・計劃</div></div>
                     <div class="card" onclick="go('lifecoach')"><div class="card-header"><span class="card-icon">🤖</span><span class="card-badge">13</span></div><div class="card-title">AI Agents</div><div class="card-desc">自動化 Agent 總覽</div></div>
                     <div class="card" onclick="go('information')"><div class="card-header"><span class="card-icon">📖</span><span class="card-badge">LEARN</span></div><div class="card-title">Information</div><div class="card-desc">YouTube Lab</div></div>
                 </div>
@@ -602,41 +599,6 @@
             </div>
         </section>
 
-        <!-- IDEAS -->
-        <section class="section" id="ideas">
-            <div class="header">
-                <div class="page-title">Ideas</div>
-                <div class="header-actions">
-                    <span class="sync-dot off" id="ideas-sync-dot"></span>
-                    <button class="btn" onclick="syncIdeasFromNotionDirect()">Sync Notion</button>
-                    <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/ed035c908cc04b7b999ef0c023557add','_blank')">Notion</button>
-                </div>
-            </div>
-            <div class="content">
-                <div class="form-section">
-                    <div class="form-title">Quick Capture</div>
-                    <div class="form-row">
-                        <div class="form-group" style="flex:2;"><label class="form-label">Idea</label><input type="text" class="form-input" id="idea-text" placeholder="Type your idea..." onkeypress="if(event.key==='Enter')saveIdea()"></div>
-                        <div class="form-group"><label class="form-label">Type</label><select class="form-input" id="idea-type"><option value="💰 賣錢點子">💰 賣錢點子</option><option value="📹 影片點子">📹 影片點子</option><option value="🛠️ 工具/自動化">🛠️ 工具/自動化</option><option value="📝 內容點子">📝 內容點子</option><option value="🌟 人生目標">🌟 人生目標</option><option value="🤔 其他">🤔 其他</option></select></div>
-                        <div class="form-group"><label class="form-label">Priority</label><select class="form-input" id="idea-priority"><option value="🔥 高">🔥 高</option><option value="⭐ 中" selected>⭐ 中</option><option value="📌 低">📌 低</option></select></div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group" style="flex:1;"><label class="form-label">Notes</label><input type="text" class="form-input" id="idea-notes" placeholder="Optional notes..."></div>
-                    </div>
-                    <div class="form-actions"><button class="btn btn-accent" onclick="saveIdea()">Save</button></div>
-                </div>
-                <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-                    <button class="btn ideas-filter-btn active" data-filter="all" onclick="setIdeasFilter('all')">All</button>
-                    <button class="btn ideas-filter-btn" data-filter="new" onclick="setIdeasFilter('new')">💡 New</button>
-                    <button class="btn ideas-filter-btn" data-filter="research" onclick="setIdeasFilter('research')">🔍 Research</button>
-                    <button class="btn ideas-filter-btn" data-filter="active" onclick="setIdeasFilter('active')">🚀 Active</button>
-                    <button class="btn ideas-filter-btn" data-filter="done" onclick="setIdeasFilter('done')">✅ Done</button>
-                    <div id="ideas-stats" style="margin-left:auto;font-size:12px;color:var(--text-muted);display:flex;gap:12px;"></div>
-                </div>
-                <div id="ideas-list"></div>
-            </div>
-        </section>
 
         <!-- AI LIFE COACH -->
         <section class="section" id="lifecoach">
@@ -1061,7 +1023,6 @@
     <script src="js/trading.js"></script>
     <script src="js/physic.js"></script>
     <script src="js/daily.js"></script>
-    <script src="js/ideas.js"></script>
     <script src="js/content.js"></script>
     <script src="js/yt-studio.js"></script>
     <script src="js/agents.js"></script>

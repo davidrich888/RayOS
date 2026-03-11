@@ -38,10 +38,6 @@ function go(section) {
                 if (typeof syncYTStudioFromNotion === 'function') syncYTStudioFromNotion(true);
             }
             break;
-        case 'ideas':
-            if (typeof renderIdeasList === 'function') renderIdeasList();
-            if (firstVisit && canSync && typeof syncIdeasFromNotionDirect === 'function') syncIdeasFromNotionDirect(true);
-            break;
         case 'wealth':
             if (typeof updateWealthDisplay === 'function') updateWealthDisplay();
             if (firstVisit) {

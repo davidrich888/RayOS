@@ -51,16 +51,11 @@
     renderAccountManager();
     updateSyncDot();
     updateBodySyncDot();
-    updateIdeasSyncDot();
     updateContentSyncDot();
     // YT Studio sync dot (now inside Content tab)
     const ytSyncDot = document.getElementById('ytstudio-sync-dot');
     if (ytSyncDot) ytSyncDot.className = 'sync-dot ' + (hasNotionDirect() ? 'on' : 'off');
     updateModelBadges();
-    // 清除舊的 ideas localStorage（已改為 Notion-first）
-    localStorage.removeItem('ideas_data');
-    localStorage.removeItem('ideas_notion_index');
-    
     // 🖼️ Moodboard: render immediately from cache/defaults, then sync from Drive
     renderMoodboard();
     if (localStorage.getItem('drive_script_url')) {
@@ -94,9 +89,8 @@
         }, 500);
         // Auto-sync: Notion Direct (Ideas + Videos + Content)
         if (hasNotionDirect()) {
-            setTimeout(() => syncIdeasFromNotionDirect(true), 2500);
-            setTimeout(() => syncVideosFromNotion(true), 3000);
-            setTimeout(() => syncContentFromNotion(true), 3500);
+            setTimeout(() => syncVideosFromNotion(true), 2500);
+            setTimeout(() => syncContentFromNotion(true), 3000);
         }
         // Body auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
         if (getN8nUrl() && !hasNotionDirect()) {
