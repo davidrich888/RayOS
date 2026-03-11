@@ -72,10 +72,15 @@ async function fetchSubtitles(videoId) {
 
   const pageHtml = await pageResp.text();
 
+  // Check for consent/bot detection pages
+  const titleMatch = pageHtml.match(/<title>(.*?)<\/title>/);
+  const pageTitle = titleMatch ? titleMatch[1] : 'unknown';
+  const hasConsent = pageHtml.includes('consent.youtube.com') || pageHtml.includes('CONSENT');
+
   // Step 2: Extract ytInitialPlayerResponse
   const playerMatch = pageHtml.match(/var ytInitialPlayerResponse\s*=\s*/);
   if (!playerMatch) {
-    return noSubs(videoId, 'No player response in page');
+    return noSubs(videoId, `No player response in page (title: ${pageTitle}, len: ${pageHtml.length}, consent: ${hasConsent})`);
   }
 
   const startIdx = playerMatch.index + playerMatch[0].length;
@@ -98,9 +103,12 @@ async function fetchSubtitles(videoId) {
   }
 
   // Step 3: Extract caption tracks
+  const hasCaptions = !!playerResponse?.captions;
+  const hasTracklistRenderer = !!playerResponse?.captions?.playerCaptionsTracklistRenderer;
   const tracks = playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
   if (tracks.length === 0) {
-    return noSubs(videoId, 'No caption tracks available');
+    const playabilityStatus = playerResponse?.playabilityStatus?.status || 'unknown';
+    return noSubs(videoId, `No caption tracks (hasCaptions: ${hasCaptions}, hasRenderer: ${hasTracklistRenderer}, playability: ${playabilityStatus}, title: ${pageTitle})`);
   }
 
   // Step 4: Find preferred language
