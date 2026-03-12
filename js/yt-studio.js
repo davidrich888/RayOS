@@ -36,7 +36,8 @@ async function syncYTStudioFromNotion(silent = false) {
                     progress: p['進度']?.multi_select?.map(s => s.name) || [],
                     type: p['類型']?.multi_select?.map(s => s.name) || [],
                     sortOrder: p['排序']?.number ?? null,
-                    hasChildren: page.has_children || false
+                    hasChildren: page.has_children || false,
+                    _hasResearch: page.has_children || false
                 };
             }).filter(i => i.title);
             console.log('[RayOS YT Studio] Loaded:', ytStudioItems.length);
