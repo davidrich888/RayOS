@@ -76,6 +76,7 @@
                     <div class="card" onclick="go('content');setTimeout(()=>setContentTab('ytstudio'),50)"><div class="card-header"><span class="card-icon">🎬</span><span class="card-badge">FILM</span></div><div class="card-title">YT 工作室</div><div class="card-desc">準上架・Research</div></div>
                     <div class="card" onclick="go('lifecoach')"><div class="card-header"><span class="card-icon">🤖</span><span class="card-badge">13</span></div><div class="card-title">AI Agents</div><div class="card-desc">自動化 Agent 總覽</div></div>
                     <div class="card" onclick="go('information')"><div class="card-header"><span class="card-icon">📖</span><span class="card-badge">LEARN</span></div><div class="card-title">Information</div><div class="card-desc">YouTube Lab</div></div>
+                    <div class="card" onclick="go('trading');setTimeout(()=>{const b=document.querySelector('#trading .tab:nth-child(3)');setTradingTab('shamewall',b)},50)"><div class="card-header"><span class="card-icon">🔥</span><span class="card-badge">TRACK</span></div><div class="card-title">恥辱牆</div><div class="card-desc">交易犯錯記錄</div></div>
                 </div>
             </div>
         </section>
@@ -168,6 +169,7 @@
                         <div class="tabs">
                             <div class="tab active" onclick="setTradingTab('algo',this)">🤖 程式交易</div>
                             <div class="tab" onclick="setTradingTab('propfirm',this)">🏦 Prop Firm</div>
+                            <div class="tab" onclick="setTradingTab('shamewall',this)">🔥 恥辱牆</div>
                         </div>
                         <div id="tab-algo">
                             <div class="summary-grid" style="margin-bottom:20px;">
@@ -198,6 +200,9 @@
                                 </div>
                                 <div class="form-actions"><button class="btn btn-accent" onclick="saveAlgoEquity()">Save</button></div>
                             </div>
+                        </div>
+                        <div id="tab-shamewall" style="display:none;">
+                            <iframe id="shamewall-frame" src="about:blank" data-src="http://localhost:8777" style="width:100%;height:calc(100vh - 160px);border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:#0a0a0a;"></iframe>
                         </div>
                         <div id="tab-propfirm" style="display:none;">
                             <div class="summary-grid" style="margin-bottom:20px;">

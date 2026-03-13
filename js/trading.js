@@ -5,6 +5,14 @@ function setTradingTab(tab, btn) {
     btn.classList.add('active');
     document.getElementById('tab-algo').style.display = tab === 'algo' ? 'block' : 'none';
     document.getElementById('tab-propfirm').style.display = tab === 'propfirm' ? 'block' : 'none';
+    document.getElementById('tab-shamewall').style.display = tab === 'shamewall' ? 'block' : 'none';
+    // lazy-load iframe on first visit
+    if (tab === 'shamewall') {
+        const frame = document.getElementById('shamewall-frame');
+        if (frame && frame.src === 'about:blank') {
+            frame.src = frame.dataset.src;
+        }
+    }
 }
 
 function updateTradingDisplay() {
