@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>交易恥辱牆 — Trading Shame Wall</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .header h1 {
+    font-size: 28px;
+    color: #ff4444;
+    text-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  .header .subtitle {
+    color: #666;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 20px;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0d0d0d;
+  }
+  .stat { text-align: center; }
+  .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff4444;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: #555;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .warning-tape {
+    background: repeating-linear-gradient(
+      -45deg, #1a1a00, #1a1a00 10px, #0a0a0a 10px, #0a0a0a 20px
+    );
+    padding: 8px 0;
+    overflow: hidden;
+    border-bottom: 1px solid #333300;
+    border-top: 1px solid #333300;
+  }
+  .warning-tape .scroll-text {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 20s linear infinite;
+    color: #ffcc00;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  @keyframes scroll {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+
+  .entry {
+    background: #111;
+    border: 1px solid #222;
+    border-left: 3px solid #ff4444;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .entry:hover {
+    border-left-color: #ff6666;
+    background: #141414;
+    box-shadow: 0 0 20px rgba(255, 68, 68, 0.05);
+  }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .entry-date { font-size: 13px; color: #888; }
+  .entry-loss {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff4444;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.2);
+  }
+  .entry-title {
+    font-size: 22px;
+    color: #ff4444;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.15);
+    line-height: 1.3;
+  }
+  .entry-detail {
+    font-size: 13px;
+    color: #777;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .entry-detail img {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 4px;
+    border: 1px solid #222;
+    display: block;
+    margin: 8px 0;
+    cursor: pointer;
+  }
+  .entry-detail img:hover { border-color: #ff4444; }
+  .entry-tags {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: #1a0a0a;
+    color: #ff6666;
+    border: 1px solid #331111;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .add-section {
+    margin-top: 30px;
+    border-top: 1px solid #1a1a1a;
+    padding-top: 30px;
+  }
+  .add-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: #1a0a0a;
+    border: 1px dashed #ff4444;
+    border-radius: 6px;
+    color: #ff4444;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .add-btn:hover {
+    background: #220e0e;
+    border-style: solid;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h2 {
+    color: #ff4444;
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 10px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #e0e0e0;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  .form-group textarea { height: 80px; resize: vertical; }
+  .rich-editor {
+    width: 100%;
+    min-height: 120px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #e0e0e0;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    outline: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .rich-editor:focus { border-color: #ff4444; }
+  .rich-editor:empty:before {
+    content: attr(data-placeholder);
+    color: #555;
+    pointer-events: none;
+  }
+  .rich-editor img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    display: block;
+    margin: 8px 0;
+    cursor: pointer;
+  }
+  .rich-editor img:hover { border-color: #ff4444; }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #ff4444;
+  }
+  /* make date picker calendar icon bigger and the whole input clickable */
+  input[type="date"] {
+    cursor: pointer;
+    position: relative;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.7);
+    font-size: 18px;
+    padding: 4px;
+  }
+  /* dark theme for the date picker dropdown */
+  ::-webkit-datetime-edit { color: #e0e0e0; }
+  ::-webkit-datetime-edit-fields-wrapper { color: #e0e0e0; }
+  .tag-selector { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag-option {
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    background: #1a1a1a;
+    color: #888;
+    border: 1px solid #333;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tag-option.selected {
+    background: #1a0a0a;
+    color: #ff6666;
+    border-color: #ff4444;
+  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-save {
+    flex: 1;
+    padding: 12px;
+    background: #ff4444;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-save:hover { background: #ff5555; }
+  .btn-cancel {
+    padding: 12px 20px;
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #888;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-cancel:hover { background: #2a2a2a; }
+
+  .entry-action-btn {
+    background: none;
+    border: 1px solid #333;
+    color: #666;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    padding: 5px 14px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .entry-action-btn:hover {
+    color: #ccc;
+    border-color: #666;
+    background: #1a1a1a;
+  }
+  .entry-action-del:hover {
+    color: #ff4444;
+    border-color: #ff4444;
+    background: #1a0a0a;
+  }
+
+  .quote {
+    text-align: center;
+    padding: 30px 20px;
+    color: #444;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .quote span {
+    display: block;
+    margin-top: 8px;
+    color: #333;
+    font-size: 12px;
+    font-style: normal;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #333;
+  }
+  .empty-state p { font-size: 14px; }
+
+  /* top dashboard: streak + calendar side by side */
+  .dashboard-row {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 16px;
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  .dashboard-left {
+    flex: 3;
+    min-width: 0;
+  }
+  .dashboard-right {
+    flex: 2;
+    min-width: 0;
+  }
+
+  /* streak chart */
+  .streak-section {
+    padding: 0;
+  }
+  .streak-header {
+    font-size: 16px;
+    color: #4ade80;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+  .streak-subtitle {
+    font-size: 11px;
+    color: #444;
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  /* calendar */
+  .calendar-section {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .calendar-nav button {
+    background: none;
+    border: 1px solid #333;
+    color: #888;
+    font-size: 14px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .calendar-nav button:hover {
+    color: #ccc;
+    border-color: #555;
+  }
+  .calendar-month-label {
+    font-size: 14px;
+    color: #ccc;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .calendar-dow {
+    font-size: 10px;
+    color: #555;
+    text-align: center;
+    padding: 2px 0 6px;
+  }
+  .calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    border-radius: 4px;
+    color: #555;
+    background: #1a1a1a;
+    position: relative;
+    gap: 1px;
+  }
+  .calendar-day.empty {
+    background: transparent;
+  }
+  .calendar-day.clean {
+    color: #ccc;
+  }
+  .calendar-day.clean .cal-icon {
+    color: #4ade80;
+    font-size: 13px;
+  }
+  .calendar-day.mistake {
+    color: #ccc;
+  }
+  .calendar-day.mistake .cal-icon {
+    color: #ff4444;
+    font-size: 13px;
+  }
+  .calendar-day.today {
+    outline: 1px solid #4ade80;
+    outline-offset: -1px;
+  }
+  .calendar-day.future {
+    background: #0f0f0f;
+    color: #333;
+  }
+  .calendar-day.weekend {
+    opacity: 0.4;
+  }
+  .calendar-legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 10px;
+    color: #666;
+  }
+  .calendar-legend span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .calendar-legend .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .streak-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .streak-row .streak-hide {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .streak-row .streak-hide:hover {
+    color: #ff4444;
+    background: #1a0a0a;
+  }
+  .streak-show-hidden {
+    text-align: center;
+    margin-top: 8px;
+  }
+  .streak-show-hidden button {
+    background: none;
+    border: 1px solid #333;
+    color: #555;
+    font-size: 11px;
+    font-family: inherit;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .streak-show-hidden button:hover {
+    color: #aaa;
+    border-color: #666;
+  }
+  .streak-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .streak-label {
+    width: 90px;
+    font-size: 11px;
+    color: #888;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .streak-bar-bg {
+    flex: 1;
+    height: 22px;
+    background: #1a1a1a;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .streak-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+    min-width: 2px;
+  }
+  .streak-days {
+    width: 65px;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .streak-days .unit {
+    font-size: 10px;
+    font-weight: normal;
+    color: #666;
+    margin-left: 2px;
+  }
+
+  /* screenshots */
+  .paste-zone {
+    border: 1px dashed #444;
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+    color: #555;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+  .paste-zone:hover, .paste-zone.dragover {
+    border-color: #ff4444;
+    background: #1a0a0a;
+    color: #ff6666;
+  }
+  .paste-zone .hint {
+    width: 100%;
+    pointer-events: none;
+  }
+  .paste-zone .thumb {
+    position: relative;
+    display: inline-block;
+  }
+  .paste-zone .thumb img {
+    height: 80px;
+    border-radius: 4px;
+    border: 1px solid #333;
+  }
+  .paste-zone .thumb-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    background: #ff4444;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 11px;
+    cursor: pointer;
+    line-height: 18px;
+    text-align: center;
+    padding: 0;
+  }
+  .entry-screenshots {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .entry-screenshots img {
+    height: 120px;
+    border-radius: 4px;
+    border: 1px solid #222;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .entry-screenshots img:hover {
+    border-color: #ff4444;
+    transform: scale(1.02);
+  }
+  .entry-screenshots-small img {
+    height: 160px;
+  }
+  /* lightbox for single image */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 6px;
+  }
+
+  /* detail modal — full view of an entry */
+  .detail-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 1500;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 40px 20px;
+    cursor: pointer;
+  }
+  .detail-modal-overlay.active { display: flex; }
+  .detail-modal {
+    background: #111;
+    border: 1px solid #222;
+    border-left: 4px solid #ff4444;
+    border-radius: 8px;
+    padding: 32px;
+    width: 100%;
+    max-width: 900px;
+    cursor: default;
+  }
+  .detail-modal .dm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .detail-modal .dm-date {
+    font-size: 14px;
+    color: #888;
+  }
+  .detail-modal .dm-loss {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff4444;
+    text-shadow: 0 0 15px rgba(255, 68, 68, 0.2);
+  }
+  .detail-modal .dm-title {
+    font-size: 26px;
+    color: #ff4444;
+    font-weight: bold;
+    margin-bottom: 16px;
+    line-height: 1.3;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.15);
+  }
+  .detail-modal .dm-detail {
+    font-size: 15px;
+    color: #aaa;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-bottom: 20px;
+  }
+  .detail-modal .dm-detail img {
+    max-width: 100%;
+    border-radius: 6px;
+    border: 1px solid #333;
+    display: block;
+    margin: 12px 0;
+    cursor: pointer;
+  }
+  .detail-modal .dm-detail img:hover { border-color: #ff4444; }
+  .detail-modal .dm-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .detail-modal .dm-tags .tag {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  .detail-modal .dm-screenshots {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .detail-modal .dm-screenshots img {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #333;
+    cursor: pointer;
+  }
+  .detail-modal .dm-screenshots img:hover { border-color: #ff4444; }
+  .detail-modal .dm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #1a1a1a;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>交易恥辱牆</h1>
+  <div class="subtitle">每一筆虧損都是學費 — 但同樣的學費不該付兩次</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-value" id="totalLoss">$0</div>
+    <div class="stat-label">總虧損</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="totalEntries">0</div>
+    <div class="stat-label">犯錯次數</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="worstLoss">$0</div>
+    <div class="stat-label">單次最大虧損</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="topMistake">—</div>
+    <div class="stat-label">最常犯的錯</div>
+  </div>
+</div>
+
+<div class="warning-tape">
+  <div class="scroll-text">
+    ⚠ 記住這些痛 — 不要重蹈覆轍 — 紀律就是你的命 — 沒有紀律就沒有錢 — 衝動是魔鬼 — 記住這些痛 — 不要重蹈覆轍 — 紀律就是你的命 — 沒有紀律就沒有錢 — 衝動是魔鬼 ⚠
+  </div>
+</div>
+
+<div class="dashboard-row">
+  <div class="dashboard-left">
+    <div class="streak-section">
+      <div class="streak-header">連續無犯錯天數</div>
+      <div class="streak-subtitle">每一天都是勝利 — 保持下去</div>
+      <div id="streakChart" class="streak-chart"></div>
+    </div>
+  </div>
+  <div class="dashboard-right">
+    <div class="calendar-section">
+      <div class="calendar-nav">
+        <button id="calPrev">◀</button>
+        <div class="calendar-month-label" id="calMonthLabel"></div>
+        <button id="calNext">▶</button>
+      </div>
+      <div class="calendar-grid" id="calGrid"></div>
+      <div class="calendar-legend">
+        <span><span style="color:#4ade80">✓</span> 無犯錯</span>
+        <span><span style="color:#ff4444">✗</span> 有犯錯</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div id="entriesList"></div>
+  <div class="add-section">
+    <button class="add-btn" id="addBtn">+ 記錄一筆新的恥辱</button>
+  </div>
+  <div class="quote" id="quoteBlock"></div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modalTitle">記錄你的失敗</h2>
+    <div class="form-group">
+      <label>日期</label>
+      <input type="date" id="entryDate">
+    </div>
+    <div class="form-group">
+      <label>虧損金額 (USD)</label>
+      <input type="number" id="entryLoss" placeholder="500" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>標題（大字顯示在卡片上）</label>
+      <input type="text" id="entryMistake" placeholder="例：史上最爛的一天、又凹單了">
+    </div>
+    <div class="form-group">
+      <label>詳細描述（可邊打字邊 Ctrl+V 貼圖）</label>
+      <div class="rich-editor" id="entryDetail" contenteditable="true" data-placeholder="早盤看到一根大紅K就衝進去做多，結果是假突破..."></div>
+    </div>
+    <div class="form-group">
+      <label>錯誤類型（可多選）</label>
+      <div class="tag-selector" id="tagSelector"></div>
+    </div>
+    <div class="form-group">
+      <label>損益截圖（Ctrl+V 貼上或拖放圖片）</label>
+      <div class="paste-zone" id="pasteZone">
+        <div class="hint">Ctrl+V 貼上截圖，或拖放圖片到這裡</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>帳號</label>
+      <input type="text" id="entryAccount" placeholder="例：APEX-12345">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" id="saveBtn">刻在牆上</button>
+      <button class="btn-cancel" id="cancelBtn">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="detail-modal-overlay" id="detailModal"></div>
+<div class="lightbox" id="lightbox"></div>
+
+<script>
+var pendingScreenshots = []; // base64 data URLs for new P&L screenshots (paste zone)
+var existingPnlScreenshots = []; // filenames (IndexedDB keys) of already-saved P&L screenshots
+var existingDetailScreenshots = []; // filenames (IndexedDB keys) of already-saved detail screenshots
+
+const TAGS = [
+  '沒設停損', '凹單', '報復交易', '過度交易',
+  '逆勢做單', '衝動進場', '重倉', '移動停損',
+  '不認錯', 'FOMO', '盤前沒計畫', '情緒失控', '賭輸博大'
+];
+
+const QUOTES = [
+  { text: '市場不會因為你需要錢就給你錢。', author: '— 交易真相' },
+  { text: '虧損不可恥，重複同樣的虧損才可恥。', author: '— 自我提醒' },
+  { text: 'The goal of a successful trader is to make the best trades. Money is secondary.', author: '— Alexander Elder' },
+  { text: '紀律不是限制你的自由，是保護你的帳戶。', author: '— 交易紀律' },
+  { text: "It's not whether you're right or wrong, but how much money you make when you're right and how much you lose when you're wrong.", author: '— George Soros' },
+  { text: '你不需要每天都做單，但每天都需要紀律。', author: '— 交易心態' },
+  { text: '最貴的學費是你不從中學習的那一次。', author: '— 自我提醒' },
+  { text: 'Losing is part of winning. The key is managing your losses.', author: '— 交易真相' },
+];
+
+// ── Notion API via RayOS proxy ──
+var NOTION_DB_ID = '7e8a015f59984504aba62b86379f83cf';
+var entries = [];
+var editingId = null;
+var loading = false;
+var screenshotCache = {}; // filename -> base64 dataUrl
+
+function getNotionToken() {
+  return localStorage.getItem('notion_token') || '';
+}
+
+function notionRequest(method, path, body) {
+  var token = getNotionToken();
+  if (!token) return Promise.reject(new Error('Notion token not configured'));
+  return fetch('/api/notion', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: path, method: method, body: body, token: token })
+  }).then(function(r) { return r.json(); });
+}
+
+function parseNotionPage(page) {
+  var props = page.properties;
+  var dateProp = props['日期'] && props['日期'].date;
+  var dateVal = dateProp ? dateProp.start : '';
+  var lossVal = (props['虧損金額'] && props['虧損金額'].number) || 0;
+  var titleArr = (props['名稱'] && props['名稱'].title) || [];
+  var getRichText = function(name) {
+    var rt = (props[name] && props[name].rich_text) || [];
+    return rt.length ? rt[0].plain_text : '';
+  };
+  var tags = ((props['錯誤類型'] && props['錯誤類型'].multi_select) || []).map(function(o) { return o.name; });
+  return {
+    id: page.id,
+    name: titleArr.length ? titleArr[0].plain_text : '',
+    date: dateVal,
+    loss: lossVal,
+    mistake: getRichText('錯誤描述'),
+    detail: getRichText('詳細過程'),
+    account: getRichText('帳號'),
+    tags: tags,
+    pnlScreenshots: [],
+    detailScreenshots: []
+  };
+}
+
+// ── IndexedDB screenshot storage ──
+var screenshotDB = null;
+
+function openScreenshotDB() {
+  return new Promise(function(resolve, reject) {
+    if (screenshotDB) { resolve(screenshotDB); return; }
+    var req = indexedDB.open('ShameWallScreenshots', 1);
+    req.onupgradeneeded = function(e) {
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains('images')) db.createObjectStore('images');
+      if (!db.objectStoreNames.contains('mapping')) db.createObjectStore('mapping');
+    };
+    req.onsuccess = function(e) { screenshotDB = e.target.result; resolve(screenshotDB); };
+    req.onerror = function(e) { reject(e.target.error); };
+  });
+}
+
+function saveScreenshotToDB(filename, dataUrl) {
+  return openScreenshotDB().then(function(db) {
+    return new Promise(function(resolve) {
+      var tx = db.transaction('images', 'readwrite');
+      tx.objectStore('images').put(dataUrl, filename);
+      tx.oncomplete = function() { screenshotCache[filename] = dataUrl; resolve(filename); };
+    });
+  });
+}
+
+function saveMappingToDB(pageId, mapping) {
+  return openScreenshotDB().then(function(db) {
+    return new Promise(function(resolve) {
+      var tx = db.transaction('mapping', 'readwrite');
+      tx.objectStore('mapping').put(mapping, pageId);
+      tx.oncomplete = function() { resolve(); };
+    });
+  });
+}
+
+function loadAllScreenshotMappings() {
+  return openScreenshotDB().then(function(db) {
+    return new Promise(function(resolve) {
+      var tx = db.transaction(['mapping', 'images'], 'readonly');
+      var mappingStore = tx.objectStore('mapping');
+      var imageStore = tx.objectStore('images');
+      var pending = [];
+
+      entries.forEach(function(entry) {
+        pending.push(new Promise(function(res) {
+          var req = mappingStore.get(entry.id);
+          req.onsuccess = function() {
+            var m = req.result || { pnl: [], detail: [] };
+            entry.pnlScreenshots = m.pnl || [];
+            entry.detailScreenshots = m.detail || [];
+            var imgLoads = [];
+            entry.pnlScreenshots.concat(entry.detailScreenshots).forEach(function(fn) {
+              if (!screenshotCache[fn]) {
+                imgLoads.push(new Promise(function(ri) {
+                  var ir = imageStore.get(fn);
+                  ir.onsuccess = function() { if (ir.result) screenshotCache[fn] = ir.result; ri(); };
+                  ir.onerror = function() { ri(); };
+                }));
+              }
+            });
+            Promise.all(imgLoads).then(res);
+          };
+          req.onerror = function() { res(); };
+        }));
+      });
+
+      Promise.all(pending).then(resolve);
+    });
+  });
+}
+
+function getScreenshotUrl(filename) {
+  return screenshotCache[filename] || '';
+}
+
+function generateFilename() {
+  return 'shame-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4) + '.png';
+}
+
+function formatDate(dateStr) {
+  var d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+}
+
+function setLoading(state) {
+  loading = state;
+  document.getElementById('addBtn').disabled = state;
+  document.getElementById('addBtn').textContent = state ? '載入中...' : '+ 記錄一筆新的恥辱';
+}
+
+function loadEntries() {
+  setLoading(true);
+  var token = getNotionToken();
+  if (!token) {
+    var el = document.getElementById('entriesList');
+    el.textContent = '';
+    var msg = document.createElement('div');
+    msg.className = 'empty-state';
+    var p = document.createElement('p');
+    p.textContent = 'Notion Token 未設定 — 請到 RayOS Settings 設定後重新整理';
+    msg.appendChild(p);
+    el.appendChild(msg);
+    setLoading(false);
+    return Promise.resolve();
+  }
+  return notionRequest('POST', '/databases/' + NOTION_DB_ID + '/query', {
+    sorts: [{ property: '日期', direction: 'descending' }]
+  }).then(function(result) {
+    if (result.error) {
+      console.error('Notion error:', result.error);
+      setLoading(false);
+      return;
+    }
+    entries = (result.results || []).map(parseNotionPage);
+    return loadAllScreenshotMappings().then(function() {
+      setLoading(false);
+      render();
+    });
+  }).catch(function(err) {
+    console.error('Failed to load:', err);
+    setLoading(false);
+  });
+}
+
+function updateStats() {
+  const totalLoss = entries.reduce(function(s, e) { return s + Number(e.loss); }, 0);
+  const worstLoss = entries.length ? Math.max.apply(null, entries.map(function(e) { return Number(e.loss); })) : 0;
+
+  document.getElementById('totalLoss').textContent = '-$' + totalLoss.toLocaleString();
+  document.getElementById('totalEntries').textContent = entries.length;
+  document.getElementById('worstLoss').textContent = '-$' + worstLoss.toLocaleString();
+
+  if (entries.length > 0) {
+    const tagCount = {};
+    entries.forEach(function(e) {
+      (e.tags || []).forEach(function(t) { tagCount[t] = (tagCount[t] || 0) + 1; });
+    });
+    const sorted = Object.keys(tagCount).sort(function(a, b) { return tagCount[b] - tagCount[a]; });
+    document.getElementById('topMistake').textContent = sorted.length ? sorted[0] : '—';
+  } else {
+    document.getElementById('topMistake').textContent = '—';
+  }
+}
+
+function getHiddenTags() {
+  var saved = localStorage.getItem('shame-wall-hidden-tags');
+  return saved ? JSON.parse(saved) : [];
+}
+
+function setHiddenTags(tags) {
+  localStorage.setItem('shame-wall-hidden-tags', JSON.stringify(tags));
+}
+
+function hideTag(tag) {
+  var hidden = getHiddenTags();
+  if (hidden.indexOf(tag) === -1) hidden.push(tag);
+  setHiddenTags(hidden);
+  renderStreakChart();
+}
+
+function showAllTags() {
+  setHiddenTags([]);
+  renderStreakChart();
+}
+
+function countWeekdays(from, to) {
+  var count = 0;
+  var d = new Date(from);
+  d.setDate(d.getDate() + 1);
+  while (d <= to) {
+    var dow = d.getDay();
+    if (dow !== 0 && dow !== 6) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
+function renderStreakChart() {
+  var chart = document.getElementById('streakChart');
+  chart.textContent = '';
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var hiddenTags = getHiddenTags();
+
+  // find last occurrence date for each tag
+  var tagLastDate = {};
+  TAGS.forEach(function(t) { tagLastDate[t] = null; });
+
+  entries.forEach(function(e) {
+    (e.tags || []).forEach(function(t) {
+      var d = new Date(e.date + 'T00:00:00');
+      if (!tagLastDate[t] || d > tagLastDate[t]) {
+        tagLastDate[t] = d;
+      }
+    });
+  });
+
+  // build streaks for ALL tags
+  var streaks = [];
+  TAGS.forEach(function(t) {
+    if (hiddenTags.indexOf(t) !== -1) return; // skip hidden
+    if (tagLastDate[t]) {
+      var days = countWeekdays(tagLastDate[t], today);
+      streaks.push({ tag: t, days: days, ever: true });
+    } else {
+      streaks.push({ tag: t, days: -1, ever: false }); // never committed
+    }
+  });
+
+  if (streaks.length === 0) return;
+
+  // sort: never-committed at top, then by days descending
+  streaks.sort(function(a, b) {
+    if (!a.ever && !b.ever) return 0;
+    if (!a.ever) return -1;
+    if (!b.ever) return 1;
+    return b.days - a.days;
+  });
+
+  var maxDays = 1;
+  streaks.forEach(function(s) { if (s.days > maxDays) maxDays = s.days; });
+
+  streaks.forEach(function(s) {
+    var row = document.createElement('div');
+    row.className = 'streak-row';
+
+    var label = document.createElement('div');
+    label.className = 'streak-label';
+    label.textContent = s.tag;
+    row.appendChild(label);
+
+    var barBg = document.createElement('div');
+    barBg.className = 'streak-bar-bg';
+    var barFill = document.createElement('div');
+    barFill.className = 'streak-bar-fill';
+
+    if (s.ever) {
+      var pct = (s.days / maxDays) * 100;
+      barFill.style.width = pct + '%';
+      barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+    } else {
+      barFill.style.width = '100%';
+      barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+      barFill.style.opacity = '0.3';
+    }
+
+    barBg.appendChild(barFill);
+    row.appendChild(barBg);
+
+    var daysEl = document.createElement('div');
+    daysEl.className = 'streak-days';
+    daysEl.style.color = '#4ade80';
+    if (s.ever) {
+      daysEl.appendChild(document.createTextNode(s.days));
+      var unit = document.createElement('span');
+      unit.className = 'unit';
+      unit.textContent = ' 天';
+      daysEl.appendChild(unit);
+    } else {
+      daysEl.style.color = '#2d7a4a';
+      daysEl.appendChild(document.createTextNode('\u2714'));
+      var unit = document.createElement('span');
+      unit.className = 'unit';
+      unit.textContent = ' 從未';
+      daysEl.appendChild(unit);
+    }
+    row.appendChild(daysEl);
+
+    // hide button
+    var hideBtn = document.createElement('button');
+    hideBtn.className = 'streak-hide';
+    hideBtn.textContent = '\u00d7';
+    hideBtn.title = '隱藏此項';
+    hideBtn.addEventListener('click', function() { hideTag(s.tag); });
+    row.appendChild(hideBtn);
+
+    chart.appendChild(row);
+  });
+
+  // show hidden count
+  if (hiddenTags.length > 0) {
+    var showDiv = document.createElement('div');
+    showDiv.className = 'streak-show-hidden';
+    var showBtn = document.createElement('button');
+    showBtn.textContent = '顯示 ' + hiddenTags.length + ' 個已隱藏項目';
+    showBtn.addEventListener('click', showAllTags);
+    showDiv.appendChild(showBtn);
+    chart.appendChild(showDiv);
+  }
+}
+
+// ── Calendar ──
+var calYear = 2026;
+var calMonth = 2; // March (0-indexed)
+
+function renderCalendar() {
+  var grid = document.getElementById('calGrid');
+  var label = document.getElementById('calMonthLabel');
+  if (!grid) return;
+  grid.textContent = '';
+
+  var monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  label.textContent = calYear + ' 年 ' + monthNames[calMonth];
+
+  // day-of-week headers (Mon-Sun)
+  var dows = ['一','二','三','四','五','六','日'];
+  dows.forEach(function(d) {
+    var el = document.createElement('div');
+    el.className = 'calendar-dow';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  // build set of dates with mistakes
+  var mistakeDates = {};
+  entries.forEach(function(e) {
+    if (e.date) mistakeDates[e.date] = true;
+  });
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  var firstDay = new Date(calYear, calMonth, 1);
+  var lastDay = new Date(calYear, calMonth + 1, 0);
+  // getDay(): 0=Sun. We want Mon=0, so adjust
+  var startDow = (firstDay.getDay() + 6) % 7;
+
+  // empty cells before first day
+  for (var i = 0; i < startDow; i++) {
+    var empty = document.createElement('div');
+    empty.className = 'calendar-day empty';
+    grid.appendChild(empty);
+  }
+
+  // tracking starts from 2026-03-14
+  var trackStart = new Date(2026, 2, 14);
+  trackStart.setHours(0, 0, 0, 0);
+
+  for (var d = 1; d <= lastDay.getDate(); d++) {
+    var cell = document.createElement('div');
+    cell.className = 'calendar-day';
+
+    var cellDate = new Date(calYear, calMonth, d);
+    var dow = cellDate.getDay();
+    var dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+
+    var isWeekend = (dow === 0 || dow === 6);
+    var isFuture = cellDate > today;
+    var isToday = cellDate.getTime() === today.getTime();
+    var isBeforeTracking = cellDate < trackStart;
+
+    if (isWeekend || isFuture || isBeforeTracking) {
+      cell.textContent = d;
+      if (isWeekend) cell.classList.add('weekend');
+      else if (isFuture) cell.classList.add('future');
+      // before tracking: just neutral, check if has mistake entry
+      if (isBeforeTracking && !isWeekend && mistakeDates[dateStr]) {
+        cell.textContent = '';
+        cell.classList.add('mistake');
+        cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
+      }
+    } else if (mistakeDates[dateStr]) {
+      cell.classList.add('mistake');
+      cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
+    } else {
+      cell.classList.add('clean');
+      cell.innerHTML = d + ' <span class="cal-icon">✓</span>';
+    }
+
+    if (isToday) cell.classList.add('today');
+
+    grid.appendChild(cell);
+  }
+}
+
+document.getElementById('calPrev').addEventListener('click', function() {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+});
+document.getElementById('calNext').addEventListener('click', function() {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+});
+
+function renderEntry(e) {
+  const card = document.createElement('div');
+  card.className = 'entry';
+  card.dataset.id = e.id;
+
+  // make card clickable
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', function(ev) {
+    // don't open if clicking buttons
+    if (ev.target.closest('.entry-action-btn')) return;
+    openDetailModal(e.id);
+  });
+
+  // header
+  const header = document.createElement('div');
+  header.className = 'entry-header';
+  const dateEl = document.createElement('div');
+  dateEl.className = 'entry-date';
+  dateEl.textContent = formatDate(e.date) + (e.account ? ' \u00b7 ' + e.account : '');
+  const lossEl = document.createElement('div');
+  lossEl.className = 'entry-loss';
+  lossEl.textContent = '-$' + Number(e.loss).toLocaleString();
+  header.appendChild(dateEl);
+  header.appendChild(lossEl);
+  card.appendChild(header);
+
+  // title (big heading)
+  if (e.mistake) {
+    var titleEl = document.createElement('div');
+    titleEl.className = 'entry-title';
+    titleEl.textContent = e.mistake;
+    card.appendChild(titleEl);
+  }
+
+  // detail text only (no inline images on card)
+  if (e.detail) {
+    var detailEl = document.createElement('div');
+    detailEl.className = 'entry-detail';
+    var plainDetail = e.detail.replace(/\[screenshot\]/g, '').trim();
+    if (plainDetail) {
+      detailEl.textContent = plainDetail.length > 120 ? plainDetail.substring(0, 120) + '...' : plainDetail;
+    }
+    card.appendChild(detailEl);
+  }
+
+  // tags
+  if (e.tags && e.tags.length) {
+    const tagsEl = document.createElement('div');
+    tagsEl.className = 'entry-tags';
+    e.tags.forEach(function(t) {
+      const tagEl = document.createElement('span');
+      tagEl.className = 'tag';
+      tagEl.textContent = t;
+      tagsEl.appendChild(tagEl);
+    });
+    card.appendChild(tagsEl);
+  }
+
+  // P&L screenshots on card (smaller thumbnails)
+  var pnlScreenshots = e.pnlScreenshots || [];
+  if (pnlScreenshots.length) {
+    var ssEl = document.createElement('div');
+    ssEl.className = 'entry-screenshots entry-screenshots-small';
+    pnlScreenshots.forEach(function(filename) {
+      var img = document.createElement('img');
+      img.src = getScreenshotUrl(filename);
+      img.alt = 'P&L screenshot';
+      img.addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        openLightbox(img.src);
+      });
+      ssEl.appendChild(img);
+    });
+    card.appendChild(ssEl);
+  }
+
+  // action buttons at bottom-right
+  var actions = document.createElement('div');
+  actions.style.cssText = 'display:flex;justify-content:flex-end;gap:8px;margin-top:14px;';
+
+  var editBtn = document.createElement('button');
+  editBtn.className = 'entry-action-btn';
+  editBtn.textContent = '編輯';
+  editBtn.addEventListener('click', function() { openModal(e.id); });
+  actions.appendChild(editBtn);
+
+  var delBtn = document.createElement('button');
+  delBtn.className = 'entry-action-btn entry-action-del';
+  delBtn.textContent = '刪除';
+  delBtn.addEventListener('click', function() { deleteEntry(e.id); });
+  actions.appendChild(delBtn);
+
+  card.appendChild(actions);
+
+  return card;
+}
+
+function openDetailModal(entryId) {
+  var e = entries.find(function(x) { return x.id === entryId; });
+  if (!e) return;
+
+  var overlay = document.getElementById('detailModal');
+  overlay.textContent = '';
+
+  var modal = document.createElement('div');
+  modal.className = 'detail-modal';
+
+  // date
+  var dateEl = document.createElement('div');
+  dateEl.className = 'dm-date';
+  dateEl.textContent = formatDate(e.date) + (e.account ? ' \u00b7 ' + e.account : '');
+  modal.appendChild(dateEl);
+
+  // tags first
+  if (e.tags && e.tags.length) {
+    var tagsEl = document.createElement('div');
+    tagsEl.className = 'dm-tags';
+    e.tags.forEach(function(t) {
+      var tagEl = document.createElement('span');
+      tagEl.className = 'tag';
+      tagEl.textContent = t;
+      tagsEl.appendChild(tagEl);
+    });
+    modal.appendChild(tagsEl);
+  }
+
+  // title
+  if (e.mistake) {
+    var title = document.createElement('div');
+    title.className = 'dm-title';
+    title.textContent = e.mistake;
+    modal.appendChild(title);
+  }
+
+  // detail text with inline detail screenshots (NOT P&L screenshots)
+  var detailSS = (e.detailScreenshots || []).slice();
+  var ssIndex = 0;
+
+  if (e.detail) {
+    var detailEl = document.createElement('div');
+    detailEl.className = 'dm-detail';
+
+    var parts = e.detail.split('[screenshot]');
+
+    parts.forEach(function(part, i) {
+      if (part.trim()) {
+        var p = document.createElement('p');
+        p.textContent = part.trim();
+        detailEl.appendChild(p);
+      }
+      if (i < parts.length - 1 && ssIndex < detailSS.length) {
+        var img = document.createElement('img');
+        img.src = getScreenshotUrl(detailSS[ssIndex]);
+        img.addEventListener('click', function(ev) {
+          ev.stopPropagation();
+          openLightbox(img.src);
+        });
+        detailEl.appendChild(img);
+        ssIndex++;
+      }
+    });
+
+    modal.appendChild(detailEl);
+  }
+
+  // P&L screenshots at the very bottom
+  var pnlSS = (e.pnlScreenshots || []);
+  if (pnlSS.length) {
+    var pnlLabel = document.createElement('div');
+    pnlLabel.style.cssText = 'color:#555;font-size:12px;margin-top:24px;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;';
+    pnlLabel.textContent = '損益截圖';
+    modal.appendChild(pnlLabel);
+    var pnlEl = document.createElement('div');
+    pnlEl.className = 'dm-screenshots';
+    pnlSS.forEach(function(filename) {
+      var img = document.createElement('img');
+      img.src = getScreenshotUrl(filename);
+      img.addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        openLightbox(img.src);
+      });
+      pnlEl.appendChild(img);
+    });
+    modal.appendChild(pnlEl);
+  }
+
+  // action buttons
+  var actions = document.createElement('div');
+  actions.className = 'dm-actions';
+  var editBtn = document.createElement('button');
+  editBtn.className = 'entry-action-btn';
+  editBtn.textContent = '編輯';
+  editBtn.addEventListener('click', function(ev) {
+    ev.stopPropagation();
+    overlay.classList.remove('active');
+    openModal(e.id);
+  });
+  actions.appendChild(editBtn);
+  var delBtn = document.createElement('button');
+  delBtn.className = 'entry-action-btn entry-action-del';
+  delBtn.textContent = '刪除';
+  delBtn.addEventListener('click', function(ev) {
+    ev.stopPropagation();
+    overlay.classList.remove('active');
+    deleteEntry(e.id);
+  });
+  actions.appendChild(delBtn);
+  modal.appendChild(actions);
+
+  overlay.appendChild(modal);
+  overlay.classList.add('active');
+}
+
+// close detail modal on overlay click
+document.getElementById('detailModal').addEventListener('click', function(ev) {
+  if (ev.target === this) this.classList.remove('active');
+});
+
+function openLightbox(src) {
+  var lb = document.getElementById('lightbox');
+  lb.textContent = '';
+  var img = document.createElement('img');
+  img.src = src;
+  lb.appendChild(img);
+  lb.classList.add('active');
+}
+document.getElementById('lightbox').addEventListener('click', function() {
+  this.classList.remove('active');
+});
+
+function render() {
+  const list = document.getElementById('entriesList');
+  list.textContent = '';
+
+  if (entries.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    const p1 = document.createElement('p');
+    p1.textContent = '還沒有記錄 — 希望永遠不需要用到這裡';
+    const p2 = document.createElement('p');
+    p2.textContent = '但如果你犯了錯，誠實面對它';
+    p2.style.marginTop = '8px';
+    p2.style.color = '#555';
+    p2.style.fontSize = '12px';
+    empty.appendChild(p1);
+    empty.appendChild(p2);
+    list.appendChild(empty);
+    updateStats();
+    return;
+  }
+
+  var sorted = entries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  sorted.forEach(function(e) {
+    list.appendChild(renderEntry(e));
+  });
+  updateStats();
+  renderStreakChart();
+  renderCalendar();
+}
+
+function openModal(id) {
+  editingId = id || null;
+  var modal = document.getElementById('modal');
+  var tagSelector = document.getElementById('tagSelector');
+  tagSelector.textContent = '';
+
+  TAGS.forEach(function(t) {
+    var el = document.createElement('div');
+    el.className = 'tag-option';
+    el.dataset.tag = t;
+    el.textContent = t;
+    el.addEventListener('click', function() { el.classList.toggle('selected'); });
+    tagSelector.appendChild(el);
+  });
+
+  if (editingId) {
+    var e = entries.find(function(x) { return x.id === editingId; });
+    document.getElementById('modalTitle').textContent = '編輯記錄';
+    document.getElementById('entryDate').value = e.date;
+    document.getElementById('entryLoss').value = e.loss;
+    document.getElementById('entryMistake').value = e.mistake || '';
+    document.getElementById('entryAccount').value = e.account || '';
+    (e.tags || []).forEach(function(t) {
+      var tagEl = tagSelector.querySelector('[data-tag="' + t + '"]');
+      if (tagEl) tagEl.classList.add('selected');
+    });
+    // reconstruct rich editor with inline detail screenshots
+    var editorEl = document.getElementById('entryDetail');
+    editorEl.innerHTML = '';
+    var detailSS = (e.detailScreenshots || []).slice();
+    var dsIdx = 0;
+    if (e.detail) {
+      var parts = e.detail.split('[screenshot]');
+      parts.forEach(function(part, i) {
+        if (part) editorEl.appendChild(document.createTextNode(part));
+        if (i < parts.length - 1 && dsIdx < detailSS.length) {
+          var img = document.createElement('img');
+          img.src = getScreenshotUrl(detailSS[dsIdx]);
+          editorEl.appendChild(img);
+          dsIdx++;
+        }
+      });
+    }
+    existingPnlScreenshots = (e.pnlScreenshots || []).slice();
+    existingDetailScreenshots = (e.detailScreenshots || []).slice();
+  } else {
+    existingPnlScreenshots = [];
+    existingDetailScreenshots = [];
+    document.getElementById('modalTitle').textContent = '記錄你的失敗';
+    document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('entryLoss').value = '';
+    document.getElementById('entryMistake').value = '';
+    document.getElementById('entryDetail').innerHTML = '';
+    document.getElementById('entryAccount').value = '';
+  }
+
+  // reset screenshots
+  pendingScreenshots = [];
+  renderPasteZone();
+
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+  editingId = null;
+  pendingScreenshots = [];
+  existingPnlScreenshots = [];
+  existingDetailScreenshots = [];
+}
+
+function renderPasteZone() {
+  var zone = document.getElementById('pasteZone');
+  zone.textContent = '';
+
+  // show existing screenshots (from server)
+  existingPnlScreenshots.forEach(function(filename, idx) {
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    var img = document.createElement('img');
+    img.src = getScreenshotUrl(filename);
+    thumb.appendChild(img);
+    var removeBtn = document.createElement('button');
+    removeBtn.className = 'thumb-remove';
+    removeBtn.textContent = '\u00d7';
+    removeBtn.type = 'button';
+    removeBtn.addEventListener('click', function(ev) {
+      ev.stopPropagation();
+      existingPnlScreenshots.splice(idx, 1);
+      renderPasteZone();
+    });
+    thumb.appendChild(removeBtn);
+    zone.appendChild(thumb);
+  });
+
+  if (existingPnlScreenshots.length === 0 && pendingScreenshots.length === 0) {
+    var hint = document.createElement('div');
+    hint.className = 'hint';
+    hint.textContent = 'Ctrl+V 貼上截圖，或拖放圖片到這裡';
+    zone.appendChild(hint);
+  }
+  pendingScreenshots.forEach(function(dataUrl, idx) {
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    var img = document.createElement('img');
+    img.src = dataUrl;
+    thumb.appendChild(img);
+    var removeBtn = document.createElement('button');
+    removeBtn.className = 'thumb-remove';
+    removeBtn.textContent = '\u00d7';
+    removeBtn.type = 'button';
+    removeBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      pendingScreenshots.splice(idx, 1);
+      renderPasteZone();
+    });
+    thumb.appendChild(removeBtn);
+    zone.appendChild(thumb);
+  });
+  if (pendingScreenshots.length > 0) {
+    var addMore = document.createElement('div');
+    addMore.className = 'hint';
+    addMore.textContent = '繼續貼上更多截圖...';
+    addMore.style.fontSize = '11px';
+    zone.appendChild(addMore);
+  }
+}
+
+function serializeRichEditor(el) {
+  // walk through child nodes, extract text and images
+  var text = '';
+  var images = [];
+  function walk(node) {
+    if (node.nodeType === 3) { // text node
+      text += node.textContent;
+    } else if (node.nodeName === 'IMG') {
+      images.push(node.src);
+      text += '\n[screenshot]\n';
+    } else if (node.nodeName === 'BR') {
+      text += '\n';
+    } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+      if (text.length > 0 && text[text.length - 1] !== '\n') text += '\n';
+      for (var i = 0; i < node.childNodes.length; i++) {
+        walk(node.childNodes[i]);
+      }
+      if (text.length > 0 && text[text.length - 1] !== '\n') text += '\n';
+      return;
+    }
+    if (node.childNodes) {
+      for (var i = 0; i < node.childNodes.length; i++) {
+        walk(node.childNodes[i]);
+      }
+    }
+  }
+  walk(el);
+  return { text: text.trim(), images: images };
+}
+
+function handleImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    pendingScreenshots.push(e.target.result);
+    renderPasteZone();
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveEntry() {
+  var date = document.getElementById('entryDate').value;
+  var loss = document.getElementById('entryLoss').value;
+  var mistake = document.getElementById('entryMistake').value.trim();
+  // serialize rich editor: extract text + inline images
+  var editorEl = document.getElementById('entryDetail');
+  var richContent = serializeRichEditor(editorEl);
+  var detail = richContent.text;
+  // separate new (base64) vs existing (server URL) inline images
+  var newInlineImages = [];
+  var keptDetailFiles = [];
+  richContent.images.forEach(function(src) {
+    if (src.startsWith('data:')) {
+      newInlineImages.push(src);
+    } else {
+      // existing screenshot — find the filename key in screenshotCache
+      Object.keys(screenshotCache).forEach(function(fn) {
+        if (screenshotCache[fn] === src) keptDetailFiles.push(fn);
+      });
+    }
+  });
+  var account = document.getElementById('entryAccount').value.trim();
+  var selectedTags = document.querySelectorAll('.tag-option.selected');
+  var tags = [];
+  selectedTags.forEach(function(el) { tags.push(el.dataset.tag); });
+
+  if (!date || !loss) {
+    alert('日期和金額必填！');
+    return;
+  }
+
+  var lossNum = Math.abs(parseFloat(loss));
+  var title = (mistake || '').substring(0, 50) || date || 'untitled';
+
+  var notionProps = {
+    '名稱': { title: [{ text: { content: title } }] },
+    '日期': { date: { start: date } },
+    '虧損金額': { number: lossNum },
+    '錯誤描述': { rich_text: [{ text: { content: mistake || '' } }] },
+    '詳細過程': { rich_text: [{ text: { content: detail || '' } }] },
+    '帳號': { rich_text: [{ text: { content: account || '' } }] },
+    '錯誤類型': { multi_select: tags.map(function(t) { return { name: t }; }) }
+  };
+
+  var saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = '儲存中...';
+
+  var notionPromise;
+  if (editingId) {
+    notionPromise = notionRequest('PATCH', '/pages/' + editingId, { properties: notionProps });
+  } else {
+    notionPromise = notionRequest('POST', '/pages', {
+      parent: { database_id: NOTION_DB_ID },
+      properties: notionProps
+    });
+  }
+
+  notionPromise.then(function(result) {
+    var pageId = editingId || result.id;
+    if (!pageId) throw new Error('No page ID returned');
+
+    // save new screenshots to IndexedDB
+    var saveTasks = [];
+    var newPnlFiles = [];
+    pendingScreenshots.forEach(function(dataUrl) {
+      var fn = generateFilename();
+      newPnlFiles.push(fn);
+      saveTasks.push(saveScreenshotToDB(fn, dataUrl));
+    });
+    var newDetailFiles = [];
+    newInlineImages.forEach(function(dataUrl) {
+      var fn = generateFilename();
+      newDetailFiles.push(fn);
+      saveTasks.push(saveScreenshotToDB(fn, dataUrl));
+    });
+
+    return Promise.all(saveTasks).then(function() {
+      var mapping = {
+        pnl: existingPnlScreenshots.concat(newPnlFiles),
+        detail: keptDetailFiles.concat(newDetailFiles)
+      };
+      return saveMappingToDB(pageId, mapping);
+    });
+  }).then(function() {
+    closeModal();
+    saveBtn.disabled = false;
+    saveBtn.textContent = '刻在牆上';
+    return loadEntries();
+  }).catch(function(err) {
+    alert('儲存失敗：' + err.message);
+    saveBtn.disabled = false;
+    saveBtn.textContent = '刻在牆上';
+  });
+}
+
+function deleteEntry(id) {
+  if (!confirm('確定要刪除這筆記錄？')) return;
+  notionRequest('PATCH', '/pages/' + id, { archived: true }).then(function() {
+    return loadEntries();
+  }).catch(function(err) {
+    alert('刪除失敗：' + err.message);
+  });
+}
+
+function showQuote() {
+  var q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  var block = document.getElementById('quoteBlock');
+  block.textContent = '';
+  var quote = document.createTextNode('\u201c' + q.text + '\u201d');
+  block.appendChild(quote);
+  var author = document.createElement('span');
+  author.textContent = q.author;
+  block.appendChild(author);
+}
+
+// event listeners
+document.getElementById('addBtn').addEventListener('click', function() { openModal(); });
+document.getElementById('saveBtn').addEventListener('click', saveEntry);
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// paste zone events
+var pasteZone = document.getElementById('pasteZone');
+pasteZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  pasteZone.classList.add('dragover');
+});
+pasteZone.addEventListener('dragleave', function() {
+  pasteZone.classList.remove('dragover');
+});
+pasteZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  pasteZone.classList.remove('dragover');
+  var files = e.dataTransfer.files;
+  for (var i = 0; i < files.length; i++) {
+    handleImageFile(files[i]);
+  }
+});
+
+// paste handler for rich editor — insert images inline
+document.getElementById('entryDetail').addEventListener('paste', function(e) {
+  var items = e.clipboardData.items;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      e.preventDefault();
+      var file = items[i].getAsFile();
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        var img = document.createElement('img');
+        img.src = ev.target.result;
+        // insert at cursor
+        var sel = window.getSelection();
+        if (sel.rangeCount) {
+          var range = sel.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(img);
+          // move cursor after image
+          range.setStartAfter(img);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          document.getElementById('entryDetail').appendChild(img);
+        }
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+  }
+});
+
+// paste handler for screenshot zone (outside rich editor)
+document.addEventListener('paste', function(e) {
+  if (!document.getElementById('modal').classList.contains('active')) return;
+  // skip if focus is in the rich editor (handled above)
+  if (document.activeElement === document.getElementById('entryDetail')) return;
+  var items = e.clipboardData.items;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      e.preventDefault();
+      handleImageFile(items[i].getAsFile());
+      break;
+    }
+  }
+});
+
+// boot — load from Notion API
+loadEntries();
+showQuote();
+</script>
+
+</body>
+</html>
