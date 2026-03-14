@@ -770,63 +770,10 @@
     border-top: 1px solid #1a1a1a;
   }
 
-  .setup-banner {
-    background: #1a1400;
-    border: 1px solid #4a3d00;
-    padding: 12px 16px;
-    margin: 12px 20px;
-    border-radius: 8px;
-    font-size: 12px;
-    color: #ccc;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .setup-banner input {
-    background: #0a0a0a;
-    border: 1px solid #333;
-    color: #e0e0e0;
-    padding: 6px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    flex: 1;
-    min-width: 200px;
-  }
-  .setup-banner button {
-    background: #2a2a00;
-    border: 1px solid #555500;
-    color: #cccc00;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 11px;
-    white-space: nowrap;
-  }
-  .setup-banner button:hover { background: #3a3a00; }
 </style>
 </head>
 <body>
 
-<div id="setupBanner" class="setup-banner" style="display:none;">
-  <span>📷 截圖上傳：</span>
-  <input type="text" id="driveScriptUrl" placeholder="貼上 Apps Script URL（見下方教學）">
-  <button onclick="saveDriveUrl()">儲存</button>
-  <button onclick="toggleSetupHelp()">設定教學</button>
-  <span id="setupStatus"></span>
-  <div id="setupHelp" style="display:none;width:100%;margin-top:8px;padding:10px;background:#0a0a0a;border:1px solid #333;border-radius:4px;line-height:1.8;">
-    <strong>一次性設定（3 分鐘）：</strong><br>
-    1. 開 Google Drive → 建資料夾「Shame Wall Screenshots」<br>
-    2. 右鍵資料夾 → 共用 → 「知道連結的人都能查看」<br>
-    3. 複製資料夾 ID（URL 中 folders/ 後面那串）<br>
-    4. 去 <a href="https://script.google.com" target="_blank" style="color:#cccc00;">script.google.com</a> → 新建專案<br>
-    5. 貼上下方程式碼，把 YOUR_FOLDER_ID 換成你的資料夾 ID<br>
-    6. 部署 → 新增部署 → 網頁應用程式 → 執行身分：我 → 存取權限：所有人<br>
-    7. 複製產生的 URL 貼到上方欄位<br><br>
-    <button onclick="copyDriveScript()" style="margin-bottom:6px;">📋 複製 Apps Script 程式碼</button>
-    <pre id="driveScriptCode" style="font-size:10px;color:#888;white-space:pre-wrap;padding:8px;background:#111;border:1px solid #222;max-height:180px;overflow-y:auto;"></pre>
-  </div>
-</div>
 
 <div class="header">
   <h1>交易恥辱牆</h1>
@@ -965,9 +912,6 @@ function getNotionToken() {
   return localStorage.getItem('notion_token') || '';
 }
 
-function getDriveScriptUrl() {
-  return localStorage.getItem('shame_wall_drive_url') || '';
-}
 
 function notionRequest(method, path, body) {
   var token = getNotionToken();
@@ -1012,11 +956,8 @@ function parseNotionPage(page) {
   };
 }
 
-// ── Google Drive screenshot upload ──
+// ── Google Drive screenshot upload via Vercel API ──
 function uploadScreenshotToDrive(base64DataUrl) {
-  var url = getDriveScriptUrl();
-  if (!url) return Promise.reject(new Error('Drive Script URL not configured'));
-
   // strip data:image/xxx;base64, prefix
   var parts = base64DataUrl.split(',');
   var header = parts[0] || '';
@@ -1027,7 +968,7 @@ function uploadScreenshotToDrive(base64DataUrl) {
 
   var filename = 'shame-' + Date.now() + (mimeType === 'image/jpeg' ? '.jpg' : '.png');
 
-  return fetch(url, {
+  return fetch('/api/drive-upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ image: base64, filename: filename, mimeType: mimeType })
@@ -1044,42 +985,6 @@ function getScreenshotUrl(urlOrFilename) {
 }
 
 // ── Setup banner ──
-function initSetupBanner() {
-  var banner = document.getElementById('setupBanner');
-  var urlInput = document.getElementById('driveScriptUrl');
-  var saved = getDriveScriptUrl();
-  if (saved) {
-    urlInput.value = saved;
-  }
-  // always show banner so user can change URL, but collapse if already set
-  banner.style.display = 'flex';
-
-  // populate Apps Script code
-  var code = document.getElementById('driveScriptCode');
-  code.textContent = 'function doPost(e) {\n  var FOLDER_ID = \'YOUR_FOLDER_ID_HERE\';\n  var data = JSON.parse(e.postData.contents);\n  var folder = DriveApp.getFolderById(FOLDER_ID);\n  var blob = Utilities.newBlob(\n    Utilities.base64Decode(data.image),\n    data.mimeType || \'image/png\',\n    data.filename || \'screenshot.png\'\n  );\n  var file = folder.createFile(blob);\n  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);\n  var url = \'https://lh3.googleusercontent.com/d/\' + file.getId() + \'=s1200\';\n  return ContentService.createTextOutput(JSON.stringify({\n    success: true, url: url, fileId: file.getId()\n  })).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction doGet(e) {\n  return ContentService.createTextOutput(JSON.stringify({\n    status: \'ok\'\n  })).setMimeType(ContentService.MimeType.JSON);\n}';
-}
-
-function saveDriveUrl() {
-  var url = document.getElementById('driveScriptUrl').value.trim();
-  if (!url) return;
-  localStorage.setItem('shame_wall_drive_url', url);
-  var status = document.getElementById('setupStatus');
-  status.textContent = 'Saved!';
-  status.style.color = '#4ade80';
-  setTimeout(function() { status.textContent = ''; }, 2000);
-}
-
-function toggleSetupHelp() {
-  var el = document.getElementById('setupHelp');
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-function copyDriveScript() {
-  var code = document.getElementById('driveScriptCode').textContent;
-  navigator.clipboard.writeText(code).then(function() {
-    alert('已複製！去 script.google.com 貼上');
-  });
-}
 
 // ── Ensure Notion DB has "截圖" property ──
 var dbSchemaChecked = false;
@@ -1876,17 +1781,6 @@ function saveEntry() {
     return uploadScreenshotToDrive(dataUrl);
   });
 
-  // if no Drive URL configured, skip uploads (screenshots won't be saved)
-  var driveUrl = getDriveScriptUrl();
-  if (!driveUrl && (pendingScreenshots.length > 0 || newInlineImages.length > 0)) {
-    if (!confirm('未設定截圖上傳。截圖將不會被儲存，文字資料仍會存入 Notion。繼續？')) {
-      saveBtn.disabled = false;
-      saveBtn.textContent = '刻在牆上';
-      return;
-    }
-    pnlUploads = [];
-    detailUploads = [];
-  }
 
   Promise.all([Promise.all(pnlUploads), Promise.all(detailUploads)]).then(function(results) {
     var newPnlUrls = results[0]; // Drive URLs
@@ -2025,7 +1919,6 @@ document.addEventListener('paste', function(e) {
 });
 
 // boot
-initSetupBanner();
 loadEntries();
 showQuote();
 </script>
