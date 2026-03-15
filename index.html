@@ -191,13 +191,11 @@
                                     </table>
                                 </div>
                             </div>
-                            <div class="form-section" style="margin-bottom:20px;">
-                                <div class="form-title">📊 績效試算表</div>
-                                <div style="position:relative;width:100%;height:500px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
-                                    <iframe src="https://docs.google.com/spreadsheets/d/1ozBB17QMML4CmbtNfLEhm4Hu-ffpN3qTRawCa_tPHG4/edit?usp=sharing&rm=minimal" style="width:100%;height:100%;border:none;"></iframe>
-                                </div>
-                                <div style="margin-top:8px;text-align:right;"><a href="https://docs.google.com/spreadsheets/d/1ozBB17QMML4CmbtNfLEhm4Hu-ffpN3qTRawCa_tPHG4/edit?usp=sharing" target="_blank" class="btn btn-small" style="font-size:12px;">↗ 開啟完整試算表</a></div>
+                            <div class="chart-container" style="margin-bottom:20px;">
+                                <div class="chart-header"><div class="chart-title">Daily Drawdown (%)</div></div>
+                                <div class="chart-wrapper"><canvas id="algoDDChart"></canvas></div>
                             </div>
+                            <div style="text-align:right;margin-bottom:20px;"><a href="https://docs.google.com/spreadsheets/d/1ozBB17QMML4CmbtNfLEhm4Hu-ffpN3qTRawCa_tPHG4/edit" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none;">↗ 開啟試算表</a></div>
                             <div class="form-section">
                                 <div class="form-title">📝 Record Daily Equity</div>
                                 <div class="form-row">

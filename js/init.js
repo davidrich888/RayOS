@@ -74,6 +74,9 @@
         }
     }
     
+    // 🔄 Trading: sync from Google Sheets
+    setTimeout(() => fetchAlgoFromSheet(), 1000);
+
     // 🔄 Wealth + Accounts: sync from Google Sheets (no auth required)
     setTimeout(() => syncWealthFromGoogleSheets(true), 1500);
     setTimeout(() => syncAccountsFromGoogleSheets(true), 2000);

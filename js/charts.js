@@ -47,7 +47,33 @@ const bizCtx = document.getElementById('bizChart').getContext('2d');
 const bizChart = new Chart(bizCtx, { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#d4c5a9', tension: 0.4, fill: true, backgroundColor: 'rgba(212,197,169,0.1)' }] }, options: chartOptions });
 
 const algoCtx = document.getElementById('algoChart').getContext('2d');
-const algoChart = new Chart(algoCtx, { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#d4c5a9', tension: 0.4, fill: true, backgroundColor: 'rgba(212,197,169,0.1)' }] }, options: { ...chartOptions, plugins: { ...chartOptions.plugins, datalabels: { display: false } } } });
+const algoChartOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, labels: { color: '#6b6b6b', font: { size: 10 }, boxWidth: 12 } }, datalabels: { display: false } },
+    scales: {
+        x: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 9 }, maxTicksLimit: 12 } },
+        y: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 10 }, callback: v => v.toFixed(0) + '%' } }
+    },
+    interaction: { mode: 'index', intersect: false },
+    elements: { point: { radius: 0, hoverRadius: 4 } }
+};
+const algoChart = new Chart(algoCtx, { type: 'line', data: { labels: [], datasets: [
+    { label: '程式帳戶', data: [], borderColor: '#d4c5a9', tension: 0.3, fill: false, borderWidth: 2 },
+    { label: '加權指數', data: [], borderColor: '#666', tension: 0.3, fill: false, borderWidth: 1.5 }
+] }, options: algoChartOpts });
+
+const algoDDCtx = document.getElementById('algoDDChart').getContext('2d');
+const algoDDChart = new Chart(algoDDCtx, { type: 'bar', data: { labels: [], datasets: [
+    { label: 'Drawdown', data: [], backgroundColor: 'rgba(212,197,169,0.5)', borderColor: '#d4c5a9', borderWidth: 1 }
+] }, options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, datalabels: { display: false } },
+    scales: {
+        x: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 9 }, maxTicksLimit: 12 } },
+        y: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 10 }, callback: v => v.toFixed(0) + '%' }, reverse: false }
+    },
+    elements: { point: { radius: 0 } }
+} });
 
 function setWealthMode(mode, btn) {
     btn.parentElement.querySelectorAll('.chart-toggle-btn').forEach(b => b.classList.remove('active'));

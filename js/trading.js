@@ -1,5 +1,7 @@
 // ==================== TRADING ====================
 
+const TRADING_SHEET_ID = '1ozBB17QMML4CmbtNfLEhm4Hu-ffpN3qTRawCa_tPHG4';
+
 function setTradingTab(tab, btn) {
     document.querySelectorAll('#trading .tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
@@ -15,12 +17,110 @@ function setTradingTab(tab, btn) {
     }
 }
 
+// Fetch algo trading data from Google Sheets
+async function fetchAlgoFromSheet() {
+    const query = encodeURIComponent('select A,E,G,H,J,K where G is not null');
+    const sheet = encodeURIComponent('Daily權益紀錄表');
+    const url = `https://docs.google.com/spreadsheets/d/${TRADING_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheet}&tq=${query}`;
+
+    try {
+        const res = await fetch(url);
+        const text = await res.text();
+        const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?$/);
+        if (!match) throw new Error('Invalid gviz response');
+        const json = JSON.parse(match[1]);
+        const rows = json.table.rows;
+
+        const sheetData = [];
+        rows.forEach(r => {
+            const dateCell = r.c[0];
+            if (!dateCell) return;
+            const date = dateCell.f || '';
+            const idxCumRet = (r.c[1]?.v || 0) * 100;
+            const equity = r.c[2]?.v || 0;
+            const dailyRet = (r.c[3]?.v || 0) * 100;
+            const cumRet = (r.c[4]?.v || 0) * 100;
+            const dd = (r.c[5]?.v || 0) * 100;
+            sheetData.push({ date, equity, dailyRet, cumRet, dd, idxCumRet });
+        });
+
+        if (sheetData.length > 0) {
+            algoEquity = sheetData;
+            computeMonthlyReturnsFromData(sheetData);
+            updateTradingDisplay();
+            console.log(`[Trading] Loaded ${sheetData.length} rows from Google Sheet`);
+        }
+    } catch (e) {
+        console.warn('[Trading] Sheet fetch failed, using preloaded data:', e.message);
+    }
+}
+
+// Compute monthly returns by compounding daily returns
+function computeMonthlyReturnsFromData(data) {
+    const monthly = {};
+    data.forEach(d => {
+        if (!d.date) return;
+        const parts = d.date.split('/');
+        if (parts.length < 3) return;
+        const year = parseInt(parts[0]);
+        const month = parseInt(parts[1]);
+        if (!monthly[year]) monthly[year] = {};
+        if (!monthly[year][month]) monthly[year][month] = [];
+        monthly[year][month].push(d.dailyRet / 100);
+    });
+
+    const result = {};
+    for (const [year, months] of Object.entries(monthly)) {
+        result[year] = {};
+        let ytdProduct = 1;
+        for (let m = 1; m <= 12; m++) {
+            if (months[m] && months[m].length > 0) {
+                const product = months[m].reduce((acc, r) => acc * (1 + r), 1);
+                result[year][m] = (product - 1) * 100;
+                ytdProduct *= product;
+            }
+        }
+        result[year].ytd = (ytdProduct - 1) * 100;
+    }
+
+    // Overwrite global MONTHLY_RETURNS
+    Object.keys(MONTHLY_RETURNS).forEach(k => delete MONTHLY_RETURNS[k]);
+    Object.assign(MONTHLY_RETURNS, result);
+}
+
+function parseTradingDate(dateStr) {
+    const parts = dateStr.split('/');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+}
+
 function updateTradingDisplay() {
     if (algoEquity.length > 0) {
         const latest = algoEquity[algoEquity.length - 1];
+
+        // Cumulative return
         document.getElementById('algo-cumret').textContent = latest.cumRet.toFixed(2) + '%';
+
+        // Win rate
         const wins = algoEquity.filter(e => e.dailyRet > 0).length;
         document.getElementById('algo-winrate').textContent = ((wins / algoEquity.length) * 100).toFixed(2) + '%';
+
+        // MDD (max drawdown from sheet DD column)
+        if (latest.dd !== undefined) {
+            const maxDD = Math.max(...algoEquity.map(e => Math.abs(e.dd || 0)));
+            const mddEl = document.getElementById('algo-mdd');
+            if (mddEl) mddEl.textContent = maxDD.toFixed(2) + '%';
+        }
+
+        // Annualized return
+        const first = algoEquity[0];
+        const firstDate = parseTradingDate(first.date);
+        const lastDate = parseTradingDate(latest.date);
+        const years = (lastDate - firstDate) / (365.25 * 24 * 60 * 60 * 1000);
+        if (years > 0) {
+            const annualized = (Math.pow(1 + latest.cumRet / 100, 1 / years) - 1) * 100;
+            const annEl = document.getElementById('algo-annual');
+            if (annEl) annEl.textContent = annualized.toFixed(2) + '%';
+        }
     }
     updateAlgoChart();
     updateMonthlyReturnsTable();
@@ -31,11 +131,31 @@ function updateTradingDisplay() {
 }
 
 function updateAlgoChart() {
-    const data = algoEquity.slice(-30);
+    const data = algoEquity;
     if (data.length === 0) return;
-    algoChart.data.labels = data.map(d => d.date.slice(5));
+
+    // Labels: show M/D format
+    algoChart.data.labels = data.map(d => {
+        const parts = d.date.split('/');
+        return parts.length >= 3 ? parts[1] + '/' + parts[2] : d.date.slice(5);
+    });
+
+    // Dataset 0: 程式帳戶 cumulative return
     algoChart.data.datasets[0].data = data.map(d => d.cumRet);
+
+    // Dataset 1: 加權指數 cumulative return (if available)
+    if (data[0].idxCumRet !== undefined) {
+        algoChart.data.datasets[1].data = data.map(d => d.idxCumRet);
+    }
+
     algoChart.update();
+
+    // DD chart
+    if (typeof algoDDChart !== 'undefined' && data[0].dd !== undefined) {
+        algoDDChart.data.labels = algoChart.data.labels;
+        algoDDChart.data.datasets[0].data = data.map(d => d.dd || 0);
+        algoDDChart.update();
+    }
 }
 
 function updateMonthlyReturnsTable() {
@@ -104,4 +224,3 @@ function savePropRecord() {
     document.getElementById('prop-payout-amount').value = '';
     showToast('Record added');
 }
-
