@@ -1,13 +1,20 @@
 /**
  * Vercel Serverless Function: YouTube Subtitle Proxy
  *
- * Strategy: Use YouTube's Innertube API with consent cookie bypass.
- * This avoids the LOGIN_REQUIRED error from cloud provider IPs.
+ * Fallback chain:
+ *   1. YouTube watch page (free, fast)
+ *   2. Innertube WEB client (free)
+ *   3. youtube-nocookie.com (free)
+ *   4. Apify YouTube Transcripts Actor (paid, ~$0.005/video)
+ *
+ * Note: YouTube blocks cloud provider IPs (Vercel/AWS/GCP), so strategies
+ * 1-3 may all fail. Apify (strategy 4) is the reliable fallback.
  *
  * GET /api/yt-subtitle?id=VIDEO_ID&token=AUTH_TOKEN
  */
 
 const AUTH_TOKEN = 'rayos-yt-sub-2026';
+const APIFY_TOKEN = process.env.APIFY_API_TOKEN || '';
 
 const LANG_PRIORITIES = [
   ['zh-Hant', 'zh-Hans', 'zh-TW', 'zh'],
@@ -59,7 +66,17 @@ async function fetchSubtitles(videoId) {
     }
   }
 
-  return noSubs(videoId, 'All proxy strategies failed');
+  // Strategy 4: Apify (paid, last resort — works from any IP)
+  if (APIFY_TOKEN) {
+    try {
+      const result = await fetchViaApify(videoId);
+      if (result && result.hasSubtitles) return result;
+    } catch (e) {
+      // Fall through
+    }
+  }
+
+  return noSubs(videoId, 'All proxy strategies failed (including Apify)');
 }
 
 async function fetchViaWatchPage(videoId, cookie) {
@@ -252,6 +269,63 @@ function parseXml(videoId, language, xmlText) {
     lengthInSeconds: Math.round(segments[segments.length - 1].start),
     source: 'vercel-proxy',
   };
+}
+
+async function fetchViaApify(videoId) {
+  const resp = await fetch(
+    'https://api.apify.com/v2/acts/karamelo~youtube-transcripts/run-sync-get-dataset-items',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${APIFY_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        urls: [`https://www.youtube.com/watch?v=${videoId}`],
+        outputFormat: 'captions',
+        maxRetries: 3,
+      }),
+      signal: AbortSignal.timeout(55000), // Vercel function timeout ~60s
+    }
+  );
+
+  if (!resp.ok) return null;
+  const items = await resp.json();
+  if (!items || items.length === 0) return null;
+
+  const item = items[0];
+  const captions = item.captions || item.transcript || [];
+  const language = item.language || item.lang || 'unknown';
+
+  if (typeof captions === 'string' && captions.length > 0) {
+    return {
+      success: true, videoId, hasSubtitles: true, language,
+      transcription: [{ start: 0, text: captions }],
+      lengthInSeconds: 0, source: 'apify',
+    };
+  }
+
+  if (Array.isArray(captions) && captions.length > 0) {
+    const segments = captions
+      .filter(c => c && (c.text || c.content))
+      .map(c => ({
+        start: Math.round((parseFloat(c.start || c.offset || c.startTime || 0)) * 100) / 100,
+        text: (c.text || c.content || '').trim(),
+      }))
+      .filter(s => s.text);
+
+    if (segments.length > 0) {
+      const last = segments[segments.length - 1];
+      return {
+        success: true, videoId, hasSubtitles: true, language,
+        transcription: segments,
+        lengthInSeconds: Math.round(last.start),
+        source: 'apify',
+      };
+    }
+  }
+
+  return null;
 }
 
 function noSubs(videoId, message) {
