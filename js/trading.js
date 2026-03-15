@@ -17,39 +17,19 @@ function setTradingTab(tab, btn) {
     }
 }
 
-// Fetch algo trading data from Google Sheets
+// Fetch algo trading data via Vercel API (proxies Google Sheets CSV)
 async function fetchAlgoFromSheet() {
-    const query = encodeURIComponent('select A,E,G,H,J,K where G is not null');
-    const sheet = encodeURIComponent('Daily權益紀錄表');
-    const url = `https://docs.google.com/spreadsheets/d/${TRADING_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheet}&tq=${query}`;
-
     try {
-        const res = await fetch(url);
-        const text = await res.text();
-        const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?$/);
-        if (!match) throw new Error('Invalid gviz response');
-        const json = JSON.parse(match[1]);
-        const rows = json.table.rows;
-
-        const sheetData = [];
-        rows.forEach(r => {
-            const dateCell = r.c[0];
-            if (!dateCell) return;
-            const date = dateCell.f || '';
-            const idxCumRet = (r.c[1]?.v || 0) * 100;
-            const equity = r.c[2]?.v || 0;
-            const dailyRet = (r.c[3]?.v || 0) * 100;
-            const cumRet = (r.c[4]?.v || 0) * 100;
-            const dd = (r.c[5]?.v || 0) * 100;
-            sheetData.push({ date, equity, dailyRet, cumRet, dd, idxCumRet });
-        });
-
-        if (sheetData.length > 0) {
-            algoEquity = sheetData;
-            computeMonthlyReturnsFromData(sheetData);
-            updateTradingDisplay();
-            console.log(`[Trading] Loaded ${sheetData.length} rows from Google Sheet`);
+        const res = await fetch('/api/trading-data');
+        const json = await res.json();
+        if (!json.success || !json.data || json.data.length === 0) {
+            throw new Error(json.error || 'No data');
         }
+
+        algoEquity = json.data;
+        computeMonthlyReturnsFromData(json.data);
+        updateTradingDisplay();
+        console.log(`[Trading] Loaded ${json.data.length} rows from Google Sheet`);
     } catch (e) {
         console.warn('[Trading] Sheet fetch failed, using preloaded data:', e.message);
     }
@@ -66,7 +46,7 @@ function computeMonthlyReturnsFromData(data) {
         const month = parseInt(parts[1]);
         if (!monthly[year]) monthly[year] = {};
         if (!monthly[year][month]) monthly[year][month] = [];
-        monthly[year][month].push(d.dailyRet / 100);
+        monthly[year][month].push(d.dailyRet);
     });
 
     const result = {};
@@ -75,7 +55,7 @@ function computeMonthlyReturnsFromData(data) {
         let ytdProduct = 1;
         for (let m = 1; m <= 12; m++) {
             if (months[m] && months[m].length > 0) {
-                const product = months[m].reduce((acc, r) => acc * (1 + r), 1);
+                const product = months[m].reduce((acc, r) => acc * (1 + r / 100), 1);
                 result[year][m] = (product - 1) * 100;
                 ytdProduct *= product;
             }
