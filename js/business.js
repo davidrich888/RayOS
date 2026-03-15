@@ -19,7 +19,7 @@ function updateBizDisplay() {
         document.getElementById('biz-mrr').textContent = '$0';
     }
     updateBizChart('members');
-    autoAnalyze('business');
+    if (typeof autoAnalyze === 'function') autoAnalyze('business');
 }
 
 function setBizChart(type, btn) {

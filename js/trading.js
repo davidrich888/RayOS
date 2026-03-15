@@ -107,7 +107,7 @@ function updateTradingDisplay() {
     renderPropChallenges();
     document.getElementById('algo-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('prop-record-date').value = new Date().toISOString().split('T')[0];
-    autoAnalyze('trading');
+    if (typeof autoAnalyze === 'function') autoAnalyze('trading');
 }
 
 function updateAlgoChart() {
