@@ -956,27 +956,49 @@ function parseNotionPage(page) {
   };
 }
 
+// ── Compress image to JPEG before upload (stay under Vercel 4.5MB limit) ──
+function compressImage(dataUrl, maxWidth, quality) {
+  maxWidth = maxWidth || 1600;
+  quality = quality || 0.8;
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width, h = img.height;
+      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
 // ── Google Drive screenshot upload via Vercel API ──
 function uploadScreenshotToDrive(base64DataUrl) {
-  // strip data:image/xxx;base64, prefix
-  var parts = base64DataUrl.split(',');
-  var header = parts[0] || '';
-  var base64 = parts[1] || '';
-  var mimeType = 'image/png';
-  if (header.indexOf('image/jpeg') !== -1) mimeType = 'image/jpeg';
-  else if (header.indexOf('image/webp') !== -1) mimeType = 'image/webp';
+  // compress first to avoid Vercel body size limit
+  return compressImage(base64DataUrl).then(function(compressed) {
+    var parts = compressed.split(',');
+    var base64 = parts[1] || '';
+    var filename = 'shame-' + Date.now() + '.jpg';
 
-  var filename = 'shame-' + Date.now() + (mimeType === 'image/jpeg' ? '.jpg' : '.png');
-
-  return fetch('/api/drive-upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image: base64, filename: filename, mimeType: mimeType })
-  }).then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.url) return data.url;
-      throw new Error(data.error || 'Upload failed');
+    return fetch('/api/drive-upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64, filename: filename, mimeType: 'image/jpeg' })
     });
+  }).then(function(r) {
+    if (!r.ok) {
+      return r.text().then(function(t) {
+        try { var j = JSON.parse(t); throw new Error(j.error || 'Upload failed'); }
+        catch(e) { if (e.message !== 'Upload failed') throw e; throw new Error('Upload failed: ' + t.substring(0, 200)); }
+      });
+    }
+    return r.json();
+  }).then(function(data) {
+    if (data.url) return data.url;
+    throw new Error(data.error || 'Upload failed');
+  });
 }
 
 // screenshots are now URLs (Google Drive), not filenames

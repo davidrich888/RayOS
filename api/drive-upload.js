@@ -34,7 +34,10 @@ module.exports = async function handler(req, res) {
                 grant_type: 'refresh_token'
             })
         });
-        const tokenData = await tokenRes.json();
+        const tokenText = await tokenRes.text();
+        let tokenData;
+        try { tokenData = JSON.parse(tokenText); }
+        catch (_) { return res.status(500).json({ error: 'Google OAuth returned non-JSON', detail: tokenText.substring(0, 300) }); }
         if (!tokenData.access_token) {
             return res.status(500).json({ error: 'Failed to get access token', detail: tokenData });
         }
@@ -50,14 +53,13 @@ module.exports = async function handler(req, res) {
             parents: [folderId]
         });
 
-        // Build multipart body
+        // Build multipart body (binary, no Content-Transfer-Encoding)
         const bodyParts = [
             `--${boundary}\r\n`,
             'Content-Type: application/json; charset=UTF-8\r\n\r\n',
             metadata + '\r\n',
             `--${boundary}\r\n`,
-            `Content-Type: ${mime}\r\n`,
-            'Content-Transfer-Encoding: base64\r\n\r\n',
+            `Content-Type: ${mime}\r\n\r\n`,
         ];
         const prefix = Buffer.from(bodyParts.join(''));
         const suffix = Buffer.from(`\r\n--${boundary}--`);
