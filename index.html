@@ -439,27 +439,28 @@
                     <div class="quote-author">— Alex Hormozi</div>
                 </div>
                 
-                <!-- 三欄等寬等高 -->
+                <!-- Today's Progress Bar -->
+                <div class="daily-progress-bar">
+                    <span class="daily-progress-label">Today</span>
+                    <span id="daily-date" style="color:var(--text-dim);font-size:11px;margin-right:12px;"></span>
+                    <div class="daily-progress-track"><div class="daily-progress-fill" id="daily-bar"></div></div>
+                    <span class="daily-progress-count"><span id="daily-done">0</span><span style="color:var(--text-dim);"> / </span><span id="daily-total">7</span></span>
+                </div>
+
+                <!-- Hidden habits grid for JS compatibility -->
+                <div id="habits-grid" hidden>
+                    <div class="habit-item" data-habit="trading"></div>
+                    <div class="habit-item" data-habit="advertise"></div>
+                    <div class="habit-item" data-habit="deliver"></div>
+                    <div class="habit-item" data-habit="gym"></div>
+                    <div class="habit-item" data-habit="fatloss"></div>
+                    <div class="habit-item" data-habit="ai"></div>
+                    <div class="habit-item" data-habit="nofap"></div>
+                </div>
+
+                <!-- 兩欄等寬等高 -->
                 <div class="daily-grid">
-                    <!-- 左邊: Daily Habits -->
-                    <div class="daily-column">
-                        <!-- Hidden placeholders for JS compatibility -->
-                        <span id="daily-done" hidden>0</span><span id="daily-total" hidden>0</span><div id="daily-bar" hidden></div><span id="daily-date" hidden></span>
-                        <div class="form-section" style="padding:16px;flex:1;">
-                            <div class="form-title" style="font-size:14px;">✓ Daily Habits</div>
-                            <div id="habits-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-                                <div class="habit-item" data-habit="trading" onclick="cycleHabit('trading')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">📈</span><span class="habit-name" style="font-size:12px;">Trading</span><span class="habit-time">4小時</span></div>
-                                <div class="habit-item" data-habit="advertise" onclick="cycleHabit('advertise')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">📣</span><span class="habit-name" style="font-size:12px;">Advertise</span><span class="habit-time">2小時</span></div>
-                                <div class="habit-item" data-habit="deliver" onclick="cycleHabit('deliver')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">📦</span><span class="habit-name" style="font-size:12px;">Deliver</span><span class="habit-time">2小時</span></div>
-                                <div class="habit-item" data-habit="gym" onclick="cycleHabit('gym')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">💪</span><span class="habit-name" style="font-size:12px;">Gym</span><span class="habit-time">2小時</span></div>
-                                <div class="habit-item" data-habit="fatloss" onclick="cycleHabit('fatloss')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">🏃</span><span class="habit-name" style="font-size:12px;">Fat Loss</span><span class="habit-time">2小時</span></div>
-                                <div class="habit-item" data-habit="ai" onclick="cycleHabit('ai')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">🤖</span><span class="habit-name" style="font-size:12px;">AI</span><span class="habit-time">2小時</span></div>
-                                <div class="habit-item" data-habit="nofap" onclick="cycleHabit('nofap')" style="padding:12px;"><span class="habit-icon" style="font-size:24px;">🔫</span><span class="habit-name" style="font-size:12px;">NoFap</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 中間: Recent Days (with sticky header) -->
+                    <!-- 左邊: Recent Days (with sticky header) -->
                     <div class="daily-column">
                         <div class="form-section" style="padding:16px;height:100%;display:flex;flex-direction:column;">
                             <div class="form-title" style="font-size:14px;">📊 Recent Days</div>

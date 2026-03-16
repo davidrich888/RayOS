@@ -240,10 +240,50 @@
         .monthly-table .positive { color: var(--success); }
         .monthly-table .negative { color: var(--danger); }
         
-        /* Daily Grid - Equal Width & Height Columns */
+        /* Daily Progress Bar */
+        .daily-progress-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+        }
+        .daily-progress-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .daily-progress-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .daily-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+        .daily-progress-count {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* Daily Grid - Two Columns */
         .daily-grid {
             display: grid;
-            grid-template-columns: 1.3fr 1fr 0.7fr;
+            grid-template-columns: 1.4fr 0.6fr;
             gap: 16px;
             align-items: stretch;
         }
@@ -326,7 +366,6 @@
             .cards { grid-template-columns: repeat(3, 1fr); }
             /* masonry handled by JS */
             .daily-grid { grid-template-columns: 1fr 1fr; }
-            .daily-column:nth-child(3) { grid-column: span 2; }
         }
         /* ===== MOBILE (≤768px) ===== */
         @media (max-width: 768px) {
@@ -435,8 +474,7 @@
             
             /* ===== DAILY SECTION ===== */
             .daily-grid { grid-template-columns: 1fr; }
-            .daily-column:nth-child(3) { grid-column: span 1; }
-            .daily-column:nth-child(3) iframe { min-height: 300px !important; }
+            .daily-column:nth-child(2) iframe { min-height: 300px !important; }
             .daily-history-wrapper { max-height: 350px; -webkit-overflow-scrolling: touch; }
             .daily-history-wrapper { overflow-x: auto; }
             .daily-history-wrapper thead th { font-size: 13px; padding: 8px 3px; }
