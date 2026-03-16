@@ -130,10 +130,23 @@ function updateAlgoChart() {
     }
 
     // Dataset 2: 手單帳戶 cumulative return (aligned by date)
+    // Dataset 3: 同期大盤 (rebased from manual account start date)
     if (manualEquity.length > 0) {
         const manualByDate = {};
         manualEquity.forEach(d => { manualByDate[d.date] = d.cumRet; });
         algoChart.data.datasets[2].data = data.map(d => manualByDate[d.date] !== undefined ? manualByDate[d.date] : null);
+
+        // Rebase index from manual account start date
+        const manualStartDate = manualEquity[0].date;
+        const baseEntry = data.find(d => d.date === manualStartDate);
+        if (baseEntry && baseEntry.idxCumRet !== undefined) {
+            const baseFactor = 1 + baseEntry.idxCumRet / 100;
+            algoChart.data.datasets[3].data = data.map(d => {
+                if (manualByDate[d.date] === undefined) return null;
+                const cur = 1 + (d.idxCumRet || 0) / 100;
+                return parseFloat(((cur / baseFactor - 1) * 100).toFixed(2));
+            });
+        }
     }
 
     algoChart.update();
