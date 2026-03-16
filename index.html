@@ -441,13 +441,10 @@
                 
                 <!-- 三欄等寬等高 -->
                 <div class="daily-grid">
-                    <!-- 左邊: Today's Progress + Daily Habits -->
+                    <!-- 左邊: Daily Habits -->
                     <div class="daily-column">
-                        <div class="goal-card" style="margin-bottom:12px;">
-                            <div class="goal-header"><span class="goal-label">Today's Progress</span><span id="daily-date" style="color:var(--text-dim);font-size:11px;"></span></div>
-                            <div class="goal-value"><span id="daily-done">0</span> / <span id="daily-total">6</span></div>
-                            <div class="goal-progress"><div class="goal-bar" id="daily-bar" style="width:0%"></div></div>
-                        </div>
+                        <!-- Hidden placeholders for JS compatibility -->
+                        <span id="daily-done" hidden>0</span><span id="daily-total" hidden>0</span><div id="daily-bar" hidden></div><span id="daily-date" hidden></span>
                         <div class="form-section" style="padding:16px;flex:1;">
                             <div class="form-title" style="font-size:14px;">✓ Daily Habits</div>
                             <div id="habits-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
