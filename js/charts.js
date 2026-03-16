@@ -60,7 +60,7 @@ const algoChartOpts = {
 const algoChart = new Chart(algoCtx, { type: 'line', data: { labels: [], datasets: [
     { label: '程式帳戶', data: [], borderColor: '#d4c5a9', tension: 0.3, fill: false, borderWidth: 2 },
     { label: '加權指數', data: [], borderColor: '#666', tension: 0.3, fill: false, borderWidth: 1.5 },
-    { label: '手單帳戶', data: [], borderColor: '#7cb5ec', tension: 0.3, fill: false, borderWidth: 2, borderDash: [5, 3], spanGaps: true }
+    { label: '手單帳戶', data: [], borderColor: '#7cb5ec', tension: 0.3, fill: false, borderWidth: 2, spanGaps: true }
 ] }, options: algoChartOpts });
 
 const algoDDCtx = document.getElementById('algoDDChart').getContext('2d');
