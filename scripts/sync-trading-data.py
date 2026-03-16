@@ -3,7 +3,6 @@
 
 import csv
 import io
-import json
 import re
 import sys
 import urllib.request
@@ -35,9 +34,10 @@ def parse_pct(s: str) -> float:
     return float(s) if s else 0.0
 
 
-def parse_sheet(csv_text: str) -> list[dict]:
+def parse_sheet(csv_text: str) -> tuple[list[dict], list[dict]]:
     lines = csv_text.strip().split('\n')
-    data = []
+    algo_data = []
+    manual_data = []
     for i, line in enumerate(lines):
         if i < 3:  # Skip 3 header rows
             continue
@@ -49,7 +49,7 @@ def parse_sheet(csv_text: str) -> list[dict]:
         equity = parse_num(row[6])
         if not date or not equity:
             continue
-        data.append({
+        algo_data.append({
             'date': date,
             'idxCumRet': round(parse_pct(row[4]), 2),
             'equity': round(equity),
@@ -57,7 +57,18 @@ def parse_sheet(csv_text: str) -> list[dict]:
             'cumRet': round(parse_pct(row[9]), 2),
             'dd': round(parse_pct(row[10]), 2),
         })
-    return data
+        # Manual account (col 12-17)
+        if len(row) > 12:
+            m_equity = parse_num(row[12])
+            if m_equity > 0:
+                manual_data.append({
+                    'date': date,
+                    'equity': round(m_equity),
+                    'dailyRet': round(parse_pct(row[13]), 4),
+                    'cumRet': round(parse_pct(row[15]), 2),
+                    'dd': round(parse_pct(row[16]), 2),
+                })
+    return algo_data, manual_data
 
 
 def compute_monthly_returns(data: list[dict]) -> dict:
@@ -96,6 +107,17 @@ def format_algo_equity_js(data: list[dict]) -> str:
     return '\n'.join(lines)
 
 
+def format_manual_equity_js(data: list[dict]) -> str:
+    lines = ['const PRELOAD_MANUAL_EQUITY = [']
+    for d in data:
+        lines.append(
+            f"    {{ date: '{d['date']}', equity: {d['equity']}, "
+            f"dailyRet: {d['dailyRet']}, cumRet: {d['cumRet']}, dd: {d['dd']} }},"
+        )
+    lines.append('];')
+    return '\n'.join(lines)
+
+
 def format_monthly_returns_js(returns: dict) -> str:
     lines = ['const MONTHLY_RETURNS = {']
     for year in sorted(returns.keys()):
@@ -110,7 +132,7 @@ def format_monthly_returns_js(returns: dict) -> str:
     return '\n'.join(lines)
 
 
-def update_data_js(algo_js: str, monthly_js: str) -> bool:
+def update_data_js(algo_js: str, manual_js: str, monthly_js: str) -> bool:
     content = DATA_JS.read_text(encoding='utf-8')
 
     # Replace PRELOAD_ALGO_EQUITY block
@@ -120,6 +142,21 @@ def update_data_js(algo_js: str, monthly_js: str) -> bool:
         content,
         flags=re.DOTALL,
     )
+
+    # Replace or insert PRELOAD_MANUAL_EQUITY block
+    if 'PRELOAD_MANUAL_EQUITY' in new_content:
+        new_content = re.sub(
+            r'const PRELOAD_MANUAL_EQUITY = \[.*?\];',
+            manual_js,
+            new_content,
+            flags=re.DOTALL,
+        )
+    else:
+        # Insert after PRELOAD_ALGO_EQUITY
+        new_content = new_content.replace(
+            algo_js,
+            algo_js + '\n\n' + manual_js,
+        )
 
     # Replace MONTHLY_RETURNS block
     new_content = re.sub(
@@ -141,26 +178,31 @@ def main():
     csv_text = fetch_csv()
 
     print('[sync-trading-data] Parsing data...')
-    data = parse_sheet(csv_text)
-    print(f'[sync-trading-data] Got {len(data)} rows')
+    algo_data, manual_data = parse_sheet(csv_text)
+    print(f'[sync-trading-data] Got {len(algo_data)} algo + {len(manual_data)} manual rows')
 
-    if len(data) < 10:
+    if len(algo_data) < 10:
         print('[sync-trading-data] ERROR: Too few rows, aborting')
         sys.exit(1)
 
-    monthly = compute_monthly_returns(data)
-    algo_js = format_algo_equity_js(data)
+    monthly = compute_monthly_returns(algo_data)
+    algo_js = format_algo_equity_js(algo_data)
+    manual_js = format_manual_equity_js(manual_data)
     monthly_js = format_monthly_returns_js(monthly)
 
-    changed = update_data_js(algo_js, monthly_js)
+    changed = update_data_js(algo_js, manual_js, monthly_js)
     if changed:
-        print(f'[sync-trading-data] Updated js/data.js with {len(data)} rows')
+        print(f'[sync-trading-data] Updated js/data.js ({len(algo_data)} algo + {len(manual_data)} manual)')
     else:
         print('[sync-trading-data] No changes needed')
 
     # Print summary for TG notification
-    latest = data[-1]
-    print(f'[sync-trading-data] Latest: {latest["date"]} | CumRet: {latest["cumRet"]}% | DD: {latest["dd"]}%')
+    latest = algo_data[-1]
+    summary = f'Latest: {latest["date"]} | Algo CumRet: {latest["cumRet"]}%'
+    if manual_data:
+        m_latest = manual_data[-1]
+        summary += f' | Manual CumRet: {m_latest["cumRet"]}%'
+    print(f'[sync-trading-data] {summary}')
 
 
 if __name__ == '__main__':

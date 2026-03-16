@@ -307,6 +307,30 @@ const PRELOAD_ALGO_EQUITY = [
     { date: '2026/3/13', idxCumRet: 48.52, equity: 1294335, dailyRet: -3.7, cumRet: 29.02, dd: 14.15 },
 ];
 
+const PRELOAD_MANUAL_EQUITY = [
+    { date: '2026/2/3', equity: 100000, dailyRet: 0.0, cumRet: 0.0, dd: 0.0 },
+    { date: '2026/2/4', equity: 100000, dailyRet: 0.0, cumRet: 0.0, dd: 0.0 },
+    { date: '2026/2/5', equity: 100071, dailyRet: 0.07, cumRet: 0.07, dd: 0.0 },
+    { date: '2026/2/6', equity: 96576, dailyRet: -3.49, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/2/9', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/2/10', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/2/11', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/2/12', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/2/24', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/2/25', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/2/26', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/3/2', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/3/3', equity: 96576, dailyRet: 0.0, cumRet: -3.42, dd: 3.49 },
+    { date: '2026/3/4', equity: 87976, dailyRet: -8.9, cumRet: -12.02, dd: 12.09 },
+    { date: '2026/3/5', equity: 105826, dailyRet: 20.29, cumRet: 5.83, dd: 0.0 },
+    { date: '2026/3/6', equity: 98446, dailyRet: -6.97, cumRet: -1.55, dd: 6.97 },
+    { date: '2026/3/9', equity: 81163, dailyRet: -17.56, cumRet: -18.84, dd: 23.31 },
+    { date: '2026/3/10', equity: 66268, dailyRet: -18.35, cumRet: -33.73, dd: 37.38 },
+    { date: '2026/3/11', equity: 106778, dailyRet: 61.13, cumRet: 6.78, dd: 0.0 },
+    { date: '2026/3/12', equity: 106778, dailyRet: 0.0, cumRet: 6.78, dd: 0.0 },
+    { date: '2026/3/13', equity: 100000, dailyRet: 0.0, cumRet: 6.78, dd: 0.0 },
+];
+
 const MONTHLY_RETURNS = {
     2025: { 1: -1.59, 2: -12.76, 3: 21.77, 4: 10.1, 5: 3.87, 6: -5.44, 7: 1.25, 8: -6.43, 9: 0.28, 10: 4.21, 11: 17.93, 12: -5.68, ytd: 24.49 },
     2026: { 1: 15.84, 2: 3.47, 3: -13.51, ytd: 3.67 },

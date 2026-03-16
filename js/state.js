@@ -13,6 +13,7 @@ let bodyPhotos = [];
 let physicGoal = JSON.parse(localStorage.getItem('physic_goal') || '{"start":21,"target":15,"height":175}');
 let bodyNotionIndex = JSON.parse(localStorage.getItem('body_notion_index') || '{}');
 let algoEquity = JSON.parse(JSON.stringify(PRELOAD_ALGO_EQUITY));
+let manualEquity = JSON.parse(JSON.stringify(PRELOAD_MANUAL_EQUITY));
 let propRecords = [];
 let dailyHabitsData = {};
 

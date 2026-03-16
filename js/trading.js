@@ -27,9 +27,10 @@ async function fetchAlgoFromSheet() {
         }
 
         algoEquity = json.data;
+        if (json.manual && json.manual.length > 0) manualEquity = json.manual;
         computeMonthlyReturnsFromData(json.data);
         updateTradingDisplay();
-        console.log(`[Trading] Loaded ${json.data.length} rows from Google Sheet`);
+        console.log(`[Trading] Loaded ${json.data.length} algo + ${(json.manual || []).length} manual rows`);
     } catch (e) {
         console.warn('[Trading] Sheet fetch failed, using preloaded data:', e.message);
     }
@@ -126,6 +127,13 @@ function updateAlgoChart() {
     // Dataset 1: 加權指數 cumulative return (if available)
     if (data[0].idxCumRet !== undefined) {
         algoChart.data.datasets[1].data = data.map(d => d.idxCumRet);
+    }
+
+    // Dataset 2: 手單帳戶 cumulative return (aligned by date)
+    if (manualEquity.length > 0) {
+        const manualByDate = {};
+        manualEquity.forEach(d => { manualByDate[d.date] = d.cumRet; });
+        algoChart.data.datasets[2].data = data.map(d => manualByDate[d.date] !== undefined ? manualByDate[d.date] : null);
     }
 
     algoChart.update();

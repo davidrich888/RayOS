@@ -16,6 +16,8 @@ module.exports = async function handler(req, res) {
         const lines = csv.split('\n');
         const data = [];
 
+        const manual = [];
+
         for (let i = 2; i < lines.length; i++) {
             const row = parseCSVLine(lines[i]);
             if (row.length < 11) continue;
@@ -32,10 +34,24 @@ module.exports = async function handler(req, res) {
                 cumRet: parsePct(row[9]),
                 dd: parsePct(row[10])
             });
+
+            // Manual account (col 12-17)
+            if (row.length > 12) {
+                const mEquity = parseNum(row[12]);
+                if (mEquity > 0) {
+                    manual.push({
+                        date,
+                        equity: mEquity,
+                        dailyRet: parsePct(row[13]),
+                        cumRet: parsePct(row[15]),
+                        dd: parsePct(row[16])
+                    });
+                }
+            }
         }
 
         res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=7200');
-        return res.status(200).json({ success: true, count: data.length, data });
+        return res.status(200).json({ success: true, count: data.length, data, manual });
     } catch (e) {
         return res.status(500).json({ success: false, error: e.message });
     }
