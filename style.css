@@ -283,7 +283,7 @@
         /* Daily Grid - Two Columns */
         .daily-grid {
             display: grid;
-            grid-template-columns: 1.4fr 0.6fr;
+            grid-template-columns: 1fr 1fr;
             gap: 16px;
             align-items: stretch;
         }
