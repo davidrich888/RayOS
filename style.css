@@ -103,7 +103,7 @@
         .wealth-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; height: fit-content; }
         
         /* Quote */
-        .quote-box { background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%); border: 1px solid var(--border); padding: 20px 24px; position: relative; }
+        .quote-box { background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%); border: 1px solid var(--border); padding: 20px 24px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .quote-box::before { content: '"'; position: absolute; top: -20px; left: 10px; font-size: 120px; color: var(--accent); opacity: 0.1; font-family: 'Cormorant Garamond', serif; }
         .quote-text { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic; color: var(--accent); line-height: 1.6; position: relative; z-index: 1; text-align: center; }
         .quote-author { font-size: 11px; color: var(--text-dim); margin-top: 10px; text-align: center; }
