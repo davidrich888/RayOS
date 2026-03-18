@@ -305,6 +305,8 @@ const PRELOAD_ALGO_EQUITY = [
     { date: '2026/3/11', idxCumRet: 51.7, equity: 1391505, dailyRet: 6.78, cumRet: 38.71, dd: 7.7 },
     { date: '2026/3/12', idxCumRet: 49.33, equity: 1344135, dailyRet: -3.4, cumRet: 33.99, dd: 10.84 },
     { date: '2026/3/13', idxCumRet: 48.52, equity: 1294335, dailyRet: -3.7, cumRet: 29.02, dd: 14.15 },
+    { date: '2026/3/16', idxCumRet: 48.27, equity: 1294335, dailyRet: 0.0, cumRet: 29.02, dd: 14.15 },
+    { date: '2026/3/17', idxCumRet: 50.46, equity: 1288085, dailyRet: -0.48, cumRet: 28.4, dd: 14.56 },
 ];
 
 const PRELOAD_MANUAL_EQUITY = [
@@ -329,9 +331,11 @@ const PRELOAD_MANUAL_EQUITY = [
     { date: '2026/3/11', equity: 106778, dailyRet: 61.13, cumRet: 6.78, dd: 0.0 },
     { date: '2026/3/12', equity: 106778, dailyRet: 0.0, cumRet: 6.78, dd: 0.0 },
     { date: '2026/3/13', equity: 100000, dailyRet: 0.0, cumRet: 6.78, dd: 0.0 },
+    { date: '2026/3/16', equity: 99040, dailyRet: -0.96, cumRet: 5.75, dd: 0.96 },
+    { date: '2026/3/17', equity: 99950, dailyRet: 0.92, cumRet: 6.72, dd: 0.05 },
 ];
 
 const MONTHLY_RETURNS = {
     2025: { 1: -1.59, 2: -12.76, 3: 21.77, 4: 10.1, 5: 3.87, 6: -5.44, 7: 1.25, 8: -6.43, 9: 0.28, 10: 4.21, 11: 17.93, 12: -5.68, ytd: 24.49 },
-    2026: { 1: 15.84, 2: 3.47, 3: -13.51, ytd: 3.67 },
+    2026: { 1: 15.84, 2: 3.47, 3: -13.92, ytd: 3.18 },
 };
