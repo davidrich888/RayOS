@@ -59,7 +59,11 @@ const algoChartOpts = {
 };
 const algoChart = new Chart(algoCtx, { type: 'line', data: { labels: [], datasets: [
     { label: '程式帳戶', data: [], borderColor: '#d4c5a9', tension: 0.3, fill: false, borderWidth: 2 },
-    { label: '加權指數', data: [], borderColor: '#666', tension: 0.3, fill: false, borderWidth: 1.5 },
+    { label: '加權指數', data: [], borderColor: '#666', tension: 0.3, fill: false, borderWidth: 1.5 }
+] }, options: algoChartOpts });
+
+const manualCtx = document.getElementById('manualChart').getContext('2d');
+const manualChart = new Chart(manualCtx, { type: 'line', data: { labels: [], datasets: [
     { label: '手單帳戶', data: [], borderColor: '#7cb5ec', tension: 0.3, fill: false, borderWidth: 2, spanGaps: true },
     { label: '加權指數（手單）', data: [], borderColor: '#999', tension: 0.3, fill: false, borderWidth: 1.5, spanGaps: true }
 ] }, options: algoChartOpts });

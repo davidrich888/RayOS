@@ -5,15 +5,20 @@ const TRADING_SHEET_ID = '1ozBB17QMML4CmbtNfLEhm4Hu-ffpN3qTRawCa_tPHG4';
 function setTradingTab(tab, btn) {
     document.querySelectorAll('#trading .tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('tab-algo').style.display = tab === 'algo' ? 'block' : 'none';
-    document.getElementById('tab-propfirm').style.display = tab === 'propfirm' ? 'block' : 'none';
-    document.getElementById('tab-shamewall').style.display = tab === 'shamewall' ? 'block' : 'none';
+    ['algo', 'manual', 'propfirm', 'shamewall'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        if (el) el.style.display = tab === t ? 'block' : 'none';
+    });
     // lazy-load iframe on first visit
     if (tab === 'shamewall') {
         const frame = document.getElementById('shamewall-frame');
         if (frame && frame.src === 'about:blank') {
             frame.src = frame.dataset.src;
         }
+    }
+    // render manual chart on first visit
+    if (tab === 'manual' && typeof updateManualChart === 'function') {
+        updateManualChart();
     }
 }
 
@@ -122,34 +127,12 @@ function updateAlgoChart() {
         return parts.length >= 3 ? parts[1] + '/' + parts[2] : d.date.slice(5);
     });
 
-    // Dataset 0: 程式帳戶 cumulative return (original, no rebase)
+    // Dataset 0: 程式帳戶 cumulative return
     algoChart.data.datasets[0].data = data.map(d => d.cumRet);
 
-    // Dataset 1: 加權指數 cumulative return (original, no rebase)
+    // Dataset 1: 加權指數 cumulative return
     if (data[0].idxCumRet !== undefined) {
         algoChart.data.datasets[1].data = data.map(d => d.idxCumRet);
-    }
-
-    // Dataset 2: 手單帳戶 cumulative return (null before start)
-    // Dataset 3: 加權指數（手單）(rebased from manual start, null before start)
-    if (manualEquity.length > 0) {
-        const manualByDate = {};
-        manualEquity.forEach(d => { manualByDate[d.date] = d.cumRet; });
-        algoChart.data.datasets[2].data = data.map(d =>
-            manualByDate[d.date] !== undefined ? manualByDate[d.date] : null
-        );
-
-        // Rebase index from manual account start date
-        const manualStartDate = manualEquity[0].date;
-        const baseEntry = data.find(d => d.date === manualStartDate);
-        if (baseEntry && baseEntry.idxCumRet !== undefined) {
-            const baseFactor = 1 + baseEntry.idxCumRet / 100;
-            algoChart.data.datasets[3].data = data.map(d => {
-                if (manualByDate[d.date] === undefined) return null;
-                const cur = 1 + (d.idxCumRet || 0) / 100;
-                return parseFloat(((cur / baseFactor - 1) * 100).toFixed(2));
-            });
-        }
     }
 
     algoChart.update();
@@ -160,6 +143,57 @@ function updateAlgoChart() {
         algoDDChart.data.datasets[0].data = data.map(d => d.dd || 0);
         algoDDChart.update();
     }
+}
+
+function updateManualChart() {
+    if (manualEquity.length === 0 || algoEquity.length === 0) return;
+
+    const manualStartDate = manualEquity[0].date;
+    const startIdx = algoEquity.findIndex(d => d.date >= manualStartDate);
+    if (startIdx < 0) return;
+    const chartData = algoEquity.slice(startIdx);
+
+    const manualByDate = {};
+    manualEquity.forEach(d => { manualByDate[d.date] = d.cumRet; });
+
+    // Labels
+    manualChart.data.labels = chartData.map(d => {
+        const parts = d.date.split('/');
+        return parts.length >= 3 ? parts[1] + '/' + parts[2] : d.date.slice(5);
+    });
+
+    // Dataset 0: 手單帳戶
+    manualChart.data.datasets[0].data = chartData.map(d =>
+        manualByDate[d.date] !== undefined ? manualByDate[d.date] : null
+    );
+
+    // Dataset 1: 加權指數（手單）rebased
+    const baseEntry = algoEquity[startIdx];
+    if (baseEntry && baseEntry.idxCumRet !== undefined) {
+        const baseFactor = 1 + baseEntry.idxCumRet / 100;
+        manualChart.data.datasets[1].data = chartData.map(d => {
+            if (manualByDate[d.date] === undefined) return null;
+            const cur = 1 + (d.idxCumRet || 0) / 100;
+            return parseFloat(((cur / baseFactor - 1) * 100).toFixed(2));
+        });
+    }
+
+    manualChart.update();
+
+    // Update summary cards
+    const last = manualEquity[manualEquity.length - 1];
+    document.getElementById('manual-cumret').textContent = last.cumRet.toFixed(2) + '%';
+    const cumEl = document.getElementById('manual-cumret');
+    cumEl.className = 'summary-value ' + (last.cumRet >= 0 ? 'positive' : 'negative');
+
+    const minDD = Math.min(...manualEquity.map(d => d.dd || 0));
+    const mddEl = document.getElementById('manual-mdd');
+    mddEl.textContent = minDD.toFixed(2) + '%';
+
+    const winDays = manualEquity.filter(d => d.dailyRet > 0).length;
+    const totalDays = manualEquity.filter(d => d.dailyRet !== 0).length;
+    document.getElementById('manual-winrate').textContent = totalDays > 0 ? (winDays / totalDays * 100).toFixed(2) + '%' : '--';
+    document.getElementById('manual-days').textContent = manualEquity.length;
 }
 
 function updateMonthlyReturnsTable() {

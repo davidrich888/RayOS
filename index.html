@@ -195,6 +195,7 @@
                     <div class="wealth-main">
                         <div class="tabs">
                             <div class="tab active" onclick="setTradingTab('algo',this)">🤖 程式交易</div>
+                            <div class="tab" onclick="setTradingTab('manual',this)">✋ 手單交易</div>
                             <div class="tab" onclick="setTradingTab('propfirm',this)">🏦 Prop Firm</div>
                             <div class="tab" onclick="setTradingTab('shamewall',this)">🔥 恥辱牆</div>
                         </div>
@@ -223,6 +224,18 @@
                                 <div class="chart-wrapper"><canvas id="algoDDChart"></canvas></div>
                             </div>
                             <div style="text-align:right;margin-bottom:20px;"><a href="https://docs.google.com/spreadsheets/d/1ozBB17QMML4CmbtNfLEhm4Hu-ffpN3qTRawCa_tPHG4/edit" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none;">↗ 開啟試算表</a></div>
+                        </div>
+                        <div id="tab-manual" style="display:none;">
+                            <div class="summary-grid" style="margin-bottom:20px;">
+                                <div class="summary-item"><div class="summary-label">累積報酬率</div><div class="summary-value accent" id="manual-cumret">--</div></div>
+                                <div class="summary-item"><div class="summary-label">MDD</div><div class="summary-value negative" id="manual-mdd">--</div></div>
+                                <div class="summary-item"><div class="summary-label">日勝率</div><div class="summary-value" id="manual-winrate">--</div></div>
+                                <div class="summary-item"><div class="summary-label">交易天數</div><div class="summary-value" id="manual-days">--</div></div>
+                            </div>
+                            <div class="chart-container" style="margin-bottom:20px;">
+                                <div class="chart-header"><div class="chart-title">Daily Cumulative Return (%)</div></div>
+                                <div class="chart-wrapper"><canvas id="manualChart"></canvas></div>
+                            </div>
                         </div>
                         <div id="tab-shamewall" style="display:none;">
                             <iframe id="shamewall-frame" src="about:blank" data-src="/shame-wall.html" style="width:100%;height:calc(100vh - 160px);border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:#0a0a0a;"></iframe>
