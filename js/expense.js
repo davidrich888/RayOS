@@ -158,7 +158,9 @@ function updateExpenseSummary(data, prev) {
         .filter(([k]) => k !== '國外手續費' && k !== '其他')
         .sort((a, b) => b[1] - a[1]);
     document.getElementById('expense-top-cat').textContent = cats.length ? cats[0][0] : '--';
-    document.getElementById('expense-foreign-fee').textContent = 'NT$' + formatNumber(data.categories['國外手續費'] || 0);
+    // Monthly average (all months)
+    const avgTotal = expenseMonthly.length > 0 ? Math.round(expenseMonthly.reduce((s, m) => s + m.total, 0) / expenseMonthly.length) : 0;
+    document.getElementById('expense-avg').textContent = 'NT$' + formatNumber(avgTotal);
 }
 
 function updateExpensePie(data) {
@@ -213,91 +215,115 @@ function renderEmptyExpense() {
     document.getElementById('expense-total').textContent = '--';
     document.getElementById('expense-vs-prev').textContent = '--';
     document.getElementById('expense-top-cat').textContent = '--';
-    document.getElementById('expense-foreign-fee').textContent = '--';
+    document.getElementById('expense-avg').textContent = '--';
     if (expensePieChart) { expensePieChart.data.labels = []; expensePieChart.data.datasets[0].data = []; expensePieChart.update(); }
     if (expenseTrendChart) { expenseTrendChart.data.labels = []; expenseTrendChart.data.datasets[0].data = []; expenseTrendChart.update(); }
     document.getElementById('expense-history-table').innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);">尚無支出資料。</div>';
 }
 
+// Fixed category column order
+const EXPENSE_COL_ORDER = ['Prop Firm', 'Skool', 'AI/SaaS', 'Apple', '交通', '餐飲', '旅行', '保險', '健身', '購物', '生活', '娛樂', '國外手續費', '其他'];
+
 function renderExpenseTable(months) {
-    let html = '<table style="width:100%;font-size:12px;border-collapse:collapse;">';
+    const thStyle = 'padding:6px 8px;text-align:right;white-space:nowrap;font-size:11px;';
+    const totalCols = EXPENSE_COL_ORDER.length + 3; // month + total + categories + count
+
+    let html = '<table style="width:100%;font-size:11px;border-collapse:collapse;min-width:900px;">';
     html += '<thead><tr style="border-bottom:1px solid var(--border);color:var(--text-dim);">';
-    html += '<th style="padding:8px 12px;text-align:left;">月份</th>';
-    html += '<th style="padding:8px 12px;text-align:right;">總支出</th>';
-    html += '<th style="padding:8px 12px;text-align:right;">筆數</th>';
-    html += '<th style="padding:8px 12px;text-align:left;">最大分類</th>';
-    html += '<th style="padding:8px 12px;text-align:right;">vs 上月</th>';
+    html += `<th style="${thStyle}text-align:left;">月份</th>`;
+    html += `<th style="${thStyle}font-weight:600;">總支出</th>`;
+    EXPENSE_COL_ORDER.forEach(cat => {
+        html += `<th style="${thStyle}">${cat}</th>`;
+    });
+    html += `<th style="${thStyle}">筆數</th>`;
     html += '</tr></thead><tbody>';
 
     months.forEach((m, i) => {
-        const prev = months[i + 1] || null;
-        const diff = prev ? ((m.total - prev.total) / prev.total * 100).toFixed(0) : null;
-        const topCat = Object.entries(m.categories)
-            .filter(([k]) => k !== '國外手續費' && k !== '其他')
-            .sort((a, b) => b[1] - a[1])[0];
         const isSelected = m.month === selectedExpenseMonth;
+        const rowBg = isSelected ? 'background:rgba(212,197,169,0.08);' : '';
 
-        html += `<tr class="expense-row" style="border-bottom:1px solid var(--border);cursor:pointer;${isSelected ? 'background:rgba(212,197,169,0.08);' : ''}" onclick="toggleExpenseDetail('${m.month}', this)">`;
-        html += `<td style="padding:8px 12px;color:var(--text);font-weight:${isSelected ? '600' : '400'};">${m.month}</td>`;
-        html += `<td style="padding:8px 12px;text-align:right;color:var(--accent);font-weight:600;">NT$${formatNumber(m.total)}</td>`;
-        html += `<td style="padding:8px 12px;text-align:right;color:var(--text-dim);">${m.count}</td>`;
-        html += `<td style="padding:8px 12px;color:var(--text);">${topCat ? topCat[0] : '--'}</td>`;
-        if (diff !== null) {
-            html += `<td style="padding:8px 12px;text-align:right;color:${Number(diff) > 0 ? 'var(--danger)' : 'var(--success)'};">${diff > 0 ? '+' : ''}${diff}%</td>`;
-        } else {
-            html += '<td style="padding:8px 12px;text-align:right;color:var(--text-dim);">--</td>';
-        }
+        html += `<tr class="expense-row" style="border-bottom:1px solid var(--border);cursor:pointer;${rowBg}" onclick="onExpenseRowClick('${m.month}', this)">`;
+        html += `<td style="padding:6px 8px;color:var(--text);font-weight:${isSelected ? '600' : '400'};">${m.month}</td>`;
+        html += `<td style="padding:6px 8px;text-align:right;color:var(--accent);font-weight:600;">NT$${formatNumber(m.total)}</td>`;
+
+        EXPENSE_COL_ORDER.forEach(cat => {
+            const val = m.categories[cat];
+            if (val && val > 0) {
+                const color = CATEGORY_COLORS[cat] || 'var(--text)';
+                html += `<td style="padding:6px 8px;text-align:right;color:${color};cursor:pointer;" onclick="event.stopPropagation();showCategoryDetail('${m.month}','${cat}')">${formatNumber(val)}</td>`;
+            } else {
+                html += '<td style="padding:6px 8px;text-align:right;color:var(--text-dim);">-</td>';
+            }
+        });
+
+        html += `<td style="padding:6px 8px;text-align:right;color:var(--text-dim);">${m.count}</td>`;
         html += '</tr>';
-
-        // Detail row (hidden by default)
-        html += `<tr id="expense-detail-${m.month.replace('/', '-')}" style="display:none;"><td colspan="5" style="padding:0;">`;
-        html += buildExpenseDetail(m);
-        html += '</td></tr>';
     });
 
     html += '</tbody></table>';
     document.getElementById('expense-history-table').innerHTML = html;
 }
 
-function buildExpenseDetail(monthData) {
-    const entries = Object.entries(monthData.categories).sort((a, b) => b[1] - a[1]);
-    const total = monthData.total;
-
-    let html = '<div style="padding:8px 12px 16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);">';
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">';
-
-    entries.forEach(([cat, amount]) => {
-        const pct = total > 0 ? (amount / total * 100).toFixed(1) : 0;
-        const color = CATEGORY_COLORS[cat] || '#555';
-        html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03);">`;
-        html += `<div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>`;
-        html += `<div style="flex:1;min-width:0;">`;
-        html += `<div style="font-size:11px;color:var(--text-dim);">${cat}</div>`;
-        html += `<div style="font-size:13px;color:var(--text);font-weight:500;">NT$${formatNumber(amount)}<span style="font-size:10px;color:var(--text-dim);margin-left:4px;">${pct}%</span></div>`;
-        html += '</div></div>';
-    });
-
-    html += '</div></div>';
-    return html;
+function onExpenseRowClick(month, rowEl) {
+    document.querySelectorAll('.expense-row').forEach(r => r.style.background = '');
+    rowEl.style.background = 'rgba(212,197,169,0.08)';
+    const sel = document.getElementById('expense-month-select');
+    sel.value = month;
+    onExpenseMonthChange(month);
 }
 
-function toggleExpenseDetail(month, rowEl) {
-    const detailId = 'expense-detail-' + month.replace('/', '-');
-    const detailRow = document.getElementById(detailId);
-    if (!detailRow) return;
+// Show category detail modal with merchant breakdown (from Notion)
+async function showCategoryDetail(month, category) {
+    const modalId = 'expense-detail-modal';
+    let modal = document.getElementById(modalId);
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal';
+        modal.innerHTML = '<div class="modal-content" style="max-width:500px;"><div class="modal-header"><h3 id="expense-detail-title"></h3><button class="btn btn-small" onclick="closeModal(\'expense-detail-modal\')">✕</button></div><div id="expense-detail-body" style="max-height:60vh;overflow-y:auto;"></div></div>';
+        document.body.appendChild(modal);
+    }
 
-    const isVisible = detailRow.style.display !== 'none';
-    // Close all other detail rows
-    document.querySelectorAll('[id^="expense-detail-"]').forEach(r => r.style.display = 'none');
-    document.querySelectorAll('.expense-row').forEach(r => r.style.background = '');
+    document.getElementById('expense-detail-title').textContent = `${month} — ${category}`;
+    const body = document.getElementById('expense-detail-body');
+    body.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-dim);">載入中...</div>';
+    modal.style.display = 'flex';
 
-    if (!isVisible) {
-        detailRow.style.display = '';
-        rowEl.style.background = 'rgba(212,197,169,0.08)';
-        // Also update charts to this month
-        const sel = document.getElementById('expense-month-select');
-        sel.value = month;
-        onExpenseMonthChange(month);
+    try {
+        const res = await fetch(`/api/expense-detail?month=${encodeURIComponent(month)}&category=${encodeURIComponent(category)}`);
+        const json = await res.json();
+        if (!json.success || !json.data || json.data.length === 0) {
+            body.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-dim);">此分類無明細資料</div>';
+            return;
+        }
+
+        // Group by merchant (description)
+        const byMerchant = {};
+        json.data.forEach(t => {
+            const key = t.desc || '未知';
+            if (!byMerchant[key]) byMerchant[key] = { total: 0, count: 0 };
+            byMerchant[key].total += t.amount;
+            byMerchant[key].count += 1;
+        });
+
+        const sorted = Object.entries(byMerchant).sort((a, b) => b[1].total - a[1].total);
+        const color = CATEGORY_COLORS[category] || '#555';
+
+        let html = '<div style="padding:8px 0;">';
+        sorted.forEach(([merchant, data]) => {
+            html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);">`;
+            html += `<div style="font-size:12px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${merchant}</div>`;
+            html += `<div style="text-align:right;white-space:nowrap;margin-left:12px;">`;
+            html += `<span style="color:${color};font-weight:600;font-size:13px;">NT$${formatNumber(data.total)}</span>`;
+            html += `<span style="color:var(--text-dim);font-size:11px;margin-left:6px;">(${data.count}筆)</span>`;
+            html += '</div></div>';
+        });
+        html += `<div style="display:flex;justify-content:space-between;padding:10px 12px;font-weight:600;color:var(--accent);font-size:13px;">`;
+        html += `<div>合計</div><div>NT$${formatNumber(json.data.reduce((s, t) => s + t.amount, 0))} (${json.data.length}筆)</div>`;
+        html += '</div></div>';
+        body.innerHTML = html;
+    } catch (e) {
+        body.innerHTML = `<div style="text-align:center;padding:24px;color:var(--danger);">載入失敗：${e.message}</div>`;
     }
 }
 

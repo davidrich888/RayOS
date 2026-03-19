@@ -370,6 +370,13 @@ def main():
     for key, val in sorted(other_summary.items(), key=lambda x: -x[1]['total']):
         print(f"  {key:45s} x{val['count']:3d}  NT${val['total']:>10,.0f}")
 
+    # Export all transactions as JSON
+    json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'expense-transactions.json')
+    os.makedirs(os.path.dirname(json_path), exist_ok=True)
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(all_transactions, f, ensure_ascii=False, indent=2)
+    print(f"\n✅ Exported {len(all_transactions)} transactions to {json_path}")
+
 
 if __name__ == '__main__':
     main()
