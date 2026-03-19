@@ -67,16 +67,23 @@
             </div>
 
             <div class="content">
-                <div class="section-label">Quick Access</div>
-                <div class="cards">
-                    <div class="card" onclick="go('physic')"><div class="card-header"><span class="card-icon">🥷</span><span class="card-badge">TRACK</span></div><div class="card-title">Physic</div><div class="card-desc">體重・體脂・進度</div></div>
-                    <div class="card" onclick="go('wealth')"><div class="card-header"><span class="card-icon">$</span><span class="card-badge">TRACK</span></div><div class="card-title">Wealth</div><div class="card-desc">資產・消費・目標</div></div>
-                    <div class="card" onclick="go('business')"><div class="card-header"><span class="card-icon">📊</span><span class="card-badge">GROW</span></div><div class="card-title">Business</div><div class="card-desc">Skool・MRR・Members</div></div>
-                    <div class="card" onclick="go('content')"><div class="card-header"><span class="card-icon">📝</span><span class="card-badge">CREATE</span></div><div class="card-title">Content</div><div class="card-desc">靈感池・產出追蹤</div></div>
-                    <div class="card" onclick="go('content');setTimeout(()=>setContentTab('ytstudio'),50)"><div class="card-header"><span class="card-icon">🎬</span><span class="card-badge">FILM</span></div><div class="card-title">YT 工作室</div><div class="card-desc">準上架・Research</div></div>
-                    <div class="card" onclick="go('lifecoach')"><div class="card-header"><span class="card-icon">🤖</span><span class="card-badge">13</span></div><div class="card-title">AI Agents</div><div class="card-desc">自動化 Agent 總覽</div></div>
-                    <div class="card" onclick="go('information')"><div class="card-header"><span class="card-icon">📖</span><span class="card-badge">LEARN</span></div><div class="card-title">Information</div><div class="card-desc">YouTube Lab</div></div>
-                    <div class="card" onclick="go('trading');setTimeout(()=>{const b=document.querySelector('#trading .tab:nth-child(3)');setTradingTab('shamewall',b)},50)"><div class="card-header"><span class="card-icon">🔥</span><span class="card-badge">TRACK</span></div><div class="card-title">恥辱牆</div><div class="card-desc">交易犯錯記錄</div></div>
+                <div class="section-label">Target</div>
+                <div class="cards" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="card" onclick="showTargetModal('bali')">
+                        <div class="card-header"><span class="card-icon">🏝️</span><span class="card-badge">$200K</span></div>
+                        <div class="card-title">Bali Villa</div>
+                        <div class="card-desc">峇里島別墅</div>
+                    </div>
+                    <div class="card" onclick="showTargetModal('yuzawa')">
+                        <div class="card-header"><span class="card-icon">🏔️</span><span class="card-badge">$80K</span></div>
+                        <div class="card-title">Yuzawa Villa</div>
+                        <div class="card-desc">日本湯澤別墅</div>
+                    </div>
+                    <div class="card" onclick="showTargetModal('bangkok')">
+                        <div class="card-header"><span class="card-icon">🏎️</span><span class="card-badge">TARGET</span></div>
+                        <div class="card-title">Bangkok & McLaren</div>
+                        <div class="card-desc">曼谷房子 + McLaren</div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -834,6 +841,15 @@
     </main>
 
     <div class="toast" id="toast">Saved</div>
+
+    <!-- TARGET MODAL -->
+    <div class="modal-overlay" id="target-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+        <div class="modal" style="max-width:700px;max-height:85vh;display:flex;flex-direction:column;">
+            <div class="modal-title" id="target-modal-title"></div>
+            <div id="target-modal-body" style="overflow-y:auto;padding-right:8px;"></div>
+            <div style="text-align:right;margin-top:16px;"><button class="btn" onclick="document.getElementById('target-modal').style.display='none'">Close</button></div>
+        </div>
+    </div>
 
     <!-- MODALS -->
     <div class="modal-overlay" id="settings-modal">

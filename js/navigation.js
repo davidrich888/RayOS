@@ -87,6 +87,59 @@ function showToast(msg, isError = false) {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 function showModal(id) { document.getElementById(id).classList.add('show'); }
+
+// Target modal data
+const TARGET_DATA = {
+    bali: {
+        title: '🏝️ Bali Villa — $200,000 USD',
+        html: `
+            <div style="margin-bottom:16px;">
+                <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80" alt="Bali Villa" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：峇里島私人別墅</p>
+                    <p><strong style="color:var(--accent);">預算</strong>：$200,000 USD</p>
+                    <p><strong style="color:var(--accent);">用途</strong>：度假 + 遠端工作基地</p>
+                </div>
+            </div>`
+    },
+    yuzawa: {
+        title: '🏔️ Yuzawa Villa — $80,000 USD',
+        html: `
+            <div style="margin-bottom:16px;">
+                <img src="https://www.angel-f.com/smp/yuzawa/mansion/img/2124_1.jpg" alt="Yuzawa Villa" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;" onerror="this.style.display='none'">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：日本湯澤別墅（滑雪度假用）</p>
+                    <p><strong style="color:var(--accent);">預算</strong>：$80,000 USD</p>
+                    <p><strong style="color:var(--accent);">相關連結</strong>：</p>
+                    <p>📍 <a href="https://maps.app.goo.gl/gsx13XfxXKfgnWHr5?g_st=il" target="_blank" style="color:var(--accent);">Google Maps 位置</a></p>
+                    <p>🏠 <a href="https://www.angel-f.com/smp/yuzawa/mansion/2124.html" target="_blank" style="color:var(--accent);">物件資訊（Angel-F）</a></p>
+                </div>
+            </div>`
+    },
+    bangkok: {
+        title: '🏎️ Bangkok House & McLaren',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <img src="https://images.unsplash.com/photo-1583511655826-05700442b31b?w=400&q=80" alt="Bangkok" style="width:100%;border-radius:4px;border:1px solid var(--border);">
+                    <img src="https://images.unsplash.com/photo-1621135802920-133df287f89c?w=400&q=80" alt="McLaren" style="width:100%;border-radius:4px;border:1px solid var(--border);">
+                </div>
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標 1</strong>：曼谷房子</p>
+                    <p><strong style="color:var(--accent);">目標 2</strong>：McLaren</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
+                </div>
+            </div>`
+    }
+};
+
+function showTargetModal(key) {
+    const data = TARGET_DATA[key];
+    if (!data) return;
+    document.getElementById('target-modal-title').textContent = data.title;
+    document.getElementById('target-modal-body').innerHTML = data.html;
+    document.getElementById('target-modal').style.display = 'flex';
+}
 function hideModal(id) { document.getElementById(id).classList.remove('show'); }
 function formatNumber(n) { return new Intl.NumberFormat('zh-TW').format(Math.round(n)); }
 function formatMoney(n) { if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M'; if (n >= 1000) return Math.round(n / 1000) + 'K'; return formatNumber(n); }
