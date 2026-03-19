@@ -62,6 +62,7 @@ let expenseMonthly = JSON.parse(JSON.stringify(PRELOAD_EXPENSE_MONTHLY));
 // Charts (initialized lazily)
 let expensePieChart = null;
 let expenseTrendChart = null;
+let selectedExpenseMonth = null;
 
 function setWealthTab(tab, btn) {
     document.querySelectorAll('#wealth .tab').forEach(t => t.classList.remove('active'));
@@ -103,20 +104,78 @@ function initExpenseCharts() {
     const trendCtx = document.getElementById('expenseTrendChart').getContext('2d');
     expenseTrendChart = new Chart(trendCtx, {
         type: 'bar',
-        data: { labels: [], datasets: [{ data: [], backgroundColor: 'rgba(212,197,169,0.5)', borderColor: '#d4c5a9', borderWidth: 1 }] },
+        data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }] },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                datalabels: { color: '#d4c5a9', font: { size: 10, weight: 'bold' }, anchor: 'end', align: 'top', formatter: v => v >= 1000 ? Math.round(v / 1000) + 'K' : v }
+                datalabels: { color: '#d4c5a9', font: { size: 10, weight: 'bold' }, anchor: 'end', align: 'top', formatter: v => formatNumber(v) }
             },
             scales: {
                 x: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 10 } } },
-                y: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 10 }, callback: v => v >= 1000 ? Math.round(v / 1000) + 'K' : v } }
+                y: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 10 }, callback: v => formatNumber(v) } }
+            },
+            onClick: (evt, elements) => {
+                if (elements.length > 0) {
+                    const idx = elements[0].index;
+                    const chronological = [...expenseMonthly].sort((a, b) => a.month.localeCompare(b.month));
+                    const sel = document.getElementById('expense-month-select');
+                    sel.value = chronological[idx].month;
+                    onExpenseMonthChange(sel.value);
+                }
             }
         }
     });
+}
+
+function onExpenseMonthChange(monthKey) {
+    selectedExpenseMonth = monthKey;
+    const months = [...expenseMonthly].sort((a, b) => b.month.localeCompare(a.month));
+    const selected = months.find(m => m.month === monthKey);
+    if (!selected) return;
+
+    const idx = months.indexOf(selected);
+    const prev = months[idx + 1] || null;
+
+    updateExpenseSummary(selected, prev);
+    updateExpensePie(selected);
+    updateTrendHighlight(monthKey);
+}
+
+function updateExpenseSummary(data, prev) {
+    document.getElementById('expense-total').textContent = 'NT$' + formatNumber(data.total);
+    if (prev) {
+        const diff = ((data.total - prev.total) / prev.total * 100).toFixed(0);
+        const el = document.getElementById('expense-vs-prev');
+        el.textContent = (diff > 0 ? '+' : '') + diff + '%';
+        el.className = 'summary-value ' + (Number(diff) > 0 ? 'negative' : 'positive');
+    } else {
+        document.getElementById('expense-vs-prev').textContent = '--';
+        document.getElementById('expense-vs-prev').className = 'summary-value';
+    }
+    const cats = Object.entries(data.categories)
+        .filter(([k]) => k !== '國外手續費' && k !== '其他')
+        .sort((a, b) => b[1] - a[1]);
+    document.getElementById('expense-top-cat').textContent = cats.length ? cats[0][0] : '--';
+    document.getElementById('expense-foreign-fee').textContent = 'NT$' + formatNumber(data.categories['國外手續費'] || 0);
+}
+
+function updateExpensePie(data) {
+    const pieEntries = Object.entries(data.categories).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    expensePieChart.data.labels = pieEntries.map(([c]) => c);
+    expensePieChart.data.datasets[0].data = pieEntries.map(([, v]) => v);
+    expensePieChart.data.datasets[0].backgroundColor = pieEntries.map(([c]) => CATEGORY_COLORS[c] || '#555');
+    expensePieChart.update();
+}
+
+function updateTrendHighlight(monthKey) {
+    const chronological = [...expenseMonthly].sort((a, b) => a.month.localeCompare(b.month));
+    const bgColors = chronological.map(m => m.month === monthKey ? 'rgba(212,197,169,0.8)' : 'rgba(212,197,169,0.3)');
+    const borderColors = chronological.map(m => m.month === monthKey ? '#d4c5a9' : 'rgba(212,197,169,0.5)');
+    expenseTrendChart.data.datasets[0].backgroundColor = bgColors;
+    expenseTrendChart.data.datasets[0].borderColor = borderColors;
+    expenseTrendChart.update();
 }
 
 function renderExpense() {
@@ -126,39 +185,25 @@ function renderExpense() {
     }
 
     const months = [...expenseMonthly].sort((a, b) => b.month.localeCompare(a.month));
-    const latest = months[0];
-    const prev = months[1] || null;
 
-    // Summary cards
-    document.getElementById('expense-total').textContent = 'NT$' + formatNumber(latest.total);
-    if (prev) {
-        const diff = ((latest.total - prev.total) / prev.total * 100).toFixed(0);
-        const el = document.getElementById('expense-vs-prev');
-        el.textContent = (diff > 0 ? '+' : '') + diff + '%';
-        el.className = 'summary-value ' + (Number(diff) > 0 ? 'negative' : 'positive');
-    } else {
-        document.getElementById('expense-vs-prev').textContent = '--';
-    }
+    // Populate month dropdown
+    const sel = document.getElementById('expense-month-select');
+    const currentVal = selectedExpenseMonth || months[0].month;
+    sel.innerHTML = months.map(m => `<option value="${m.month}"${m.month === currentVal ? ' selected' : ''}>${m.month}</option>`).join('');
+    selectedExpenseMonth = currentVal;
 
-    // Top category (excluding 其他 and 國外手續費)
-    const cats = Object.entries(latest.categories)
-        .filter(([k]) => k !== '國外手續費' && k !== '其他')
-        .sort((a, b) => b[1] - a[1]);
-    document.getElementById('expense-top-cat').textContent = cats.length ? cats[0][0] : '--';
-    document.getElementById('expense-foreign-fee').textContent = 'NT$' + formatNumber(latest.categories['國外手續費'] || 0);
+    const selected = months.find(m => m.month === currentVal);
+    const idx = months.indexOf(selected);
+    const prev = months[idx + 1] || null;
 
-    // Pie chart - latest month
-    const pieEntries = Object.entries(latest.categories).sort((a, b) => b[1] - a[1]);
-    expensePieChart.data.labels = pieEntries.map(([c]) => c);
-    expensePieChart.data.datasets[0].data = pieEntries.map(([, v]) => v);
-    expensePieChart.data.datasets[0].backgroundColor = pieEntries.map(([c]) => CATEGORY_COLORS[c] || '#555');
-    expensePieChart.update();
+    updateExpenseSummary(selected, prev);
+    updateExpensePie(selected);
 
-    // Trend chart - chronological
+    // Trend chart - chronological with highlight
     const chronological = [...expenseMonthly].sort((a, b) => a.month.localeCompare(b.month));
     expenseTrendChart.data.labels = chronological.map(m => m.month.slice(2));
     expenseTrendChart.data.datasets[0].data = chronological.map(m => m.total);
-    expenseTrendChart.update();
+    updateTrendHighlight(currentVal);
 
     // History table
     renderExpenseTable(months);
@@ -171,39 +216,89 @@ function renderEmptyExpense() {
     document.getElementById('expense-foreign-fee').textContent = '--';
     if (expensePieChart) { expensePieChart.data.labels = []; expensePieChart.data.datasets[0].data = []; expensePieChart.update(); }
     if (expenseTrendChart) { expenseTrendChart.data.labels = []; expenseTrendChart.data.datasets[0].data = []; expenseTrendChart.update(); }
-    document.getElementById('expense-history-table').innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);">尚無支出資料。貼上信用卡 CSV 帳單開始追蹤。</div>';
+    document.getElementById('expense-history-table').innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);">尚無支出資料。</div>';
 }
 
 function renderExpenseTable(months) {
-    // Collect all categories
-    const allCats = new Set();
-    months.forEach(m => Object.keys(m.categories).forEach(c => allCats.add(c)));
-    const catList = [...allCats].filter(c => c !== '國外手續費' && c !== '其他').sort();
-
     let html = '<table style="width:100%;font-size:12px;border-collapse:collapse;">';
     html += '<thead><tr style="border-bottom:1px solid var(--border);color:var(--text-dim);">';
-    html += '<th style="padding:8px;text-align:left;">月份</th>';
-    html += '<th style="padding:8px;text-align:right;">總支出</th>';
-    catList.forEach(c => { html += `<th style="padding:8px;text-align:right;">${c}</th>`; });
-    html += '<th style="padding:8px;text-align:right;">其他</th>';
-    html += '<th style="padding:8px;text-align:right;">手續費</th>';
+    html += '<th style="padding:8px 12px;text-align:left;">月份</th>';
+    html += '<th style="padding:8px 12px;text-align:right;">總支出</th>';
+    html += '<th style="padding:8px 12px;text-align:right;">筆數</th>';
+    html += '<th style="padding:8px 12px;text-align:left;">最大分類</th>';
+    html += '<th style="padding:8px 12px;text-align:right;">vs 上月</th>';
     html += '</tr></thead><tbody>';
 
-    months.forEach(m => {
-        html += '<tr style="border-bottom:1px solid var(--border);">';
-        html += `<td style="padding:8px;color:var(--text);">${m.month}</td>`;
-        html += `<td style="padding:8px;text-align:right;color:var(--accent);font-weight:600;">${formatNumber(m.total)}</td>`;
-        catList.forEach(c => {
-            const v = m.categories[c] || 0;
-            html += `<td style="padding:8px;text-align:right;color:${v > 0 ? 'var(--text)' : 'var(--text-muted)'};">${v > 0 ? formatNumber(v) : '-'}</td>`;
-        });
-        html += `<td style="padding:8px;text-align:right;color:var(--text-dim);">${formatNumber(m.categories['其他'] || 0)}</td>`;
-        html += `<td style="padding:8px;text-align:right;color:var(--text-dim);">${formatNumber(m.categories['國外手續費'] || 0)}</td>`;
+    months.forEach((m, i) => {
+        const prev = months[i + 1] || null;
+        const diff = prev ? ((m.total - prev.total) / prev.total * 100).toFixed(0) : null;
+        const topCat = Object.entries(m.categories)
+            .filter(([k]) => k !== '國外手續費' && k !== '其他')
+            .sort((a, b) => b[1] - a[1])[0];
+        const isSelected = m.month === selectedExpenseMonth;
+
+        html += `<tr class="expense-row" style="border-bottom:1px solid var(--border);cursor:pointer;${isSelected ? 'background:rgba(212,197,169,0.08);' : ''}" onclick="toggleExpenseDetail('${m.month}', this)">`;
+        html += `<td style="padding:8px 12px;color:var(--text);font-weight:${isSelected ? '600' : '400'};">${m.month}</td>`;
+        html += `<td style="padding:8px 12px;text-align:right;color:var(--accent);font-weight:600;">NT$${formatNumber(m.total)}</td>`;
+        html += `<td style="padding:8px 12px;text-align:right;color:var(--text-dim);">${m.count}</td>`;
+        html += `<td style="padding:8px 12px;color:var(--text);">${topCat ? topCat[0] : '--'}</td>`;
+        if (diff !== null) {
+            html += `<td style="padding:8px 12px;text-align:right;color:${Number(diff) > 0 ? 'var(--danger)' : 'var(--success)'};">${diff > 0 ? '+' : ''}${diff}%</td>`;
+        } else {
+            html += '<td style="padding:8px 12px;text-align:right;color:var(--text-dim);">--</td>';
+        }
         html += '</tr>';
+
+        // Detail row (hidden by default)
+        html += `<tr id="expense-detail-${m.month.replace('/', '-')}" style="display:none;"><td colspan="5" style="padding:0;">`;
+        html += buildExpenseDetail(m);
+        html += '</td></tr>';
     });
 
     html += '</tbody></table>';
     document.getElementById('expense-history-table').innerHTML = html;
+}
+
+function buildExpenseDetail(monthData) {
+    const entries = Object.entries(monthData.categories).sort((a, b) => b[1] - a[1]);
+    const total = monthData.total;
+
+    let html = '<div style="padding:8px 12px 16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);">';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">';
+
+    entries.forEach(([cat, amount]) => {
+        const pct = total > 0 ? (amount / total * 100).toFixed(1) : 0;
+        const color = CATEGORY_COLORS[cat] || '#555';
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03);">`;
+        html += `<div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>`;
+        html += `<div style="flex:1;min-width:0;">`;
+        html += `<div style="font-size:11px;color:var(--text-dim);">${cat}</div>`;
+        html += `<div style="font-size:13px;color:var(--text);font-weight:500;">NT$${formatNumber(amount)}<span style="font-size:10px;color:var(--text-dim);margin-left:4px;">${pct}%</span></div>`;
+        html += '</div></div>';
+    });
+
+    html += '</div></div>';
+    return html;
+}
+
+function toggleExpenseDetail(month, rowEl) {
+    const detailId = 'expense-detail-' + month.replace('/', '-');
+    const detailRow = document.getElementById(detailId);
+    if (!detailRow) return;
+
+    const isVisible = detailRow.style.display !== 'none';
+    // Close all other detail rows
+    document.querySelectorAll('[id^="expense-detail-"]').forEach(r => r.style.display = 'none');
+    document.querySelectorAll('.expense-row').forEach(r => r.style.background = '');
+
+    if (!isVisible) {
+        detailRow.style.display = '';
+        rowEl.style.background = 'rgba(212,197,169,0.08)';
+        // Also update charts to this month
+        const sel = document.getElementById('expense-month-select');
+        sel.value = month;
+        onExpenseMonthChange(month);
+    }
 }
 
 // CSV import with AI classification (for future months)
