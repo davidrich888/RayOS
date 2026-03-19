@@ -3,8 +3,8 @@
 // Category classification rules (enhanced)
 const EXPENSE_CATEGORIES = {
     'Prop Firm': ['E8 FUNDING', 'E8FUNDING', 'TOPSTEP', 'APEX TRADER', 'APEX FUNDING', 'APEXTRADERFUNDING', 'FTMO', 'FUNDEDNEXT', 'FXIFY', 'THE5ERS', '5%ERS', 'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TRADERSCONNECT', 'TAKEPROFITTRADER', 'TRADESYNCER', 'KIT.COM', 'SIM2FUNDED'],
-    'Skool': ['SKOOL.COM', 'SKOOL'],
-    'AI/SaaS': ['ANTHROPIC', 'CLAUDE.AI', 'TELLA', 'STREAMYARD', 'N8N', 'PADDLE', 'APIFY', 'SUBEASY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY', 'VERCEL', 'CANVA', 'MANYCHAT', 'FUNNEL MASTE', 'ZAC PHUA', 'GOOGLE*CLOUD', 'GOOGLE CLOUD', 'GOOGLE*WORKSPACE', 'GSUITE', 'CAPCUT', 'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME', 'TRADINGVIEW', 'SCRIBD', 'NAME-CHEAP', 'NAMECHEAP', 'METACOPIER', 'FORMFLOW', '2CO.COM', 'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE'],
+    '事業': ['SKOOL.COM', 'SKOOL', 'TELLA', 'STREAMYARD', 'CAPCUT', 'CAPCUTO', 'SUBEASY', 'MANYCHAT', 'CANVA', 'FUNNEL MASTE', 'ZAC PHUA'],
+    'AI/SaaS': ['ANTHROPIC', 'CLAUDE.AI', 'N8N', 'PADDLE', 'APIFY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY', 'VERCEL', 'GOOGLE*CLOUD', 'GOOGLE CLOUD', 'GOOGLE*WORKSPACE', 'GSUITE', 'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME', 'TRADINGVIEW', 'SCRIBD', 'NAME-CHEAP', 'NAMECHEAP', 'METACOPIER', 'FORMFLOW', '2CO.COM', 'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE'],
     'Apple': ['APPLE.COM/BILL', 'APPLE.COM'],
     '交通': ['UBER ', 'UBER*', 'GOGORO', 'MOBILE SUICA', 'SUICA', '台灣大車隊', 'GRAB.COM', 'GRAB ', '加油站', '中油', '高鐵', '優步', 'CHARGESPOT', '城市車旅', 'ALPHA FLIGHT'],
     '餐飲': ['UBEREATS', '優食', 'FOODPANDA', '7-ELEVEN', '全家便利', '萊爾富', 'STARBUCKS', '星巴克', 'MOS-', 'MOS ', 'CAFE', 'SUSHI', 'HANDROLL', '全聯', '義美', 'PUTIEN', 'MUNCHIZ', 'XIAOLONGKAN', 'HOTPOT', 'GRILL', 'HOUSE KOREAN', 'ARABICA', 'BOOST JUICE', '拉麵', '燒肉', '鍋物', 'OMAKASE', '日嚐', '木門咖啡', '波奇', 'GELATO', 'DEAN&DELUCA', 'MCD', 'BREAD STREET', '統一超商', 'SEVEN-ELEVEN', 'FAMILYMART', 'MINISTOP', '鐵板燒', '食事', '壽司', 'ICHIRAN', 'UNATOTO', '冒煙的喬', '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT'],
@@ -19,7 +19,7 @@ const EXPENSE_CATEGORIES = {
 
 const CATEGORY_COLORS = {
     'Prop Firm': '#d4c5a9',
-    'Skool': '#7cb5ec',
+    '事業': '#7cb5ec',
     'AI/SaaS': '#90ed7d',
     'Apple': '#a0a0a0',
     '交通': '#f7a35c',
@@ -222,7 +222,7 @@ function renderEmptyExpense() {
 }
 
 // Fixed category column order
-const EXPENSE_COL_ORDER = ['Prop Firm', 'Skool', 'AI/SaaS', 'Apple', '交通', '餐飲', '旅行', '保險', '健身', '購物', '生活', '娛樂', '國外手續費', '其他'];
+const EXPENSE_COL_ORDER = ['Prop Firm', '事業', 'AI/SaaS', 'Apple', '交通', '餐飲', '旅行', '保險', '健身', '購物', '生活', '娛樂', '國外手續費', '其他'];
 
 function renderExpenseTable(months) {
     const thStyle = 'padding:6px 8px;text-align:right;white-space:nowrap;font-size:11px;';
