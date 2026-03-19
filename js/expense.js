@@ -279,8 +279,7 @@ async function showCategoryDetail(month, category) {
     if (!modal) {
         modal = document.createElement('div');
         modal.id = modalId;
-        modal.className = 'modal';
-        modal.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:center;';
+        modal.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:center;';
         modal.innerHTML = '<div style="background:var(--card-bg,#1a1a1a);border:1px solid var(--border,#333);border-radius:12px;max-width:500px;width:90%;max-height:80vh;overflow:hidden;"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border,#333);"><h3 id="expense-detail-title" style="margin:0;font-size:16px;color:var(--text,#e0e0e0);"></h3><button class="btn btn-small" onclick="document.getElementById(\'expense-detail-modal\').style.display=\'none\'">✕</button></div><div id="expense-detail-body" style="max-height:60vh;overflow-y:auto;padding:0;"></div></div>';
         modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
         document.body.appendChild(modal);
