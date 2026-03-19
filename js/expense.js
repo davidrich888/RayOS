@@ -2,16 +2,18 @@
 
 // Category classification rules (enhanced)
 const EXPENSE_CATEGORIES = {
-    'Prop Firm': ['E8 FUNDING', 'E8FUNDING', 'TOPSTEP', 'APEX TRADER', 'APEX FUNDING', 'APEXTRADERFUNDING', 'FTMO', 'FUNDEDNEXT', 'FXIFY', 'THE5ERS', '5%ERS', 'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TRADERSCONNECT', 'TAKEPROFITTRADER', 'TRADESYNCER', 'KIT.COM'],
+    'Prop Firm': ['E8 FUNDING', 'E8FUNDING', 'TOPSTEP', 'APEX TRADER', 'APEX FUNDING', 'APEXTRADERFUNDING', 'FTMO', 'FUNDEDNEXT', 'FXIFY', 'THE5ERS', '5%ERS', 'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TRADERSCONNECT', 'TAKEPROFITTRADER', 'TRADESYNCER', 'KIT.COM', 'SIM2FUNDED'],
     'Skool': ['SKOOL.COM', 'SKOOL'],
-    'AI/SaaS': ['ANTHROPIC', 'CLAUDE.AI', 'TELLA', 'STREAMYARD', 'N8N', 'PADDLE', 'APIFY', 'SUBEASY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY', 'VERCEL', 'CANVA', 'MANYCHAT', 'FUNNEL MASTE', 'ZAC PHUA'],
+    'AI/SaaS': ['ANTHROPIC', 'CLAUDE.AI', 'TELLA', 'STREAMYARD', 'N8N', 'PADDLE', 'APIFY', 'SUBEASY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY', 'VERCEL', 'CANVA', 'MANYCHAT', 'FUNNEL MASTE', 'ZAC PHUA', 'GOOGLE*CLOUD', 'GOOGLE CLOUD', 'GOOGLE*WORKSPACE', 'GSUITE', 'CAPCUT', 'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME', 'TRADINGVIEW', 'SCRIBD', 'NAME-CHEAP', 'NAMECHEAP', 'METACOPIER', 'FORMFLOW', '2CO.COM', 'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE'],
     'Apple': ['APPLE.COM/BILL', 'APPLE.COM'],
-    '交通': ['UBER ', 'UBER*', 'GOGORO', 'MOBILE SUICA', '台灣大車隊', 'GRAB.COM', 'GRAB '],
-    '餐飲': ['UBEREATS', '優食', 'FOODPANDA', '7-ELEVEN', '全家', '萊爾富', 'STARBUCKS', 'MOS-', 'MOS ', 'CAFE', 'SUSHI', 'HANDROLL'],
-    '旅行': ['AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店', 'KIWI.COM', 'STARLUX', 'FLYSCOOT', 'TOKYO', 'SHIBUYA', 'EKKAMAI', '易遊網'],
+    '交通': ['UBER ', 'UBER*', 'GOGORO', 'MOBILE SUICA', 'SUICA', '台灣大車隊', 'GRAB.COM', 'GRAB ', '加油站', '中油', '高鐵', '優步', 'CHARGESPOT', '城市車旅', 'ALPHA FLIGHT'],
+    '餐飲': ['UBEREATS', '優食', 'FOODPANDA', '7-ELEVEN', '全家便利', '萊爾富', 'STARBUCKS', '星巴克', 'MOS-', 'MOS ', 'CAFE', 'SUSHI', 'HANDROLL', '全聯', '義美', 'PUTIEN', 'MUNCHIZ', 'XIAOLONGKAN', 'HOTPOT', 'GRILL', 'HOUSE KOREAN', 'ARABICA', 'BOOST JUICE', '拉麵', '燒肉', '鍋物', 'OMAKASE', '日嚐', '木門咖啡', '波奇', 'GELATO', 'DEAN&DELUCA', 'MCD', 'BREAD STREET', '統一超商', 'SEVEN-ELEVEN', 'FAMILYMART', 'MINISTOP', '鐵板燒', '食事', '壽司', 'ICHIRAN', 'UNATOTO', '冒煙的喬', '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT'],
+    '旅行': ['AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店', 'KIWI.COM', 'STARLUX', 'FLYSCOOT', 'TOKYO', 'SHIBUYA', 'EKKAMAI', '易遊網', 'TRIP.COM', 'BANGKO', 'BANGKOK', 'DUBAI', 'DUTY FREE', 'DUTY_FREE', 'RYANAIR', 'SALA RATTANAKOSIN', 'ICONSIAM', 'EMQUARTIER', 'EMSPHERE', 'SIAM', 'PARAGON', 'SUKHUMVIT', 'THONGLOR', 'ASIATIQUE', 'KING POWER', 'SUVARNA', 'AIR ARABIA', 'NARITA', 'EDELWEISS', 'SOUTH COAST', 'SNOWIN', '滑雪', 'PRINCE HOTEL', 'SOLAMACHI', '行旅', 'WAYSIM', '酷遊天'],
     '保險': ['國泰人壽', '保險'],
-    '健身': ['WORLDGY', 'WORLD GY', '大有運動', 'DECATHLON', '迪卡儂'],
-    '購物': ['PCHOME', '蝦皮', 'LALAPORT', '秀泰', 'GLOBAL MALL', '環球'],
+    '健身': ['WORLDGY', 'WORLD GY', '大有運動', 'DECATHLON', '迪卡儂', 'JETTS FITNESS', 'NU TRITION DEPOT'],
+    '購物': ['PCHOME', '蝦皮', 'LALAPORT', '秀泰', 'GLOBAL MALL', '環球', '富邦MOMO', 'MOMO購物', '無印良品', 'MUJI', '金典', '勤美', 'CONVERSE', '大魯閣', '台灣菸酒', '連加', 'HOLA', 'TSUTAYA', 'BURTON', 'J STREAM', 'K區', 'WHSMITH', 'PIKZELS', 'CHANCHAO'],
+    '生活': ['遠傳電信', '遠傳電', '電話費', '寶雅', '屈臣氏', '佑全', '三商藥局', '小北百貨', '全家福', '寶島眼鏡', '昇昌', '燦坤', '年費'],
+    '娛樂': ['威秀影城', 'GOOGLE*YOUTUBE', 'GOOGLE *YOUTUBE', 'GOOGLE*TV', 'LINE STO'],
     '其他': []
 };
 
@@ -27,6 +29,8 @@ const CATEGORY_COLORS = {
     '健身': '#e4d354',
     '購物': '#f45b5b',
     '國外手續費': '#c4a35a',
+    '生活': '#91dcea',
+    '娛樂': '#ff9ff3',
     '其他': '#555'
 };
 
