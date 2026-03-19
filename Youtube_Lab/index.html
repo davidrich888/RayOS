@@ -153,14 +153,15 @@
       if (!text) return [];
       const lines = text.split('\n').filter(line => line.trim());
       return lines.map(line => {
-        const match = line.match(/^(\d+:\d+)(?:-(\d+:\d+))?\s*[-–]\s*(.+)$/);
-        if (match) {
-          return {
-            startTime: match[1],
-            endTime: match[2] || null,
-            description: match[3].trim(),
-            startSeconds: timeToSeconds(match[1])
-          };
+        // Format 1: "0:31-1:02 - description" or "0:31 - description"
+        const m1 = line.match(/^(\d+:\d+)(?:-(\d+:\d+))?\s*[-–]\s*(.+)$/);
+        if (m1) {
+          return { startTime: m1[1], endTime: m1[2] || null, description: m1[3].trim(), startSeconds: timeToSeconds(m1[1]) };
+        }
+        // Format 2: "0:31 description" (no dash separator)
+        const m2 = line.match(/^(\d+:\d+)\s+(.+)$/);
+        if (m2) {
+          return { startTime: m2[1], endTime: null, description: m2[2].trim(), startSeconds: timeToSeconds(m2[1]) };
         }
         return null;
       }).filter(Boolean);

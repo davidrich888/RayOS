@@ -33,11 +33,18 @@ def fetch_subtitles(video_id: str) -> dict:
     from youtube_transcript_api import YouTubeTranscriptApi
     api = YouTubeTranscriptApi()
     lang_priorities = [['zh-Hant', 'zh-Hans', 'zh-TW', 'zh'], ['en']]
+    def format_with_timestamps(transcript):
+        parts = []
+        for s in transcript.snippets:
+            mins = int(s.start // 60)
+            secs = int(s.start % 60)
+            parts.append(f'[{mins}:{secs:02d}] {s.text.strip()}')
+        return '\n'.join(parts)
+
     for langs in lang_priorities:
         try:
             transcript = api.fetch(video_id, languages=langs)
-            text_parts = [s.text.strip() for s in transcript.snippets]
-            return {'success': True, 'language': transcript.language, 'text': ' '.join(text_parts), 'length': len(transcript.snippets)}
+            return {'success': True, 'language': transcript.language, 'text': format_with_timestamps(transcript), 'length': len(transcript.snippets)}
         except Exception:
             continue
     try:
@@ -45,8 +52,7 @@ def fetch_subtitles(video_id: str) -> dict:
         for t in transcript_list:
             try:
                 transcript = api.fetch(video_id, languages=[t.language_code])
-                text_parts = [s.text.strip() for s in transcript.snippets]
-                return {'success': True, 'language': transcript.language, 'text': ' '.join(text_parts), 'length': len(transcript.snippets)}
+                return {'success': True, 'language': transcript.language, 'text': format_with_timestamps(transcript), 'length': len(transcript.snippets)}
             except Exception:
                 continue
     except Exception:
@@ -68,7 +74,7 @@ def generate_ai_summary(title: str, channel: str, transcript: str) -> dict:
 
 1. "summary" — AI 摘要（5 個重點，每點一句話，用 <br> 分隔）
 2. "one_liner" — 一句話學到（最核心的一個收穫，一句話）
-3. "highlights" — 精華片段（3-5 個關鍵段落重點，格式：段落位置 + 重點描述，用 <br> 分隔）
+3. "highlights" — 精華片段（3-5 個關鍵段落重點，格式：「時間碼 - 重點描述」，每段用 <br> 分隔。時間碼從字幕中取最接近的時間點，格式 M:SS 或 MM:SS，例如 "2:15 - 解釋風控的核心邏輯"）
 4. "priority" — 優先度建議（"🔥 必看" / "⭐ 重要" / "📌 一般" 三選一）
 
 只回覆 JSON，不要其他文字。"""
