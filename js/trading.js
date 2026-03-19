@@ -180,6 +180,15 @@ function updateManualChart() {
 
     manualChart.update();
 
+    // DD chart (negative values for visual)
+    manualDDChart.data.labels = manualChart.data.labels;
+    manualDDChart.data.datasets[0].data = chartData.map(d => {
+        if (manualByDate[d.date] === undefined) return null;
+        const entry = manualEquity.find(e => e.date === d.date);
+        return entry ? -(entry.dd || 0) : null;
+    });
+    manualDDChart.update();
+
     // Update summary cards
     const last = manualEquity[manualEquity.length - 1];
     document.getElementById('manual-cumret').textContent = last.cumRet.toFixed(2) + '%';

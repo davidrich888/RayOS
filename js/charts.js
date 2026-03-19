@@ -68,6 +68,19 @@ const manualChart = new Chart(manualCtx, { type: 'line', data: { labels: [], dat
     { label: '加權指數（手單）', data: [], borderColor: '#999', tension: 0.3, fill: false, borderWidth: 1.5, spanGaps: true }
 ] }, options: algoChartOpts });
 
+const manualDDCtx = document.getElementById('manualDDChart').getContext('2d');
+const manualDDChart = new Chart(manualDDCtx, { type: 'bar', data: { labels: [], datasets: [
+    { label: 'Drawdown', data: [], backgroundColor: 'rgba(124,181,236,0.5)', borderColor: '#7cb5ec', borderWidth: 1 }
+] }, options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, datalabels: { display: false } },
+    scales: {
+        x: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 9 }, maxTicksLimit: 12 } },
+        y: { grid: { color: '#1f1f1f' }, ticks: { color: '#6b6b6b', font: { size: 10 }, callback: v => v.toFixed(0) + '%' }, reverse: false }
+    },
+    elements: { point: { radius: 0 } }
+} });
+
 const algoDDCtx = document.getElementById('algoDDChart').getContext('2d');
 const algoDDChart = new Chart(algoDDCtx, { type: 'bar', data: { labels: [], datasets: [
     { label: 'Drawdown', data: [], backgroundColor: 'rgba(212,197,169,0.5)', borderColor: '#d4c5a9', borderWidth: 1 }
