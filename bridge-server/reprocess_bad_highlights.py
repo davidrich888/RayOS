@@ -11,6 +11,7 @@ import requests
 
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 NOTION_TOKEN = os.environ.get('NOTION_TOKEN', '')
+APIFY_API_TOKEN = os.environ.get('APIFY_API_TOKEN', '')
 NOTION_DB_ID = '76fb8600-ae96-49bc-b6c4-75f75f0ec818'
 
 GOOD_HIGHLIGHT_RE = re.compile(r'^\d+:\d+\s*[-–]\s*.+', re.MULTILINE)
@@ -92,10 +93,13 @@ def has_good_highlights(highlights: str) -> bool:
     return bool(GOOD_HIGHLIGHT_RE.search(highlights))
 
 
-def fetch_subtitles(video_id: str) -> dict:
-    """Fetch subtitles with timestamps."""
-    from youtube_transcript_api import YouTubeTranscriptApi
-    api = YouTubeTranscriptApi()
+def fetch_subtitles_local(video_id: str) -> dict:
+    """Fetch subtitles with timestamps using local youtube-transcript-api."""
+    try:
+        from youtube_transcript_api import YouTubeTranscriptApi
+        api = YouTubeTranscriptApi()
+    except ImportError:
+        return {'success': False, 'text': '', 'language': '', 'length': 0}
 
     def format_with_timestamps(transcript):
         parts = []
@@ -135,6 +139,74 @@ def fetch_subtitles(video_id: str) -> dict:
         pass
 
     return {'success': False, 'text': '', 'language': '', 'length': 0}
+
+
+def fetch_subtitles_apify(video_id: str) -> dict:
+    """Fetch subtitles using Apify karamelo~youtube-transcripts actor."""
+    if not APIFY_API_TOKEN:
+        return {'success': False, 'text': '', 'language': '', 'length': 0}
+
+    url = f'https://api.apify.com/v2/acts/karamelo~youtube-transcripts/run-sync-get-dataset-items?token={APIFY_API_TOKEN}'
+    resp = requests.post(
+        url,
+        json={
+            'urls': [f'https://www.youtube.com/watch?v={video_id}'],
+            'outputFormat': 'textWithTimestamps',
+        },
+        timeout=60,
+    )
+
+    if resp.status_code not in (200, 201):
+        print(f'  Apify HTTP {resp.status_code}: {resp.text[:100]}')
+        return {'success': False, 'text': '', 'language': '', 'length': 0}
+
+    try:
+        items = resp.json()
+    except Exception:
+        return {'success': False, 'text': '', 'language': '', 'length': 0}
+
+    if not isinstance(items, list) or not items:
+        return {'success': False, 'text': '', 'language': '', 'length': 0}
+
+    item = items[0]
+    captions = item.get('captions', [])
+    # Filter out null entries
+    raw_len = len(captions)
+    captions = [c for c in captions if c is not None]
+    if not captions:
+        print(f'  Apify: {raw_len} raw captions, all null')
+        return {'success': False, 'text': '', 'language': '', 'length': 0}
+
+    # textWithTimestamps: captions = [{start, end, text}, ...]
+    formatted_lines = []
+    for cap in captions:
+        start = cap.get('start', 0)
+        text = cap.get('text', '').strip()
+        if not text:
+            continue
+        mins = int(start // 60)
+        secs = int(start % 60)
+        formatted_lines.append(f'[{mins}:{secs:02d}] {text}')
+
+    if not formatted_lines:
+        return {'success': False, 'text': '', 'language': '', 'length': 0}
+
+    return {
+        'success': True,
+        'language': 'apify',
+        'text': '\n'.join(formatted_lines),
+        'length': len(formatted_lines),
+    }
+
+
+def fetch_subtitles(video_id: str) -> dict:
+    """Fetch subtitles: try local first, fallback to Apify."""
+    result = fetch_subtitles_local(video_id)
+    if result['success']:
+        return result
+
+    print('  Local failed, trying Apify...')
+    return fetch_subtitles_apify(video_id)
 
 
 def generate_ai_summary(title: str, channel: str, transcript: str) -> dict:
@@ -230,6 +302,10 @@ def main():
     if not NOTION_TOKEN:
         print('ERROR: NOTION_TOKEN not set')
         sys.exit(1)
+    if not APIFY_API_TOKEN:
+        print('WARNING: APIFY_API_TOKEN not set, Apify fallback disabled')
+    else:
+        print(f'Apify token: {APIFY_API_TOKEN[:15]}...')
 
     # Step 1: Fetch all videos from Notion
     print('Fetching all videos from Notion...')
