@@ -414,37 +414,4 @@ function updateLifeOverview() {
     renderMemoryPanel();
 }
 
-// Expense analyzer (standalone, kept for wealth page)
-async function analyzeExpenses() {
-    const csvText = document.getElementById('expense-paste').value.trim();
-    if (!csvText) { showToast('Please paste CSV data first', true); return; }
-    const apiKey = localStorage.getItem('anthropic_key');
-    if (!apiKey) { showToast('Please set API key in Settings first', true); return; }
-    const resultEl = document.getElementById('expense-result');
-    resultEl.style.display = 'block';
-    resultEl.innerHTML = '<div style="text-align:center;padding:20px;">Analyzing expenses...</div>';
-    try {
-        const model = localStorage.getItem('ai_model') || 'claude-haiku-4-5-20251001';
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify({
-                model: model,
-                max_tokens: 1024,
-                system: 'You are an expense analyzer. Analyze the CSV data. Respond in Traditional Chinese mixed with English. Output: 1) Category breakdown table (category, count, total) 2) Top 3 spending categories 3) One actionable saving tip. Use simple HTML formatting with inline styles matching dark theme (color:#e0e0e0). Keep it concise.',
-                messages: [{ role: 'user', content: 'Analyze these expenses:\n' + csvText }]
-            })
-        });
-        if (!response.ok) throw new Error('API error: ' + response.status);
-        const data = await response.json();
-        const text = data.content?.[0]?.text || 'No response';
-        resultEl.innerHTML = '<div class="form-section" style="margin-top:12px;">' + text + '</div>';
-    } catch(e) {
-        resultEl.innerHTML = '<div style="color:var(--danger);padding:12px;">Analysis failed: ' + e.message + '</div>';
-    }
-}
+// Expense analyzer moved to js/expense.js (importExpenseCSV)

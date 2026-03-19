@@ -456,6 +456,10 @@
             .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             .tab { padding: 10px 12px; font-size: 11px; white-space: nowrap; }
             
+            /* ===== EXPENSE ===== */
+            #tab-expense-page > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+            #tab-expense-page .summary-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
             /* ===== WEALTH SECTION ===== */
             .wealth-main { overflow: hidden; }
             .wealth-layout { gap: 16px; }

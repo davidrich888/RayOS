@@ -93,64 +93,103 @@
                 </div>
             </div>
             <div class="content">
+                <div class="tabs">
+                    <div class="tab active" onclick="setWealthTab('assets',this)">💰 Assets</div>
+                    <div class="tab" onclick="setWealthTab('expense',this)">💳 Expense</div>
+                </div>
                 <div class="wealth-layout">
                     <div class="wealth-main">
-                        <div class="wealth-quote-goal" style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
-                            <div class="quote-box animate-fade">
-                                <div class="quote-text" id="wealth-quote-text">"Make more money, keep the same lifestyle.<br>That's how you get rich."</div>
-                                <div class="quote-author" id="wealth-quote-author"></div>
-                                <button class="btn btn-small" style="position:absolute;top:12px;right:12px;opacity:0.5;" onclick="editQuote()">Edit</button>
-                            </div>
-                            <div class="goal-card animate-fade" style="animation-delay:0.1s;">
-                                <div class="goal-header"><span class="goal-label">2026 TARGET</span><button class="btn btn-small" onclick="editGoal()">Edit</button></div>
-                                <div class="goal-value"><span id="goal-current">--</span> / <span id="goal-target">6,500,000</span></div>
-                                <div class="goal-progress"><div class="goal-bar" id="goal-bar" style="width:0%"></div></div>
-                                <div class="goal-info"><span id="goal-pct">0%</span><span id="goal-remain">還差 --</span></div>
-                            </div>
-                        </div>
-                        
-                        <div class="summary-grid animate-fade" style="animation-delay:0.15s;">
-                            <div class="summary-item"><div class="summary-label">Total Assets</div><div class="summary-value accent" id="display-total">--</div></div>
-                            <div class="summary-item"><div class="summary-label">Monthly</div><div class="summary-value" id="display-monthly">--</div></div>
-                            <div class="summary-item"><div class="summary-label">Yearly</div><div class="summary-value" id="display-yearly">--</div></div>
-                            <div class="summary-item"><div class="summary-label">MDD</div><div class="summary-value" id="display-mdd">--</div></div>
-                            <div class="summary-item"><div class="summary-label">Last Update</div><div class="summary-value" id="display-lastdate" style="font-size:16px;">--</div></div>
-                        </div>
-                        
-                        <div class="chart-container animate-fade" style="animation-delay:0.2s;">
-                            <div class="chart-header">
-                                <div class="chart-title">Trend</div>
-                                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                                    <div class="chart-toggle">
-                                        <button class="chart-toggle-btn active" onclick="setWealthMode('trend',this)">Trend</button>
-                                        <button class="chart-toggle-btn" onclick="setWealthMode('growth',this)">Growth %</button>
-                                    </div>
-                                    <div class="chart-toggle">
-                                        <button class="chart-toggle-btn" onclick="setWealthChartStyle('line',this)">📈 Line</button>
-                                        <button class="chart-toggle-btn active" onclick="setWealthChartStyle('bar',this)">📊 Bar</button>
-                                        <button class="chart-toggle-btn" onclick="setWealthChartStyle('both',this)">Both</button>
-                                    </div>
-                                    <div class="chart-tabs">
-                                        <button class="chart-tab active" onclick="setWealthChart('total',this)">Total Assets</button>
-                                        <button class="chart-tab" onclick="setWealthChart('reserve',this)">備用金</button>
-                                        <button class="chart-tab" onclick="setWealthChart('savings',this)">活期存款</button>
-                                        <button class="chart-tab" onclick="setWealthChart('stocks',this)">股票/ETF</button>
-                                        <button class="chart-tab" onclick="setWealthChart('crypto',this)">加密貨幣</button>
-                                        <button class="chart-tab" onclick="setWealthChart('forex',this)">外幣存款</button>
-                                        <button class="chart-tab" onclick="setWealthChart('debt',this)">債務</button>
-                                    </div>
+                        <!-- ASSETS TAB -->
+                        <div id="tab-assets">
+                            <div class="wealth-quote-goal" style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+                                <div class="quote-box animate-fade">
+                                    <div class="quote-text" id="wealth-quote-text">"Make more money, keep the same lifestyle.<br>That's how you get rich."</div>
+                                    <div class="quote-author" id="wealth-quote-author"></div>
+                                    <button class="btn btn-small" style="position:absolute;top:12px;right:12px;opacity:0.5;" onclick="editQuote()">Edit</button>
+                                </div>
+                                <div class="goal-card animate-fade" style="animation-delay:0.1s;">
+                                    <div class="goal-header"><span class="goal-label">2026 TARGET</span><button class="btn btn-small" onclick="editGoal()">Edit</button></div>
+                                    <div class="goal-value"><span id="goal-current">--</span> / <span id="goal-target">6,500,000</span></div>
+                                    <div class="goal-progress"><div class="goal-bar" id="goal-bar" style="width:0%"></div></div>
+                                    <div class="goal-info"><span id="goal-pct">0%</span><span id="goal-remain">還差 --</span></div>
                                 </div>
                             </div>
-                            <div class="chart-wrapper"><canvas id="wealthChart"></canvas></div>
-                        </div>
-                        
-                        <div id="tab-expense">
-                            <div class="form-section">
-                                <div class="form-title">📤 Import Credit Card Statement</div>
-                                <textarea class="form-input" id="expense-paste" rows="3" placeholder="Paste CSV: date,description,amount" style="width:100%;"></textarea>
-                                <div class="form-actions"><button class="btn btn-accent" onclick="analyzeExpenses()">Analyze</button></div>
+
+                            <div class="summary-grid animate-fade" style="animation-delay:0.15s;">
+                                <div class="summary-item"><div class="summary-label">Total Assets</div><div class="summary-value accent" id="display-total">--</div></div>
+                                <div class="summary-item"><div class="summary-label">Monthly</div><div class="summary-value" id="display-monthly">--</div></div>
+                                <div class="summary-item"><div class="summary-label">Yearly</div><div class="summary-value" id="display-yearly">--</div></div>
+                                <div class="summary-item"><div class="summary-label">MDD</div><div class="summary-value" id="display-mdd">--</div></div>
+                                <div class="summary-item"><div class="summary-label">Last Update</div><div class="summary-value" id="display-lastdate" style="font-size:16px;">--</div></div>
                             </div>
-                            <div id="expense-result" style="display:none;"></div>
+
+                            <div class="chart-container animate-fade" style="animation-delay:0.2s;">
+                                <div class="chart-header">
+                                    <div class="chart-title">Trend</div>
+                                    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                                        <div class="chart-toggle">
+                                            <button class="chart-toggle-btn active" onclick="setWealthMode('trend',this)">Trend</button>
+                                            <button class="chart-toggle-btn" onclick="setWealthMode('growth',this)">Growth %</button>
+                                        </div>
+                                        <div class="chart-toggle">
+                                            <button class="chart-toggle-btn" onclick="setWealthChartStyle('line',this)">📈 Line</button>
+                                            <button class="chart-toggle-btn active" onclick="setWealthChartStyle('bar',this)">📊 Bar</button>
+                                            <button class="chart-toggle-btn" onclick="setWealthChartStyle('both',this)">Both</button>
+                                        </div>
+                                        <div class="chart-tabs">
+                                            <button class="chart-tab active" onclick="setWealthChart('total',this)">Total Assets</button>
+                                            <button class="chart-tab" onclick="setWealthChart('reserve',this)">備用金</button>
+                                            <button class="chart-tab" onclick="setWealthChart('savings',this)">活期存款</button>
+                                            <button class="chart-tab" onclick="setWealthChart('stocks',this)">股票/ETF</button>
+                                            <button class="chart-tab" onclick="setWealthChart('crypto',this)">加密貨幣</button>
+                                            <button class="chart-tab" onclick="setWealthChart('forex',this)">外幣存款</button>
+                                            <button class="chart-tab" onclick="setWealthChart('debt',this)">債務</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart-wrapper"><canvas id="wealthChart"></canvas></div>
+                            </div>
+                        </div>
+
+                        <!-- EXPENSE TAB -->
+                        <div id="tab-expense-page" style="display:none;">
+                            <div class="summary-grid" style="grid-template-columns:repeat(4,1fr);">
+                                <div class="summary-item"><div class="summary-label">本月總支出</div><div class="summary-value accent" id="expense-total">--</div></div>
+                                <div class="summary-item"><div class="summary-label">vs 上月</div><div class="summary-value" id="expense-vs-prev">--</div></div>
+                                <div class="summary-item"><div class="summary-label">最大分類</div><div class="summary-value" id="expense-top-cat" style="font-size:14px;">--</div></div>
+                                <div class="summary-item"><div class="summary-label">國外手續費</div><div class="summary-value" id="expense-foreign-fee">--</div></div>
+                            </div>
+
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+                                <div class="chart-container">
+                                    <div class="chart-header"><div class="chart-title">分類占比</div></div>
+                                    <div class="chart-wrapper" style="height:280px;"><canvas id="expensePieChart"></canvas></div>
+                                </div>
+                                <div class="chart-container">
+                                    <div class="chart-header"><div class="chart-title">月支出趨勢</div></div>
+                                    <div class="chart-wrapper" style="height:280px;"><canvas id="expenseTrendChart"></canvas></div>
+                                </div>
+                            </div>
+
+                            <div class="form-section" style="margin-top:16px;">
+                                <div class="form-title">📤 匯入信用卡帳單</div>
+                                <div style="display:flex;gap:12px;align-items:flex-start;">
+                                    <textarea class="form-input" id="expense-paste" rows="4" placeholder="貼上 CSV：日期,描述,金額（國泰/台新帳單格式皆可）" style="flex:1;"></textarea>
+                                    <div style="display:flex;flex-direction:column;gap:8px;">
+                                        <button class="btn btn-accent" onclick="importExpenseCSV()">AI 分類匯入</button>
+                                        <button class="btn" onclick="document.getElementById('expense-paste').value=''">清除</button>
+                                    </div>
+                                </div>
+                                <div id="expense-import-status" style="display:none;margin-top:8px;font-size:12px;color:var(--text-dim);"></div>
+                            </div>
+
+                            <div class="chart-container" style="margin-top:16px;">
+                                <div class="chart-header">
+                                    <div class="chart-title">歷史紀錄</div>
+                                    <button class="btn btn-small" onclick="clearExpenseData()">清除全部</button>
+                                </div>
+                                <div id="expense-history-table" style="overflow-x:auto;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1057,6 +1096,7 @@
     <script src="js/settings.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/wealth.js"></script>
+    <script src="js/expense.js"></script>
     <script src="js/ai-engine.js"></script>
     <script src="js/business.js"></script>
     <script src="js/trading.js"></script>
