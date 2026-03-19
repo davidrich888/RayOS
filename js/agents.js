@@ -170,7 +170,11 @@ async function n8nFetch(apiPath) {
 }
 
 let agentExecChart = null;
+let agentDailyChart = null;
 let agentDataLoaded = false;
+
+// Store all executions for daily bar chart
+let allExecsByDate = {};
 
 async function loadAgentExecutions() {
     const rows = document.querySelectorAll('.agent-row[data-wf]');
@@ -182,13 +186,14 @@ async function loadAgentExecutions() {
     const agentNames = [];
     const agentSuccessCounts = [];
     const agentErrorCounts = [];
+    allExecsByDate = {};
 
     for (const row of rows) {
         const wfId = row.dataset.wf;
         const statusEl = row.querySelector('.agent-exec-status');
         const dotEl = row.querySelector('.agent-status-dot');
         const nameEl = row.querySelector('div[style*="font-weight:600"]');
-        const agentName = nameEl ? nameEl.textContent.split('（')[0].trim() : wfId;
+        const agentName = nameEl ? nameEl.textContent.split('（')[0].split(/\s/)[0].trim() : wfId;
         if (!statusEl) continue;
 
         try {
@@ -211,6 +216,12 @@ async function loadAgentExecutions() {
                 if (t < sevenDaysAgo) continue;
                 if (ex.status === 'success') { s++; totalSuccess++; }
                 else { e++; totalError++; }
+
+                // Group by date for daily bar chart
+                const dateKey = new Date(ex.startedAt || ex.createdAt).toISOString().slice(0, 10);
+                if (!allExecsByDate[dateKey]) allExecsByDate[dateKey] = { success: 0, error: 0 };
+                if (ex.status === 'success') allExecsByDate[dateKey].success++;
+                else allExecsByDate[dateKey].error++;
             }
             agentNames.push(agentName);
             agentSuccessCounts.push(s);
@@ -256,14 +267,30 @@ async function loadAgentExecutions() {
 function buildOverviewChart(names, successCounts, errorCounts, totalSuccess, totalError, lastRunTime) {
     const canvas = document.getElementById('agent-exec-chart');
     const summaryEl = document.getElementById('agent-exec-summary');
+    const totalsEl = document.getElementById('agent-exec-totals');
+    const healthEl = document.getElementById('agent-health-pct');
+    const lastActivityEl = document.getElementById('agent-last-activity');
     if (!canvas || !summaryEl) return;
-
-    // Doughnut chart: success vs error
-    const ctx = canvas.getContext('2d');
-    if (agentExecChart) agentExecChart.destroy();
 
     const total = totalSuccess + totalError;
     const successRate = total > 0 ? Math.round((totalSuccess / total) * 100) : 0;
+
+    // Update hero health indicator
+    if (healthEl) {
+        const healthColor = successRate >= 80 ? '#4CAF50' : successRate >= 50 ? '#FF9800' : '#f44336';
+        healthEl.textContent = total > 0 ? `${successRate}%` : '—';
+        healthEl.style.color = total > 0 ? healthColor : 'var(--text-dim)';
+    }
+
+    // Update last activity timestamp
+    if (lastActivityEl) {
+        const lastRunStr = lastRunTime ? formatRelative(lastRunTime) : '';
+        lastActivityEl.textContent = lastRunStr ? `Last activity: ${lastRunStr}` : '';
+    }
+
+    // Doughnut chart: success vs error (smaller 150x150)
+    const ctx = canvas.getContext('2d');
+    if (agentExecChart) agentExecChart.destroy();
 
     agentExecChart = new Chart(ctx, {
         type: 'doughnut',
@@ -277,7 +304,7 @@ function buildOverviewChart(names, successCounts, errorCounts, totalSuccess, tot
         },
         options: {
             responsive: false,
-            cutout: '70%',
+            cutout: '68%',
             plugins: {
                 legend: { display: false },
                 datalabels: { display: false }
@@ -288,34 +315,118 @@ function buildOverviewChart(names, successCounts, errorCounts, totalSuccess, tot
             beforeDraw(chart) {
                 const { ctx, width, height } = chart;
                 ctx.save();
-                ctx.font = 'bold 28px Inter';
+                ctx.font = 'bold 24px Inter';
                 ctx.fillStyle = successRate >= 80 ? '#4CAF50' : successRate >= 50 ? '#FF9800' : '#f44336';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(`${successRate}%`, width / 2, height / 2 - 8);
-                ctx.font = '10px Inter';
+                ctx.fillText(`${successRate}%`, width / 2, height / 2 - 6);
+                ctx.font = '9px Inter';
                 ctx.fillStyle = '#6b6b6b';
-                ctx.fillText('success rate', width / 2, height / 2 + 16);
+                ctx.fillText('success', width / 2, height / 2 + 14);
                 ctx.restore();
             }
         }]
     });
 
-    // Summary text
-    const lastRunStr = lastRunTime ? formatRelative(lastRunTime) : 'N/A';
-    summaryEl.innerHTML = `
-        <div><strong style="color:var(--text);">${total}</strong> executions (7d)</div>
-        <div><span style="color:#4CAF50;">● ${totalSuccess} success</span> · <span style="color:#f44336;">● ${totalError} error</span></div>
-        <div>Last activity: <strong style="color:var(--text);">${lastRunStr}</strong></div>
-        <div style="margin-top:8px;">
-            ${names.map((n, i) => {
-                const s = successCounts[i];
-                const e = errorCounts[i];
-                const color = e > 0 ? '#f44336' : '#4CAF50';
-                return `<span style="color:${color};margin-right:8px;">● ${n}: ${s}✓${e > 0 ? ` ${e}✗` : ''}</span>`;
-            }).join('<br>')}
-        </div>
-    `;
+    // Totals below donut
+    if (totalsEl) {
+        totalsEl.innerHTML = `<span style="color:#4CAF50;">${totalSuccess}✓</span> · <span style="color:#f44336;">${totalError}✗</span> · <strong style="color:var(--text);">${total}</strong> total`;
+    }
+
+    // Daily bar chart — last 7 days stacked bars
+    buildDailyBarChart();
+
+    // Per-agent summary as compact horizontal badges
+    summaryEl.innerHTML = names.map((n, i) => {
+        const s = successCounts[i];
+        const e = errorCounts[i];
+        const color = e > 0 ? '#f44336' : '#4CAF50';
+        const bgColor = e > 0 ? 'rgba(244,67,54,0.12)' : 'rgba(76,175,80,0.12)';
+        return `<span style="color:${color};background:${bgColor};padding:2px 8px;border-radius:4px;font-size:10px;white-space:nowrap;">● ${n} ${s}✓${e > 0 ? ` ${e}✗` : ''}</span>`;
+    }).join('');
+}
+
+function buildDailyBarChart() {
+    const canvas = document.getElementById('agent-daily-chart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (agentDailyChart) agentDailyChart.destroy();
+
+    // Generate last 7 days labels
+    const labels = [];
+    const successData = [];
+    const errorData = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        const dayLabel = d.toLocaleDateString('zh-TW', { weekday: 'short' });
+        labels.push(dayLabel);
+        const dayData = allExecsByDate[key] || { success: 0, error: 0 };
+        successData.push(dayData.success);
+        errorData.push(dayData.error);
+    }
+
+    agentDailyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Success',
+                    data: successData,
+                    backgroundColor: 'rgba(76,175,80,0.7)',
+                    borderRadius: 3,
+                    barPercentage: 0.6
+                },
+                {
+                    label: 'Error',
+                    data: errorData,
+                    backgroundColor: 'rgba(244,67,54,0.7)',
+                    borderRadius: 3,
+                    barPercentage: 0.6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { display: false },
+                    ticks: { color: '#6b6b6b', font: { size: 10 } },
+                    border: { display: false }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: 'rgba(212,197,169,0.08)' },
+                    ticks: {
+                        color: '#6b6b6b',
+                        font: { size: 10 },
+                        stepSize: 1,
+                        precision: 0
+                    },
+                    border: { display: false }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                datalabels: { display: false },
+                tooltip: {
+                    backgroundColor: '#1a1a1a',
+                    titleColor: '#e8e8e8',
+                    bodyColor: '#e8e8e8',
+                    borderColor: 'rgba(212,197,169,0.2)',
+                    borderWidth: 1,
+                    padding: 8,
+                    displayColors: true
+                }
+            }
+        }
+    });
 }
 
 function formatRelative(date) {
@@ -492,9 +603,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.agent-row[data-wf]').forEach(row => {
         row.style.cursor = 'pointer';
         row.style.transition = 'background 0.15s ease';
+        const originalBg = row.style.background;
         row.addEventListener('click', () => toggleAgentDetail(row));
         row.addEventListener('mouseenter', () => { row.style.background = 'rgba(212,197,169,0.14)'; });
-        row.addEventListener('mouseleave', () => { row.style.background = 'rgba(212,197,169,0.08)'; });
+        row.addEventListener('mouseleave', () => { row.style.background = originalBg; });
     });
 
     // Attach click handlers to info rows (Data Sync + Tools)
