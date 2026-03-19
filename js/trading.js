@@ -116,58 +116,26 @@ function updateAlgoChart() {
     const data = algoEquity;
     if (data.length === 0) return;
 
-    // If manual account exists, trim x-axis to start from manual start date
-    // and rebase all lines to 0% from that date
-    let chartData = data;
-    let algoRebaseCumRet = null;
-    let idxRebaseCumRet = null;
-
-    if (manualEquity.length > 0) {
-        const manualStartDate = manualEquity[0].date;
-        const startIdx = data.findIndex(d => d.date >= manualStartDate);
-        if (startIdx > 0) {
-            chartData = data.slice(startIdx);
-            algoRebaseCumRet = data[startIdx].cumRet;
-            if (data[startIdx].idxCumRet !== undefined) {
-                idxRebaseCumRet = data[startIdx].idxCumRet;
-            }
-        }
-    }
-
-    // Labels: show M/D format
-    algoChart.data.labels = chartData.map(d => {
+    // Labels: show M/D format (full history)
+    algoChart.data.labels = data.map(d => {
         const parts = d.date.split('/');
         return parts.length >= 3 ? parts[1] + '/' + parts[2] : d.date.slice(5);
     });
 
-    // Dataset 0: 程式帳戶 cumulative return (rebased if trimmed)
-    if (algoRebaseCumRet !== null) {
-        const baseFactor = 1 + algoRebaseCumRet / 100;
-        algoChart.data.datasets[0].data = chartData.map(d =>
-            parseFloat(((1 + d.cumRet / 100) / baseFactor - 1) * 100).toFixed(2) * 1
-        );
-    } else {
-        algoChart.data.datasets[0].data = chartData.map(d => d.cumRet);
+    // Dataset 0: 程式帳戶 cumulative return (original, no rebase)
+    algoChart.data.datasets[0].data = data.map(d => d.cumRet);
+
+    // Dataset 1: 加權指數 cumulative return (original, no rebase)
+    if (data[0].idxCumRet !== undefined) {
+        algoChart.data.datasets[1].data = data.map(d => d.idxCumRet);
     }
 
-    // Dataset 1: 加權指數 cumulative return (rebased if trimmed)
-    if (chartData[0].idxCumRet !== undefined) {
-        if (idxRebaseCumRet !== null) {
-            const baseFactor = 1 + idxRebaseCumRet / 100;
-            algoChart.data.datasets[1].data = chartData.map(d =>
-                parseFloat(((1 + (d.idxCumRet || 0) / 100) / baseFactor - 1) * 100).toFixed(2) * 1
-            );
-        } else {
-            algoChart.data.datasets[1].data = chartData.map(d => d.idxCumRet);
-        }
-    }
-
-    // Dataset 2: 手單帳戶 cumulative return
-    // Dataset 3: 加權指數（手單）(rebased from manual start)
+    // Dataset 2: 手單帳戶 cumulative return (null before start)
+    // Dataset 3: 加權指數（手單）(rebased from manual start, null before start)
     if (manualEquity.length > 0) {
         const manualByDate = {};
         manualEquity.forEach(d => { manualByDate[d.date] = d.cumRet; });
-        algoChart.data.datasets[2].data = chartData.map(d =>
+        algoChart.data.datasets[2].data = data.map(d =>
             manualByDate[d.date] !== undefined ? manualByDate[d.date] : null
         );
 
@@ -176,7 +144,7 @@ function updateAlgoChart() {
         const baseEntry = data.find(d => d.date === manualStartDate);
         if (baseEntry && baseEntry.idxCumRet !== undefined) {
             const baseFactor = 1 + baseEntry.idxCumRet / 100;
-            algoChart.data.datasets[3].data = chartData.map(d => {
+            algoChart.data.datasets[3].data = data.map(d => {
                 if (manualByDate[d.date] === undefined) return null;
                 const cur = 1 + (d.idxCumRet || 0) / 100;
                 return parseFloat(((cur / baseFactor - 1) * 100).toFixed(2));
@@ -186,10 +154,10 @@ function updateAlgoChart() {
 
     algoChart.update();
 
-    // DD chart (also trimmed to same range)
-    if (typeof algoDDChart !== 'undefined' && chartData[0].dd !== undefined) {
+    // DD chart
+    if (typeof algoDDChart !== 'undefined' && data[0].dd !== undefined) {
         algoDDChart.data.labels = algoChart.data.labels;
-        algoDDChart.data.datasets[0].data = chartData.map(d => d.dd || 0);
+        algoDDChart.data.datasets[0].data = data.map(d => d.dd || 0);
         algoDDChart.update();
     }
 }
