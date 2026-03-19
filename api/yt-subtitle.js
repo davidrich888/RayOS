@@ -5,7 +5,8 @@
  *   1. YouTube watch page (free, fast)
  *   2. Innertube WEB client (free)
  *   3. youtube-nocookie.com (free)
- *   4. Apify YouTube Transcripts Actor (paid, ~$0.005/video)
+ *   4. RapidAPI YouTube Transcriptor (paid, ~$0.001/req)
+ *   5. Apify YouTube Transcripts Actor (paid, ~$0.005/video)
  *
  * Note: YouTube blocks cloud provider IPs (Vercel/AWS/GCP), so strategies
  * 1-3 may all fail. Apify (strategy 4) is the reliable fallback.
@@ -15,6 +16,7 @@
 
 const AUTH_TOKEN = 'rayos-yt-sub-2026';
 const APIFY_TOKEN = process.env.APIFY_API_TOKEN || '';
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '';
 
 const LANG_PRIORITIES = [
   ['zh-Hant', 'zh-Hans', 'zh-TW', 'zh'],
@@ -66,7 +68,17 @@ async function fetchSubtitles(videoId) {
     }
   }
 
-  // Strategy 4: Apify (paid, last resort — works from any IP)
+  // Strategy 4: RapidAPI YouTube Transcriptor (paid, fast)
+  if (RAPIDAPI_KEY) {
+    try {
+      const result = await fetchViaRapidAPI(videoId);
+      if (result && result.hasSubtitles) return result;
+    } catch (e) {
+      // Fall through
+    }
+  }
+
+  // Strategy 5: Apify (paid, last resort — works from any IP)
   if (APIFY_TOKEN) {
     try {
       const result = await fetchViaApify(videoId);
@@ -76,7 +88,7 @@ async function fetchSubtitles(videoId) {
     }
   }
 
-  return noSubs(videoId, 'All proxy strategies failed (including Apify)');
+  return noSubs(videoId, 'All proxy strategies failed (including RapidAPI + Apify)');
 }
 
 async function fetchViaWatchPage(videoId, cookie) {
@@ -269,6 +281,55 @@ function parseXml(videoId, language, xmlText) {
     lengthInSeconds: Math.round(segments[segments.length - 1].start),
     source: 'vercel-proxy',
   };
+}
+
+async function fetchViaRapidAPI(videoId) {
+  const langs = ['zh-Hant', 'en', 'zh', 'ja'];
+  for (const lang of langs) {
+    try {
+      const resp = await fetch(
+        `https://youtube-transcriptor.p.rapidapi.com/transcript?video_id=${videoId}&lang=${lang}`,
+        {
+          headers: {
+            'x-rapidapi-host': 'youtube-transcriptor.p.rapidapi.com',
+            'x-rapidapi-key': RAPIDAPI_KEY,
+          },
+          signal: AbortSignal.timeout(30000),
+        }
+      );
+      if (!resp.ok) continue;
+      const data = await resp.json();
+
+      // Parse response — array of transcript objects
+      const items = Array.isArray(data) ? data : [data];
+      for (const item of items) {
+        if (typeof item !== 'object' || !item) continue;
+        const segs = item.transcription || item.subtitles || [];
+        if (!Array.isArray(segs) || segs.length === 0) continue;
+
+        const segments = segs
+          .filter(s => s && (s.subtitle || s.text))
+          .map(s => ({
+            start: Math.round(parseFloat(s.start || s.startTime || 0) * 100) / 100,
+            text: (s.subtitle || s.text || '').trim(),
+          }))
+          .filter(s => s.text);
+
+        if (segments.length > 0) {
+          const last = segments[segments.length - 1];
+          return {
+            success: true, videoId, hasSubtitles: true, language: lang,
+            transcription: segments,
+            lengthInSeconds: Math.round(last.start),
+            source: 'rapidapi',
+          };
+        }
+      }
+    } catch (e) {
+      continue;
+    }
+  }
+  return null;
 }
 
 async function fetchViaApify(videoId) {

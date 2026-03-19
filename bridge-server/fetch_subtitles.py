@@ -4,7 +4,9 @@ Called by bridge-server/server.js as a subprocess.
 
 Fallback chain:
   1. youtube-transcript-api (free, fast)
-  2. Apify YouTube Transcript Actor (paid ~$0.005/video, 99.5%+ success rate)
+  2. RapidAPI YouTube Transcriptor (paid, ~$0.001/req)
+  3. Vercel serverless proxy (free, different IP)
+  4. Apify YouTube Transcript Actor (paid ~$0.005/video, 99.5%+ success rate)
 
 Usage: python3 fetch_subtitles.py <video_id>
 Output: JSON to stdout
@@ -13,9 +15,12 @@ import sys
 import json
 import os
 import time
+import urllib.request
+import urllib.error
 from typing import Optional
 
 APIFY_API_TOKEN = os.environ.get('APIFY_API_TOKEN', '')
+RAPIDAPI_KEY = os.environ.get('RAPIDAPI_KEY', '')
 VERCEL_PROXY_URL = os.environ.get('VERCEL_PROXY_URL', 'https://ray-os.vercel.app/api/yt-subtitle')
 VERCEL_PROXY_TOKEN = os.environ.get('VERCEL_PROXY_TOKEN', 'rayos-yt-sub-2026')
 
@@ -102,10 +107,60 @@ def fetch_via_transcript_api(video_id: str) -> Optional[dict]:
     return None
 
 
+def fetch_via_rapidapi(video_id: str) -> Optional[dict]:
+    """Layer 2: RapidAPI YouTube Transcriptor (paid, fast)."""
+    if not RAPIDAPI_KEY:
+        print('[Layer 2] No RAPIDAPI_KEY, skipping', file=sys.stderr)
+        return None
+
+    for lang in ['zh-Hant', 'zh-TW', 'en', 'zh', 'ja']:
+        try:
+            api_url = f'https://youtube-transcriptor.p.rapidapi.com/transcript?video_id={video_id}&lang={lang}'
+            req = urllib.request.Request(api_url, headers={
+                'x-rapidapi-host': 'youtube-transcriptor.p.rapidapi.com',
+                'x-rapidapi-key': RAPIDAPI_KEY,
+            })
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read())
+
+            if isinstance(data, list) and len(data) > 0:
+                for item in data:
+                    if isinstance(item, dict):
+                        segs = item.get('transcription', item.get('subtitles', []))
+                        if isinstance(segs, list) and segs:
+                            segments = []
+                            for s in segs:
+                                if isinstance(s, dict):
+                                    text = s.get('subtitle', s.get('text', '')).strip()
+                                    start = float(s.get('start', s.get('startTime', 0)))
+                                    dur = float(s.get('dur', s.get('duration', 0)))
+                                    if text:
+                                        segments.append({'start': round(start, 2), 'text': text, 'duration': round(dur, 2)})
+                            if segments:
+                                return _format_result(video_id, lang, segments, 'rapidapi')
+            elif isinstance(data, dict):
+                segs = data.get('transcription', data.get('subtitles', []))
+                if isinstance(segs, list) and segs:
+                    segments = []
+                    for s in segs:
+                        if isinstance(s, dict):
+                            text = s.get('subtitle', s.get('text', '')).strip()
+                            start = float(s.get('start', s.get('startTime', 0)))
+                            dur = float(s.get('dur', s.get('duration', 0)))
+                            if text:
+                                segments.append({'start': round(start, 2), 'text': text, 'duration': round(dur, 2)})
+                    if segments:
+                        return _format_result(video_id, lang, segments, 'rapidapi')
+        except Exception as e:
+            continue
+
+    return None
+
+
 def fetch_via_apify(video_id: str) -> Optional[dict]:
-    """Layer 2: Apify YouTube Transcript Actor (paid, reliable)."""
+    """Layer 4: Apify YouTube Transcript Actor (paid, reliable)."""
     if not APIFY_API_TOKEN:
-        print('[Layer 3] No APIFY_API_TOKEN, skipping', file=sys.stderr)
+        print('[Layer 4] No APIFY_API_TOKEN, skipping', file=sys.stderr)
         return None
 
     import requests
@@ -129,12 +184,12 @@ def fetch_via_apify(video_id: str) -> Optional[dict]:
         )
 
         if resp.status_code not in (200, 201):
-            print(f'[Layer 3] Apify HTTP {resp.status_code}: {resp.text[:200]}', file=sys.stderr)
+            print(f'[Layer 4] Apify HTTP {resp.status_code}: {resp.text[:200]}', file=sys.stderr)
             return None
 
         items = resp.json()
         if not items or len(items) == 0:
-            print('[Layer 3] Apify returned empty result', file=sys.stderr)
+            print('[Layer 4] Apify returned empty result', file=sys.stderr)
             return None
 
         item = items[0]
@@ -179,14 +234,14 @@ def fetch_via_apify(video_id: str) -> Optional[dict]:
             if segments:
                 return _format_result(video_id, language, segments, 'apify')
 
-        print(f'[Layer 3] Apify response has no usable captions. Keys: {list(item.keys())}', file=sys.stderr)
+        print(f'[Layer 4] Apify response has no usable captions. Keys: {list(item.keys())}', file=sys.stderr)
         return None
 
     except requests.Timeout:
-        print('[Layer 3] Apify timeout (120s)', file=sys.stderr)
+        print('[Layer 4] Apify timeout (120s)', file=sys.stderr)
         return None
     except Exception as e:
-        print(f'[Layer 3] Apify error: {e}', file=sys.stderr)
+        print(f'[Layer 4] Apify error: {e}', file=sys.stderr)
         return None
 
 
@@ -227,8 +282,9 @@ def fetch(video_id: str) -> dict:
 
     Chain:
       1. youtube-transcript-api (free, fast, local)
-      2. Vercel serverless proxy (free, different IP)
-      3. Apify (paid, last resort)
+      2. RapidAPI YouTube Transcriptor (paid, fast)
+      3. Vercel serverless proxy (free, different IP)
+      4. Apify (paid, last resort)
     """
 
     # Layer 1: youtube-transcript-api (free)
@@ -238,18 +294,25 @@ def fetch(video_id: str) -> dict:
         print(f'[fetch] Layer 1 success: {len(result["transcription"])} segments', file=sys.stderr)
         return result
 
-    # Layer 2: Vercel proxy (free, different IP)
-    print(f'[fetch] Layer 1 failed, trying Layer 2: Vercel proxy', file=sys.stderr)
-    result = fetch_via_vercel_proxy(video_id)
+    # Layer 2: RapidAPI (paid, fast)
+    print(f'[fetch] Layer 1 failed, trying Layer 2: RapidAPI', file=sys.stderr)
+    result = fetch_via_rapidapi(video_id)
     if result:
         print(f'[fetch] Layer 2 success: {len(result["transcription"])} segments', file=sys.stderr)
         return result
 
-    # Layer 3: Apify (paid fallback)
-    print(f'[fetch] Layer 2 failed, trying Layer 3: Apify', file=sys.stderr)
-    result = fetch_via_apify(video_id)
+    # Layer 3: Vercel proxy (free, different IP)
+    print(f'[fetch] Layer 2 failed, trying Layer 3: Vercel proxy', file=sys.stderr)
+    result = fetch_via_vercel_proxy(video_id)
     if result:
         print(f'[fetch] Layer 3 success: {len(result["transcription"])} segments', file=sys.stderr)
+        return result
+
+    # Layer 4: Apify (paid fallback)
+    print(f'[fetch] Layer 3 failed, trying Layer 4: Apify', file=sys.stderr)
+    result = fetch_via_apify(video_id)
+    if result:
+        print(f'[fetch] Layer 4 success: {len(result["transcription"])} segments', file=sys.stderr)
         return result
 
     # All layers failed
@@ -259,7 +322,7 @@ def fetch(video_id: str) -> dict:
         'videoId': video_id,
         'hasSubtitles': False,
         'transcription': [],
-        'message': 'All subtitle fetch methods failed (L1: IP blocked, L2: Vercel proxy failed, L3: Apify failed)',
+        'message': 'All subtitle fetch methods failed (L1: transcript-api, L2: RapidAPI, L3: Vercel proxy, L4: Apify)',
     }
 
 
