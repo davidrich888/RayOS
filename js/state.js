@@ -2,7 +2,7 @@
 
 let accounts = JSON.parse(localStorage.getItem('accounts')) || DEFAULT_ACCOUNTS;
 let wealthGoal = parseInt(localStorage.getItem('wealth_goal')) || 6500000;
-let quote = JSON.parse(localStorage.getItem('wealth_quote')) || {text:"Wealth is the ability to fully experience life.",author:"Henry David Thoreau"};
+let quote = JSON.parse(localStorage.getItem('wealth_quote')) || {text:"Make more money, keep the same lifestyle.\nThat's how you get rich.",author:""};
 let wealthChartMode = 'trend';
 let wealthChartType = 'total';
 let wealthChartStyle = 'bar';
