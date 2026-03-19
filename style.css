@@ -142,7 +142,7 @@
         @keyframes dotPulse { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
         
         /* Summary Grid */
-        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
         #wealth .summary-grid { grid-template-columns: repeat(4, 1fr); }
         .summary-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.3s; }
         .summary-item:hover { border-color: var(--text-muted); }
@@ -153,7 +153,7 @@
         .summary-value.accent { color: var(--accent); }
         
         /* Chart */
-        .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 16px; }
         .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
         .chart-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; }
         .chart-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
