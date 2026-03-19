@@ -137,6 +137,16 @@ const INFO_META = {
         flow: 'Claude curl POST（title/type/summary/score/tags）→ N8N Webhook → 寫入 Memory → 回傳確認',
         webhook: true
     },
+    'tft-wall-sync': {
+        name: 'TFT 見證牆自動新增',
+        icon: '🏆',
+        schedule: '每 7 天（Auto Task）',
+        purpose: '自動掃描 Skool 最新 2 面成果牆，比對現有 storyData，新卡片自動截圖、抓取貼文內容/頭像/附圖，生成 WebP，插入 index.html 並 git push 部署。',
+        sources: ['Skool 成果牆（Playwright 登入）', 'index.html storyData'],
+        outputs: ['story.png + avatar + images', 'index.html（新 entry）', 'Vercel 自動部署', 'TG 通知'],
+        flow: 'Auto Task 觸發 → Playwright 登入 Skool → 掃描牆 1+2 → 比對現有 → 截圖+抓資料 → WebP → 插入 storyData → git push → TG 通知',
+        taskId: 'tft-wall-sync'
+    },
     'weekly-review-data': {
         name: 'Weekly Review Data',
         icon: '📊',
