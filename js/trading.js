@@ -130,19 +130,23 @@ function updateAlgoChart() {
         algoChart.data.datasets[1].data = data.map(d => d.idxCumRet);
     }
 
-    // Dataset 2: 手單帳戶 cumulative return (aligned by date)
-    // Dataset 3: 同期大盤 (rebased from manual account start date)
+    // Dataset 2: 手單帳戶 cumulative return (aligned by date, 0% before start)
+    // Dataset 3: 加權指數（手單）(rebased from manual account start date, 0% before start)
     if (manualEquity.length > 0) {
         const manualByDate = {};
         manualEquity.forEach(d => { manualByDate[d.date] = d.cumRet; });
-        algoChart.data.datasets[2].data = data.map(d => manualByDate[d.date] !== undefined ? manualByDate[d.date] : null);
+        const manualStartDate = manualEquity[0].date;
+        algoChart.data.datasets[2].data = data.map(d => {
+            if (manualByDate[d.date] !== undefined) return manualByDate[d.date];
+            return d.date < manualStartDate ? 0 : null;
+        });
 
         // Rebase index from manual account start date
-        const manualStartDate = manualEquity[0].date;
         const baseEntry = data.find(d => d.date === manualStartDate);
         if (baseEntry && baseEntry.idxCumRet !== undefined) {
             const baseFactor = 1 + baseEntry.idxCumRet / 100;
             algoChart.data.datasets[3].data = data.map(d => {
+                if (d.date < manualStartDate) return 0;
                 if (manualByDate[d.date] === undefined) return null;
                 const cur = 1 + (d.idxCumRet || 0) / 100;
                 return parseFloat(((cur / baseFactor - 1) * 100).toFixed(2));
