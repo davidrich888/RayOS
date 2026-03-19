@@ -19,13 +19,16 @@ EXPENSE_CATEGORIES = {
         'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TRADERSCONNECT', 'TAKEPROFITTRADER',
         'TRADESYNCER', 'KIT.COM', 'SIM2FUNDED',
     ],
-    'Skool': ['SKOOL.COM', 'SKOOL'],
+    '事業': [
+        'SKOOL.COM', 'SKOOL', 'TELLA', 'STREAMYARD', 'CAPCUT', 'CAPCUTO',
+        'SUBEASY', 'MANYCHAT', 'CANVA', 'FUNNEL MASTE', 'ZAC PHUA',
+    ],
     'AI/SaaS': [
-        'ANTHROPIC', 'CLAUDE.AI', 'TELLA', 'STREAMYARD', 'N8N', 'PADDLE',
-        'APIFY', 'SUBEASY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY',
-        'VERCEL', 'CANVA', 'MANYCHAT', 'FUNNEL MASTE', 'ZAC PHUA',
+        'ANTHROPIC', 'CLAUDE.AI', 'N8N', 'PADDLE',
+        'APIFY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY',
+        'VERCEL',
         'GOOGLE*CLOUD', 'GOOGLE CLOUD', 'GOOGLE*WORKSPACE', 'GSUITE',
-        'CAPCUT', 'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME', 'TRADINGVIEW',
+        'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME', 'TRADINGVIEW',
         'SCRIBD', 'NAME-CHEAP', 'NAMECHEAP', 'METACOPIER', 'FORMFLOW', '2CO.COM',
         'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'NOKIA',
         'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE',
@@ -109,21 +112,19 @@ def classify(desc: str) -> str:
 def should_skip(desc: str, amount: float) -> bool:
     """Check if this row should be skipped."""
     norm = normalize(desc)
-    if amount <= 0:
-        return True
     for pat in SKIP_PATTERNS:
         if pat in norm:
             return True
     return False
 
 
-def parse_amount(val: str) -> float:
+def parse_amount(val: str, keep_sign: bool = False) -> float:
     """Parse a TWD amount string like '29,770' or '-29,770'."""
     clean = val.replace(',', '').replace('"', '').replace('−', '-').strip()
     if not clean or clean == '−':
         return 0
     try:
-        return abs(float(clean))
+        return float(clean) if keep_sign else abs(float(clean))
     except ValueError:
         return 0
 
@@ -176,12 +177,12 @@ def parse_cathay_csv(filepath: str, bill_year: int, bill_month: int) -> list:
         if not re.match(r'\d{2}/\d{2}', date_str):
             continue
 
-        amount = parse_amount(amount_str)
-        if amount <= 0:
+        amount = parse_amount(amount_str, keep_sign=True)
+        if amount == 0:
             continue
 
         norm_desc = normalize(desc)
-        if should_skip(norm_desc, amount):
+        if should_skip(norm_desc, abs(amount)):
             continue
 
         # Determine month from date
@@ -246,13 +247,13 @@ def parse_taishin_xlsx(filepath: str) -> list:
         except (ValueError, TypeError):
             continue
 
-        if amount <= 0:
+        if amount == 0:
             continue
 
         desc = str(desc_val).strip()
         norm_desc = normalize(desc)
 
-        if should_skip(norm_desc, amount):
+        if should_skip(norm_desc, abs(amount)):
             continue
 
         # Month key
@@ -317,7 +318,34 @@ def main():
         print(f"  Taishin {fname}: {len(txns)} transactions")
         all_transactions.extend(txns)
 
-    print(f"\nTotal transactions: {len(all_transactions)}")
+    print(f"\nTotal transactions (before refund matching): {len(all_transactions)}")
+
+    # Match refunds: negative amount + same merchant → remove both
+    refunds = [t for t in all_transactions if t['amount'] < 0]
+    charges = [t for t in all_transactions if t['amount'] > 0]
+    matched_refund_ids = set()
+    matched_charge_ids = set()
+
+    for ri, refund in enumerate(refunds):
+        refund_amt = abs(refund['amount'])
+        for ci, charge in enumerate(charges):
+            if ci in matched_charge_ids:
+                continue
+            if charge['desc'] == refund['desc'] and abs(charge['amount'] - refund_amt) < 0.01:
+                matched_refund_ids.add(ri)
+                matched_charge_ids.add(ci)
+                print(f"  🔄 Refund matched: {refund['desc']} NT${refund_amt:,.0f} ({refund['date']})")
+                break
+
+    # Remove matched pairs, keep only positive unmatched
+    unmatched_refunds = [r for i, r in enumerate(refunds) if i not in matched_refund_ids]
+    if unmatched_refunds:
+        print(f"\n  ⚠️  {len(unmatched_refunds)} unmatched refunds:")
+        for r in unmatched_refunds:
+            print(f"     {r['date']}  {r['desc']}  NT${abs(r['amount']):,.0f}")
+
+    all_transactions = [c for i, c in enumerate(charges) if i not in matched_charge_ids]
+    print(f"Total transactions (after refund matching): {len(all_transactions)}")
 
     # Aggregate by month
     monthly = defaultdict(lambda: {'total': 0, 'count': 0, 'categories': defaultdict(int)})
