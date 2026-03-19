@@ -59,8 +59,7 @@ EXPENSE_CATEGORIES = {
         'WAYSIM', '酷遊天',
     ],
     '保險': ['國泰人壽', '保險'],
-    '健身': ['WORLDGY', 'WORLD GY', '大有運動', 'DECATHLON', '迪卡儂',
-             'JETTS FITNESS', 'NU TRITION DEPOT'],
+    '健身': ['WORLDGY', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT'],
     '購物': [
         'PCHOME', '蝦皮', 'LALAPORT', '秀泰', 'GLOBAL MALL', '環球',
         '富邦MOMO', 'MOMO購物', '無印良品', 'MUJI', '金典', '勤美',
@@ -72,7 +71,8 @@ EXPENSE_CATEGORIES = {
         '遠傳電信', '遠傳電', '電話費', '寶雅', '屈臣氏', '佑全', '三商藥局',
         '小北百貨', '全家福', '寶島眼鏡', '昇昌', '燦坤', '年費',
     ],
-    '娛樂': ['威秀影城', 'GOOGLE*YOUTUBE', 'GOOGLE *YOUTUBE', 'GOOGLE*TV', 'LINE STO'],
+    '娛樂': ['威秀影城', 'GOOGLE*YOUTUBE', 'GOOGLE *YOUTUBE', 'GOOGLE*TV', 'LINE STO',
+             'DECATHLON', '迪卡儂', '大有運動'],
 }
 
 # Skip patterns - these are NOT expenses
