@@ -76,7 +76,7 @@ EXPENSE_CATEGORIES = {
 }
 
 # Skip patterns - these are NOT expenses
-SKIP_PATTERNS = ['CUBEAPP', 'RICHART', '上期帳單']
+SKIP_PATTERNS = ['CUBEAPP', 'RICHART', '上期帳單', '年費']
 
 # Foreign transaction fee patterns
 FOREIGN_FEE_PATTERNS = ['國外交易手續費', '國外交易服務費']
@@ -273,7 +273,7 @@ def parse_taishin_xlsx(filepath: str) -> list:
 
 
 def main():
-    dl = '/Users/jarvis/Downloads'
+    dl = os.path.join(os.path.dirname(__file__), '..', 'archive', 'expense-bills')
 
     # Cathay CSV files
     cathay_files = [
