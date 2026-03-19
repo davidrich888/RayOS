@@ -186,9 +186,9 @@ function updateManualChart() {
     const cumEl = document.getElementById('manual-cumret');
     cumEl.className = 'summary-value ' + (last.cumRet >= 0 ? 'positive' : 'negative');
 
-    const minDD = Math.min(...manualEquity.map(d => d.dd || 0));
+    const maxDD = Math.max(...manualEquity.map(d => d.dd || 0));
     const mddEl = document.getElementById('manual-mdd');
-    mddEl.textContent = minDD.toFixed(2) + '%';
+    mddEl.textContent = maxDD.toFixed(2) + '%';
 
     const winDays = manualEquity.filter(d => d.dailyRet > 0).length;
     const totalDays = manualEquity.filter(d => d.dailyRet !== 0).length;
