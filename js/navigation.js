@@ -99,6 +99,8 @@ const TARGET_DATA = {
                     <p><strong style="color:var(--accent);">目標</strong>：峇里島私人別墅</p>
                     <p><strong style="color:var(--accent);">預算</strong>：$200,000 USD</p>
                     <p><strong style="color:var(--accent);">用途</strong>：度假 + 遠端工作基地</p>
+                    <p><strong style="color:var(--accent);">靈感參考</strong>：</p>
+                    <p>📸 <a href="https://www.instagram.com/axelrayne/saved/_/18034424416904428/" target="_blank" style="color:var(--accent);">IG 收藏 — Bali Villa 靈感</a></p>
                 </div>
             </div>`
     },
@@ -117,16 +119,25 @@ const TARGET_DATA = {
             </div>`
     },
     bangkok: {
-        title: '🏎️ Bangkok House & McLaren',
+        title: '🏠 Bangkok House — $100,000 USD',
         html: `
             <div style="margin-bottom:16px;">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-                    <img src="https://images.unsplash.com/photo-1583511655826-05700442b31b?w=400&q=80" alt="Bangkok" style="width:100%;border-radius:4px;border:1px solid var(--border);">
-                    <img src="https://images.unsplash.com/photo-1621135802920-133df287f89c?w=400&q=80" alt="McLaren" style="width:100%;border-radius:4px;border:1px solid var(--border);">
-                </div>
+                <img src="https://images.unsplash.com/photo-1583511655826-05700442b31b?w=400&q=80" alt="Bangkok" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
-                    <p><strong style="color:var(--accent);">目標 1</strong>：曼谷房子</p>
-                    <p><strong style="color:var(--accent);">目標 2</strong>：McLaren</p>
+                    <p><strong style="color:var(--accent);">目標</strong>：曼谷房子</p>
+                    <p><strong style="color:var(--accent);">預算</strong>：$100,000 USD</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
+                </div>
+            </div>`
+    },
+    mclaren: {
+        title: '🏎️ McLaren — $300,000 USD',
+        html: `
+            <div style="margin-bottom:16px;">
+                <img src="https://images.unsplash.com/photo-1621135802920-133df287f89c?w=800&q=80" alt="McLaren" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：McLaren</p>
+                    <p><strong style="color:var(--accent);">預算</strong>：$300,000 USD</p>
                     <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
                 </div>
             </div>`

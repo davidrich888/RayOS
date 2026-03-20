@@ -112,13 +112,6 @@
     "month": "2025/08"
   },
   {
-    "date": "2025/08/29",
-    "desc": "APPLE.COM/BILL",
-    "amount": 29.0,
-    "category": "Apple",
-    "month": "2025/08"
-  },
-  {
     "date": "2025/08/30",
     "desc": "統一超商-新榮",
     "amount": 155.0,
@@ -199,7 +192,7 @@
     "date": "2025/09/05",
     "desc": "STREAMYARD.COM",
     "amount": 1383.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/09"
   },
   {
@@ -437,7 +430,7 @@
     "date": "2025/10/01",
     "desc": "ZAC PHUA* 60-MIN STRAT",
     "amount": 2957.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -451,7 +444,7 @@
     "date": "2025/10/01",
     "desc": "ZAC PHUA* FUNNEL MASTE",
     "amount": 9053.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -549,7 +542,7 @@
     "date": "2025/10/05",
     "desc": "STREAMYARD.COM",
     "amount": 1368.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -1312,7 +1305,7 @@
     "date": "2025/11/05",
     "desc": "STREAMYARD.COM",
     "amount": 1392.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/11"
   },
   {
@@ -1823,7 +1816,7 @@
     "date": "2025/12/05",
     "desc": "STREAMYARD.COM",
     "amount": 1411.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/12"
   },
   {
@@ -2586,7 +2579,7 @@
     "date": "2026/01/05",
     "desc": "STREAMYARD.COM",
     "amount": 1414.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/01"
   },
   {
@@ -3524,7 +3517,7 @@
     "date": "2026/02/05",
     "desc": "STREAMYARD.COM",
     "amount": 1423.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -3755,7 +3748,7 @@
     "date": "2026/02/15",
     "desc": "SUBEASY.AI",
     "amount": 480.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -3825,7 +3818,7 @@
     "date": "2026/02/17",
     "desc": "TELLA",
     "amount": 4895.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -3895,7 +3888,7 @@
     "date": "2026/02/23",
     "desc": "SKOOL.COM",
     "amount": 28651.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -3909,7 +3902,7 @@
     "date": "2026/02/23",
     "desc": "SKOOL.COM",
     "amount": 30274.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -5169,7 +5162,7 @@
     "date": "2026/03/05",
     "desc": "STREAMYARD.COM",
     "amount": 1425.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/03"
   },
   {
@@ -6177,7 +6170,7 @@
     "date": "2025/10/03",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3013.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -6275,7 +6268,7 @@
     "date": "2025/10/01",
     "desc": "SUBEASY.AIO6075 UNIT 1",
     "amount": 1238.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -6359,7 +6352,7 @@
     "date": "2025/09/28",
     "desc": "MANYCHAT.COMO1846 SAN FR",
     "amount": 1373.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/09"
   },
   {
@@ -6492,7 +6485,7 @@
     "date": "2025/09/22",
     "desc": "CAPCUTO7785 SINGAP",
     "amount": 590.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/09"
   },
   {
@@ -6590,7 +6583,7 @@
     "date": "2025/09/18",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 2974.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2025/09"
   },
   {
@@ -6961,7 +6954,7 @@
     "date": "2025/11/05",
     "desc": "CANVA* I04688-34621674O4664 CAMDEN",
     "amount": 9289.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/11"
   },
   {
@@ -7115,7 +7108,7 @@
     "date": "2025/11/03",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3063.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2025/11"
   },
   {
@@ -7178,7 +7171,7 @@
     "date": "2025/11/01",
     "desc": "SUBEASY.AIO6075 UNIT 1",
     "amount": 1238.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/11"
   },
   {
@@ -7451,7 +7444,7 @@
     "date": "2025/10/28",
     "desc": "MANYCHAT.COMO1846 SAN FR",
     "amount": 1381.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -7479,7 +7472,7 @@
     "date": "2025/10/28",
     "desc": "P.SKOOL.COM/GJPMQO6995 EL SEG",
     "amount": 21477.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -7990,7 +7983,7 @@
     "date": "2025/10/21",
     "desc": "CAPCUTO7785 SINGAP",
     "amount": 590.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -8158,7 +8151,7 @@
     "date": "2025/10/18",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3041.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2025/10"
   },
   {
@@ -8604,13 +8597,6 @@
   },
   {
     "date": "2025/11/07",
-    "desc": "TRIP.COMLONDON",
-    "amount": 52759.0,
-    "category": "旅行",
-    "month": "2025/11"
-  },
-  {
-    "date": "2025/11/07",
     "desc": "國外交易服務費-52759.00",
     "amount": 792.0,
     "category": "國外手續費",
@@ -8634,7 +8620,7 @@
     "date": "2025/12/03",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3099.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2025/12"
   },
   {
@@ -8746,7 +8732,7 @@
     "date": "2025/12/01",
     "desc": "SUBEASY.AIO6075 UNIT 1",
     "amount": 1238.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/12"
   },
   {
@@ -8991,7 +8977,7 @@
     "date": "2025/11/28",
     "desc": "MANYCHAT.COMO1846 SAN FR",
     "amount": 1411.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/11"
   },
   {
@@ -9334,7 +9320,7 @@
     "date": "2025/11/21",
     "desc": "CAPCUTO7785 SINGAP",
     "amount": 590.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/11"
   },
   {
@@ -9474,7 +9460,7 @@
     "date": "2025/11/18",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3090.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2025/11"
   },
   {
@@ -10216,7 +10202,7 @@
     "date": "2026/01/03",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3113.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2026/01"
   },
   {
@@ -10335,7 +10321,7 @@
     "date": "2025/12/28",
     "desc": "MANYCHAT.COMO1846 SAN FR",
     "amount": 1415.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/12"
   },
   {
@@ -10391,7 +10377,7 @@
     "date": "2025/12/21",
     "desc": "CAPCUTO7785 SINGAP",
     "amount": 590.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2025/12"
   },
   {
@@ -10433,7 +10419,7 @@
     "date": "2025/12/18",
     "desc": "SKOOL.COMEL SEG",
     "amount": 3121.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2025/12"
   },
   {
@@ -11273,7 +11259,7 @@
     "date": "2026/02/03",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3129.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -11350,7 +11336,7 @@
     "date": "2026/01/28",
     "desc": "MANYCHAT.COMSAN FR",
     "amount": 1414.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/01"
   },
   {
@@ -11420,7 +11406,7 @@
     "date": "2026/01/21",
     "desc": "CAPCUTO7785 SINGAP",
     "amount": 590.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/01"
   },
   {
@@ -11434,7 +11420,7 @@
     "date": "2026/01/18",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3132.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2026/01"
   },
   {
@@ -11546,7 +11532,7 @@
     "date": "2026/01/08",
     "desc": "SUBEASY.AIO6075 UNIT 1",
     "amount": 1238.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/01"
   },
   {
@@ -11672,7 +11658,7 @@
     "date": "2026/02/28",
     "desc": "MANYCHAT.COMO1846 SAN FR",
     "amount": 1414.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -11826,7 +11812,7 @@
     "date": "2026/02/22",
     "desc": "P.SKOOL.COM/XXJHZO6995 EL SEG",
     "amount": 915.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -11875,7 +11861,7 @@
     "date": "2026/02/21",
     "desc": "CAPCUTO7785 SINGAP",
     "amount": 590.0,
-    "category": "AI/SaaS",
+    "category": "事業",
     "month": "2026/02"
   },
   {
@@ -11931,7 +11917,7 @@
     "date": "2026/02/18",
     "desc": "SKOOL.COMO0117 EL SEG",
     "amount": 3115.0,
-    "category": "Skool",
+    "category": "事業",
     "month": "2026/02"
   },
   {
