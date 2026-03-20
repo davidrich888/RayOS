@@ -6,6 +6,8 @@ let contentLog = [];
 let contentTab = 'inspiration';
 let contentPillarFilter = 'all';
 let contentStatusFilter = 'all';
+let igScripts = [];
+let igScriptFilter = 'all';
 
 const CONTENT_LOG_DB_ID = '60354141f1fe4f858b065f0101a72e89';
 
@@ -106,7 +108,9 @@ function renderContentSection() {
     renderWeeklyProgress();
     // Hide all tab areas first
     const ytArea = document.getElementById('content-ytstudio-area');
+    const igArea = document.getElementById('content-igscripts-area');
     if (ytArea) ytArea.style.display = 'none';
+    if (igArea) igArea.style.display = 'none';
 
     if (contentTab === 'ytstudio') {
         document.getElementById('content-status-filters').style.display = 'none';
@@ -115,6 +119,14 @@ function renderContentSection() {
         document.getElementById('content-list').style.display = 'none';
         if (ytArea) ytArea.style.display = '';
         if (typeof renderYTStudio === 'function') renderYTStudio();
+    } else if (contentTab === 'igscripts') {
+        document.getElementById('content-status-filters').style.display = 'none';
+        document.getElementById('content-filters').style.display = 'none';
+        document.getElementById('content-production-area').style.display = 'none';
+        document.getElementById('content-list').style.display = 'none';
+        if (igArea) igArea.style.display = '';
+        loadIGScripts();
+        renderIGScripts();
     } else if (contentTab === 'inspiration') {
         document.getElementById('content-list').style.display = '';
         renderInspirationPool();
@@ -814,6 +826,188 @@ function markdownToNotionBlocks(md) {
     }
 
     return blocks;
+}
+
+// ==================== IG SCRIPTS ====================
+
+const IG_SCRIPTS_KEY = 'igScripts';
+
+const DEFAULT_IG_SCRIPTS = [
+    { id: 'ig-001', title: 'AI 幫我寫的 EA，出金 180 萬', hook: '開頭秀出金截圖，倒帶講怎麼做到的', status: '💡 待拍', pillar: 'AI 自動化', created: '2026-03-20' },
+    { id: 'ig-002', title: '我叫 AI 寫一個交易策略，然後拿去跑真錢', hook: '螢幕錄影 Claude Code → MQL5 → 回測 → 實盤結果', status: '💡 待拍', pillar: 'AI 自動化', created: '2026-03-20' },
+    { id: 'ig-003', title: 'AI 寫的交易策略 vs 我自己寫的，誰贏？', hook: 'PK 對比，有懸念有結果', status: '💡 待拍', pillar: '程式交易', created: '2026-03-20' },
+    { id: 'ig-004', title: '用 AI 寫交易機器人的 3 個致命錯誤', hook: '踩坑經驗，反向切入（真實犯過的錯誤）', status: '💡 待拍', pillar: 'AI 自動化', created: '2026-03-20' },
+    { id: 'ig-005', title: '我每天花 0 分鐘盯盤，因為 AI 幫我做了這件事', hook: '展示 RayOS 儀表板 + 自動化 pipeline', status: '💡 待拍', pillar: 'AI 自動化', created: '2026-03-20' },
+    { id: 'ig-006', title: 'Prop Firm 考試可以用 AI 嗎？可以，但...', hook: '爭議性標題，講 AI 能幫什麼、不能幫什麼', status: '💡 待拍', pillar: 'Prop Firm 實戰', created: '2026-03-20' },
+    { id: 'ig-007', title: '我用 Claude Code 10 分鐘寫出一個均線策略，能賺錢嗎？', hook: '限時挑戰，回測揭曉', status: '💡 待拍', pillar: '程式交易', created: '2026-03-20' },
+    { id: 'ig-008', title: '交易員會被 AI 取代嗎？我用了一年的真實感受', hook: '觀點型，有資格講因為真的在用', status: '💡 待拍', pillar: '交易心態', created: '2026-03-20' },
+    { id: 'ig-009', title: '一個指令讓 AI 自動分析我的交易績效', hook: '展示 Claude Code 跑分析、生成報告的過程', status: '💡 待拍', pillar: 'AI 自動化', created: '2026-03-20' },
+    { id: 'ig-010', title: 'AI 寫的策略上線第一天就虧錢，然後我做了這件事', hook: '故事型，從虧到調整到獲利的過程', status: '💡 待拍', pillar: '程式交易', created: '2026-03-20' },
+];
+
+function loadIGScripts() {
+    const saved = localStorage.getItem(IG_SCRIPTS_KEY);
+    if (saved) {
+        igScripts = JSON.parse(saved);
+    } else {
+        igScripts = [...DEFAULT_IG_SCRIPTS];
+        saveIGScripts();
+    }
+}
+
+function saveIGScripts() {
+    localStorage.setItem(IG_SCRIPTS_KEY, JSON.stringify(igScripts));
+}
+
+function setIGScriptFilter(filter) {
+    igScriptFilter = filter;
+    document.querySelectorAll('.ig-script-filter-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.ig-script-filter-btn[data-filter="${filter}"]`);
+    if (btn) btn.classList.add('active');
+    renderIGScripts();
+}
+
+function renderIGScripts() {
+    const container = document.getElementById('ig-scripts-list');
+    if (!container) return;
+
+    let filtered = igScripts;
+    if (igScriptFilter !== 'all') {
+        filtered = filtered.filter(s => s.status === igScriptFilter);
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">沒有符合的腳本</div>';
+        return;
+    }
+
+    container.innerHTML = filtered.map(s => {
+        const dimClass = s.status === '✅ 已發布' ? ' published' : s.status === '❌ 放棄' ? ' abandoned' : '';
+        return `<div class="ig-script-card${dimClass}" data-id="${s.id}">
+            <div class="ig-script-card-main">
+                <div class="ig-script-card-body">
+                    <div class="ig-script-card-title">${escapeHtml(s.title)}</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+                        <span class="content-tag ig-platform">IG Reels</span>
+                        ${s.pillar ? `<span class="content-tag pillar">${escapeHtml(s.pillar)}</span>` : ''}
+                        <span class="content-tag">${s.created || ''}</span>
+                        ${s.notionId ? '<span class="content-tag" style="color:#4a7c59;">✓ Notion</span>' : ''}
+                    </div>
+                    ${s.hook ? `<div class="ig-script-card-hook">${escapeHtml(s.hook)}</div>` : ''}
+                </div>
+                <div class="ig-script-card-actions">
+                    <select onchange="updateIGScriptStatus('${s.id}', this.value)">
+                        ${['💡 待拍', '🎬 拍攝中', '✅ 已發布', '❌ 放棄'].map(st =>
+                            `<option value="${st}"${s.status === st ? ' selected' : ''}>${st}</option>`
+                        ).join('')}
+                    </select>
+                    <button class="btn-icon" onclick="event.stopPropagation();deleteIGScript('${s.id}')" title="刪除">🗑</button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function updateIGScriptStatus(id, status) {
+    const s = igScripts.find(s => s.id === id);
+    if (s) { s.status = status; saveIGScripts(); renderIGScripts(); }
+}
+
+function deleteIGScript(id) {
+    if (!confirm('確定刪除這個腳本？')) return;
+    igScripts = igScripts.filter(s => s.id !== id);
+    saveIGScripts();
+    renderIGScripts();
+}
+
+function addIGScript() {
+    const title = prompt('腳本標題：');
+    if (!title || !title.trim()) return;
+    const hook = prompt('Hook 描述（可留空）：') || '';
+    const pillar = prompt('支柱（Prop Firm 實戰 / 程式交易 / 交易心態 / AI 自動化 / 個人成長）：') || '';
+    const id = 'ig-' + Date.now();
+    igScripts.unshift({
+        id, title: title.trim(), hook: hook.trim(), pillar: pillar.trim(),
+        status: '💡 待拍', created: new Date().toISOString().split('T')[0]
+    });
+    saveIGScripts();
+    renderIGScripts();
+    showToast('✓ 已新增 IG 腳本');
+}
+
+// Sync IG scripts TO Notion (write to Ideas DB)
+async function syncIGScriptsToNotion() {
+    if (!hasNotionDirect()) { showToast('請先設定 Notion Token', true); return; }
+    const unsynced = igScripts.filter(s => !s.notionId);
+    if (unsynced.length === 0) { showToast('所有腳本已同步到 Notion'); return; }
+
+    showToast(`正在寫入 ${unsynced.length} 個腳本到 Notion...`);
+    let success = 0;
+    for (const s of unsynced) {
+        try {
+            const result = await notionFetch('/pages', 'POST', {
+                parent: { database_id: IDEAS_DB_ID },
+                properties: {
+                    '主題': { title: [{ text: { content: s.title } }] },
+                    '來源': { select: { name: '📸 IG 腳本' } },
+                    '狀態': { select: { name: s.status === '💡 待拍' ? '💡 新想法' : s.status === '✅ 已發布' ? '✅ 已採納' : '💡 新想法' } },
+                    '支柱': s.pillar ? { select: { name: s.pillar } } : undefined,
+                    '備註': { rich_text: [{ text: { content: s.hook || '' } }] }
+                }
+            });
+            if (result && result.id) {
+                s.notionId = result.id;
+                success++;
+            }
+        } catch (e) {
+            console.error('[IG Scripts] Notion write error:', e);
+        }
+    }
+    saveIGScripts();
+    renderIGScripts();
+    showToast(`✓ ${success}/${unsynced.length} 個寫入 Notion`);
+}
+
+// Sync IG scripts FROM Notion (pull IG-tagged ideas)
+async function syncIGScriptsFromNotion() {
+    if (!hasNotionDirect()) { showToast('請先設定 Notion Token', true); return; }
+    showToast('正在從 Notion 拉取 IG 腳本...');
+    try {
+        const data = await notionFetch('/databases/' + IDEAS_DB_ID + '/query', 'POST', {
+            page_size: 100,
+            filter: { property: '來源', select: { equals: '📸 IG 腳本' } },
+            sorts: [{ property: '建立日期', direction: 'descending' }]
+        });
+        if (!data.results || data.results.length === 0) {
+            showToast('Notion 沒有 IG 腳本');
+            return;
+        }
+        let added = 0;
+        for (const page of data.results) {
+            const p = page.properties;
+            const notionId = page.id;
+            // Skip if already exists locally
+            if (igScripts.some(s => s.notionId === notionId)) continue;
+            const title = p['主題']?.title?.[0]?.plain_text || '';
+            if (!title) continue;
+            igScripts.unshift({
+                id: 'ig-' + Date.now() + '-' + added,
+                notionId,
+                title,
+                hook: p['備註']?.rich_text?.[0]?.plain_text || '',
+                pillar: p['支柱']?.select?.name || '',
+                status: '💡 待拍',
+                created: (p['建立日期']?.created_time || '').split('T')[0]
+            });
+            added++;
+        }
+        saveIGScripts();
+        renderIGScripts();
+        showToast(`✓ 從 Notion 拉取 ${added} 個新腳本（共 ${data.results.length} 個）`);
+    } catch (e) {
+        console.error('[IG Scripts] Notion read error:', e);
+        showToast('Notion 拉取失敗: ' + e.message, true);
+    }
 }
 
 // === Dashboard stat box ===

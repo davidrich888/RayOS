@@ -644,6 +644,22 @@
         .yt-studio-detail td { padding: 6px 10px; border: 1px solid var(--border); color: var(--text-dim); }
         .yt-studio-detail hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
+        /* ===== IG SCRIPTS ===== */
+        .ig-script-filter-btn.active { background: var(--accent); color: var(--bg); }
+        .ig-script-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 8px; transition: border-color 0.3s; }
+        .ig-script-card:hover { border-color: var(--text-muted); }
+        .ig-script-card-main { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+        .ig-script-card-body { flex: 1; min-width: 0; }
+        .ig-script-card-title { font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+        .ig-script-card-hook { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-style: italic; }
+        .ig-script-card-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+        .ig-script-card-actions select { font-size: 11px; padding: 4px 8px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px; color: var(--text); }
+        .ig-script-card-actions .btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 4px; }
+        .ig-script-card-actions .btn-icon:hover { color: #ef4444; }
+        .ig-script-card.published { opacity: 0.5; }
+        .ig-script-card.abandoned { opacity: 0.35; }
+        .content-tag.ig-platform { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+
         /* ===== SMALL PHONE (≤400px) ===== */
         @media (max-width: 400px) {
             .stats-row { grid-template-columns: repeat(2, 1fr) !important; }

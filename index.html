@@ -562,6 +562,7 @@
                     <button class="btn content-tab-btn active" data-tab="inspiration" onclick="setContentTab('inspiration')">靈感池</button>
                     <button class="btn content-tab-btn" data-tab="production" onclick="setContentTab('production')">產出追蹤</button>
                     <button class="btn content-tab-btn" data-tab="ytstudio" onclick="setContentTab('ytstudio')">🎬 YT 工作室</button>
+                    <button class="btn content-tab-btn" data-tab="igscripts" onclick="setContentTab('igscripts')">📸 IG 腳本</button>
                 </div>
 
                 <!-- Status filters (inspiration tab only) -->
@@ -610,6 +611,21 @@
                         <button class="btn btn-small btn-accent" onclick="window.open('https://www.notion.so/10f629ef6a1380bb98d1c91986441940','_blank')">Notion</button>
                     </div>
                     <div id="yt-studio-list"></div>
+                </div>
+
+                <!-- IG Scripts tab area (hidden by default) -->
+                <div id="content-igscripts-area" style="display:none;">
+                    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+                        <button class="btn btn-small ig-script-filter-btn active" data-filter="all" onclick="setIGScriptFilter('all')">全部</button>
+                        <button class="btn btn-small ig-script-filter-btn" data-filter="💡 待拍" onclick="setIGScriptFilter('💡 待拍')">💡 待拍</button>
+                        <button class="btn btn-small ig-script-filter-btn" data-filter="🎬 拍攝中" onclick="setIGScriptFilter('🎬 拍攝中')">🎬 拍攝中</button>
+                        <button class="btn btn-small ig-script-filter-btn" data-filter="✅ 已發布" onclick="setIGScriptFilter('✅ 已發布')">✅ 已發布</button>
+                        <button class="btn btn-small ig-script-filter-btn" data-filter="❌ 放棄" onclick="setIGScriptFilter('❌ 放棄')">❌ 放棄</button>
+                        <button class="btn btn-small btn-accent" onclick="addIGScript()" style="margin-left:auto;">+ 新增腳本</button>
+                        <button class="btn btn-small" onclick="syncIGScriptsToNotion()">↑ 寫入 Notion</button>
+                        <button class="btn btn-small" onclick="syncIGScriptsFromNotion()">↓ 從 Notion 拉</button>
+                    </div>
+                    <div id="ig-scripts-list"></div>
                 </div>
 
                 <!-- Main list (ideas or empty) -->
