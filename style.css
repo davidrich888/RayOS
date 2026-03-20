@@ -89,6 +89,9 @@
         .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
         .card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: all 0.3s; }
         .card:hover { border-color: var(--text-muted); transform: translateY(-2px); }
+        .card.card-highlight { border-color: var(--accent); box-shadow: 0 0 12px rgba(212, 197, 169, 0.15); }
+        .card.card-highlight .card-title { color: var(--accent); }
+        .card.card-highlight .card-badge { background: var(--accent); color: var(--bg); }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .card-icon { font-size: 24px; }
         .card-badge { font-size: 9px; color: var(--accent); letter-spacing: 1px; padding: 4px 8px; border: 1px solid var(--accent); }
