@@ -94,7 +94,7 @@ const TARGET_DATA = {
         title: '🏝️ Bali Villa — $200,000 USD',
         html: `
             <div style="margin-bottom:16px;">
-                <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80" alt="Bali Villa" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
+                <img src="icons/bali-villa.jpg" alt="Bali Villa" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：峇里島私人別墅</p>
                     <p><strong style="color:var(--accent);">預算</strong>：$200,000 USD</p>
