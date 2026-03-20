@@ -151,7 +151,7 @@
     // 解析精華片段
     function parseHighlights(text) {
       if (!text) return [];
-      const lines = text.split('\n').filter(line => line.trim());
+      const lines = text.split(/\n|<br\s*\/?>/).filter(line => line.trim());
       return lines.map(line => {
         // Format 1: "0:31-1:02 - description" or "0:31 - description"
         const m1 = line.match(/^(\d+:\d+)(?:-(\d+:\d+))?\s*[-–]\s*(.+)$/);
