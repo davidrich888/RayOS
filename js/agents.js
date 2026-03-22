@@ -117,7 +117,16 @@ const INFO_META = {
         flow: 'Auto Task 觸發 → Apify 爬取 IG Reels → 分析表現 → 更新 Tracker → TG 通知',
         taskId: 'ig-data-update'
     },
-    // skool-sync moved to AGENT_META as agent-row with data-wf="kcf28BPi8d5nyjIo"
+    'skool-sync-sh': {
+        name: 'Skool Sync（炒股黑客）',
+        icon: '🏫',
+        schedule: '每天 08:00（本地 launchd）',
+        purpose: '炒股黑客 Skool 成員同步：本地 Python 腳本匯出 CSV → 比對 Google Sheet → 新成員寫入 Sheet + ConvertKit 標籤 → TG 通知。獨立於 N8N 執行，避免 OOM。',
+        sources: ['Skool Export API（炒股黑客）'],
+        outputs: ['Google Sheet 炒股黑客 tab（5,400+）', 'ConvertKit（炒股黑客標籤）', 'TG 通知（新成員）'],
+        flow: 'launchd 觸發 → Python 腳本 → Skool CSV Export → Diff 比對 → Sheet 更新 → ConvertKit Tag → TG 通知',
+        local: true
+    },
     'agent-memory-read': {
         name: 'Agent Memory Read',
         icon: '🧠',
