@@ -62,6 +62,16 @@ const AGENT_META = {
         outputs: ['Notion Content Log [FLOP]', 'TG 失敗分析報告', 'what-flopped.md'],
         nodes: 'Schedule → Fetch YT Stats → Fetch CK Stats → Claude Haiku 分析 → Notion [FLOP] + TG Notify',
         value: '自動餵養 what-flopped 資料庫，讓失敗變成系統性學習'
+    },
+    'r7327CJ8dXoO6TW5': {
+        name: 'Skool Sync（TFT）',
+        icon: '🏫',
+        schedule: '每 2 天（N8N Schedule 自動觸發）',
+        purpose: 'TFT 付費社群成員同步：Skool Export → Google Sheet TFT tab + ConvertKit 標籤。偵測新加入/退出的成員。炒股黑客同步由本地腳本處理（launchd 每 2 天 08:00）。',
+        sources: ['Skool Export API（TFT）'],
+        outputs: ['Google Sheet TFT tab（113 筆）', 'ConvertKit（TFT付費/TFT退出標籤）', 'TG 通知（退出者）'],
+        nodes: 'Schedule → Skool Export → Diff 比對 → Sheet 更新 → ConvertKit Tag → TG Notify',
+        value: 'TFT 成員自動同步 + 退出偵測，炒股黑客由本地 Python 腳本獨立處理避免 N8N OOM'
     }
 };
 
@@ -107,16 +117,7 @@ const INFO_META = {
         flow: 'Auto Task 觸發 → Apify 爬取 IG Reels → 分析表現 → 更新 Tracker → TG 通知',
         taskId: 'ig-data-update'
     },
-    'skool-sync': {
-        name: 'Skool → Sheet + CK',
-        icon: '🏫',
-        schedule: '每 2 天（N8N Workflow 自動觸發）',
-        purpose: '從 Skool 匯出炒股黑客 + TFT 成員名單，同步到 Google Sheet（Master Sheet）和 ConvertKit（Email 自動標籤）。偵測新加入/退出的成員。',
-        sources: ['Skool Export API（炒股黑客 + TFT）'],
-        outputs: ['Google Sheet（Master Sheet）', 'ConvertKit（標籤：炒股黑客/TFT付費/TFT退出）', 'TG 通知（新成員/退出者）'],
-        flow: 'N8N Schedule → Skool Export → Diff 比對 → Sheet 更新 → ConvertKit Tag → TG Notify',
-        n8nId: 'kcf28BPi8d5nyjIo'
-    },
+    // skool-sync moved to AGENT_META as agent-row with data-wf="kcf28BPi8d5nyjIo"
     'agent-memory-read': {
         name: 'Agent Memory Read',
         icon: '🧠',
