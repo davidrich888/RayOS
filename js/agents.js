@@ -71,7 +71,7 @@ const AGENT_META = {
         sources: ['Skool Export API（TFT）'],
         outputs: ['Google Sheet TFT tab（113 筆）', 'ConvertKit（TFT付費/TFT退出標籤）', 'TG 通知（退出者）'],
         nodes: 'Schedule → Skool Export → Diff 比對 → Sheet 更新 → ConvertKit Tag → TG Notify',
-        value: 'TFT 成員自動同步 + 退出偵測，炒股黑客由本地 Python 腳本獨立處理避免 N8N OOM'
+        value: 'TFT 成員自動同步 + 退出偵測，炒股黑客由本地 Python 腳本每天 08:00 獨立處理避免 N8N OOM'
     }
 };
 
