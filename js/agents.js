@@ -66,7 +66,7 @@ const AGENT_META = {
     'r7327CJ8dXoO6TW5': {
         name: 'Skool Sync（TFT）',
         icon: '🏫',
-        schedule: '每 2 天（N8N Schedule 自動觸發）',
+        schedule: '每天 09:00（N8N Schedule 自動觸發）',
         purpose: 'TFT 付費社群成員同步：Skool Export → Google Sheet TFT tab + ConvertKit 標籤。偵測新加入/退出的成員。炒股黑客同步由本地腳本處理（launchd 每 2 天 08:00）。',
         sources: ['Skool Export API（TFT）'],
         outputs: ['Google Sheet TFT tab（113 筆）', 'ConvertKit（TFT付費/TFT退出標籤）', 'TG 通知（退出者）'],
