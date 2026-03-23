@@ -1805,9 +1805,12 @@ function saveEntry() {
   var pnlUploads = pendingScreenshots.map(tryUpload);
   var detailUploads = newInlineImages.map(tryUpload);
 
+  var skippedCount = 0;
   Promise.all([Promise.all(pnlUploads), Promise.all(detailUploads)]).then(function(results) {
     var newPnlUrls = results[0].filter(Boolean); // remove nulls (failed uploads)
     var newDetailUrls = results[1].filter(Boolean);
+    skippedCount = (pendingScreenshots.length - newPnlUrls.length)
+                 + (newInlineImages.length - newDetailUrls.length);
 
     // combine with existing URLs
     var allPnlUrls = existingPnlScreenshots.concat(newPnlUrls);
@@ -1837,8 +1840,6 @@ function saveEntry() {
       });
     }
   }).then(function() {
-    var skippedCount = pendingScreenshots.length - results[0].filter(Boolean).length
-                     + newInlineImages.length - results[1].filter(Boolean).length;
     closeModal();
     saveBtn.disabled = false;
     saveBtn.textContent = '刻在牆上';
