@@ -945,6 +945,10 @@
       </div>
     </div>
     <div class="form-group">
+      <label>連結（貼上後可直接點擊）</label>
+      <input type="url" id="entryLink" placeholder="https://app.tradezella.com/tracking/trades/...">
+    </div>
+    <div class="form-group">
       <label>帳號</label>
       <input type="text" id="entryAccount" placeholder="例：APEX-12345">
     </div>
@@ -1021,6 +1025,7 @@ function parseNotionPage(page) {
     try { ssData = JSON.parse(ssRaw); } catch(e) {}
   }
 
+  var linkProp = props['連結'] && props['連結'].url;
   return {
     id: page.id,
     name: titleArr.length ? titleArr[0].plain_text : '',
@@ -1029,6 +1034,7 @@ function parseNotionPage(page) {
     mistake: getRichText('錯誤描述'),
     detail: getRichText('詳細過程'),
     account: getRichText('帳號'),
+    link: linkProp || '',
     tags: tags,
     pnlScreenshots: ssData.pnl || [],
     detailScreenshots: ssData.detail || []
@@ -1093,7 +1099,8 @@ function ensureNotionSchema() {
   if (dbSchemaChecked) return Promise.resolve();
   return notionRequest('PATCH', '/databases/' + NOTION_DB_ID, {
     properties: {
-      '截圖': { rich_text: {} }
+      '截圖': { rich_text: {} },
+      '連結': { url: {} }
     }
   }).then(function() {
     dbSchemaChecked = true;
@@ -1643,6 +1650,21 @@ function openDetailModal(entryId) {
     modal.appendChild(title);
   }
 
+  // link
+  if (e.link) {
+    var linkWrap = document.createElement('div');
+    linkWrap.style.cssText = 'margin:8px 0 12px;';
+    var linkEl = document.createElement('a');
+    linkEl.href = e.link;
+    linkEl.target = '_blank';
+    linkEl.rel = 'noopener noreferrer';
+    linkEl.textContent = e.link;
+    linkEl.style.cssText = 'color:#d4c5a9;font-size:13px;word-break:break-all;text-decoration:underline;';
+    linkEl.addEventListener('click', function(ev) { ev.stopPropagation(); });
+    linkWrap.appendChild(linkEl);
+    modal.appendChild(linkWrap);
+  }
+
   // detail text with inline detail screenshots (NOT P&L screenshots)
   var detailSS = (e.detailScreenshots || []).slice();
   var ssIndex = 0;
@@ -1791,6 +1813,7 @@ function openModal(id) {
     document.getElementById('entryDate').value = e.date;
     document.getElementById('entryLoss').value = e.loss;
     document.getElementById('entryMistake').value = e.mistake || '';
+    document.getElementById('entryLink').value = e.link || '';
     document.getElementById('entryAccount').value = e.account || '';
     (e.tags || []).forEach(function(t) {
       var tagEl = tagSelector.querySelector('[data-tag="' + t + '"]');
@@ -1822,7 +1845,8 @@ function openModal(id) {
     document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('entryLoss').value = '';
     document.getElementById('entryMistake').value = '';
-    document.getElementById('entryDetail').innerHTML = '';
+    document.getElementById('entryDetail').textContent = '';
+    document.getElementById('entryLink').value = '';
     document.getElementById('entryAccount').value = '';
   }
 
@@ -1957,6 +1981,7 @@ function saveEntry() {
       keptDetailUrls.push(src);
     }
   });
+  var link = document.getElementById('entryLink').value.trim();
   var account = document.getElementById('entryAccount').value.trim();
   var selectedTags = document.querySelectorAll('.tag-option.selected');
   var tags = [];
@@ -2006,6 +2031,7 @@ function saveEntry() {
       '錯誤描述': { rich_text: [{ text: { content: mistake || '' } }] },
       '詳細過程': { rich_text: [{ text: { content: detail || '' } }] },
       '帳號': { rich_text: [{ text: { content: account || '' } }] },
+      '連結': { url: link || null },
       '錯誤類型': { multi_select: tags.map(function(t) { return { name: t }; }) },
       '截圖': { rich_text: [{ text: { content: screenshotJson } }] }
     };
