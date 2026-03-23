@@ -1310,8 +1310,34 @@ function renderCalendar() {
       cell.classList.add('mistake');
       cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
     } else {
-      cell.classList.add('clean');
-      cell.innerHTML = d + ' <span class="cal-icon">✓</span>';
+      // check localStorage for manually marked clean days
+      var cleanDays = JSON.parse(localStorage.getItem('shamewall_clean_days') || '{}');
+      if (cleanDays[dateStr]) {
+        cell.classList.add('clean');
+        cell.innerHTML = d + ' <span class="cal-icon">✓</span>';
+      } else {
+        cell.textContent = d;
+      }
+      // click to toggle clean status (only past/today non-mistake days)
+      cell.style.cursor = 'pointer';
+      cell.setAttribute('data-date', dateStr);
+      cell.setAttribute('data-day', d);
+      cell.addEventListener('click', function() {
+        var ds = this.getAttribute('data-date');
+        var dy = this.getAttribute('data-day');
+        var stored = JSON.parse(localStorage.getItem('shamewall_clean_days') || '{}');
+        if (stored[ds]) {
+          delete stored[ds];
+          this.classList.remove('clean');
+          this.innerHTML = '';
+          this.textContent = dy;
+        } else {
+          stored[ds] = true;
+          this.classList.add('clean');
+          this.innerHTML = dy + ' <span class="cal-icon">✓</span>';
+        }
+        localStorage.setItem('shamewall_clean_days', JSON.stringify(stored));
+      });
     }
 
     if (isToday) cell.classList.add('today');
