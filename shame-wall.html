@@ -511,35 +511,36 @@
     flex-direction: column;
     gap: 8px;
   }
-  .streak-row .streak-hide {
-    background: none;
-    border: none;
-    color: #333;
-    cursor: pointer;
-    font-size: 13px;
-    padding: 2px 6px;
+  .streak-row .streak-check {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #444;
     border-radius: 3px;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .streak-row .streak-hide:hover {
-    color: #ff4444;
-    background: #1a0a0a;
-  }
-  .streak-show-hidden {
-    text-align: center;
-    margin-top: 8px;
-  }
-  .streak-show-hidden button {
-    background: none;
-    border: 1px solid #333;
-    color: #555;
-    font-size: 11px;
-    font-family: inherit;
-    padding: 4px 12px;
-    border-radius: 4px;
+    background: transparent;
     cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
     transition: all 0.2s;
+  }
+  .streak-row .streak-check:checked {
+    background: #22c55e;
+    border-color: #22c55e;
+  }
+  .streak-row .streak-check:checked::after {
+    content: '\2713';
+    position: absolute;
+    top: -1px;
+    left: 2px;
+    font-size: 12px;
+    color: #000;
+    font-weight: bold;
+  }
+  .streak-row.unchecked .streak-label,
+  .streak-row.unchecked .streak-bar-bg,
+  .streak-row.unchecked .streak-days {
+    opacity: 0.3;
   }
   .streak-show-hidden button:hover {
     color: #aaa;
@@ -1174,25 +1175,27 @@ function updateStats() {
   }
 }
 
-function getHiddenTags() {
-  var saved = localStorage.getItem('shame-wall-hidden-tags');
-  return saved ? JSON.parse(saved) : [];
+function getActiveTags() {
+  var saved = localStorage.getItem('shame-wall-active-tags');
+  if (saved) return JSON.parse(saved);
+  return TAGS.slice(); // default: all active
 }
 
-function setHiddenTags(tags) {
-  localStorage.setItem('shame-wall-hidden-tags', JSON.stringify(tags));
+function setActiveTags(tags) {
+  localStorage.setItem('shame-wall-active-tags', JSON.stringify(tags));
 }
 
-function hideTag(tag) {
-  var hidden = getHiddenTags();
-  if (hidden.indexOf(tag) === -1) hidden.push(tag);
-  setHiddenTags(hidden);
+function toggleActiveTag(tag) {
+  var active = getActiveTags();
+  var idx = active.indexOf(tag);
+  if (idx === -1) {
+    active.push(tag);
+  } else {
+    active.splice(idx, 1);
+  }
+  setActiveTags(active);
   renderStreakChart();
-}
-
-function showAllTags() {
-  setHiddenTags([]);
-  renderStreakChart();
+  renderFocusArea();
 }
 
 function countWeekdays(from, to) {
@@ -1213,7 +1216,7 @@ function renderStreakChart() {
 
   var today = new Date();
   today.setHours(0, 0, 0, 0);
-  var hiddenTags = getHiddenTags();
+  var activeTags = getActiveTags();
 
   // find last occurrence date for each tag
   var tagLastDate = {};
@@ -1228,22 +1231,23 @@ function renderStreakChart() {
     });
   });
 
-  // build streaks for ALL tags
+  // build streaks for ALL tags (show all, but only active ones count)
   var streaks = [];
   TAGS.forEach(function(t) {
-    if (hiddenTags.indexOf(t) !== -1) return; // skip hidden
+    var isActive = activeTags.indexOf(t) !== -1;
     if (tagLastDate[t]) {
       var days = countWeekdays(tagLastDate[t], today);
-      streaks.push({ tag: t, days: days, ever: true });
+      streaks.push({ tag: t, days: days, ever: true, active: isActive });
     } else {
-      streaks.push({ tag: t, days: -1, ever: false }); // never committed
+      streaks.push({ tag: t, days: -1, ever: false, active: isActive });
     }
   });
 
   if (streaks.length === 0) return;
 
-  // sort: never-committed at top, then by days descending
+  // sort: active first, then never-committed at top, then by days descending
   streaks.sort(function(a, b) {
+    if (a.active !== b.active) return a.active ? -1 : 1;
     if (!a.ever && !b.ever) return 0;
     if (!a.ever) return -1;
     if (!b.ever) return 1;
@@ -1255,7 +1259,17 @@ function renderStreakChart() {
 
   streaks.forEach(function(s) {
     var row = document.createElement('div');
-    row.className = 'streak-row';
+    row.className = 'streak-row' + (s.active ? '' : ' unchecked');
+
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'streak-check';
+    cb.checked = s.active;
+    cb.title = s.active ? '取消追蹤' : '開始追蹤';
+    (function(tag) {
+      cb.addEventListener('change', function() { toggleActiveTag(tag); });
+    })(s.tag);
+    row.appendChild(cb);
 
     var label = document.createElement('div');
     label.className = 'streak-label';
@@ -1299,27 +1313,8 @@ function renderStreakChart() {
     }
     row.appendChild(daysEl);
 
-    // hide button
-    var hideBtn = document.createElement('button');
-    hideBtn.className = 'streak-hide';
-    hideBtn.textContent = '\u00d7';
-    hideBtn.title = '隱藏此項';
-    hideBtn.addEventListener('click', function() { hideTag(s.tag); });
-    row.appendChild(hideBtn);
-
     chart.appendChild(row);
   });
-
-  // show hidden count
-  if (hiddenTags.length > 0) {
-    var showDiv = document.createElement('div');
-    showDiv.className = 'streak-show-hidden';
-    var showBtn = document.createElement('button');
-    showBtn.textContent = '顯示 ' + hiddenTags.length + ' 個已隱藏項目';
-    showBtn.addEventListener('click', showAllTags);
-    showDiv.appendChild(showBtn);
-    chart.appendChild(showDiv);
-  }
 }
 
 // ── Focus Area (精進重點) ──
@@ -1331,6 +1326,7 @@ function renderFocusArea() {
   var tagLastDate = {};
   var today = new Date();
   today.setHours(0, 0, 0, 0);
+  var activeTags = getActiveTags();
 
   TAGS.forEach(function(t) { tagCount[t] = 0; tagLastDate[t] = null; });
 
@@ -1346,7 +1342,7 @@ function renderFocusArea() {
 
   var focus = [];
   TAGS.forEach(function(t) {
-    if (tagCount[t] > 0) {
+    if (tagCount[t] > 0 && activeTags.indexOf(t) !== -1) {
       var days = countWeekdays(tagLastDate[t], today);
       focus.push({ tag: t, days: days, count: tagCount[t] });
     }
