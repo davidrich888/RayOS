@@ -1795,18 +1795,19 @@ function saveEntry() {
   saveBtn.disabled = true;
   saveBtn.textContent = '上傳截圖中...';
 
-  // upload all new screenshots to Google Drive
-  var pnlUploads = pendingScreenshots.map(function(dataUrl) {
-    return uploadScreenshotToDrive(dataUrl);
-  });
-  var detailUploads = newInlineImages.map(function(dataUrl) {
-    return uploadScreenshotToDrive(dataUrl);
-  });
-
+  // upload all new screenshots to Google Drive (with fallback: skip on auth failure)
+  function tryUpload(dataUrl) {
+    return uploadScreenshotToDrive(dataUrl).catch(function(err) {
+      console.warn('Drive upload failed, skipping screenshot:', err.message);
+      return null; // null = skipped
+    });
+  }
+  var pnlUploads = pendingScreenshots.map(tryUpload);
+  var detailUploads = newInlineImages.map(tryUpload);
 
   Promise.all([Promise.all(pnlUploads), Promise.all(detailUploads)]).then(function(results) {
-    var newPnlUrls = results[0]; // Drive URLs
-    var newDetailUrls = results[1];
+    var newPnlUrls = results[0].filter(Boolean); // remove nulls (failed uploads)
+    var newDetailUrls = results[1].filter(Boolean);
 
     // combine with existing URLs
     var allPnlUrls = existingPnlScreenshots.concat(newPnlUrls);
@@ -1836,9 +1837,14 @@ function saveEntry() {
       });
     }
   }).then(function() {
+    var skippedCount = pendingScreenshots.length - results[0].filter(Boolean).length
+                     + newInlineImages.length - results[1].filter(Boolean).length;
     closeModal();
     saveBtn.disabled = false;
     saveBtn.textContent = '刻在牆上';
+    if (skippedCount > 0) {
+      alert('記錄已儲存，但 ' + skippedCount + ' 張截圖上傳失敗（Google Drive Token 可能過期）。\n可稍後到 Settings 更新 Token 後重新編輯補圖。');
+    }
     return loadEntries();
   }).catch(function(err) {
     alert('儲存失敗：' + err.message);
