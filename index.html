@@ -201,12 +201,12 @@
                 <div class="wealth-layout">
                     <div class="wealth-main">
                         <div class="tabs">
-                            <div class="tab active" onclick="setTradingTab('algo',this)">🤖 程式交易</div>
+                            <div class="tab active" onclick="setTradingTab('shamewall',this)">🔥 恥辱牆</div>
+                            <div class="tab" onclick="setTradingTab('algo',this)">🤖 程式交易</div>
                             <div class="tab" onclick="setTradingTab('manual',this)">✋ 手單交易</div>
                             <div class="tab" onclick="setTradingTab('propfirm',this)">🏦 Prop Firm</div>
-                            <div class="tab" onclick="setTradingTab('shamewall',this)">🔥 恥辱牆</div>
                         </div>
-                        <div id="tab-algo">
+                        <div id="tab-algo" style="display:none;">
                             <div class="summary-grid" style="margin-bottom:20px;">
                                 <div class="summary-item"><div class="summary-label">累積報酬率</div><div class="summary-value accent" id="algo-cumret">43.16%</div></div>
                                 <div class="summary-item"><div class="summary-label">年化報酬率</div><div class="summary-value" id="algo-annual">58.83%</div></div>
@@ -248,8 +248,8 @@
                                 <div class="chart-wrapper"><canvas id="manualDDChart"></canvas></div>
                             </div>
                         </div>
-                        <div id="tab-shamewall" style="display:none;">
-                            <iframe id="shamewall-frame" src="about:blank" data-src="/shame-wall.html" style="width:100%;height:calc(100vh - 160px);border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:#0a0a0a;"></iframe>
+                        <div id="tab-shamewall">
+                            <iframe id="shamewall-frame" src="/shame-wall.html" data-src="/shame-wall.html" style="width:100%;height:calc(100vh - 160px);border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:#0a0a0a;"></iframe>
                         </div>
                         <div id="tab-propfirm" style="display:none;">
                             <div class="summary-grid" style="margin-bottom:20px;">

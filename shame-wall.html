@@ -585,6 +585,78 @@
     margin-left: 2px;
   }
 
+  /* focus area - improvement targets */
+  .focus-area {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 16px;
+  }
+  .focus-area-header {
+    font-size: 14px;
+    color: #ff9800;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .focus-area-subtitle {
+    font-size: 11px;
+    color: #444;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .focus-cards {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .focus-card {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 14px 20px;
+    min-width: 160px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .focus-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff4444, #ff9800);
+  }
+  .focus-card-rank {
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .focus-card-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff6b6b;
+    margin-bottom: 4px;
+  }
+  .focus-card-days {
+    font-size: 12px;
+    color: #888;
+  }
+  .focus-card-days span {
+    color: #ff4444;
+    font-weight: bold;
+  }
+  .focus-card-count {
+    font-size: 11px;
+    color: #555;
+    margin-top: 4px;
+  }
+
   /* screenshots */
   .paste-zone {
     border: 1px dashed #444;
@@ -805,6 +877,12 @@
   </div>
 </div>
 
+<div class="focus-area">
+  <div class="focus-area-header">精進重點</div>
+  <div class="focus-area-subtitle">最近最常犯的錯 — 這些是你現在最需要改善的</div>
+  <div class="focus-cards" id="focusCards"></div>
+</div>
+
 <div class="dashboard-row">
   <div class="dashboard-left">
     <div class="streak-section">
@@ -888,7 +966,8 @@ var existingDetailScreenshots = []; // Drive URLs of already-saved detail screen
 const TAGS = [
   '沒設停損', '凹單', '報復交易', '過度交易',
   '逆勢做單', '衝動進場', '重倉', '移動停損',
-  '不認錯', 'FOMO', '盤前沒計畫', '情緒失控', '賭輸博大'
+  '不認錯', 'FOMO', '盤前沒計畫', '情緒失控', '賭輸博大',
+  '多空都做', '沒遵守日風控', '看對做錯'
 ];
 
 const QUOTES = [
@@ -1234,6 +1313,79 @@ function renderStreakChart() {
     showDiv.appendChild(showBtn);
     chart.appendChild(showDiv);
   }
+}
+
+// ── Focus Area (精進重點) ──
+function renderFocusArea() {
+  var container = document.getElementById('focusCards');
+  container.textContent = '';
+
+  var tagCount = {};
+  var tagLastDate = {};
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  TAGS.forEach(function(t) { tagCount[t] = 0; tagLastDate[t] = null; });
+
+  entries.forEach(function(e) {
+    (e.tags || []).forEach(function(t) {
+      tagCount[t] = (tagCount[t] || 0) + 1;
+      var d = new Date(e.date + 'T00:00:00');
+      if (!tagLastDate[t] || d > tagLastDate[t]) {
+        tagLastDate[t] = d;
+      }
+    });
+  });
+
+  var focus = [];
+  TAGS.forEach(function(t) {
+    if (tagCount[t] > 0) {
+      var days = countWeekdays(tagLastDate[t], today);
+      focus.push({ tag: t, days: days, count: tagCount[t] });
+    }
+  });
+
+  focus.sort(function(a, b) { return a.days - b.days; });
+
+  var top = focus.slice(0, 3);
+  if (top.length === 0) {
+    var emptyMsg = document.createElement('div');
+    emptyMsg.style.cssText = 'color:#444;font-size:12px;';
+    emptyMsg.textContent = '目前沒有犯錯記錄 — 繼續保持！';
+    container.appendChild(emptyMsg);
+    return;
+  }
+
+  var rankLabels = ['#1 最需改善', '#2', '#3'];
+  top.forEach(function(item, i) {
+    var card = document.createElement('div');
+    card.className = 'focus-card';
+
+    var rank = document.createElement('div');
+    rank.className = 'focus-card-rank';
+    rank.textContent = rankLabels[i];
+    card.appendChild(rank);
+
+    var name = document.createElement('div');
+    name.className = 'focus-card-name';
+    name.textContent = item.tag;
+    card.appendChild(name);
+
+    var days = document.createElement('div');
+    days.className = 'focus-card-days';
+    days.textContent = '上次犯錯：';
+    var daysSpan = document.createElement('span');
+    daysSpan.textContent = item.days + ' 天前';
+    days.appendChild(daysSpan);
+    card.appendChild(days);
+
+    var count = document.createElement('div');
+    count.className = 'focus-card-count';
+    count.textContent = '累計 ' + item.count + ' 次';
+    card.appendChild(count);
+
+    container.appendChild(card);
+  });
 }
 
 // ── Calendar ──
@@ -1614,6 +1766,7 @@ function render() {
   });
   updateStats();
   renderStreakChart();
+  renderFocusArea();
   renderCalendar();
 }
 
