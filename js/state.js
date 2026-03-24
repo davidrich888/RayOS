@@ -2,7 +2,7 @@
 
 let accounts = JSON.parse(localStorage.getItem('accounts')) || DEFAULT_ACCOUNTS;
 let wealthGoal = parseInt(localStorage.getItem('wealth_goal')) || 6500000;
-let quote = JSON.parse(localStorage.getItem('wealth_quote')) || {text:"Make more money, keep the same lifestyle.\nThat's how you get rich.",author:""};
+let quote = JSON.parse(localStorage.getItem('wealth_quote')) || {text:"Make more money, keep the same lifestyle.\nThat's how you get rich.\n\n100K 美金是個可怕的金額，很容易以為自己很有錢開始亂花錢（警惕）！",author:""};
 let wealthChartMode = 'trend';
 let wealthChartType = 'total';
 let wealthChartStyle = 'bar';
