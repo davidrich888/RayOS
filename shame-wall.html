@@ -1167,7 +1167,12 @@ function notionRequest(method, path, body) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: path, method: method, body: body, token: token })
-  }).then(function(r) { return r.json(); });
+  }).then(function(r) {
+    return r.json().then(function(data) {
+      if (data.object === 'error') throw new Error(data.message || 'Notion API error');
+      return data;
+    });
+  });
 }
 
 function parseNotionPage(page) {
@@ -2295,7 +2300,7 @@ function saveEntry() {
   var account = document.getElementById('entryAccount').value.trim();
   var tags = [];
   var goodTags = [];
-  document.querySelectorAll('.tag-option').forEach(function(el) {
+  document.querySelectorAll('#tagSelector .tag-option').forEach(function(el) {
     if (el.dataset.state === 'bad') tags.push(el.dataset.tag);
     else if (el.dataset.state === 'good') goodTags.push(el.dataset.tag);
   });
@@ -2348,12 +2353,6 @@ function saveEntry() {
       '錯誤類型': { multi_select: tags.map(function(t) { return { name: t }; }) },
       '截圖': { rich_text: [{ text: { content: screenshotJson } }] }
     };
-    // new fields — only send if DB supports them (avoid Notion API errors)
-    try {
-      if (lesson) notionProps['這天犯的錯'] = { rich_text: [{ text: { content: lesson } }] };
-      if (currentMood !== 'bad') notionProps['mood'] = { rich_text: [{ text: { content: currentMood } }] };
-      if (goodTags.length) notionProps['做得好'] = { multi_select: goodTags.map(function(t) { return { name: t }; }) };
-    } catch(e) { console.warn('Optional fields skipped:', e); }
 
     function doSave(props) {
       if (editingId) {
@@ -2365,8 +2364,13 @@ function saveEntry() {
         });
       }
     }
+    // first try with all fields including optional new ones
+    if (lesson) notionProps['這天犯的錯'] = { rich_text: [{ text: { content: lesson } }] };
+    if (currentMood !== 'bad') notionProps['mood'] = { rich_text: [{ text: { content: currentMood } }] };
+    if (goodTags.length) notionProps['做得好'] = { multi_select: goodTags.map(function(t) { return { name: t }; }) };
+
     return doSave(notionProps).catch(function(err) {
-      // retry without new fields if Notion rejects them
+      // if Notion rejects new fields, retry without them
       console.warn('Save failed, retrying without new fields:', err.message);
       delete notionProps['這天犯的錯'];
       delete notionProps['mood'];
