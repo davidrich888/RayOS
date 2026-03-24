@@ -153,6 +153,11 @@
     text-transform: uppercase;
     letter-spacing: 1px;
   }
+  .tag.tag-good {
+    background: #0a1a0a;
+    color: #4ade80;
+    border-color: #113311;
+  }
 
   .add-section {
     margin-top: 30px;
@@ -287,6 +292,16 @@
     border: 1px solid #333;
     cursor: pointer;
     transition: all 0.2s;
+  }
+  .tag-option.bad {
+    background: #1a0a0a;
+    color: #ff6666;
+    border-color: #ff4444;
+  }
+  .tag-option.good {
+    background: #0a1a0a;
+    color: #4ade80;
+    border-color: #22c55e;
   }
   .tag-option.selected {
     background: #1a0a0a;
@@ -1051,7 +1066,7 @@
       <div class="rich-editor" id="entryDetail" contenteditable="true" data-placeholder="早盤看到一根大紅K就衝進去做多，結果是假突破..."></div>
     </div>
     <div class="form-group">
-      <label>錯誤類型（可多選）</label>
+      <label>錯誤類型（點一次 = ✗ 犯了，再點 = ✓ 做得好）</label>
       <div class="tag-selector" id="tagSelector"></div>
     </div>
     <div class="form-group">
@@ -1087,7 +1102,7 @@ const TAGS = [
   '沒設停損', '凹單', '報復交易', '過度交易',
   '逆勢做單', '衝動進場', '重倉', '移動停損',
   '不認錯', 'FOMO', '盤前沒計畫', '情緒失控', '賭輸博大',
-  '多空都做', '沒遵守日風控', '看對做錯'
+  '多空都做', '沒遵守日風控', '看對做錯', '沒耐心等待'
 ];
 
 const QUOTES = [
@@ -1133,6 +1148,7 @@ function parseNotionPage(page) {
     return rt.length ? rt[0].plain_text : '';
   };
   var tags = ((props['錯誤類型'] && props['錯誤類型'].multi_select) || []).map(function(o) { return o.name; });
+  var goodTags = ((props['做得好'] && props['做得好'].multi_select) || []).map(function(o) { return o.name; });
 
   // parse screenshot URLs from "截圖" property (JSON)
   var ssData = { pnl: [], detail: [] };
@@ -1152,6 +1168,7 @@ function parseNotionPage(page) {
     account: getRichText('帳號'),
     link: linkProp || '',
     tags: tags,
+    goodTags: goodTags,
     pnlScreenshots: ssData.pnl || [],
     detailScreenshots: ssData.detail || []
   };
@@ -1733,7 +1750,23 @@ function renderEntry(e) {
     e.tags.forEach(function(t) {
       const tagEl = document.createElement('span');
       tagEl.className = 'tag';
-      tagEl.textContent = t;
+      tagEl.textContent = '✗ ' + t;
+      tagsEl.appendChild(tagEl);
+    });
+    (e.goodTags || []).forEach(function(t) {
+      const tagEl = document.createElement('span');
+      tagEl.className = 'tag tag-good';
+      tagEl.textContent = '✓ ' + t;
+      tagsEl.appendChild(tagEl);
+    });
+    card.appendChild(tagsEl);
+  } else if (e.goodTags && e.goodTags.length) {
+    const tagsEl = document.createElement('div');
+    tagsEl.className = 'entry-tags';
+    e.goodTags.forEach(function(t) {
+      const tagEl = document.createElement('span');
+      tagEl.className = 'tag tag-good';
+      tagEl.textContent = '✓ ' + t;
       tagsEl.appendChild(tagEl);
     });
     card.appendChild(tagsEl);
@@ -1795,13 +1828,19 @@ function openDetailModal(entryId) {
   modal.appendChild(dateEl);
 
   // tags first
-  if (e.tags && e.tags.length) {
+  if ((e.tags && e.tags.length) || (e.goodTags && e.goodTags.length)) {
     var tagsEl = document.createElement('div');
     tagsEl.className = 'dm-tags';
-    e.tags.forEach(function(t) {
+    (e.tags || []).forEach(function(t) {
       var tagEl = document.createElement('span');
       tagEl.className = 'tag';
-      tagEl.textContent = t;
+      tagEl.textContent = '✗ ' + t;
+      tagsEl.appendChild(tagEl);
+    });
+    (e.goodTags || []).forEach(function(t) {
+      var tagEl = document.createElement('span');
+      tagEl.className = 'tag tag-good';
+      tagEl.textContent = '✓ ' + t;
       tagsEl.appendChild(tagEl);
     });
     modal.appendChild(tagsEl);
@@ -1967,8 +2006,24 @@ function openModal(id) {
     var el = document.createElement('div');
     el.className = 'tag-option';
     el.dataset.tag = t;
+    el.dataset.state = 'none'; // none → bad → good → none
     el.textContent = t;
-    el.addEventListener('click', function() { el.classList.toggle('selected'); });
+    el.addEventListener('click', function() {
+      var s = el.dataset.state;
+      if (s === 'none') {
+        el.dataset.state = 'bad';
+        el.className = 'tag-option bad';
+        el.textContent = '✗ ' + t;
+      } else if (s === 'bad') {
+        el.dataset.state = 'good';
+        el.className = 'tag-option good';
+        el.textContent = '✓ ' + t;
+      } else {
+        el.dataset.state = 'none';
+        el.className = 'tag-option';
+        el.textContent = t;
+      }
+    });
     tagSelector.appendChild(el);
   });
 
@@ -1982,7 +2037,19 @@ function openModal(id) {
     document.getElementById('entryAccount').value = e.account || '';
     (e.tags || []).forEach(function(t) {
       var tagEl = tagSelector.querySelector('[data-tag="' + t + '"]');
-      if (tagEl) tagEl.classList.add('selected');
+      if (tagEl) {
+        tagEl.dataset.state = 'bad';
+        tagEl.className = 'tag-option bad';
+        tagEl.textContent = '✗ ' + t;
+      }
+    });
+    (e.goodTags || []).forEach(function(t) {
+      var tagEl = tagSelector.querySelector('[data-tag="' + t + '"]');
+      if (tagEl) {
+        tagEl.dataset.state = 'good';
+        tagEl.className = 'tag-option good';
+        tagEl.textContent = '✓ ' + t;
+      }
     });
     // reconstruct rich editor with inline detail screenshots
     var editorEl = document.getElementById('entryDetail');
@@ -2148,9 +2215,12 @@ function saveEntry() {
   });
   var link = document.getElementById('entryLink').value.trim();
   var account = document.getElementById('entryAccount').value.trim();
-  var selectedTags = document.querySelectorAll('.tag-option.selected');
   var tags = [];
-  selectedTags.forEach(function(el) { tags.push(el.dataset.tag); });
+  var goodTags = [];
+  document.querySelectorAll('.tag-option').forEach(function(el) {
+    if (el.dataset.state === 'bad') tags.push(el.dataset.tag);
+    else if (el.dataset.state === 'good') goodTags.push(el.dataset.tag);
+  });
 
   if (!date || !loss) {
     alert('日期和金額必填！');
@@ -2198,6 +2268,7 @@ function saveEntry() {
       '帳號': { rich_text: [{ text: { content: account || '' } }] },
       '連結': { url: link || null },
       '錯誤類型': { multi_select: tags.map(function(t) { return { name: t }; }) },
+      '做得好': { multi_select: goodTags.map(function(t) { return { name: t }; }) },
       '截圖': { rich_text: [{ text: { content: screenshotJson } }] }
     };
 
