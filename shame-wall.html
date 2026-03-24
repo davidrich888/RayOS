@@ -594,6 +594,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 6px;
   }
   .streak-label {
     width: 90px;
@@ -602,32 +603,34 @@
     text-align: right;
     flex-shrink: 0;
   }
-  .streak-bar-bg {
+  .streak-grid {
+    display: flex;
+    gap: 3px;
     flex: 1;
-    height: 22px;
-    background: #1a1a1a;
-    border-radius: 4px;
-    overflow: hidden;
-    position: relative;
   }
-  .streak-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.6s ease;
-    min-width: 2px;
+  .streak-cell {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    transition: background 0.3s ease;
+  }
+  .streak-cell.filled {
+    background: #22c55e;
+    border-color: #22c55e;
+    box-shadow: 0 0 4px rgba(34, 197, 94, 0.3);
   }
   .streak-days {
-    width: 65px;
-    font-size: 13px;
+    width: 55px;
+    font-size: 12px;
     font-weight: bold;
     text-align: right;
     flex-shrink: 0;
+    color: #555;
   }
-  .streak-days .unit {
-    font-size: 10px;
-    font-weight: normal;
-    color: #666;
-    margin-left: 2px;
+  .streak-days.has-streak {
+    color: #4ade80;
   }
 
   /* focus area - improvement targets */
@@ -1021,9 +1024,10 @@
       padding: 16px;
     }
 
-    .streak-label { width: 70px; font-size: 10px; }
-    .streak-days { width: 55px; font-size: 12px; }
-    .streak-bar-bg { height: 18px; }
+    .streak-label { width: 60px; font-size: 10px; }
+    .streak-days { width: 45px; font-size: 11px; }
+    .streak-cell { border-radius: 2px; }
+    .streak-grid { gap: 2px; }
 
     .calendar-section { padding: 12px; }
     .calendar-day { font-size: 10px; }
@@ -1527,8 +1531,7 @@ function renderStreakChart() {
     return 0;
   });
 
-  var maxDays = 1;
-  streaks.forEach(function(s) { if (s.days > maxDays) maxDays = s.days; });
+  var GOAL = 30;
 
   streaks.forEach(function(s) {
     var row = document.createElement('div');
@@ -1539,31 +1542,18 @@ function renderStreakChart() {
     label.textContent = s.tag;
     row.appendChild(label);
 
-    var barBg = document.createElement('div');
-    barBg.className = 'streak-bar-bg';
-    var barFill = document.createElement('div');
-    barFill.className = 'streak-bar-fill';
-    if (s.status === 'streak') {
-      barFill.style.width = (s.days / maxDays * 100) + '%';
-      barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
-    } else {
-      barFill.style.width = '0%';
+    var grid = document.createElement('div');
+    grid.className = 'streak-grid';
+    for (var i = 0; i < GOAL; i++) {
+      var cell = document.createElement('div');
+      cell.className = 'streak-cell' + (i < s.days ? ' filled' : '');
+      grid.appendChild(cell);
     }
-    barBg.appendChild(barFill);
-    row.appendChild(barBg);
+    row.appendChild(grid);
 
     var daysEl = document.createElement('div');
-    daysEl.className = 'streak-days';
-    if (s.status === 'streak') {
-      daysEl.style.color = '#4ade80';
-      daysEl.textContent = s.days + ' 天';
-    } else if (s.status === 'nodata') {
-      daysEl.style.color = '#555';
-      daysEl.textContent = '無資料';
-    } else {
-      daysEl.style.color = '#555';
-      daysEl.textContent = '0 天';
-    }
+    daysEl.className = 'streak-days' + (s.days > 0 ? ' has-streak' : '');
+    daysEl.textContent = s.days + '/' + GOAL;
     row.appendChild(daysEl);
 
     chart.appendChild(row);
