@@ -87,6 +87,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    align-items: start;
   }
 
   .entry {
@@ -1674,34 +1675,19 @@ function renderEntry(e) {
     card.appendChild(lessonEl);
   }
 
-  // detail text only (no inline images on card)
+  // detail text — first paragraph only, click to see full
   if (e.detail) {
     var detailEl = document.createElement('div');
     detailEl.className = 'entry-detail';
     var plainDetail = e.detail.replace(/\[screenshot\]/g, '').trim();
     if (plainDetail) {
-      detailEl.textContent = plainDetail.length > 120 ? plainDetail.substring(0, 120) + '...' : plainDetail;
+      var firstPara = plainDetail.split('\n')[0].trim();
+      detailEl.textContent = firstPara.length > 80 ? firstPara.substring(0, 80) + '...' : firstPara;
     }
     card.appendChild(detailEl);
   }
 
-  // P&L screenshots on card (smaller thumbnails)
-  var pnlScreenshots = e.pnlScreenshots || [];
-  if (pnlScreenshots.length) {
-    var ssEl = document.createElement('div');
-    ssEl.className = 'entry-screenshots entry-screenshots-small';
-    pnlScreenshots.forEach(function(filename) {
-      var img = document.createElement('img');
-      img.src = getScreenshotUrl(filename);
-      img.alt = 'P&L screenshot';
-      img.addEventListener('click', function(ev) {
-        ev.stopPropagation();
-        openLightbox(img.src);
-      });
-      ssEl.appendChild(img);
-    });
-    card.appendChild(ssEl);
-  }
+  // P&L screenshots hidden on card — only shown in detail modal
 
   // action buttons at bottom-right
   var actions = document.createElement('div');
