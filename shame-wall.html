@@ -2054,6 +2054,121 @@ function render() {
   renderPnlChart();
 }
 
+function renderPnlChart() {
+  var canvas = document.getElementById('pnlCanvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  var W = rect.width;
+  var H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  if (entries.length === 0) {
+    document.getElementById('pnlTotal').textContent = '$0';
+    document.getElementById('pnlTotal').style.color = '#888';
+    return;
+  }
+
+  // sort by date ascending
+  var sorted = entries.slice().sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+
+  // build cumulative P&L
+  var cumulative = [];
+  var running = 0;
+  sorted.forEach(function(e) {
+    running += Number(e.loss) || 0;
+    cumulative.push({ date: e.date, val: running });
+  });
+
+  var total = cumulative[cumulative.length - 1].val;
+  var totalEl = document.getElementById('pnlTotal');
+  totalEl.textContent = (total >= 0 ? '+$' : '-$') + Math.abs(total).toLocaleString();
+  totalEl.style.color = total >= 0 ? '#4ade80' : '#ff4444';
+
+  var padL = 60, padR = 20, padT = 10, padB = 30;
+  var cW = W - padL - padR;
+  var cH = H - padT - padB;
+
+  var vals = cumulative.map(function(c) { return c.val; });
+  var minV = Math.min.apply(null, vals.concat([0]));
+  var maxV = Math.max.apply(null, vals.concat([0]));
+  var range = maxV - minV || 1;
+
+  function xPos(i) { return padL + (cumulative.length === 1 ? cW / 2 : (i / (cumulative.length - 1)) * cW); }
+  function yPos(v) { return padT + (1 - (v - minV) / range) * cH; }
+
+  // zero line
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(padL, yPos(0));
+  ctx.lineTo(W - padR, yPos(0));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Y axis labels
+  ctx.fillStyle = '#555';
+  ctx.font = '11px SF Mono, monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText('$0', padL - 8, yPos(0) + 4);
+  if (maxV !== 0) ctx.fillText((maxV >= 0 ? '+' : '') + '$' + Math.abs(Math.round(maxV)).toLocaleString(), padL - 8, padT + 12);
+  if (minV !== 0) ctx.fillText('-$' + Math.abs(Math.round(minV)).toLocaleString(), padL - 8, H - padB);
+
+  // line
+  ctx.beginPath();
+  ctx.strokeStyle = total >= 0 ? '#4ade80' : '#ff4444';
+  ctx.lineWidth = 2;
+  cumulative.forEach(function(c, i) {
+    if (i === 0) ctx.moveTo(xPos(i), yPos(c.val));
+    else ctx.lineTo(xPos(i), yPos(c.val));
+  });
+  ctx.stroke();
+
+  // gradient fill
+  var grad = ctx.createLinearGradient(0, padT, 0, H - padB);
+  if (total >= 0) {
+    grad.addColorStop(0, 'rgba(74, 222, 128, 0.15)');
+    grad.addColorStop(1, 'rgba(74, 222, 128, 0)');
+  } else {
+    grad.addColorStop(0, 'rgba(255, 68, 68, 0)');
+    grad.addColorStop(1, 'rgba(255, 68, 68, 0.15)');
+  }
+  ctx.beginPath();
+  cumulative.forEach(function(c, i) {
+    if (i === 0) ctx.moveTo(xPos(i), yPos(c.val));
+    else ctx.lineTo(xPos(i), yPos(c.val));
+  });
+  ctx.lineTo(xPos(cumulative.length - 1), yPos(0));
+  ctx.lineTo(xPos(0), yPos(0));
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // dots
+  cumulative.forEach(function(c, i) {
+    ctx.beginPath();
+    ctx.arc(xPos(i), yPos(c.val), 3, 0, Math.PI * 2);
+    ctx.fillStyle = c.val >= 0 ? '#4ade80' : '#ff4444';
+    ctx.fill();
+  });
+
+  // X axis date labels
+  ctx.fillStyle = '#555';
+  ctx.font = '10px SF Mono, monospace';
+  ctx.textAlign = 'center';
+  var labelIndices = [0];
+  if (cumulative.length > 2) labelIndices.push(Math.floor(cumulative.length / 2));
+  if (cumulative.length > 1) labelIndices.push(cumulative.length - 1);
+  labelIndices.forEach(function(idx) {
+    var d = cumulative[idx].date;
+    ctx.fillText(d.substring(5), xPos(idx), H - 8);
+  });
+}
+
 var currentMood = 'bad'; // 'bad' or 'good'
 function toggleMood() {
   var btn = document.getElementById('moodToggle');
