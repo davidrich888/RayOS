@@ -137,6 +137,21 @@
     cursor: pointer;
   }
   .entry-detail img:hover { border-color: #ff4444; }
+  .entry.entry-good {
+    border-left-color: #22c55e;
+  }
+  .entry.entry-good .entry-title {
+    color: #4ade80;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.15);
+  }
+  .entry.entry-good .entry-loss {
+    color: #4ade80;
+  }
+  .entry.entry-good .entry-lesson {
+    color: #4ade80;
+    background: #0a1a0a;
+    border-left-color: #22c55e;
+  }
   .entry-lesson {
     font-size: 15px;
     color: #ff9800;
@@ -1059,7 +1074,10 @@
 
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <h2 id="modalTitle">記錄你的失敗</h2>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <h2 id="modalTitle" style="margin:0;">記錄你的失敗</h2>
+      <button type="button" id="moodToggle" onclick="toggleMood()" style="padding:6px 14px;border-radius:4px;border:1px solid #ff4444;background:#1a0a0a;color:#ff4444;font-family:inherit;font-size:13px;font-weight:bold;cursor:pointer;transition:all 0.2s;">✗ 犯錯日</button>
+    </div>
     <div class="form-group">
       <label>日期</label>
       <input type="date" id="entryDate">
@@ -1183,6 +1201,7 @@ function parseNotionPage(page) {
     account: getRichText('帳號'),
     link: linkProp || '',
     lesson: getRichText('這天犯的錯'),
+    mood: getRichText('mood') || 'bad',
     tags: tags,
     goodTags: goodTags,
     pnlScreenshots: ssData.pnl || [],
@@ -1716,7 +1735,7 @@ document.getElementById('calNext').addEventListener('click', function() {
 
 function renderEntry(e) {
   const card = document.createElement('div');
-  card.className = 'entry';
+  card.className = 'entry' + (e.mood === 'good' ? ' entry-good' : '');
   card.dataset.id = e.id;
 
   // make card clickable
@@ -2010,6 +2029,39 @@ function render() {
   renderCalendar();
 }
 
+var currentMood = 'bad'; // 'bad' or 'good'
+function toggleMood() {
+  var btn = document.getElementById('moodToggle');
+  if (currentMood === 'bad') {
+    currentMood = 'good';
+    btn.textContent = '✓ 做得好';
+    btn.style.borderColor = '#22c55e';
+    btn.style.background = '#0a1a0a';
+    btn.style.color = '#4ade80';
+  } else {
+    currentMood = 'bad';
+    btn.textContent = '✗ 犯錯日';
+    btn.style.borderColor = '#ff4444';
+    btn.style.background = '#1a0a0a';
+    btn.style.color = '#ff4444';
+  }
+}
+function setMoodUI(mood) {
+  currentMood = mood;
+  var btn = document.getElementById('moodToggle');
+  if (mood === 'good') {
+    btn.textContent = '✓ 做得好';
+    btn.style.borderColor = '#22c55e';
+    btn.style.background = '#0a1a0a';
+    btn.style.color = '#4ade80';
+  } else {
+    btn.textContent = '✗ 犯錯日';
+    btn.style.borderColor = '#ff4444';
+    btn.style.background = '#1a0a0a';
+    btn.style.color = '#ff4444';
+  }
+}
+
 function openModal(id) {
   editingId = id || null;
   var modal = document.getElementById('modal');
@@ -2044,6 +2096,7 @@ function openModal(id) {
   if (editingId) {
     var e = entries.find(function(x) { return x.id === editingId; });
     document.getElementById('modalTitle').textContent = '編輯記錄';
+    setMoodUI(e.mood === 'good' ? 'good' : 'bad');
     document.getElementById('entryDate').value = e.date;
     document.getElementById('entryLoss').value = e.loss;
     document.getElementById('entryMistake').value = e.mistake || '';
@@ -2074,7 +2127,14 @@ function openModal(id) {
     if (e.detail) {
       var parts = e.detail.split('[screenshot]');
       parts.forEach(function(part, i) {
-        if (part) editorEl.appendChild(document.createTextNode(part));
+        if (part) {
+          // use innerHTML-safe text with <br> for newlines
+          var lines = part.split('\n');
+          lines.forEach(function(line, li) {
+            if (line) editorEl.appendChild(document.createTextNode(line));
+            if (li < lines.length - 1) editorEl.appendChild(document.createElement('br'));
+          });
+        }
         if (i < parts.length - 1 && dsIdx < detailSS.length) {
           var img = document.createElement('img');
           img.src = getScreenshotUrl(detailSS[dsIdx]);
@@ -2089,9 +2149,11 @@ function openModal(id) {
     existingPnlScreenshots = [];
     existingDetailScreenshots = [];
     document.getElementById('modalTitle').textContent = '記錄你的失敗';
+    setMoodUI('bad');
     document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('entryLoss').value = '';
     document.getElementById('entryMistake').value = '';
+    document.getElementById('entryLesson').value = '';
     document.getElementById('entryDetail').textContent = '';
     document.getElementById('entryLink').value = '';
     document.getElementById('entryAccount').value = '';
@@ -2281,6 +2343,7 @@ function saveEntry() {
       '虧損金額': { number: lossNum },
       '錯誤描述': { rich_text: [{ text: { content: mistake || '' } }] },
       '這天犯的錯': { rich_text: [{ text: { content: lesson || '' } }] },
+      'mood': { rich_text: [{ text: { content: currentMood } }] },
       '詳細過程': { rich_text: [{ text: { content: detail || '' } }] },
       '帳號': { rich_text: [{ text: { content: account || '' } }] },
       '連結': { url: link || null },
