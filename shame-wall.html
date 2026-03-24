@@ -1970,20 +1970,14 @@ function renderEntry(e) {
     card.appendChild(titleEl);
   }
 
-  // tags (after title, before lesson)
-  if ((e.tags && e.tags.length) || (e.goodTags && e.goodTags.length)) {
+  // tags (after title, before lesson) — only show ✗ bad tags on cards
+  if (e.tags && e.tags.length) {
     const tagsEl = document.createElement('div');
     tagsEl.className = 'entry-tags';
     (e.tags || []).forEach(function(t) {
       const tagEl = document.createElement('span');
       tagEl.className = 'tag';
       tagEl.textContent = '✗ ' + t;
-      tagsEl.appendChild(tagEl);
-    });
-    (e.goodTags || []).forEach(function(t) {
-      const tagEl = document.createElement('span');
-      tagEl.className = 'tag tag-good';
-      tagEl.textContent = '✓ ' + t;
       tagsEl.appendChild(tagEl);
     });
     card.appendChild(tagsEl);
@@ -2062,20 +2056,14 @@ function openDetailModal(entryId) {
   dateEl.textContent = formatDate(e.date) + (e.account ? ' \u00b7 ' + e.account : '');
   modal.appendChild(dateEl);
 
-  // tags first
-  if ((e.tags && e.tags.length) || (e.goodTags && e.goodTags.length)) {
+  // tags first — only show ✗ bad tags
+  if (e.tags && e.tags.length) {
     var tagsEl = document.createElement('div');
     tagsEl.className = 'dm-tags';
     (e.tags || []).forEach(function(t) {
       var tagEl = document.createElement('span');
       tagEl.className = 'tag';
       tagEl.textContent = '✗ ' + t;
-      tagsEl.appendChild(tagEl);
-    });
-    (e.goodTags || []).forEach(function(t) {
-      var tagEl = document.createElement('span');
-      tagEl.className = 'tag tag-good';
-      tagEl.textContent = '✓ ' + t;
       tagsEl.appendChild(tagEl);
     });
     modal.appendChild(tagsEl);
