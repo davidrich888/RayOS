@@ -1650,10 +1650,22 @@ function closeDailyTagModal() {
 
 // Get bad count and total count for a date
 function dateBadCount(dateStr) {
+  // merge daily tag checklist + entry tags for this date
+  var merged = {};
   var data = getDailyTagData();
   var dayData = data[dateStr];
-  if (!dayData) return { bad: 0, total: 0 };
-  var vals = Object.values(dayData);
+  if (dayData) {
+    Object.keys(dayData).forEach(function(t) { merged[t] = dayData[t]; });
+  }
+  // also count entry tags (bad only, don't overwrite existing checklist data)
+  entries.forEach(function(e) {
+    if (e.date === dateStr && e.tags) {
+      e.tags.forEach(function(t) {
+        if (!merged[t]) merged[t] = 'bad';
+      });
+    }
+  });
+  var vals = Object.values(merged);
   var bad = vals.filter(function(v) { return v === 'bad'; }).length;
   return { bad: bad, total: vals.length };
 }
@@ -1737,14 +1749,11 @@ function renderCalendar() {
         cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
       }
     } else {
-      // show bad count / total as (bad/total)
+      // show (bad/total) from daily checklist + entry tags
       var counts = dateBadCount(dateStr);
       if (counts.total > 0) {
         cell.classList.add(counts.bad > 0 ? 'mistake' : 'clean');
         cell.innerHTML = d + '<span class="cal-count ' + (counts.bad > 0 ? 'bad' : 'good') + '">(' + counts.bad + '/' + counts.total + ')</span>';
-      } else if (mistakeDates[dateStr]) {
-        cell.classList.add('mistake');
-        cell.innerHTML = d + '<span class="cal-count bad">✗</span>';
       } else {
         cell.textContent = d;
       }
