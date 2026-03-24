@@ -87,7 +87,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    align-items: start;
   }
 
   .entry {
@@ -155,19 +154,15 @@
     text-shadow: 0 0 10px rgba(74, 222, 128, 0.15);
   }
   /* entry-loss color is based on P&L value, not mood */
-  .entry.entry-good .entry-lesson {
-    color: #4ade80;
-    background: #0a1a0a;
-    border-left-color: #22c55e;
-  }
+  /* lesson always yellow regardless of mood */
   .entry-lesson {
     font-size: 15px;
-    color: #ff9800;
+    color: #facc15;
     font-weight: bold;
     padding: 8px 12px;
     margin-top: 10px;
-    background: #1a1200;
-    border-left: 3px solid #ff9800;
+    background: #1a1800;
+    border-left: 3px solid #facc15;
     border-radius: 0 4px 4px 0;
     line-height: 1.5;
   }
@@ -693,6 +688,22 @@
     color: #ff4444;
     font-size: 12px;
   }
+  /* Daily tag checklist in modal */
+  .dtag-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #1a1a1a;
+    cursor: pointer;
+    user-select: none;
+  }
+  .dtag-row:hover { background: #1a1a1a; margin: 0 -12px; padding: 10px 12px; }
+  .dtag-name { font-size: 14px; color: #ccc; }
+  .dtag-state { font-size: 18px; width: 32px; text-align: center; }
+  .dtag-state.good { color: #4ade80; }
+  .dtag-state.bad { color: #ff4444; }
+  .dtag-state.empty { color: #333; }
   .focus-30-grid {
     display: grid;
     grid-template-columns: repeat(30, 1fr);
@@ -1111,6 +1122,18 @@
 </div>
 
 <div class="detail-modal-overlay" id="detailModal"></div>
+
+<div class="modal-overlay" id="dailyTagModal">
+  <div class="modal" style="max-width:420px;">
+    <h2 id="dailyTagTitle" style="margin:0 0 6px;font-size:16px;">2026-03-25 交易紀律</h2>
+    <div style="font-size:11px;color:#666;margin-bottom:14px;">點一下 = ✓ 做到｜再點 = ✗ 犯錯｜第三下 = 清除</div>
+    <div id="dailyTagList"></div>
+    <div class="modal-actions" style="justify-content:flex-end;">
+      <button id="dailyTagClose" style="padding:8px 20px;background:#222;border:1px solid #444;color:#ccc;border-radius:6px;font-family:inherit;cursor:pointer;">關閉</button>
+    </div>
+  </div>
+</div>
+
 <div class="lightbox" id="lightbox"></div>
 
 <script>
@@ -1490,6 +1513,103 @@ function renderFocusArea() {
     })(i);
     container.appendChild(card);
   });
+}
+
+// ── Daily Tag Checklist (per-date, 3-state: null/good/bad) ──
+// Storage format: { "2026-03-25": { "凹單": "bad", "FOMO": "good" }, ... }
+function getDailyTagData() {
+  return JSON.parse(localStorage.getItem('shamewall_daily_tags') || '{}');
+}
+function saveDailyTagData(data) {
+  localStorage.setItem('shamewall_daily_tags', JSON.stringify(data));
+}
+
+function openDailyTagModal(dateStr) {
+  var modal = document.getElementById('dailyTagModal');
+  var title = document.getElementById('dailyTagTitle');
+  var list = document.getElementById('dailyTagList');
+  title.textContent = dateStr + ' 交易紀律';
+  list.textContent = '';
+
+  var allData = getDailyTagData();
+  var dayData = allData[dateStr] || {};
+
+  TAGS.forEach(function(tag) {
+    var row = document.createElement('div');
+    row.className = 'dtag-row';
+
+    var name = document.createElement('span');
+    name.className = 'dtag-name';
+    name.textContent = tag;
+
+    var state = document.createElement('span');
+    state.className = 'dtag-state';
+    var current = dayData[tag] || null; // null, 'good', 'bad'
+    updateStateIcon(state, current);
+
+    row.appendChild(name);
+    row.appendChild(state);
+
+    // click cycles: null → good → bad → null
+    (function(t, stateEl) {
+      row.addEventListener('click', function() {
+        var data = getDailyTagData();
+        if (!data[dateStr]) data[dateStr] = {};
+        var cur = data[dateStr][t] || null;
+        var next;
+        if (cur === null) next = 'good';
+        else if (cur === 'good') next = 'bad';
+        else next = null;
+
+        if (next === null) {
+          delete data[dateStr][t];
+        } else {
+          data[dateStr][t] = next;
+        }
+        // clean up empty dates
+        if (Object.keys(data[dateStr]).length === 0) delete data[dateStr];
+        saveDailyTagData(data);
+        updateStateIcon(stateEl, next);
+        renderStreakChart();
+        renderCalendar();
+      });
+    })(tag, state);
+
+    list.appendChild(row);
+  });
+
+  modal.classList.add('active');
+}
+
+function updateStateIcon(el, state) {
+  el.textContent = state === 'good' ? '✓' : state === 'bad' ? '✗' : '—';
+  el.className = 'dtag-state ' + (state === 'good' ? 'good' : state === 'bad' ? 'bad' : 'empty');
+}
+
+function closeDailyTagModal() {
+  document.getElementById('dailyTagModal').classList.remove('active');
+}
+
+// Check if a date has any 'bad' tag
+function dateHasMistake(dateStr) {
+  var data = getDailyTagData();
+  var dayData = data[dateStr];
+  if (!dayData) return false;
+  return Object.values(dayData).indexOf('bad') !== -1;
+}
+
+// Check if a date has any data at all
+function dateHasData(dateStr) {
+  var data = getDailyTagData();
+  return !!data[dateStr] && Object.keys(data[dateStr]).length > 0;
+}
+
+// Check if a date is all good (has data, no bad)
+function dateIsClean(dateStr) {
+  var data = getDailyTagData();
+  var dayData = data[dateStr];
+  if (!dayData || Object.keys(dayData).length === 0) return false;
+  return Object.values(dayData).indexOf('bad') === -1;
 }
 
 // ── Calendar ──
