@@ -83,6 +83,32 @@
     margin: 0 auto;
     padding: 30px 20px;
   }
+
+  /* P&L Chart */
+  .pnl-chart-section {
+    margin-bottom: 24px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 20px;
+  }
+  .pnl-chart-header {
+    font-size: 14px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .pnl-chart-header span {
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 12px;
+  }
+  #pnlCanvas {
+    width: 100%;
+    height: 180px;
+    display: block;
+  }
   #entriesList {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -511,16 +537,16 @@
   .calendar-day.clean {
     color: #ccc;
   }
-  .calendar-day.clean .cal-icon {
-    color: #4ade80;
-    font-size: 13px;
+  .cal-count {
+    display: block;
+    font-size: 9px;
+    line-height: 1;
+    margin-top: 2px;
   }
+  .cal-count.good { color: #4ade80; }
+  .cal-count.bad { color: #ff4444; }
   .calendar-day.mistake {
     color: #ccc;
-  }
-  .calendar-day.mistake .cal-icon {
-    color: #ff4444;
-    font-size: 13px;
   }
   .calendar-day.today {
     outline: 1px solid #4ade80;
@@ -1057,14 +1083,18 @@
       </div>
       <div class="calendar-grid" id="calGrid"></div>
       <div class="calendar-legend">
-        <span><span style="color:#4ade80">✓</span> 無犯錯</span>
-        <span><span style="color:#ff4444">✗</span> 有犯錯</span>
+        <span><span style="color:#4ade80">(0/17)</span> 沒犯錯</span>
+        <span><span style="color:#ff4444">(3/17)</span> 有犯錯</span>
       </div>
     </div>
   </div>
 </div>
 
 <div class="content">
+  <div class="pnl-chart-section">
+    <div class="pnl-chart-header">累計損益 <span id="pnlTotal"></span></div>
+    <canvas id="pnlCanvas"></canvas>
+  </div>
   <div id="entriesList"></div>
   <div class="add-section">
     <button class="add-btn" id="addBtn">+ 記錄一筆新的恥辱</button>
@@ -1128,7 +1158,7 @@
 <div class="modal-overlay" id="dailyTagModal">
   <div class="modal" style="max-width:420px;">
     <h2 id="dailyTagTitle" style="margin:0 0 6px;font-size:16px;">2026-03-25 交易紀律</h2>
-    <div style="font-size:11px;color:#666;margin-bottom:14px;">點一下 = ✓ 做到｜再點 = ✗ 犯錯｜第三下 = 清除</div>
+    <div style="font-size:11px;color:#666;margin-bottom:14px;">點一下 = ✓ 沒犯錯｜再點 = ✗ 犯錯｜第三下 = 清除</div>
     <div id="dailyTagList"></div>
     <div class="modal-actions" style="justify-content:flex-end;">
       <button id="dailyTagClose" style="padding:8px 20px;background:#222;border:1px solid #444;color:#ccc;border-radius:6px;font-family:inherit;cursor:pointer;">關閉</button>
@@ -1163,6 +1193,8 @@ const QUOTES = [
 
 // ── Notion API via RayOS proxy ──
 var NOTION_DB_ID = '7e8a015f59984504aba62b86379f83cf';
+var DISCIPLINE_DB_ID = 'b94d18624e184f1f8396b086d00adb72';
+var disciplineIndex = {}; // dateStr → notion page id
 var entries = [];
 var editingId = null;
 var loading = false;
@@ -1382,106 +1414,53 @@ function renderStreakChart() {
 
   var today = new Date();
   today.setHours(0, 0, 0, 0);
-  // find last 'bad' occurrence date for each tag (from entries + daily tag checklist)
-  var tagLastDate = {};
-  TAGS.forEach(function(t) { tagLastDate[t] = null; });
 
-  // from legacy entries
-  entries.forEach(function(e) {
-    (e.tags || []).forEach(function(t) {
-      var d = new Date(e.date + 'T00:00:00');
-      if (!tagLastDate[t] || d > tagLastDate[t]) {
-        tagLastDate[t] = d;
-      }
-    });
-  });
-
-  // from daily tag checklist (only 'bad' marks count)
+  // build set of dates that have any mistake (daily tags 'bad' + legacy entries)
+  var mistakeDateSet = {};
   var dailyData = getDailyTagData();
   Object.keys(dailyData).forEach(function(dateStr) {
-    var dayData = dailyData[dateStr];
-    Object.keys(dayData).forEach(function(tag) {
-      if (dayData[tag] === 'bad') {
-        var d = new Date(dateStr + 'T00:00:00');
-        if (!tagLastDate[tag] || d > tagLastDate[tag]) {
-          tagLastDate[tag] = d;
-        }
-      }
-    });
-  });
-
-  // build streaks for all tags
-  var streaks = [];
-  TAGS.forEach(function(t) {
-    if (tagLastDate[t]) {
-      var days = countWeekdays(tagLastDate[t], today);
-      streaks.push({ tag: t, days: days, ever: true });
-    } else {
-      streaks.push({ tag: t, days: -1, ever: false });
+    if (Object.values(dailyData[dateStr]).indexOf('bad') !== -1) {
+      mistakeDateSet[dateStr] = true;
     }
   });
-
-  if (streaks.length === 0) return;
-
-  // sort: never-committed at top, then by days descending
-  streaks.sort(function(a, b) {
-    if (!a.ever && !b.ever) return 0;
-    if (!a.ever) return -1;
-    if (!b.ever) return 1;
-    return b.days - a.days;
+  entries.forEach(function(e) {
+    if (e.tags && e.tags.length > 0) mistakeDateSet[e.date] = true;
   });
 
-  var maxDays = 1;
-  streaks.forEach(function(s) { if (s.days > maxDays) maxDays = s.days; });
+  // count consecutive weekdays from today with no mistakes
+  var streak = 0;
+  for (var s = 0; s < 365; s++) {
+    var checkD = new Date(today.getTime() - s * 86400000);
+    var dow = checkD.getDay();
+    if (dow === 0 || dow === 6) continue;
+    var checkStr = checkD.getFullYear() + '-' +
+      String(checkD.getMonth() + 1).padStart(2, '0') + '-' +
+      String(checkD.getDate()).padStart(2, '0');
+    if (mistakeDateSet[checkStr]) break;
+    streak++;
+  }
 
-  streaks.forEach(function(s) {
-    var row = document.createElement('div');
-    row.className = 'streak-row';
+  // display as single big number
+  var numEl = document.createElement('div');
+  numEl.style.cssText = 'text-align:center;padding:20px 0;';
+  var bigNum = document.createElement('div');
+  bigNum.style.cssText = 'font-size:64px;font-weight:bold;color:#4ade80;line-height:1;';
+  bigNum.textContent = streak;
+  numEl.appendChild(bigNum);
+  var labelEl = document.createElement('div');
+  labelEl.style.cssText = 'font-size:13px;color:#666;margin-top:8px;';
+  labelEl.textContent = '連續交易日無犯錯';
+  numEl.appendChild(labelEl);
 
-    var label = document.createElement('div');
-    label.className = 'streak-label';
-    label.textContent = s.tag;
-    row.appendChild(label);
+  var lastMistakeDate = Object.keys(mistakeDateSet).sort().reverse()[0];
+  if (lastMistakeDate) {
+    var since = document.createElement('div');
+    since.style.cssText = 'font-size:11px;color:#444;margin-top:4px;';
+    since.textContent = '上次犯錯：' + lastMistakeDate;
+    numEl.appendChild(since);
+  }
 
-    var barBg = document.createElement('div');
-    barBg.className = 'streak-bar-bg';
-    var barFill = document.createElement('div');
-    barFill.className = 'streak-bar-fill';
-
-    if (s.ever) {
-      var pct = (s.days / maxDays) * 100;
-      barFill.style.width = pct + '%';
-      barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
-    } else {
-      barFill.style.width = '100%';
-      barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
-      barFill.style.opacity = '0.3';
-    }
-
-    barBg.appendChild(barFill);
-    row.appendChild(barBg);
-
-    var daysEl = document.createElement('div');
-    daysEl.className = 'streak-days';
-    daysEl.style.color = '#4ade80';
-    if (s.ever) {
-      daysEl.appendChild(document.createTextNode(s.days));
-      var unit = document.createElement('span');
-      unit.className = 'unit';
-      unit.textContent = ' 天';
-      daysEl.appendChild(unit);
-    } else {
-      daysEl.style.color = '#2d7a4a';
-      daysEl.appendChild(document.createTextNode('\u2714'));
-      var unit = document.createElement('span');
-      unit.className = 'unit';
-      unit.textContent = ' 從未';
-      daysEl.appendChild(unit);
-    }
-    row.appendChild(daysEl);
-
-    chart.appendChild(row);
-  });
+  chart.appendChild(numEl);
 }
 
 // ── Focus Area (盤前提醒) ──
@@ -1537,12 +1516,68 @@ function renderFocusArea() {
 }
 
 // ── Daily Tag Checklist (per-date, 3-state: null/good/bad) ──
-// Storage format: { "2026-03-25": { "凹單": "bad", "FOMO": "good" }, ... }
+// localStorage cache: { "2026-03-25": { "凹單": "bad", "FOMO": "good" }, ... }
+// Notion DB: one page per date, 紀律資料 = JSON string of tag states
 function getDailyTagData() {
   return JSON.parse(localStorage.getItem('shamewall_daily_tags') || '{}');
 }
 function saveDailyTagData(data) {
   localStorage.setItem('shamewall_daily_tags', JSON.stringify(data));
+}
+
+// Sync a single date to Notion (upsert)
+function syncDayToNotion(dateStr) {
+  var token = getNotionToken();
+  if (!token) return;
+  var data = getDailyTagData();
+  var dayData = data[dateStr] || {};
+  var jsonStr = JSON.stringify(dayData);
+  var pageId = disciplineIndex[dateStr];
+
+  if (pageId) {
+    // update existing page
+    notionRequest('PATCH', '/pages/' + pageId, {
+      properties: {
+        '紀律資料': { rich_text: [{ text: { content: jsonStr } }] }
+      }
+    }).catch(function(e) { console.error('Discipline sync error:', e); });
+  } else {
+    // create new page
+    notionRequest('POST', '/pages', {
+      parent: { database_id: DISCIPLINE_DB_ID },
+      properties: {
+        '日期': { title: [{ text: { content: dateStr } }] },
+        '紀律資料': { rich_text: [{ text: { content: jsonStr } }] }
+      }
+    }).then(function(result) {
+      if (result && result.id) disciplineIndex[dateStr] = result.id;
+    }).catch(function(e) { console.error('Discipline create error:', e); });
+  }
+}
+
+// Load all discipline data from Notion → localStorage
+function loadDisciplineFromNotion() {
+  var token = getNotionToken();
+  if (!token) return Promise.resolve();
+  return notionRequest('POST', '/databases/' + DISCIPLINE_DB_ID + '/query', {
+    sorts: [{ property: '日期', direction: 'descending' }]
+  }).then(function(result) {
+    var data = {};
+    (result.results || []).forEach(function(page) {
+      var props = page.properties;
+      var titleArr = (props['日期'] && props['日期'].title) || [];
+      var dateStr = titleArr.length ? titleArr[0].plain_text : '';
+      var rtArr = (props['紀律資料'] && props['紀律資料'].rich_text) || [];
+      var jsonStr = rtArr.length ? rtArr[0].plain_text : '{}';
+      if (dateStr) {
+        try { data[dateStr] = JSON.parse(jsonStr); } catch(e) { data[dateStr] = {}; }
+        disciplineIndex[dateStr] = page.id;
+      }
+    });
+    // merge: Notion is source of truth, overwrite localStorage
+    saveDailyTagData(data);
+    console.log('[ShameWall] Loaded ' + Object.keys(data).length + ' discipline days from Notion');
+  }).catch(function(e) { console.error('Discipline load error:', e); });
 }
 
 function openDailyTagModal(dateStr) {
@@ -1565,7 +1600,7 @@ function openDailyTagModal(dateStr) {
 
     var state = document.createElement('span');
     state.className = 'dtag-state';
-    var current = dayData[tag] || null; // null, 'good', 'bad'
+    var current = dayData[tag] || null;
     updateStateIcon(state, current);
 
     row.appendChild(name);
@@ -1587,9 +1622,9 @@ function openDailyTagModal(dateStr) {
         } else {
           data[dateStr][t] = next;
         }
-        // clean up empty dates
-        if (Object.keys(data[dateStr]).length === 0) delete data[dateStr];
+        if (data[dateStr] && Object.keys(data[dateStr]).length === 0) delete data[dateStr];
         saveDailyTagData(data);
+        syncDayToNotion(dateStr);
         updateStateIcon(stateEl, next);
         renderStreakChart();
         renderCalendar();
@@ -1611,26 +1646,22 @@ function closeDailyTagModal() {
   document.getElementById('dailyTagModal').classList.remove('active');
 }
 
-// Check if a date has any 'bad' tag
+// Get bad count and total count for a date
+function dateBadCount(dateStr) {
+  var data = getDailyTagData();
+  var dayData = data[dateStr];
+  if (!dayData) return { bad: 0, total: 0 };
+  var vals = Object.values(dayData);
+  var bad = vals.filter(function(v) { return v === 'bad'; }).length;
+  return { bad: bad, total: vals.length };
+}
+
 function dateHasMistake(dateStr) {
-  var data = getDailyTagData();
-  var dayData = data[dateStr];
-  if (!dayData) return false;
-  return Object.values(dayData).indexOf('bad') !== -1;
+  return dateBadCount(dateStr).bad > 0;
 }
 
-// Check if a date has any data at all
 function dateHasData(dateStr) {
-  var data = getDailyTagData();
-  return !!data[dateStr] && Object.keys(data[dateStr]).length > 0;
-}
-
-// Check if a date is all good (has data, no bad)
-function dateIsClean(dateStr) {
-  var data = getDailyTagData();
-  var dayData = data[dateStr];
-  if (!dayData || Object.keys(dayData).length === 0) return false;
-  return Object.values(dayData).indexOf('bad') === -1;
+  return dateBadCount(dateStr).total > 0;
 }
 
 // ── Calendar ──
@@ -1704,14 +1735,14 @@ function renderCalendar() {
         cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
       }
     } else {
-      // determine state from daily tag checklist data (+ legacy entries)
-      var hasBadTag = dateHasMistake(dateStr) || mistakeDates[dateStr];
-      if (hasBadTag) {
+      // show bad count / total as (bad/total)
+      var counts = dateBadCount(dateStr);
+      if (counts.total > 0) {
+        cell.classList.add(counts.bad > 0 ? 'mistake' : 'clean');
+        cell.innerHTML = d + '<span class="cal-count ' + (counts.bad > 0 ? 'bad' : 'good') + '">(' + counts.bad + '/' + counts.total + ')</span>';
+      } else if (mistakeDates[dateStr]) {
         cell.classList.add('mistake');
-        cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
-      } else if (dateIsClean(dateStr)) {
-        cell.classList.add('clean');
-        cell.innerHTML = d + ' <span class="cal-icon">✓</span>';
+        cell.innerHTML = d + '<span class="cal-count bad">✗</span>';
       } else {
         cell.textContent = d;
       }
@@ -2020,6 +2051,7 @@ function render() {
   renderStreakChart();
   renderFocusArea();
   renderCalendar();
+  renderPnlChart();
 }
 
 var currentMood = 'bad'; // 'bad' or 'good'
@@ -2476,6 +2508,10 @@ document.addEventListener('paste', function(e) {
 
 // boot
 loadEntries();
+loadDisciplineFromNotion().then(function() {
+  renderStreakChart();
+  renderCalendar();
+});
 showQuote();
 </script>
 
