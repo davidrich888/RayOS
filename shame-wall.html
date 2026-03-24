@@ -647,69 +647,75 @@
     text-align: center;
     margin-bottom: 12px;
   }
-  .focus-tag-grid {
+  .focus-input-row {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
     margin-bottom: 16px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
-  .focus-tag-btn {
+  .focus-reminder-input {
+    flex: 1;
     background: #111;
     border: 1px solid #333;
     border-radius: 6px;
-    padding: 8px 14px;
-    color: #666;
+    padding: 10px 14px;
+    color: #eee;
     font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    font-size: 14px;
+    outline: none;
   }
-  .focus-tag-btn:hover {
-    border-color: #555;
-    color: #aaa;
-  }
-  .focus-tag-btn.selected {
+  .focus-reminder-input:focus {
     border-color: #ff9800;
-    color: #ff9800;
-    background: #1a1200;
   }
-  .focus-tag-btn .focus-icon {
-    font-size: 12px;
-  }
-  .focus-selected-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
-  }
-  .focus-selected-item {
-    background: #111;
-    border: 1px solid #222;
-    border-left: 3px solid #ff9800;
+  .focus-add-btn {
+    background: #ff9800;
+    color: #000;
+    border: none;
     border-radius: 6px;
-    padding: 14px 16px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
   }
-  .focus-selected-top {
+  .focus-add-btn:hover {
+    background: #ffb74d;
+  }
+  .focus-reminder-cards {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 8px;
   }
-  .focus-selected-name {
+  .focus-reminder-card {
+    background: linear-gradient(135deg, #1a1200, #2a1f00);
+    border: 1.5px solid #ff9800;
+    border-radius: 10px;
+    padding: 14px 20px;
+    color: #ffcc00;
     font-size: 15px;
     font-weight: bold;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    text-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
+  }
+  .focus-reminder-card:hover {
+    background: linear-gradient(135deg, #2a1f00, #3a2f00);
+    border-color: #ff4444;
     color: #ff6b6b;
   }
-  .focus-selected-streak {
-    font-size: 13px;
-    font-weight: bold;
+  .focus-reminder-card:hover::after {
+    content: ' x';
+    color: #ff4444;
+    font-size: 12px;
   }
-  .focus-selected-streak.good { color: #4ade80; }
-  .focus-selected-streak.zero { color: #ff4444; }
   .focus-30-grid {
     display: grid;
     grid-template-columns: repeat(30, 1fr);
@@ -1034,10 +1040,13 @@
 </div>
 
 <div class="focus-area">
-  <div class="focus-area-header">精進重點</div>
-  <div class="focus-area-subtitle">選擇你目前最需要改善的錯誤 — 勾選的才計入連續無犯錯天數</div>
-  <div class="focus-tag-grid" id="focusTagGrid"></div>
-  <div class="focus-selected-list" id="focusSelectedList"></div>
+  <div class="focus-area-header">盤前提醒</div>
+  <div class="focus-area-subtitle">每天開盤前提醒自己 — 點卡片可刪除</div>
+  <div class="focus-input-row">
+    <input type="text" id="focusReminderInput" class="focus-reminder-input" placeholder="輸入你要提醒自己的事...">
+    <button id="focusAddBtn" class="focus-add-btn">+ 新增</button>
+  </div>
+  <div class="focus-reminder-cards" id="focusReminderCards"></div>
 </div>
 
 <div class="dashboard-row">
@@ -1489,131 +1498,55 @@ function renderStreakChart() {
   });
 }
 
-// ── Focus Area (精進重點) ──
+// ── Focus Area (盤前提醒) ──
+function getReminders() {
+  var saved = localStorage.getItem('shame-wall-reminders');
+  if (saved) return JSON.parse(saved);
+  return [];
+}
+
+function saveReminders(list) {
+  localStorage.setItem('shame-wall-reminders', JSON.stringify(list));
+}
+
+function addReminder() {
+  var input = document.getElementById('focusReminderInput');
+  var text = input.value.trim();
+  if (!text) return;
+  var list = getReminders();
+  list.push(text);
+  saveReminders(list);
+  input.value = '';
+  renderFocusArea();
+}
+
+function removeReminder(idx) {
+  var list = getReminders();
+  list.splice(idx, 1);
+  saveReminders(list);
+  renderFocusArea();
+}
+
 function renderFocusArea() {
-  var tagGrid = document.getElementById('focusTagGrid');
-  var selectedList = document.getElementById('focusSelectedList');
-  tagGrid.textContent = '';
-  selectedList.textContent = '';
-
-  var activeTags = getActiveTags();
-  var today = new Date();
-  today.setHours(0, 0, 0, 0);
-  var todayStr = today.getFullYear() + '-' +
-    String(today.getMonth() + 1).padStart(2, '0') + '-' +
-    String(today.getDate()).padStart(2, '0');
-
-  // build date-to-tags map from entries
-  var dateTags = {};
-  entries.forEach(function(e) {
-    if (!dateTags[e.date]) dateTags[e.date] = [];
-    (e.tags || []).forEach(function(t) {
-      if (dateTags[e.date].indexOf(t) === -1) dateTags[e.date].push(t);
-    });
-  });
-
-  // render tag buttons
-  TAGS.forEach(function(tag) {
-    var btn = document.createElement('button');
-    btn.className = 'focus-tag-btn' + (activeTags.indexOf(tag) !== -1 ? ' selected' : '');
-    var icon = document.createElement('span');
-    icon.className = 'focus-icon';
-    icon.textContent = activeTags.indexOf(tag) !== -1 ? '✓' : '✗';
-    btn.appendChild(icon);
-    btn.appendChild(document.createTextNode(tag));
-    (function(t) {
-      btn.addEventListener('click', function() { toggleActiveTag(t); });
-    })(tag);
-    tagGrid.appendChild(btn);
-  });
-
-  // render 30-day tracker for selected tags
-  if (activeTags.length === 0) {
-    var msg = document.createElement('div');
-    msg.className = 'focus-empty-msg';
-    msg.textContent = '請選擇至少一個精進重點';
-    selectedList.appendChild(msg);
+  var container = document.getElementById('focusReminderCards');
+  container.textContent = '';
+  var list = getReminders();
+  if (list.length === 0) {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'color:#444;font-size:13px;text-align:center;padding:12px;';
+    empty.textContent = '還沒有提醒 — 輸入你盤前要記住的事';
+    container.appendChild(empty);
     return;
   }
-
-  activeTags.forEach(function(tag) {
-    if (TAGS.indexOf(tag) === -1) return;
-
-    var item = document.createElement('div');
-    item.className = 'focus-selected-item';
-
-    // count current streak (consecutive days without this error)
-    var streak = 0;
-    for (var s = 0; s < 365; s++) {
-      var checkD = new Date(today.getTime() - s * 86400000);
-      var dow = checkD.getDay();
-      if (dow === 0 || dow === 6) continue; // skip weekends
-      var checkStr = checkD.getFullYear() + '-' +
-        String(checkD.getMonth() + 1).padStart(2, '0') + '-' +
-        String(checkD.getDate()).padStart(2, '0');
-      if (dateTags[checkStr] && dateTags[checkStr].indexOf(tag) !== -1) break;
-      streak++;
-    }
-
-    // top row
-    var topRow = document.createElement('div');
-    topRow.className = 'focus-selected-top';
-    var name = document.createElement('span');
-    name.className = 'focus-selected-name';
-    name.textContent = tag;
-    topRow.appendChild(name);
-    var streakSpan = document.createElement('span');
-    streakSpan.className = 'focus-selected-streak ' + (streak > 0 ? 'good' : 'zero');
-    streakSpan.textContent = streak + ' 天無犯錯';
-    topRow.appendChild(streakSpan);
-    item.appendChild(topRow);
-
-    // 30-day grid (last 30 weekdays)
-    var grid = document.createElement('div');
-    grid.className = 'focus-30-grid';
-    var weekdays = [];
-    var d = new Date(today);
-    while (weekdays.length < 30) {
-      var dow = d.getDay();
-      if (dow !== 0 && dow !== 6) {
-        weekdays.push(new Date(d));
-      }
-      d.setDate(d.getDate() - 1);
-    }
-    weekdays.reverse();
-
-    weekdays.forEach(function(wd, i) {
-      var wdStr = wd.getFullYear() + '-' +
-        String(wd.getMonth() + 1).padStart(2, '0') + '-' +
-        String(wd.getDate()).padStart(2, '0');
-      var cell = document.createElement('div');
-      cell.className = 'focus-30-day';
-      if (dateTags[wdStr] && dateTags[wdStr].indexOf(tag) !== -1) {
-        cell.classList.add('dirty');
-      } else {
-        cell.classList.add('clean');
-      }
-      if (wdStr === todayStr) cell.classList.add('today');
-      cell.title = wdStr;
-      grid.appendChild(cell);
-    });
-    item.appendChild(grid);
-
-    // date labels
-    var labels = document.createElement('div');
-    labels.className = 'focus-30-labels';
-    var startLabel = document.createElement('span');
-    var firstDay = weekdays[0];
-    startLabel.textContent = String(firstDay.getMonth() + 1).padStart(2, '0') + '/' +
-      String(firstDay.getDate()).padStart(2, '0');
-    labels.appendChild(startLabel);
-    var endLabel = document.createElement('span');
-    endLabel.textContent = String(today.getMonth() + 1).padStart(2, '0') + '/' +
-      String(today.getDate()).padStart(2, '0');
-    labels.appendChild(endLabel);
-    item.appendChild(labels);
-
-    selectedList.appendChild(item);
+  list.forEach(function(text, i) {
+    var card = document.createElement('div');
+    card.className = 'focus-reminder-card';
+    card.textContent = text;
+    card.title = '點擊刪除';
+    (function(idx) {
+      card.addEventListener('click', function() { removeReminder(idx); });
+    })(i);
+    container.appendChild(card);
   });
 }
 
@@ -2364,19 +2297,12 @@ function saveEntry() {
         });
       }
     }
-    // first try with all fields including optional new ones
-    if (lesson) notionProps['這天犯的錯'] = { rich_text: [{ text: { content: lesson } }] };
-    if (currentMood !== 'bad') notionProps['mood'] = { rich_text: [{ text: { content: currentMood } }] };
-    if (goodTags.length) notionProps['做得好'] = { multi_select: goodTags.map(function(t) { return { name: t }; }) };
+    // always send all 3 new fields (DB properties confirmed to exist)
+    notionProps['這天犯的錯'] = { rich_text: lesson ? [{ text: { content: lesson } }] : [] };
+    notionProps['mood'] = { rich_text: [{ text: { content: currentMood } }] };
+    notionProps['做得好'] = { multi_select: goodTags.map(function(t) { return { name: t }; }) };
 
-    return doSave(notionProps).catch(function(err) {
-      // if Notion rejects new fields, retry without them
-      console.warn('Save failed, retrying without new fields:', err.message);
-      delete notionProps['這天犯的錯'];
-      delete notionProps['mood'];
-      delete notionProps['做得好'];
-      return doSave(notionProps);
-    });
+    return doSave(notionProps);
   }).then(function() {
     closeModal();
     saveBtn.disabled = false;
