@@ -1400,9 +1400,11 @@ function loadEntries() {
 
 function updateStats() {
   const totalLoss = entries.reduce(function(s, e) { return s + Number(e.loss); }, 0);
-  const worstLoss = entries.length ? Math.max.apply(null, entries.map(function(e) { return Number(e.loss); })) : 0;
+  // Find worst single loss (largest absolute value)
+  const worstLoss = entries.length ? Math.max.apply(null, entries.map(function(e) { return Math.abs(Number(e.loss)); })) : 0;
 
-  document.getElementById('totalLoss').textContent = '-$' + totalLoss.toLocaleString();
+  var absTotal = Math.abs(totalLoss);
+  document.getElementById('totalLoss').textContent = '-$' + absTotal.toLocaleString();
   document.getElementById('totalEntries').textContent = entries.length;
   document.getElementById('worstLoss').textContent = '-$' + worstLoss.toLocaleString();
 
@@ -1442,41 +1444,72 @@ function renderStreakChart() {
   var today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // find last 'bad' date per tag (from daily checklist + legacy entries)
-  var tagLastDate = {};
-  TAGS.forEach(function(t) { tagLastDate[t] = null; });
-
+  // Build per-date, per-tag status map (merge dailyData + entries)
   var dailyData = getDailyTagData();
+  var tagStatusMap = {}; // { 'YYYY-MM-DD': { tag: 'good'|'bad' } }
+  var tagHasData = {};
+  TAGS.forEach(function(t) { tagHasData[t] = false; });
+
+  // From daily tag data (calendar tri-state)
   Object.keys(dailyData).forEach(function(dateStr) {
+    if (!tagStatusMap[dateStr]) tagStatusMap[dateStr] = {};
     var dayData = dailyData[dateStr];
     Object.keys(dayData).forEach(function(tag) {
-      if (dayData[tag] === 'bad') {
-        var d = new Date(dateStr + 'T00:00:00');
-        if (!tagLastDate[tag] || d > tagLastDate[tag]) tagLastDate[tag] = d;
+      if (TAGS.indexOf(tag) !== -1) {
+        tagHasData[tag] = true;
+        tagStatusMap[dateStr][tag] = dayData[tag];
       }
     });
   });
+  // From shame entries (tags = bad, goodTags = good)
   entries.forEach(function(e) {
+    var dateStr = e.date;
+    if (!tagStatusMap[dateStr]) tagStatusMap[dateStr] = {};
     (e.tags || []).forEach(function(t) {
-      var d = new Date(e.date + 'T00:00:00');
-      if (!tagLastDate[t] || d > tagLastDate[t]) tagLastDate[t] = d;
+      if (TAGS.indexOf(t) !== -1) {
+        tagHasData[t] = true;
+        tagStatusMap[dateStr][t] = 'bad';
+      }
+    });
+    (e.goodTags || []).forEach(function(t) {
+      if (TAGS.indexOf(t) !== -1) {
+        tagHasData[t] = true;
+        if (tagStatusMap[dateStr][t] !== 'bad') {
+          tagStatusMap[dateStr][t] = 'good';
+        }
+      }
     });
   });
 
+  // Count consecutive ✓ (good) days going backwards from today
+  // Days without mark or with ✗ break the streak (weekends skipped)
   var streaks = [];
   TAGS.forEach(function(t) {
-    if (tagLastDate[t]) {
-      streaks.push({ tag: t, days: countWeekdays(tagLastDate[t], today), ever: true });
-    } else {
-      streaks.push({ tag: t, days: -1, ever: false });
+    if (!tagHasData[t]) {
+      streaks.push({ tag: t, days: 0, status: 'nodata' });
+      return;
     }
+    var streak = 0;
+    var d = new Date(today);
+    for (var i = 0; i < 365; i++) {
+      var dow = d.getDay();
+      if (dow === 0 || dow === 6) { d.setDate(d.getDate() - 1); continue; }
+      var ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      var dayStatus = tagStatusMap[ds] && tagStatusMap[ds][t];
+      if (dayStatus === 'good') {
+        streak++;
+      } else {
+        break;
+      }
+      d.setDate(d.getDate() - 1);
+    }
+    streaks.push({ tag: t, days: streak, status: streak > 0 ? 'streak' : 'zero' });
   });
 
+  // sort: streak days desc, zero/nodata last
   streaks.sort(function(a, b) {
-    if (!a.ever && !b.ever) return 0;
-    if (!a.ever) return -1;
-    if (!b.ever) return 1;
-    return b.days - a.days;
+    if (a.days !== b.days) return b.days - a.days;
+    return 0;
   });
 
   var maxDays = 1;
@@ -1495,25 +1528,26 @@ function renderStreakChart() {
     barBg.className = 'streak-bar-bg';
     var barFill = document.createElement('div');
     barFill.className = 'streak-bar-fill';
-    if (s.ever) {
+    if (s.status === 'streak') {
       barFill.style.width = (s.days / maxDays * 100) + '%';
       barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
     } else {
-      barFill.style.width = '100%';
-      barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
-      barFill.style.opacity = '0.3';
+      barFill.style.width = '0%';
     }
     barBg.appendChild(barFill);
     row.appendChild(barBg);
 
     var daysEl = document.createElement('div');
     daysEl.className = 'streak-days';
-    daysEl.style.color = '#4ade80';
-    if (s.ever) {
+    if (s.status === 'streak') {
+      daysEl.style.color = '#4ade80';
       daysEl.textContent = s.days + ' 天';
+    } else if (s.status === 'nodata') {
+      daysEl.style.color = '#555';
+      daysEl.textContent = '無資料';
     } else {
-      daysEl.style.color = '#2d7a4a';
-      daysEl.textContent = '\u2714 從未';
+      daysEl.style.color = '#555';
+      daysEl.textContent = '0 天';
     }
     row.appendChild(daysEl);
 
@@ -1745,7 +1779,7 @@ function syncTagToEntries(dateStr, tag, newState) {
         '做得好': { multi_select: goodTags.map(function(t) { return { name: t }; }) }
       }
     }).then(function() {
-      renderEntries();
+      render();
     }).catch(function(e) {
       console.error('Entry tag sync error:', e);
     });
