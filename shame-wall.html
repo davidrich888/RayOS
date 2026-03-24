@@ -1415,52 +1415,83 @@ function renderStreakChart() {
   var today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // build set of dates that have any mistake (daily tags 'bad' + legacy entries)
-  var mistakeDateSet = {};
+  // find last 'bad' date per tag (from daily checklist + legacy entries)
+  var tagLastDate = {};
+  TAGS.forEach(function(t) { tagLastDate[t] = null; });
+
   var dailyData = getDailyTagData();
   Object.keys(dailyData).forEach(function(dateStr) {
-    if (Object.values(dailyData[dateStr]).indexOf('bad') !== -1) {
-      mistakeDateSet[dateStr] = true;
-    }
+    var dayData = dailyData[dateStr];
+    Object.keys(dayData).forEach(function(tag) {
+      if (dayData[tag] === 'bad') {
+        var d = new Date(dateStr + 'T00:00:00');
+        if (!tagLastDate[tag] || d > tagLastDate[tag]) tagLastDate[tag] = d;
+      }
+    });
   });
   entries.forEach(function(e) {
-    if (e.tags && e.tags.length > 0) mistakeDateSet[e.date] = true;
+    (e.tags || []).forEach(function(t) {
+      var d = new Date(e.date + 'T00:00:00');
+      if (!tagLastDate[t] || d > tagLastDate[t]) tagLastDate[t] = d;
+    });
   });
 
-  // count consecutive weekdays from today with no mistakes
-  var streak = 0;
-  for (var s = 0; s < 365; s++) {
-    var checkD = new Date(today.getTime() - s * 86400000);
-    var dow = checkD.getDay();
-    if (dow === 0 || dow === 6) continue;
-    var checkStr = checkD.getFullYear() + '-' +
-      String(checkD.getMonth() + 1).padStart(2, '0') + '-' +
-      String(checkD.getDate()).padStart(2, '0');
-    if (mistakeDateSet[checkStr]) break;
-    streak++;
-  }
+  var streaks = [];
+  TAGS.forEach(function(t) {
+    if (tagLastDate[t]) {
+      streaks.push({ tag: t, days: countWeekdays(tagLastDate[t], today), ever: true });
+    } else {
+      streaks.push({ tag: t, days: -1, ever: false });
+    }
+  });
 
-  // display as single big number
-  var numEl = document.createElement('div');
-  numEl.style.cssText = 'text-align:center;padding:20px 0;';
-  var bigNum = document.createElement('div');
-  bigNum.style.cssText = 'font-size:64px;font-weight:bold;color:#4ade80;line-height:1;';
-  bigNum.textContent = streak;
-  numEl.appendChild(bigNum);
-  var labelEl = document.createElement('div');
-  labelEl.style.cssText = 'font-size:13px;color:#666;margin-top:8px;';
-  labelEl.textContent = '連續交易日無犯錯';
-  numEl.appendChild(labelEl);
+  streaks.sort(function(a, b) {
+    if (!a.ever && !b.ever) return 0;
+    if (!a.ever) return -1;
+    if (!b.ever) return 1;
+    return b.days - a.days;
+  });
 
-  var lastMistakeDate = Object.keys(mistakeDateSet).sort().reverse()[0];
-  if (lastMistakeDate) {
-    var since = document.createElement('div');
-    since.style.cssText = 'font-size:11px;color:#444;margin-top:4px;';
-    since.textContent = '上次犯錯：' + lastMistakeDate;
-    numEl.appendChild(since);
-  }
+  var maxDays = 1;
+  streaks.forEach(function(s) { if (s.days > maxDays) maxDays = s.days; });
 
-  chart.appendChild(numEl);
+  streaks.forEach(function(s) {
+    var row = document.createElement('div');
+    row.className = 'streak-row';
+
+    var label = document.createElement('div');
+    label.className = 'streak-label';
+    label.textContent = s.tag;
+    row.appendChild(label);
+
+    var barBg = document.createElement('div');
+    barBg.className = 'streak-bar-bg';
+    var barFill = document.createElement('div');
+    barFill.className = 'streak-bar-fill';
+    if (s.ever) {
+      barFill.style.width = (s.days / maxDays * 100) + '%';
+      barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+    } else {
+      barFill.style.width = '100%';
+      barFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+      barFill.style.opacity = '0.3';
+    }
+    barBg.appendChild(barFill);
+    row.appendChild(barBg);
+
+    var daysEl = document.createElement('div');
+    daysEl.className = 'streak-days';
+    daysEl.style.color = '#4ade80';
+    if (s.ever) {
+      daysEl.textContent = s.days + ' 天';
+    } else {
+      daysEl.style.color = '#2d7a4a';
+      daysEl.textContent = '\u2714 從未';
+    }
+    row.appendChild(daysEl);
+
+    chart.appendChild(row);
+  });
 }
 
 // ── Focus Area (盤前提醒) ──
