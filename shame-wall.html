@@ -606,23 +606,20 @@
     text-align: center;
     margin-bottom: 12px;
   }
-  .focus-cards {
+  .focus-items-list {
     display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 16px;
   }
-  .focus-card {
+  .focus-item {
     background: #111;
-    border: 1px solid #333;
+    border: 1px solid #222;
     border-radius: 8px;
-    padding: 14px 20px;
-    min-width: 160px;
-    text-align: center;
+    padding: 16px 20px;
     position: relative;
     overflow: hidden;
   }
-  .focus-card::before {
+  .focus-item::before {
     content: '';
     position: absolute;
     top: 0;
@@ -631,31 +628,139 @@
     height: 3px;
     background: linear-gradient(90deg, #ff4444, #ff9800);
   }
-  .focus-card-rank {
-    font-size: 10px;
-    color: #555;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 6px;
+  .focus-item-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
   }
-  .focus-card-name {
-    font-size: 16px;
-    font-weight: bold;
+  .focus-item-input {
+    flex: 1;
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 4px;
     color: #ff6b6b;
-    margin-bottom: 4px;
-  }
-  .focus-card-days {
-    font-size: 12px;
-    color: #888;
-  }
-  .focus-card-days span {
-    color: #ff4444;
+    font-family: inherit;
+    font-size: 15px;
     font-weight: bold;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s;
   }
-  .focus-card-count {
+  .focus-item-input:focus {
+    border-color: #ff9800;
+  }
+  .focus-item-input::placeholder {
+    color: #333;
+    font-weight: normal;
+  }
+  .focus-item-remove {
+    background: none;
+    border: 1px solid #333;
+    color: #555;
+    font-size: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .focus-item-remove:hover {
+    color: #ff4444;
+    border-color: #ff4444;
+  }
+  .focus-item-streak-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .focus-item-streak-label {
     font-size: 11px;
     color: #555;
+    letter-spacing: 1px;
+  }
+  .focus-item-streak-count {
+    font-size: 13px;
+    font-weight: bold;
+  }
+  .focus-item-streak-count.active {
+    color: #4ade80;
+  }
+  .focus-item-streak-count.zero {
+    color: #555;
+  }
+  .focus-30-grid {
+    display: grid;
+    grid-template-columns: repeat(30, 1fr);
+    gap: 3px;
+  }
+  .focus-day {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #333;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .focus-day:hover {
+    background: #252525;
+  }
+  .focus-day.checked {
+    background: #22c55e;
+  }
+  .focus-day.checked::after {
+    content: '\2713';
+    color: #000;
+    font-size: 10px;
+    font-weight: bold;
+  }
+  .focus-day.today {
+    outline: 1px solid #ff9800;
+    outline-offset: -1px;
+  }
+  .focus-day.future {
+    background: #0f0f0f;
+    cursor: default;
+    pointer-events: none;
+  }
+  .focus-day-labels {
+    display: flex;
+    justify-content: space-between;
     margin-top: 4px;
+    font-size: 9px;
+    color: #333;
+  }
+  .focus-add-btn {
+    display: block;
+    margin: 12px auto 0;
+    background: none;
+    border: 1px dashed #333;
+    color: #555;
+    font-family: inherit;
+    font-size: 12px;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .focus-add-btn:hover {
+    border-color: #ff9800;
+    color: #ff9800;
+  }
+  @media (max-width: 768px) {
+    .focus-30-grid {
+      grid-template-columns: repeat(15, 1fr);
+    }
   }
 
   /* screenshots */
@@ -922,8 +1027,9 @@
 
 <div class="focus-area">
   <div class="focus-area-header">精進重點</div>
-  <div class="focus-area-subtitle">最近最常犯的錯 — 這些是你現在最需要改善的</div>
-  <div class="focus-cards" id="focusCards"></div>
+  <div class="focus-area-subtitle">寫下你現在最需要改善的事 — 連續 30 天每天打勾追蹤</div>
+  <div class="focus-items-list" id="focusItemsList"></div>
+  <button class="focus-add-btn" id="focusAddBtn" onclick="addFocusItem()">+ 新增精進重點</button>
 </div>
 
 <div class="dashboard-row">
@@ -1360,76 +1466,192 @@ function renderStreakChart() {
 }
 
 // ── Focus Area (精進重點) ──
+function getFocusItems() {
+  return JSON.parse(localStorage.getItem('shamewall_focus_items') || '[]');
+}
+function saveFocusItems(items) {
+  localStorage.setItem('shamewall_focus_items', JSON.stringify(items));
+}
+
+function addFocusItem() {
+  var items = getFocusItems();
+  if (items.length >= 5) return;
+  var today = new Date();
+  var startDate = today.getFullYear() + '-' +
+    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+    String(today.getDate()).padStart(2, '0');
+  items.push({ text: '', startDate: startDate, days: {} });
+  saveFocusItems(items);
+  renderFocusArea();
+  // auto-focus the new input
+  var inputs = document.querySelectorAll('.focus-item-input');
+  if (inputs.length) inputs[inputs.length - 1].focus();
+}
+
+function removeFocusItem(idx) {
+  var items = getFocusItems();
+  items.splice(idx, 1);
+  saveFocusItems(items);
+  renderFocusArea();
+}
+
+function updateFocusText(idx, text) {
+  var items = getFocusItems();
+  if (items[idx]) {
+    items[idx].text = text;
+    saveFocusItems(items);
+  }
+}
+
+function toggleFocusDay(idx, dateStr) {
+  var items = getFocusItems();
+  if (!items[idx]) return;
+  if (!items[idx].days) items[idx].days = {};
+  items[idx].days[dateStr] = !items[idx].days[dateStr];
+  saveFocusItems(items);
+  renderFocusArea();
+}
+
 function renderFocusArea() {
-  var container = document.getElementById('focusCards');
+  var container = document.getElementById('focusItemsList');
+  var addBtn = document.getElementById('focusAddBtn');
   container.textContent = '';
 
-  var tagCount = {};
-  var tagLastDate = {};
-  var today = new Date();
-  today.setHours(0, 0, 0, 0);
-  var activeTags = getActiveTags();
+  var items = getFocusItems();
+  addBtn.style.display = items.length >= 5 ? 'none' : '';
 
-  TAGS.forEach(function(t) { tagCount[t] = 0; tagLastDate[t] = null; });
-
-  entries.forEach(function(e) {
-    (e.tags || []).forEach(function(t) {
-      tagCount[t] = (tagCount[t] || 0) + 1;
-      var d = new Date(e.date + 'T00:00:00');
-      if (!tagLastDate[t] || d > tagLastDate[t]) {
-        tagLastDate[t] = d;
-      }
-    });
-  });
-
-  var focus = [];
-  TAGS.forEach(function(t) {
-    if (tagCount[t] > 0 && activeTags.indexOf(t) !== -1) {
-      var days = countWeekdays(tagLastDate[t], today);
-      focus.push({ tag: t, days: days, count: tagCount[t] });
-    }
-  });
-
-  focus.sort(function(a, b) { return a.days - b.days; });
-
-  var top = focus.slice(0, 3);
-  if (top.length === 0) {
+  if (items.length === 0) {
     var emptyMsg = document.createElement('div');
-    emptyMsg.style.cssText = 'color:#444;font-size:12px;';
-    emptyMsg.textContent = '目前沒有犯錯記錄 — 繼續保持！';
+    emptyMsg.style.cssText = 'color:#444;font-size:12px;text-align:center;padding:8px;';
+    emptyMsg.textContent = '點擊下方按鈕新增你的精進重點';
     container.appendChild(emptyMsg);
     return;
   }
 
-  var rankLabels = ['#1 最需改善', '#2', '#3'];
-  top.forEach(function(item, i) {
-    var card = document.createElement('div');
-    card.className = 'focus-card';
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var todayStr = today.getFullYear() + '-' +
+    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+    String(today.getDate()).padStart(2, '0');
 
-    var rank = document.createElement('div');
-    rank.className = 'focus-card-rank';
-    rank.textContent = rankLabels[i];
-    card.appendChild(rank);
+  items.forEach(function(item, idx) {
+    var div = document.createElement('div');
+    div.className = 'focus-item';
 
-    var name = document.createElement('div');
-    name.className = 'focus-card-name';
-    name.textContent = item.tag;
-    card.appendChild(name);
+    // top row: input + remove
+    var top = document.createElement('div');
+    top.className = 'focus-item-top';
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'focus-item-input';
+    input.placeholder = '輸入精進重點，例如：不報復交易';
+    input.value = item.text || '';
+    input.setAttribute('data-idx', idx);
+    input.addEventListener('blur', function() {
+      updateFocusText(parseInt(this.getAttribute('data-idx')), this.value);
+    });
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') this.blur();
+    });
+    top.appendChild(input);
 
-    var days = document.createElement('div');
-    days.className = 'focus-card-days';
-    days.textContent = '上次犯錯：';
-    var daysSpan = document.createElement('span');
-    daysSpan.textContent = item.days + ' 天前';
-    days.appendChild(daysSpan);
-    card.appendChild(days);
+    var removeBtn = document.createElement('button');
+    removeBtn.className = 'focus-item-remove';
+    removeBtn.textContent = '×';
+    removeBtn.setAttribute('data-idx', idx);
+    removeBtn.addEventListener('click', function() {
+      if (confirm('確定刪除這個精進重點？')) {
+        removeFocusItem(parseInt(this.getAttribute('data-idx')));
+      }
+    });
+    top.appendChild(removeBtn);
+    div.appendChild(top);
 
-    var count = document.createElement('div');
-    count.className = 'focus-card-count';
-    count.textContent = '累計 ' + item.count + ' 次';
-    card.appendChild(count);
+    // streak info
+    var startD = new Date(item.startDate + 'T00:00:00');
+    var currentStreak = 0;
+    // count consecutive checked days ending at yesterday or today
+    for (var s = 0; s < 30; s++) {
+      var checkD = new Date(today.getTime() - s * 86400000);
+      var checkStr = checkD.getFullYear() + '-' +
+        String(checkD.getMonth() + 1).padStart(2, '0') + '-' +
+        String(checkD.getDate()).padStart(2, '0');
+      if (checkD < startD) break;
+      if (item.days && item.days[checkStr]) {
+        currentStreak++;
+      } else if (s === 0) {
+        // today not checked yet is ok, continue
+        continue;
+      } else {
+        break;
+      }
+    }
 
-    container.appendChild(card);
+    var infoRow = document.createElement('div');
+    infoRow.className = 'focus-item-streak-info';
+    var label = document.createElement('span');
+    label.className = 'focus-item-streak-label';
+    label.textContent = '30 天追蹤';
+    infoRow.appendChild(label);
+    var countSpan = document.createElement('span');
+    countSpan.className = 'focus-item-streak-count ' + (currentStreak > 0 ? 'active' : 'zero');
+    countSpan.textContent = '🔥 ' + currentStreak + ' 天連續';
+    infoRow.appendChild(countSpan);
+    div.appendChild(infoRow);
+
+    // 30-day grid
+    var grid = document.createElement('div');
+    grid.className = 'focus-30-grid';
+    for (var d = 0; d < 30; d++) {
+      var dayDate = new Date(startD.getTime() + d * 86400000);
+      var dayStr = dayDate.getFullYear() + '-' +
+        String(dayDate.getMonth() + 1).padStart(2, '0') + '-' +
+        String(dayDate.getDate()).padStart(2, '0');
+      var cell = document.createElement('div');
+      cell.className = 'focus-day';
+      cell.title = 'Day ' + (d + 1) + ' (' + dayStr + ')';
+      if (dayDate > today) {
+        cell.classList.add('future');
+      } else {
+        if (item.days && item.days[dayStr]) {
+          cell.classList.add('checked');
+        }
+        if (dayStr === todayStr) {
+          cell.classList.add('today');
+        }
+        cell.setAttribute('data-idx', idx);
+        cell.setAttribute('data-date', dayStr);
+        cell.addEventListener('click', function() {
+          toggleFocusDay(
+            parseInt(this.getAttribute('data-idx')),
+            this.getAttribute('data-date')
+          );
+        });
+      }
+      // show day number on first, middle, last
+      if (d === 0 || d === 14 || d === 29) {
+        cell.textContent = d + 1;
+      }
+      grid.appendChild(cell);
+    }
+    div.appendChild(grid);
+
+    // date labels
+    var labels = document.createElement('div');
+    labels.className = 'focus-day-labels';
+    var startLabel = document.createElement('span');
+    startLabel.textContent = item.startDate.substring(5);
+    labels.appendChild(startLabel);
+    var endD = new Date(startD.getTime() + 29 * 86400000);
+    var endStr = endD.getFullYear() + '-' +
+      String(endD.getMonth() + 1).padStart(2, '0') + '-' +
+      String(endD.getDate()).padStart(2, '0');
+    var endLabel = document.createElement('span');
+    endLabel.textContent = endStr.substring(5);
+    labels.appendChild(endLabel);
+    div.appendChild(labels);
+
+    container.appendChild(div);
   });
 }
 
