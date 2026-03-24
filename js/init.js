@@ -23,7 +23,7 @@
         console.log('[RayOS] Reset body data to verified Notion values v4');
     }
     
-    document.getElementById('wealth-quote-text').textContent = '"' + quote.text + '"';
+    document.getElementById('wealth-quote-text').innerHTML = '"' + quote.text.replace(/\n/g, '<br>') + '"';
     document.getElementById('wealth-quote-author').textContent = '— ' + quote.author;
     document.getElementById('goal-target').textContent = formatNumber(wealthGoal);
     

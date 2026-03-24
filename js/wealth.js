@@ -10,7 +10,7 @@ function saveQuote() {
     quote.text = document.getElementById('quote-text-input').value;
     quote.author = document.getElementById('quote-author-input').value;
     localStorage.setItem('wealth_quote', JSON.stringify(quote));
-    document.getElementById('wealth-quote-text').textContent = '"' + quote.text + '"';
+    document.getElementById('wealth-quote-text').innerHTML = '"' + quote.text.replace(/\n/g, '<br>') + '"';
     document.getElementById('wealth-quote-author').textContent = '— ' + quote.author;
     hideModal('quote-modal');
     showToast('Quote saved');
