@@ -2342,24 +2342,37 @@ function saveEntry() {
       '日期': { date: { start: date } },
       '虧損金額': { number: lossNum },
       '錯誤描述': { rich_text: [{ text: { content: mistake || '' } }] },
-      '這天犯的錯': { rich_text: [{ text: { content: lesson || '' } }] },
-      'mood': { rich_text: [{ text: { content: currentMood } }] },
       '詳細過程': { rich_text: [{ text: { content: detail || '' } }] },
       '帳號': { rich_text: [{ text: { content: account || '' } }] },
       '連結': { url: link || null },
       '錯誤類型': { multi_select: tags.map(function(t) { return { name: t }; }) },
-      '做得好': { multi_select: goodTags.map(function(t) { return { name: t }; }) },
       '截圖': { rich_text: [{ text: { content: screenshotJson } }] }
     };
+    // new fields — only send if DB supports them (avoid Notion API errors)
+    try {
+      if (lesson) notionProps['這天犯的錯'] = { rich_text: [{ text: { content: lesson } }] };
+      if (currentMood !== 'bad') notionProps['mood'] = { rich_text: [{ text: { content: currentMood } }] };
+      if (goodTags.length) notionProps['做得好'] = { multi_select: goodTags.map(function(t) { return { name: t }; }) };
+    } catch(e) { console.warn('Optional fields skipped:', e); }
 
-    if (editingId) {
-      return notionRequest('PATCH', '/pages/' + editingId, { properties: notionProps });
-    } else {
-      return notionRequest('POST', '/pages', {
-        parent: { database_id: NOTION_DB_ID },
-        properties: notionProps
-      });
+    function doSave(props) {
+      if (editingId) {
+        return notionRequest('PATCH', '/pages/' + editingId, { properties: props });
+      } else {
+        return notionRequest('POST', '/pages', {
+          parent: { database_id: NOTION_DB_ID },
+          properties: props
+        });
+      }
     }
+    return doSave(notionProps).catch(function(err) {
+      // retry without new fields if Notion rejects them
+      console.warn('Save failed, retrying without new fields:', err.message);
+      delete notionProps['這天犯的錯'];
+      delete notionProps['mood'];
+      delete notionProps['做得好'];
+      return doSave(notionProps);
+    });
   }).then(function() {
     closeModal();
     saveBtn.disabled = false;
