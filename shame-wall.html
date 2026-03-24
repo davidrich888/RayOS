@@ -1345,16 +1345,20 @@ function updateStats() {
   document.getElementById('totalEntries').textContent = entries.length;
   document.getElementById('worstLoss').textContent = '-$' + worstLoss.toLocaleString();
 
-  if (entries.length > 0) {
-    const tagCount = {};
-    entries.forEach(function(e) {
-      (e.tags || []).forEach(function(t) { tagCount[t] = (tagCount[t] || 0) + 1; });
+  // count mistakes from entries + daily tag checklist
+  const tagCount = {};
+  entries.forEach(function(e) {
+    (e.tags || []).forEach(function(t) { tagCount[t] = (tagCount[t] || 0) + 1; });
+  });
+  var dailyData = getDailyTagData();
+  Object.keys(dailyData).forEach(function(dateStr) {
+    var dayData = dailyData[dateStr];
+    Object.keys(dayData).forEach(function(tag) {
+      if (dayData[tag] === 'bad') tagCount[tag] = (tagCount[tag] || 0) + 1;
     });
-    const sorted = Object.keys(tagCount).sort(function(a, b) { return tagCount[b] - tagCount[a]; });
-    document.getElementById('topMistake').textContent = sorted.length ? sorted[0] : '—';
-  } else {
-    document.getElementById('topMistake').textContent = '—';
-  }
+  });
+  const sorted = Object.keys(tagCount).sort(function(a, b) { return tagCount[b] - tagCount[a]; });
+  document.getElementById('topMistake').textContent = sorted.length ? sorted[0] : '—';
 }
 
 
@@ -1376,15 +1380,30 @@ function renderStreakChart() {
 
   var today = new Date();
   today.setHours(0, 0, 0, 0);
-  // find last occurrence date for each tag
+  // find last 'bad' occurrence date for each tag (from entries + daily tag checklist)
   var tagLastDate = {};
   TAGS.forEach(function(t) { tagLastDate[t] = null; });
 
+  // from legacy entries
   entries.forEach(function(e) {
     (e.tags || []).forEach(function(t) {
       var d = new Date(e.date + 'T00:00:00');
       if (!tagLastDate[t] || d > tagLastDate[t]) {
         tagLastDate[t] = d;
+      }
+    });
+  });
+
+  // from daily tag checklist (only 'bad' marks count)
+  var dailyData = getDailyTagData();
+  Object.keys(dailyData).forEach(function(dateStr) {
+    var dayData = dailyData[dateStr];
+    Object.keys(dayData).forEach(function(tag) {
+      if (dayData[tag] === 'bad') {
+        var d = new Date(dateStr + 'T00:00:00');
+        if (!tagLastDate[tag] || d > tagLastDate[tag]) {
+          tagLastDate[tag] = d;
+        }
       }
     });
   });
@@ -1682,37 +1701,23 @@ function renderCalendar() {
         cell.classList.add('mistake');
         cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
       }
-    } else if (mistakeDates[dateStr]) {
-      cell.classList.add('mistake');
-      cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
     } else {
-      // check localStorage for manually marked clean days
-      var cleanDays = JSON.parse(localStorage.getItem('shamewall_clean_days') || '{}');
-      if (cleanDays[dateStr]) {
+      // determine state from daily tag checklist data (+ legacy entries)
+      var hasBadTag = dateHasMistake(dateStr) || mistakeDates[dateStr];
+      if (hasBadTag) {
+        cell.classList.add('mistake');
+        cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
+      } else if (dateIsClean(dateStr)) {
         cell.classList.add('clean');
         cell.innerHTML = d + ' <span class="cal-icon">✓</span>';
       } else {
         cell.textContent = d;
       }
-      // click to toggle clean status (only past/today non-mistake days)
+      // click opens daily tag checklist modal
       cell.style.cursor = 'pointer';
       cell.setAttribute('data-date', dateStr);
-      cell.setAttribute('data-day', d);
       cell.addEventListener('click', function() {
-        var ds = this.getAttribute('data-date');
-        var dy = this.getAttribute('data-day');
-        var stored = JSON.parse(localStorage.getItem('shamewall_clean_days') || '{}');
-        if (stored[ds]) {
-          delete stored[ds];
-          this.classList.remove('clean');
-          this.innerHTML = '';
-          this.textContent = dy;
-        } else {
-          stored[ds] = true;
-          this.classList.add('clean');
-          this.innerHTML = dy + ' <span class="cal-icon">✓</span>';
-        }
-        localStorage.setItem('shamewall_clean_days', JSON.stringify(stored));
+        openDailyTagModal(this.getAttribute('data-date'));
       });
     }
 
@@ -2391,6 +2396,10 @@ document.getElementById('addBtn').addEventListener('click', function() { openMod
 document.getElementById('focusAddBtn').addEventListener('click', addReminder);
 document.getElementById('focusReminderInput').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') addReminder();
+});
+document.getElementById('dailyTagClose').addEventListener('click', closeDailyTagModal);
+document.getElementById('dailyTagModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDailyTagModal();
 });
 document.getElementById('saveBtn').addEventListener('click', saveEntry);
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
