@@ -1339,6 +1339,25 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
 }
 
+// render text with [hl]...[/hl] as <mark> elements
+function renderHighlightedText(text, container) {
+  var re = /\[hl\]([\s\S]*?)\[\/hl\]/g;
+  var lastIdx = 0;
+  var match;
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > lastIdx) {
+      container.appendChild(document.createTextNode(text.substring(lastIdx, match.index)));
+    }
+    var mark = document.createElement('mark');
+    mark.textContent = match[1];
+    container.appendChild(mark);
+    lastIdx = re.lastIndex;
+  }
+  if (lastIdx < text.length) {
+    container.appendChild(document.createTextNode(text.substring(lastIdx)));
+  }
+}
+
 function setLoading(state) {
   loading = state;
   document.getElementById('addBtn').disabled = state;
@@ -1896,7 +1915,8 @@ function renderEntry(e) {
     var plainDetail = e.detail.replace(/\[screenshot\]/g, '').trim();
     if (plainDetail) {
       var firstPara = plainDetail.split('\n')[0].trim();
-      detailEl.textContent = firstPara.length > 80 ? firstPara.substring(0, 80) + '...' : firstPara;
+      var displayText = firstPara.length > 80 ? firstPara.substring(0, 80) + '...' : firstPara;
+      renderHighlightedText(displayText, detailEl);
     }
     card.appendChild(detailEl);
   }
@@ -2008,7 +2028,7 @@ function openDetailModal(entryId) {
     parts.forEach(function(part, i) {
       if (part.trim()) {
         var p = document.createElement('p');
-        p.textContent = part.trim();
+        renderHighlightedText(part.trim(), p);
         detailEl.appendChild(p);
       }
       if (i < parts.length - 1 && ssIndex < detailSS.length) {
@@ -2221,10 +2241,10 @@ function openModal(id) {
       var parts = e.detail.split('[screenshot]');
       parts.forEach(function(part, i) {
         if (part) {
-          // use innerHTML-safe text with <br> for newlines
+          // use innerHTML-safe text with <br> for newlines, render [hl] as <mark>
           var lines = part.split('\n');
           lines.forEach(function(line, li) {
-            if (line) editorEl.appendChild(document.createTextNode(line));
+            if (line) renderHighlightedText(line, editorEl);
             if (li < lines.length - 1) editorEl.appendChild(document.createElement('br'));
           });
         }
@@ -2376,21 +2396,12 @@ function saveEntry() {
   var loss = document.getElementById('entryLoss').value;
   var mistake = document.getElementById('entryMistake').value.trim();
   var lesson = document.getElementById('entryLesson').value.trim();
-  // serialize rich editor: extract text + inline images
+  // serialize rich editor: extract text + inline images (preserving order)
   var editorEl = document.getElementById('entryDetail');
   var richContent = serializeRichEditor(editorEl);
   var detail = richContent.text;
-  // separate new (base64) vs existing (server URL) inline images
-  var newInlineImages = []; // base64 data URLs from rich editor
-  var keptDetailUrls = []; // existing Drive URLs kept in editor
-  richContent.images.forEach(function(src) {
-    if (src.startsWith('data:')) {
-      newInlineImages.push(src);
-    } else {
-      // existing Drive URL — keep it
-      keptDetailUrls.push(src);
-    }
-  });
+  // keep images in original order, track which ones need uploading
+  var orderedDetailImages = richContent.images; // [{src, isNew}] in order
   var link = document.getElementById('entryLink').value.trim();
   var account = document.getElementById('entryAccount').value.trim();
   var tags = [];
@@ -2430,18 +2441,26 @@ function saveEntry() {
     });
   }
   var pnlUploads = pendingScreenshots.map(tryUpload);
-  var detailUploads = newInlineImages.map(tryUpload);
+  // upload detail images in order — existing URLs resolve immediately, new ones upload
+  var detailUploads = orderedDetailImages.map(function(src) {
+    if (src.startsWith('data:')) {
+      return tryUpload(src);
+    } else {
+      return Promise.resolve(src); // already a Drive URL, keep as-is
+    }
+  });
 
   var skippedCount = 0;
   Promise.all([Promise.all(pnlUploads), Promise.all(detailUploads)]).then(function(results) {
-    var newPnlUrls = results[0].filter(Boolean); // remove nulls (failed uploads)
-    var newDetailUrls = results[1].filter(Boolean);
-    skippedCount = (pendingScreenshots.length - newPnlUrls.length)
-                 + (newInlineImages.length - newDetailUrls.length);
+    var newPnlUrls = results[0].filter(Boolean);
+    // detail URLs already in correct order, filter out failed uploads (nulls)
+    var allDetailUrls = results[1].filter(Boolean);
+    var totalNew = pendingScreenshots.length + orderedDetailImages.filter(function(s){return s.startsWith('data:')}).length;
+    var totalUploaded = newPnlUrls.length + (allDetailUrls.length - orderedDetailImages.filter(function(s){return !s.startsWith('data:')}).length);
+    skippedCount = totalNew - totalUploaded;
+    if (skippedCount < 0) skippedCount = 0;
 
-    // combine with existing URLs
     var allPnlUrls = existingPnlScreenshots.concat(newPnlUrls);
-    var allDetailUrls = keptDetailUrls.concat(newDetailUrls);
 
     var screenshotJson = JSON.stringify({ pnl: allPnlUrls, detail: allDetailUrls });
 
@@ -2512,6 +2531,34 @@ function showQuote() {
 
 // event listeners
 document.getElementById('addBtn').addEventListener('click', function() { openModal(); });
+
+// highlighter button
+document.getElementById('hlBtn').addEventListener('click', function() {
+  var sel = window.getSelection();
+  if (!sel.rangeCount || sel.isCollapsed) return;
+  var range = sel.getRangeAt(0);
+  var editor = document.getElementById('entryDetail');
+  if (!editor.contains(range.commonAncestorContainer)) return;
+  // check if already highlighted — toggle off
+  var parentMark = sel.anchorNode.parentElement && sel.anchorNode.parentElement.closest('mark');
+  if (parentMark) {
+    var frag = document.createDocumentFragment();
+    while (parentMark.firstChild) frag.appendChild(parentMark.firstChild);
+    parentMark.parentNode.replaceChild(frag, parentMark);
+    return;
+  }
+  var mark = document.createElement('mark');
+  try {
+    range.surroundContents(mark);
+  } catch(e) {
+    // partial selection across elements — extract and wrap
+    var contents = range.extractContents();
+    mark.appendChild(contents);
+    range.insertNode(mark);
+  }
+  sel.removeAllRanges();
+});
+
 document.getElementById('focusAddBtn').addEventListener('click', addReminder);
 document.getElementById('focusReminderInput').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') addReminder();
