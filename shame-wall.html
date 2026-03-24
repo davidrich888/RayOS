@@ -2506,15 +2506,16 @@ function saveEntry() {
     return;
   }
 
-  // sync entry tags to daily tag checklist so calendar updates
-  if (tags.length > 0 || goodTags.length > 0) {
-    var data = getDailyTagData();
-    if (!data[date]) data[date] = {};
-    tags.forEach(function(t) { data[date][t] = 'bad'; });
-    goodTags.forEach(function(t) { data[date][t] = 'good'; });
-    saveDailyTagData(data);
-    syncDayToNotion(date);
-  }
+  // sync entry tags to daily tag checklist so calendar updates (full overwrite)
+  var data = getDailyTagData();
+  if (!data[date]) data[date] = {};
+  TAGS.forEach(function(t) {
+    if (tags.indexOf(t) !== -1) data[date][t] = 'bad';
+    else if (goodTags.indexOf(t) !== -1) data[date][t] = 'good';
+    else delete data[date][t];
+  });
+  saveDailyTagData(data);
+  if (tags.length > 0 || goodTags.length > 0) syncDayToNotion(date);
 
   var lossNum = parseFloat(loss) || 0;
   var title = (mistake || '').substring(0, 50) || date || 'untitled';
