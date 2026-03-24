@@ -1491,6 +1491,7 @@ function renderStreakChart() {
     }
     var streak = 0;
     var d = new Date(today);
+    d.setDate(d.getDate() - 1); // exclude today, start from yesterday
     for (var i = 0; i < 365; i++) {
       var dow = d.getDay();
       if (dow === 0 || dow === 6) { d.setDate(d.getDate() - 1); continue; }
