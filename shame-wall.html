@@ -98,6 +98,8 @@
     margin-bottom: 0;
     transition: all 0.2s;
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
   .entry:hover {
     border-left-color: #ff6666;
@@ -1816,7 +1818,7 @@ function renderEntry(e) {
 
   // action buttons at bottom-right
   var actions = document.createElement('div');
-  actions.style.cssText = 'display:flex;justify-content:flex-end;gap:8px;margin-top:14px;';
+  actions.style.cssText = 'display:flex;justify-content:flex-end;gap:8px;margin-top:auto;padding-top:14px;';
 
   var editBtn = document.createElement('button');
   editBtn.className = 'entry-action-btn';
