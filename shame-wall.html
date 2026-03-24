@@ -464,19 +464,22 @@
   .streak-section {
     padding: 0;
   }
-  .streak-header {
-    font-size: 16px;
+  .dashboard-section-title {
+    font-size: 22px;
     color: #4ade80;
     font-weight: bold;
     text-align: center;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
+    max-width: 1100px;
+    margin: 32px auto 4px;
+    padding: 0 20px;
   }
-  .streak-subtitle {
-    font-size: 11px;
+  .dashboard-section-subtitle {
+    font-size: 12px;
     color: #444;
     text-align: center;
-    margin-top: 4px;
-    margin-bottom: 16px;
+    max-width: 1100px;
+    margin: 0 auto 16px;
   }
 
   /* calendar */
@@ -485,8 +488,6 @@
     border: 1px solid #222;
     border-radius: 8px;
     padding: 16px;
-    max-width: 500px;
-    margin: 0 auto;
   }
   .calendar-nav {
     display: flex;
@@ -1098,17 +1099,15 @@
   <div class="focus-reminder-cards" id="focusReminderCards"></div>
 </div>
 
+<div class="dashboard-section-title">連續無犯錯天數</div>
+<div class="dashboard-section-subtitle">每一天都是勝利 — 保持下去</div>
 <div class="dashboard-row">
-  <div class="dashboard-full">
+  <div class="dashboard-left">
     <div class="streak-section">
-      <div class="streak-header">連續無犯錯天數</div>
-      <div class="streak-subtitle">每一天都是勝利 — 保持下去</div>
       <div id="streakChart" class="streak-chart"></div>
     </div>
   </div>
-</div>
-<div class="dashboard-row">
-  <div class="dashboard-full">
+  <div class="dashboard-right">
     <div class="calendar-section">
       <div class="calendar-nav">
         <button id="calPrev">◀</button>
