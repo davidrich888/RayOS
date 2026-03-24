@@ -137,6 +137,17 @@
     cursor: pointer;
   }
   .entry-detail img:hover { border-color: #ff4444; }
+  .entry-lesson {
+    font-size: 15px;
+    color: #ff9800;
+    font-weight: bold;
+    padding: 8px 12px;
+    margin-top: 10px;
+    background: #1a1200;
+    border-left: 3px solid #ff9800;
+    border-radius: 0 4px 4px 0;
+    line-height: 1.5;
+  }
   .entry-tags {
     display: flex;
     gap: 8px;
@@ -1062,6 +1073,10 @@
       <input type="text" id="entryMistake" placeholder="例：史上最爛的一天、又凹單了">
     </div>
     <div class="form-group">
+      <label>這天犯的錯（一句話總結，會顯眼顯示在卡片上）</label>
+      <input type="text" id="entryLesson" placeholder="例：沒耐心等回踩就進場、不該在盤整區硬做">
+    </div>
+    <div class="form-group">
       <label>詳細描述（可邊打字邊 Ctrl+V 貼圖）</label>
       <div class="rich-editor" id="entryDetail" contenteditable="true" data-placeholder="早盤看到一根大紅K就衝進去做多，結果是假突破..."></div>
     </div>
@@ -1167,6 +1182,7 @@ function parseNotionPage(page) {
     detail: getRichText('詳細過程'),
     account: getRichText('帳號'),
     link: linkProp || '',
+    lesson: getRichText('這天犯的錯'),
     tags: tags,
     goodTags: goodTags,
     pnlScreenshots: ssData.pnl || [],
@@ -1732,22 +1748,11 @@ function renderEntry(e) {
     card.appendChild(titleEl);
   }
 
-  // detail text only (no inline images on card)
-  if (e.detail) {
-    var detailEl = document.createElement('div');
-    detailEl.className = 'entry-detail';
-    var plainDetail = e.detail.replace(/\[screenshot\]/g, '').trim();
-    if (plainDetail) {
-      detailEl.textContent = plainDetail.length > 120 ? plainDetail.substring(0, 120) + '...' : plainDetail;
-    }
-    card.appendChild(detailEl);
-  }
-
-  // tags
-  if (e.tags && e.tags.length) {
+  // tags (after title, before lesson)
+  if ((e.tags && e.tags.length) || (e.goodTags && e.goodTags.length)) {
     const tagsEl = document.createElement('div');
     tagsEl.className = 'entry-tags';
-    e.tags.forEach(function(t) {
+    (e.tags || []).forEach(function(t) {
       const tagEl = document.createElement('span');
       tagEl.className = 'tag';
       tagEl.textContent = '✗ ' + t;
@@ -1760,16 +1765,25 @@ function renderEntry(e) {
       tagsEl.appendChild(tagEl);
     });
     card.appendChild(tagsEl);
-  } else if (e.goodTags && e.goodTags.length) {
-    const tagsEl = document.createElement('div');
-    tagsEl.className = 'entry-tags';
-    e.goodTags.forEach(function(t) {
-      const tagEl = document.createElement('span');
-      tagEl.className = 'tag tag-good';
-      tagEl.textContent = '✓ ' + t;
-      tagsEl.appendChild(tagEl);
-    });
-    card.appendChild(tagsEl);
+  }
+
+  // lesson (prominent, after tags)
+  if (e.lesson) {
+    var lessonEl = document.createElement('div');
+    lessonEl.className = 'entry-lesson';
+    lessonEl.textContent = '⚠ ' + e.lesson;
+    card.appendChild(lessonEl);
+  }
+
+  // detail text only (no inline images on card)
+  if (e.detail) {
+    var detailEl = document.createElement('div');
+    detailEl.className = 'entry-detail';
+    var plainDetail = e.detail.replace(/\[screenshot\]/g, '').trim();
+    if (plainDetail) {
+      detailEl.textContent = plainDetail.length > 120 ? plainDetail.substring(0, 120) + '...' : plainDetail;
+    }
+    card.appendChild(detailEl);
   }
 
   // P&L screenshots on card (smaller thumbnails)
@@ -2033,6 +2047,7 @@ function openModal(id) {
     document.getElementById('entryDate').value = e.date;
     document.getElementById('entryLoss').value = e.loss;
     document.getElementById('entryMistake').value = e.mistake || '';
+    document.getElementById('entryLesson').value = e.lesson || '';
     document.getElementById('entryLink').value = e.link || '';
     document.getElementById('entryAccount').value = e.account || '';
     (e.tags || []).forEach(function(t) {
@@ -2198,6 +2213,7 @@ function saveEntry() {
   var date = document.getElementById('entryDate').value;
   var loss = document.getElementById('entryLoss').value;
   var mistake = document.getElementById('entryMistake').value.trim();
+  var lesson = document.getElementById('entryLesson').value.trim();
   // serialize rich editor: extract text + inline images
   var editorEl = document.getElementById('entryDetail');
   var richContent = serializeRichEditor(editorEl);
@@ -2264,6 +2280,7 @@ function saveEntry() {
       '日期': { date: { start: date } },
       '虧損金額': { number: lossNum },
       '錯誤描述': { rich_text: [{ text: { content: mistake || '' } }] },
+      '這天犯的錯': { rich_text: [{ text: { content: lesson || '' } }] },
       '詳細過程': { rich_text: [{ text: { content: detail || '' } }] },
       '帳號': { rich_text: [{ text: { content: account || '' } }] },
       '連結': { url: link || null },
