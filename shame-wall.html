@@ -1894,11 +1894,20 @@ function renderCalendar() {
       cell.textContent = d;
       if (isWeekend) cell.classList.add('weekend');
       else if (isFuture) cell.classList.add('future');
-      // before tracking: just neutral, check if has mistake entry
-      if (isBeforeTracking && !isWeekend && mistakeDates[dateStr]) {
-        cell.textContent = '';
-        cell.classList.add('mistake');
-        cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
+      // before tracking: check if has data (entry or daily tags)
+      if (isBeforeTracking && !isWeekend) {
+        var preCounts = dateBadCount(dateStr);
+        if (preCounts.total > 0) {
+          cell.classList.add(preCounts.bad > 0 ? 'mistake' : 'clean');
+          cell.innerHTML = d + '<span class="cal-count ' + (preCounts.bad > 0 ? 'bad' : 'good') + '">(' + preCounts.bad + '/' + TAGS.length + ')</span>';
+          cell.style.cursor = 'pointer';
+          cell.setAttribute('data-date', dateStr);
+          cell.addEventListener('click', function() { openDailyTagModal(this.getAttribute('data-date')); });
+        } else if (mistakeDates[dateStr]) {
+          cell.textContent = '';
+          cell.classList.add('mistake');
+          cell.innerHTML = d + ' <span class="cal-icon">✗</span>';
+        }
       }
     } else {
       // show (bad/total) from daily checklist + entry tags
