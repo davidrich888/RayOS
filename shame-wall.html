@@ -456,6 +456,9 @@
     flex: 2;
     min-width: 0;
   }
+  .dashboard-full {
+    width: 100%;
+  }
 
   /* streak chart */
   .streak-section {
@@ -482,6 +485,8 @@
     border: 1px solid #222;
     border-radius: 8px;
     padding: 16px;
+    max-width: 500px;
+    margin: 0 auto;
   }
   .calendar-nav {
     display: flex;
@@ -1094,14 +1099,16 @@
 </div>
 
 <div class="dashboard-row">
-  <div class="dashboard-left">
+  <div class="dashboard-full">
     <div class="streak-section">
       <div class="streak-header">連續無犯錯天數</div>
       <div class="streak-subtitle">每一天都是勝利 — 保持下去</div>
       <div id="streakChart" class="streak-chart"></div>
     </div>
   </div>
-  <div class="dashboard-right">
+</div>
+<div class="dashboard-row">
+  <div class="dashboard-full">
     <div class="calendar-section">
       <div class="calendar-nav">
         <button id="calPrev">◀</button>
