@@ -843,6 +843,48 @@
     border-top: 1px solid #1a1a1a;
   }
 
+  /* ── Mobile Responsive ── */
+  @media (max-width: 768px) {
+    .header { padding: 24px 16px 16px; }
+    .header h1 { font-size: 20px; letter-spacing: 2px; }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 12px;
+      padding: 16px;
+    }
+    .stat-value { font-size: 18px; }
+    .stat-label { font-size: 10px; }
+
+    .dashboard-row {
+      flex-direction: column;
+      gap: 20px;
+      padding: 16px;
+    }
+
+    .streak-label { width: 70px; font-size: 10px; }
+    .streak-days { width: 55px; font-size: 12px; }
+    .streak-bar-bg { height: 18px; }
+
+    .calendar-section { padding: 12px; }
+    .calendar-day { font-size: 10px; }
+
+    .content { padding: 16px 12px; }
+    .entry { padding: 14px; }
+    .entry-title { font-size: 18px; }
+    .entry-loss { font-size: 17px; }
+    .entry-screenshots img { height: 80px; }
+
+    .modal { padding: 20px 16px; width: 95%; }
+
+    .detail-modal { padding: 20px 16px; }
+    .detail-modal .dm-title { font-size: 20px; }
+    .detail-modal .dm-loss { font-size: 22px; }
+    .detail-modal .dm-detail { font-size: 14px; }
+    .detail-modal .dm-actions { flex-wrap: wrap; }
+  }
+
 </style>
 </head>
 <body>
