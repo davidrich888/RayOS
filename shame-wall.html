@@ -79,9 +79,14 @@
   }
 
   .content {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 30px 20px;
+  }
+  #entriesList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
   }
 
   .entry {
@@ -90,7 +95,7 @@
     border-left: 3px solid #ff4444;
     border-radius: 6px;
     padding: 20px;
-    margin-bottom: 16px;
+    margin-bottom: 0;
     transition: all 0.2s;
     position: relative;
   }
@@ -111,6 +116,10 @@
     font-weight: bold;
     color: #ff4444;
     text-shadow: 0 0 10px rgba(255, 68, 68, 0.2);
+  }
+  .entry-loss.loss-positive {
+    color: #4ade80;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
   }
   .entry-title {
     font-size: 22px;
@@ -144,9 +153,7 @@
     color: #4ade80;
     text-shadow: 0 0 10px rgba(74, 222, 128, 0.15);
   }
-  .entry.entry-good .entry-loss {
-    color: #4ade80;
-  }
+  /* entry-loss color is based on P&L value, not mood */
   .entry.entry-good .entry-lesson {
     color: #4ade80;
     background: #0a1a0a;
@@ -959,6 +966,7 @@
     .calendar-day { font-size: 10px; }
 
     .content { padding: 16px 12px; }
+    #entriesList { grid-template-columns: 1fr; }
     .entry { padding: 14px; }
     .entry-title { font-size: 18px; }
     .entry-loss { font-size: 17px; }
@@ -1624,8 +1632,9 @@ function renderEntry(e) {
   dateEl.className = 'entry-date';
   dateEl.textContent = formatDate(e.date) + (e.account ? ' \u00b7 ' + e.account : '');
   const lossEl = document.createElement('div');
-  lossEl.className = 'entry-loss';
-  lossEl.textContent = '-$' + Number(e.loss).toLocaleString();
+  var lossVal = Number(e.loss) || 0;
+  lossEl.className = 'entry-loss' + (lossVal > 0 ? ' loss-positive' : '');
+  lossEl.textContent = (lossVal >= 0 ? '+$' : '-$') + Math.abs(lossVal).toLocaleString();
   header.appendChild(dateEl);
   header.appendChild(lossEl);
   card.appendChild(header);
