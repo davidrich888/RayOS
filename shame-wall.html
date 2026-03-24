@@ -1185,7 +1185,7 @@ const TAGS = [
   '沒設停損', '凹單', '報復交易', '過度交易',
   '逆勢做單', '衝動進場', '重倉', '移動停損',
   '不認錯', 'FOMO', '盤前沒計畫', '情緒失控', '賭輸博大',
-  '多空都做', '沒遵守日風控', '看對做錯', '沒耐心等待'
+  '多空都做', '沒遵守日風控', '看對做錯', '沒耐心等待', '盯盤'
 ];
 
 const QUOTES = [
@@ -1694,6 +1694,9 @@ function openDailyTagModal(dateStr) {
         updateStateIcon(stateEl, next);
         renderStreakChart();
         renderCalendar();
+
+        // bidirectional sync: update entry cards for this date
+        syncTagToEntries(dateStr, t, next);
       });
     })(tag, state);
 
@@ -1710,6 +1713,43 @@ function updateStateIcon(el, state) {
 
 function closeDailyTagModal() {
   document.getElementById('dailyTagModal').classList.remove('active');
+}
+
+// Sync a tag change from daily modal to matching entry cards in Notion
+function syncTagToEntries(dateStr, tag, newState) {
+  var matchingEntries = entries.filter(function(e) { return e.date === dateStr && e.id; });
+  if (matchingEntries.length === 0) return;
+
+  matchingEntries.forEach(function(entry) {
+    var badTags = (entry.tags || []).slice();
+    var goodTags = (entry.goodTags || []).slice();
+
+    // remove tag from both lists first
+    badTags = badTags.filter(function(t) { return t !== tag; });
+    goodTags = goodTags.filter(function(t) { return t !== tag; });
+
+    // add to correct list based on new state
+    if (newState === 'bad') badTags.push(tag);
+    else if (newState === 'good') goodTags.push(tag);
+
+    // update local entry object
+    entry.tags = badTags;
+    entry.goodTags = goodTags;
+
+    // update Notion
+    var token = getNotionToken();
+    if (!token) return;
+    notionRequest('PATCH', '/pages/' + entry.id, {
+      properties: {
+        '錯誤類型': { multi_select: badTags.map(function(t) { return { name: t }; }) },
+        '做得好': { multi_select: goodTags.map(function(t) { return { name: t }; }) }
+      }
+    }).then(function() {
+      renderEntries();
+    }).catch(function(e) {
+      console.error('Entry tag sync error:', e);
+    });
+  });
 }
 
 // Get bad count and total count for a date
