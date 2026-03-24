@@ -552,37 +552,6 @@
     flex-direction: column;
     gap: 8px;
   }
-  .streak-row .streak-check {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    border: 1px solid #444;
-    border-radius: 3px;
-    background: transparent;
-    cursor: pointer;
-    flex-shrink: 0;
-    position: relative;
-    transition: all 0.2s;
-  }
-  .streak-row .streak-check:checked {
-    background: #22c55e;
-    border-color: #22c55e;
-  }
-  .streak-row .streak-check:checked::after {
-    content: '\2713';
-    position: absolute;
-    top: -1px;
-    left: 2px;
-    font-size: 12px;
-    color: #000;
-    font-weight: bold;
-  }
-  .streak-row.unchecked .streak-label,
-  .streak-row.unchecked .streak-bar-bg,
-  .streak-row.unchecked .streak-days {
-    opacity: 0.3;
-  }
   .streak-show-hidden button:hover {
     color: #aaa;
     border-color: #666;
@@ -1356,28 +1325,6 @@ function updateStats() {
   }
 }
 
-function getActiveTags() {
-  var saved = localStorage.getItem('shame-wall-active-tags');
-  if (saved) return JSON.parse(saved);
-  return TAGS.slice(); // default: all active
-}
-
-function setActiveTags(tags) {
-  localStorage.setItem('shame-wall-active-tags', JSON.stringify(tags));
-}
-
-function toggleActiveTag(tag) {
-  var active = getActiveTags();
-  var idx = active.indexOf(tag);
-  if (idx === -1) {
-    active.push(tag);
-  } else {
-    active.splice(idx, 1);
-  }
-  setActiveTags(active);
-  renderStreakChart();
-  renderFocusArea();
-}
 
 function countWeekdays(from, to) {
   var count = 0;
@@ -1397,8 +1344,6 @@ function renderStreakChart() {
 
   var today = new Date();
   today.setHours(0, 0, 0, 0);
-  var activeTags = getActiveTags();
-
   // find last occurrence date for each tag
   var tagLastDate = {};
   TAGS.forEach(function(t) { tagLastDate[t] = null; });
@@ -1412,23 +1357,21 @@ function renderStreakChart() {
     });
   });
 
-  // build streaks for ALL tags (show all, but only active ones count)
+  // build streaks for all tags
   var streaks = [];
   TAGS.forEach(function(t) {
-    var isActive = activeTags.indexOf(t) !== -1;
     if (tagLastDate[t]) {
       var days = countWeekdays(tagLastDate[t], today);
-      streaks.push({ tag: t, days: days, ever: true, active: isActive });
+      streaks.push({ tag: t, days: days, ever: true });
     } else {
-      streaks.push({ tag: t, days: -1, ever: false, active: isActive });
+      streaks.push({ tag: t, days: -1, ever: false });
     }
   });
 
   if (streaks.length === 0) return;
 
-  // sort: active first, then never-committed at top, then by days descending
+  // sort: never-committed at top, then by days descending
   streaks.sort(function(a, b) {
-    if (a.active !== b.active) return a.active ? -1 : 1;
     if (!a.ever && !b.ever) return 0;
     if (!a.ever) return -1;
     if (!b.ever) return 1;
@@ -1440,17 +1383,7 @@ function renderStreakChart() {
 
   streaks.forEach(function(s) {
     var row = document.createElement('div');
-    row.className = 'streak-row' + (s.active ? '' : ' unchecked');
-
-    var cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.className = 'streak-check';
-    cb.checked = s.active;
-    cb.title = s.active ? '取消追蹤' : '開始追蹤';
-    (function(tag) {
-      cb.addEventListener('change', function() { toggleActiveTag(tag); });
-    })(s.tag);
-    row.appendChild(cb);
+    row.className = 'streak-row';
 
     var label = document.createElement('div');
     label.className = 'streak-label';
@@ -2340,6 +2273,10 @@ function showQuote() {
 
 // event listeners
 document.getElementById('addBtn').addEventListener('click', function() { openModal(); });
+document.getElementById('focusAddBtn').addEventListener('click', addReminder);
+document.getElementById('focusReminderInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') addReminder();
+});
 document.getElementById('saveBtn').addEventListener('click', saveEntry);
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
 document.getElementById('modal').addEventListener('click', function(e) {
