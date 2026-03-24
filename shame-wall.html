@@ -699,25 +699,35 @@
     background: linear-gradient(135deg, #1a1200, #2a1f00);
     border: 1.5px solid #ff9800;
     border-radius: 10px;
-    padding: 14px 20px;
+    padding: 14px 28px 14px 20px;
     color: #ffcc00;
     font-size: 15px;
     font-weight: bold;
     letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.2s;
+    cursor: default;
     position: relative;
     text-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
   }
-  .focus-reminder-card:hover {
-    background: linear-gradient(135deg, #2a1f00, #3a2f00);
-    border-color: #ff4444;
-    color: #ff6b6b;
+  .focus-reminder-card .focus-close-btn {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.2s;
   }
-  .focus-reminder-card:hover::after {
-    content: ' x';
+  .focus-reminder-card .focus-close-btn:hover {
     color: #ff4444;
-    font-size: 12px;
+    background: rgba(255, 68, 68, 0.15);
   }
   /* Daily tag checklist in modal */
   .dtag-row {
@@ -1067,7 +1077,7 @@
 
 <div class="focus-area">
   <div class="focus-area-header">盤前提醒</div>
-  <div class="focus-area-subtitle">每天開盤前提醒自己 — 點卡片可刪除</div>
+  <div class="focus-area-subtitle">每天開盤前提醒自己</div>
   <div class="focus-input-row">
     <input type="text" id="focusReminderInput" class="focus-reminder-input" placeholder="輸入你要提醒自己的事...">
     <button id="focusAddBtn" class="focus-add-btn">+ 新增</button>
@@ -1600,10 +1610,14 @@ function renderFocusArea() {
     var card = document.createElement('div');
     card.className = 'focus-reminder-card';
     card.textContent = text;
-    card.title = '點擊刪除';
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'focus-close-btn';
+    closeBtn.textContent = 'x';
+    closeBtn.title = '刪除';
     (function(idx) {
-      card.addEventListener('click', function() { removeReminder(idx); });
+      closeBtn.addEventListener('click', function(e) { e.stopPropagation(); removeReminder(idx); });
     })(i);
+    card.appendChild(closeBtn);
     container.appendChild(card);
   });
 }
