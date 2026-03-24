@@ -139,6 +139,12 @@
     white-space: pre-wrap;
     word-wrap: break-word;
   }
+  .entry-detail mark {
+    background: rgba(255, 230, 0, 0.35);
+    color: #e0e0e0;
+    padding: 1px 2px;
+    border-radius: 2px;
+  }
   .entry-detail img {
     max-width: 100%;
     max-height: 400px;
@@ -294,6 +300,28 @@
     cursor: pointer;
   }
   .rich-editor img:hover { border-color: #ff4444; }
+  .rich-editor mark, .rich-editor .hl {
+    background: rgba(255, 230, 0, 0.35);
+    color: #fff;
+    padding: 1px 2px;
+    border-radius: 2px;
+  }
+  .rich-editor-toolbar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .rich-editor-toolbar button {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #e0e0e0;
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .rich-editor-toolbar button:hover { border-color: #ff4444; }
+  .rich-editor-toolbar button.active { background: rgba(255, 230, 0, 0.25); border-color: #ffe600; }
   .form-group input:focus,
   .form-group textarea:focus,
   .form-group select:focus {
@@ -913,6 +941,12 @@
     word-wrap: break-word;
     margin-bottom: 20px;
   }
+  .detail-modal .dm-detail mark {
+    background: rgba(255, 230, 0, 0.35);
+    color: #fff;
+    padding: 1px 3px;
+    border-radius: 2px;
+  }
   .detail-modal .dm-detail img {
     max-width: 100%;
     border-radius: 6px;
@@ -1097,6 +1131,9 @@
     </div>
     <div class="form-group">
       <label>詳細描述（可邊打字邊 Ctrl+V 貼圖）</label>
+      <div class="rich-editor-toolbar" id="editorToolbar">
+        <button type="button" id="hlBtn" title="螢光筆（選取文字後點擊）">🖍 螢光筆</button>
+      </div>
       <div class="rich-editor" id="entryDetail" contenteditable="true" data-placeholder="早盤看到一根大紅K就衝進去做多，結果是假突破..."></div>
     </div>
     <div class="form-group">
@@ -1589,8 +1626,16 @@ function openDailyTagModal(dateStr) {
   title.textContent = dateStr + ' 交易紀律';
   list.textContent = '';
 
+  // merge daily checklist + entry card tags for this date
   var allData = getDailyTagData();
-  var dayData = allData[dateStr] || {};
+  var dayData = {};
+  var saved = allData[dateStr] || {};
+  Object.keys(saved).forEach(function(k) { dayData[k] = saved[k]; });
+  entries.forEach(function(e) {
+    if (e.date === dateStr && e.tags) {
+      e.tags.forEach(function(t) { if (!dayData[t]) dayData[t] = 'bad'; });
+    }
+  });
 
   TAGS.forEach(function(tag) {
     var row = document.createElement('div');
@@ -1753,7 +1798,7 @@ function renderCalendar() {
       var counts = dateBadCount(dateStr);
       if (counts.total > 0) {
         cell.classList.add(counts.bad > 0 ? 'mistake' : 'clean');
-        cell.innerHTML = d + '<span class="cal-count ' + (counts.bad > 0 ? 'bad' : 'good') + '">(' + counts.bad + '/' + counts.total + ')</span>';
+        cell.innerHTML = d + '<span class="cal-count ' + (counts.bad > 0 ? 'bad' : 'good') + '">(' + counts.bad + '/' + TAGS.length + ')</span>';
       } else {
         cell.textContent = d;
       }
@@ -2291,6 +2336,13 @@ function serializeRichEditor(el) {
       text += '\n[screenshot]\n';
     } else if (node.nodeName === 'BR') {
       text += '\n';
+    } else if (node.nodeName === 'MARK') {
+      text += '[hl]';
+      for (var i = 0; i < node.childNodes.length; i++) {
+        walk(node.childNodes[i]);
+      }
+      text += '[/hl]';
+      return;
     } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
       if (text.length > 0 && text[text.length - 1] !== '\n') text += '\n';
       for (var i = 0; i < node.childNodes.length; i++) {
