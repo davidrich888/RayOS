@@ -689,35 +689,40 @@
     background: #ffb74d;
   }
   .focus-reminder-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
   }
   .focus-reminder-card {
-    background: rgba(30, 25, 10, 0.6);
-    border-left: 3px solid #ff9800;
-    border-radius: 6px;
-    padding: 12px 36px 12px 16px;
+    background: rgba(20, 18, 8, 0.8);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 20px 16px 16px;
     color: #ffcc00;
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.3px;
     cursor: default;
     position: relative;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.5;
   }
   .focus-reminder-card .focus-close-btn {
     position: absolute;
-    top: 50%;
-    right: 8px;
-    transform: translateY(-50%);
-    width: 22px;
-    height: 22px;
+    top: 4px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
     border: none;
     background: transparent;
-    color: #555;
-    font-size: 13px;
-    line-height: 22px;
+    color: #444;
+    font-size: 12px;
+    line-height: 20px;
     text-align: center;
     cursor: pointer;
     padding: 0;
