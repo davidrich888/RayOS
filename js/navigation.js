@@ -3,7 +3,7 @@
 function toggleMobileMenu() {
     document.querySelector('.sidebar').classList.toggle('open');
     document.querySelector('.sidebar-overlay').classList.toggle('show');
-    document.querySelector('.mobile-menu-btn').innerHTML = document.querySelector('.sidebar').classList.contains('open') ? 'â' : 'â°';
+    document.querySelector('.mobile-menu-btn').innerHTML = document.querySelector('.sidebar').classList.contains('open') ? '\u2715' : '\u2630';
 }
 
 // Track which sections have been synced this session
@@ -18,7 +18,7 @@ function go(section) {
     if (window.innerWidth <= 768) {
         document.querySelector('.sidebar').classList.remove('open');
         document.querySelector('.sidebar-overlay').classList.remove('show');
-        document.querySelector('.mobile-menu-btn').innerHTML = 'â°';
+        document.querySelector('.mobile-menu-btn').innerHTML = '\u2630';
     }
 
     // === Auto-sync & refresh on section navigation ===
