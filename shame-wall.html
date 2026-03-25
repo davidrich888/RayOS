@@ -1518,48 +1518,52 @@ function renderStreakChart() {
     });
   });
 
-  // Count consecutive days going backwards from today (inclusive)
-  // Check today's status first to determine streak direction
-  // If today is 'bad' → count bad streak from today backwards (negative, shown as red)
-  // If today is 'good' or no data → count good streak from yesterday backwards
-  // DEBUG: log today's tagStatusMap
-  var debugD = new Date(today);
-  while (debugD.getDay() === 0 || debugD.getDay() === 6) { debugD.setDate(debugD.getDate() - 1); }
-  var debugDs = debugD.getFullYear() + '-' + String(debugD.getMonth() + 1).padStart(2, '0') + '-' + String(debugD.getDate()).padStart(2, '0');
-  console.log('[StreakChart DEBUG] today:', debugDs, 'tagStatusMap[today]:', JSON.stringify(tagStatusMap[debugDs]), 'entries count:', entries.length, 'dailyData keys:', Object.keys(dailyData).join(','));
-
+  // Find most recent day with data for each tag to determine streak direction
+  // If most recent is 'bad' → red streak (negative)
+  // If most recent is 'good' → green streak (positive)
+  // No data at all → grey (0/30)
   var streaks = [];
   TAGS.forEach(function(t) {
     if (!tagHasData[t]) {
       streaks.push({ tag: t, days: 0, status: 'nodata' });
       return;
     }
-    // Check today first (skip weekends to find latest weekday)
+    // Walk backwards from today to find the most recent weekday with data for this tag
     var d = new Date(today);
-    while (d.getDay() === 0 || d.getDay() === 6) { d.setDate(d.getDate() - 1); }
-    var todayDs = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    var todayStatus = tagStatusMap[todayDs] && tagStatusMap[todayDs][t];
-    var countingBad = (todayStatus === 'bad');
-    var targetStatus = countingBad ? 'bad' : 'good';
-
+    var foundStatus = null;
+    var startDate = null;
+    for (var i = 0; i < 365; i++) {
+      var dow = d.getDay();
+      if (dow === 0 || dow === 6) { d.setDate(d.getDate() - 1); continue; }
+      var ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      var st = tagStatusMap[ds] && tagStatusMap[ds][t];
+      if (st === 'bad' || st === 'good') {
+        foundStatus = st;
+        startDate = new Date(d);
+        break;
+      }
+      d.setDate(d.getDate() - 1);
+    }
+    if (!foundStatus) {
+      streaks.push({ tag: t, days: 0, status: 'zero' });
+      return;
+    }
+    // Count consecutive days of that status from startDate backwards
     var streak = 0;
-    // Bad streak: start from today (inclusive)
-    // Good streak: start from yesterday (today not over yet)
-    d = new Date(today);
-    if (!countingBad) { d.setDate(d.getDate() - 1); }
+    d = new Date(startDate);
     for (var i = 0; i < 365; i++) {
       var dow = d.getDay();
       if (dow === 0 || dow === 6) { d.setDate(d.getDate() - 1); continue; }
       var ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       var dayStatus = tagStatusMap[ds] && tagStatusMap[ds][t];
-      if (dayStatus === targetStatus) {
+      if (dayStatus === foundStatus) {
         streak++;
       } else {
         break;
       }
       d.setDate(d.getDate() - 1);
     }
-    if (countingBad && streak > 0) {
+    if (foundStatus === 'bad' && streak > 0) {
       streaks.push({ tag: t, days: -streak, status: 'bad-streak' });
     } else {
       streaks.push({ tag: t, days: streak, status: streak > 0 ? 'streak' : 'zero' });
