@@ -1518,28 +1518,29 @@ function renderStreakChart() {
     });
   });
 
-  // Count consecutive days going backwards from today
-  // First check direction: if yesterday was 'good' → count good streak (positive)
-  // If yesterday was 'bad' → count bad streak (negative, shown as red)
+  // Count consecutive days going backwards from today (inclusive)
+  // Check today's status first to determine streak direction
+  // If today is 'bad' → count bad streak from today backwards (negative, shown as red)
+  // If today is 'good' or no data → count good streak from yesterday backwards
   var streaks = [];
   TAGS.forEach(function(t) {
     if (!tagHasData[t]) {
       streaks.push({ tag: t, days: 0, status: 'nodata' });
       return;
     }
-    // Find yesterday's status first to determine streak direction
+    // Check today first (skip weekends to find latest weekday)
     var d = new Date(today);
-    d.setDate(d.getDate() - 1);
-    // Skip weekends to find the most recent weekday
     while (d.getDay() === 0 || d.getDay() === 6) { d.setDate(d.getDate() - 1); }
-    var firstDs = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    var firstStatus = tagStatusMap[firstDs] && tagStatusMap[firstDs][t];
-    var countingBad = (firstStatus === 'bad');
+    var todayDs = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    var todayStatus = tagStatusMap[todayDs] && tagStatusMap[todayDs][t];
+    var countingBad = (todayStatus === 'bad');
     var targetStatus = countingBad ? 'bad' : 'good';
 
     var streak = 0;
+    // Bad streak: start from today (inclusive)
+    // Good streak: start from yesterday (today not over yet)
     d = new Date(today);
-    d.setDate(d.getDate() - 1);
+    if (!countingBad) { d.setDate(d.getDate() - 1); }
     for (var i = 0; i < 365; i++) {
       var dow = d.getDay();
       if (dow === 0 || dow === 6) { d.setDate(d.getDate() - 1); continue; }
@@ -1559,15 +1560,14 @@ function renderStreakChart() {
     }
   });
 
-  // sort: good streaks first (desc), then zero/nodata, then bad streaks (by severity desc)
+  // sort: bad (red) first by severity, then good (green) desc, then zero/nodata (grey) last
   streaks.sort(function(a, b) {
-    // positive streaks first (descending), then zero, then negative (descending severity)
+    if (a.days < 0 && b.days < 0) return a.days - b.days;
+    if (a.days < 0 && b.days >= 0) return -1;
+    if (b.days < 0 && a.days >= 0) return 1;
     if (a.days > 0 && b.days <= 0) return -1;
     if (b.days > 0 && a.days <= 0) return 1;
     if (a.days > 0 && b.days > 0) return b.days - a.days;
-    if (a.days < 0 && b.days >= 0) return 1;
-    if (b.days < 0 && a.days >= 0) return -1;
-    if (a.days < 0 && b.days < 0) return a.days - b.days; // more negative = worse = lower
     return 0;
   });
 
@@ -2044,7 +2044,7 @@ function renderEntry(e) {
   if (e.fix) {
     var fixEl = document.createElement('div');
     fixEl.className = 'entry-detail';
-    fixEl.style.color = '#4ade80';
+    fixEl.style.cssText = 'color:#d4c5a9;font-weight:bold;';
     fixEl.textContent = '🔧 ' + e.fix;
     card.appendChild(fixEl);
   }
@@ -2148,7 +2148,7 @@ function openDetailModal(entryId) {
   // fix
   if (e.fix) {
     var fixEl = document.createElement('div');
-    fixEl.style.cssText = 'color:#4ade80;font-size:14px;margin:10px 0 14px;padding:8px 12px;background:rgba(74,222,128,0.06);border-left:3px solid #4ade80;border-radius:4px;';
+    fixEl.style.cssText = 'color:#d4c5a9;font-weight:bold;font-size:14px;margin:10px 0 14px;padding:8px 12px;background:rgba(212,197,169,0.06);border-left:3px solid #d4c5a9;border-radius:4px;';
     fixEl.textContent = '🔧 需要修正：' + e.fix;
     modal.appendChild(fixEl);
   }
