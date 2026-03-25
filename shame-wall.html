@@ -2044,7 +2044,7 @@ function renderEntry(e) {
   if (e.fix) {
     var fixEl = document.createElement('div');
     fixEl.className = 'entry-detail';
-    fixEl.style.color = '#666';
+    fixEl.style.color = '#4ade80';
     fixEl.textContent = '🔧 ' + e.fix;
     card.appendChild(fixEl);
   }
@@ -2148,7 +2148,7 @@ function openDetailModal(entryId) {
   // fix
   if (e.fix) {
     var fixEl = document.createElement('div');
-    fixEl.style.cssText = 'color:#666;font-size:13px;margin:10px 0 14px;padding:8px 12px;background:rgba(255,255,255,0.03);border-left:3px solid #444;border-radius:4px;';
+    fixEl.style.cssText = 'color:#4ade80;font-size:14px;margin:10px 0 14px;padding:8px 12px;background:rgba(74,222,128,0.06);border-left:3px solid #4ade80;border-radius:4px;';
     fixEl.textContent = '🔧 需要修正：' + e.fix;
     modal.appendChild(fixEl);
   }
