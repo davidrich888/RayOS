@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">&#9776;</button>
     <div class="sidebar-overlay" onclick="toggleMobileMenu()"></div>
     
     <nav class="sidebar">
@@ -51,6 +51,9 @@
                     <div class="moodboard-sub">Build The Life You Want</div>
                 </div>
                 <button class="moodboard-refresh" onclick="refreshMoodboard()" title="Shuffle images">🔀 Shuffle</button>
+            </div>
+            <div class="moodboard-lightbox" id="moodboard-lightbox" onclick="closeMoodboardLightbox()">
+                <img id="moodboard-lightbox-img" src="" alt="">
             </div>
 
             <div class="stats-row">

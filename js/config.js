@@ -113,7 +113,7 @@ function justifiedLayout(photos) {
 
         row.forEach(photo => {
             const w = rowHeight * photo.ratio;
-            html += `<div class="mood-item" style="width:${w}px;height:${rowHeight}px;animation-delay:${idx * 0.06}s"><img src="${photo.url}" alt="" loading="lazy"></div>`;
+            html += `<div class="mood-item" style="width:${w}px;height:${rowHeight}px;animation-delay:${idx * 0.06}s" onclick="openMoodboardLightbox('${photo.url.replace(/'/g, "\\'")}')"><img src="${photo.url}" alt="" loading="lazy"></div>`;
             idx++;
         });
     });
@@ -129,6 +129,20 @@ window.addEventListener('resize', () => {
 
 function refreshMoodboard() {
     renderMoodboard(Date.now().toString());
+}
+
+function openMoodboardLightbox(url) {
+    const lb = document.getElementById('moodboard-lightbox');
+    const img = document.getElementById('moodboard-lightbox-img');
+    img.src = url;
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMoodboardLightbox() {
+    const lb = document.getElementById('moodboard-lightbox');
+    lb.classList.remove('active');
+    document.body.style.overflow = '';
 }
 
 function copyDriveScript() {
