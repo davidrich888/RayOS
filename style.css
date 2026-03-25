@@ -12,7 +12,7 @@
             --success: #4a7c59;
             --danger: #e63946;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-tap-highlight-color: transparent; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -675,4 +675,65 @@
             .mobile-menu-btn { width: 44px; height: 44px; font-size: 18px; }
             .moodboard-title { font-size: 22px; letter-spacing: 4px; }
             .chart-wrapper { height: 160px; }
+        }
+
+        /* ===== UI POLISH (pure cosmetic) ===== */
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* Unified button border-radius */
+        .btn { border-radius: 6px; }
+        .btn-small { border-radius: 4px; }
+
+        /* Table zebra striping */
+        .monthly-table tbody tr:nth-child(even) { background: var(--bg-elevated); }
+
+        /* Stats row hover micro-interaction */
+        .stat-box { transition: all 0.3s ease; border-bottom: 2px solid transparent; }
+        .stat-box:hover { background: var(--bg-card); border-bottom-color: var(--accent); }
+        .stat-box:hover .stat-value { transform: scale(1.05); }
+        .stat-value { transition: transform 0.3s ease; display: inline-block; }
+
+        /* Card subtle shadow */
+        .card { box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
+
+        /* Summary item subtle shadow */
+        .summary-item { box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+        /* Modal fade-in transition */
+        .modal-overlay { opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-overlay.show .modal { transform: translateY(0); }
+        .modal { transform: translateY(16px); transition: transform 0.3s ease; }
+
+        /* Section fade-in on switch */
+        .section.active { animation: sectionFadeIn 0.35s ease-out; }
+        @keyframes sectionFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Sidebar nav grouping */
+        .nav-item[data-section="daily"] { margin-top: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .nav-item[data-section="content"] { margin-top: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .nav-item[data-section="information"] { margin-top: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+        /* Form section consistent radius */
+        .form-section { border-radius: 10px; }
+
+        /* Chart container hover */
+        .chart-container { transition: border-color 0.3s ease; }
+        .chart-container:hover { border-color: var(--text-muted); }
+
+        /* Business chip radius */
+        .business-chip { border-radius: 6px; }
+
+        /* Toast radius */
+        .toast { border-radius: 8px; }
+
+        /* Mobile toast position */
+        @media (max-width: 768px) {
+            .toast { bottom: auto; top: calc(16px + env(safe-area-inset-top)); right: 16px; left: 16px; text-align: center; }
         }
