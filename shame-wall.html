@@ -1522,6 +1522,12 @@ function renderStreakChart() {
   // Check today's status first to determine streak direction
   // If today is 'bad' → count bad streak from today backwards (negative, shown as red)
   // If today is 'good' or no data → count good streak from yesterday backwards
+  // DEBUG: log today's tagStatusMap
+  var debugD = new Date(today);
+  while (debugD.getDay() === 0 || debugD.getDay() === 6) { debugD.setDate(debugD.getDate() - 1); }
+  var debugDs = debugD.getFullYear() + '-' + String(debugD.getMonth() + 1).padStart(2, '0') + '-' + String(debugD.getDate()).padStart(2, '0');
+  console.log('[StreakChart DEBUG] today:', debugDs, 'tagStatusMap[today]:', JSON.stringify(tagStatusMap[debugDs]), 'entries count:', entries.length, 'dailyData keys:', Object.keys(dailyData).join(','));
+
   var streaks = [];
   TAGS.forEach(function(t) {
     if (!tagHasData[t]) {
@@ -2044,7 +2050,7 @@ function renderEntry(e) {
   if (e.fix) {
     var fixEl = document.createElement('div');
     fixEl.className = 'entry-detail';
-    fixEl.style.cssText = 'color:#d4c5a9;font-weight:bold;';
+    fixEl.style.cssText = 'color:#d4c5a9;font-weight:bold;margin-top:10px;';
     fixEl.textContent = '🔧 ' + e.fix;
     card.appendChild(fixEl);
   }
