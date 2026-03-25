@@ -1156,6 +1156,10 @@
       <input type="text" id="entryLesson" placeholder="例：沒耐心等回踩就進場、不該在盤整區硬做">
     </div>
     <div class="form-group">
+      <label>需要修正的地方（會顯示在卡片上）</label>
+      <input type="text" id="entryFix" placeholder="例：進場前先確認支撐壓力、設好停損再下單">
+    </div>
+    <div class="form-group">
       <label>詳細描述（可邊打字邊 Ctrl+V 貼圖）</label>
       <div class="rich-editor-toolbar" id="editorToolbar">
         <button type="button" id="hlBtn" title="螢光筆（選取文字後點擊）">🖍 螢光筆</button>
@@ -1285,6 +1289,7 @@ function parseNotionPage(page) {
     account: getRichText('帳號'),
     link: linkProp || '',
     lesson: getRichText('這天犯的錯'),
+    fix: getRichText('需要修正'),
     mood: getRichText('mood') || 'bad',
     tags: tags,
     goodTags: goodTags,
@@ -2003,17 +2008,13 @@ function renderEntry(e) {
     card.appendChild(lessonEl);
   }
 
-  // detail text — first paragraph only, click to see full
-  if (e.detail) {
-    var detailEl = document.createElement('div');
-    detailEl.className = 'entry-detail';
-    var plainDetail = e.detail.replace(/\[screenshot\]/g, '').trim();
-    if (plainDetail) {
-      var firstPara = plainDetail.split('\n')[0].trim();
-      var displayText = firstPara.length > 80 ? firstPara.substring(0, 80) + '...' : firstPara;
-      renderHighlightedText(displayText, detailEl);
-    }
-    card.appendChild(detailEl);
+  // fix text — show "需要修正的地方" on card instead of detail first line
+  if (e.fix) {
+    var fixEl = document.createElement('div');
+    fixEl.className = 'entry-detail';
+    fixEl.style.color = '#f59e0b';
+    fixEl.textContent = '🔧 ' + e.fix;
+    card.appendChild(fixEl);
   }
 
   // P&L screenshots on card
@@ -2102,6 +2103,14 @@ function openDetailModal(entryId) {
     linkEl.addEventListener('click', function(ev) { ev.stopPropagation(); });
     linkWrap.appendChild(linkEl);
     modal.appendChild(linkWrap);
+  }
+
+  // fix
+  if (e.fix) {
+    var fixEl = document.createElement('div');
+    fixEl.style.cssText = 'color:#f59e0b;font-size:14px;margin:10px 0 14px;padding:8px 12px;background:rgba(245,158,11,0.08);border-left:3px solid #f59e0b;border-radius:4px;';
+    fixEl.textContent = '🔧 需要修正：' + e.fix;
+    modal.appendChild(fixEl);
   }
 
   // detail text with inline detail screenshots (NOT P&L screenshots)
@@ -2303,6 +2312,7 @@ function openModal(id) {
     document.getElementById('entryLoss').value = e.loss;
     document.getElementById('entryMistake').value = e.mistake || '';
     document.getElementById('entryLesson').value = e.lesson || '';
+    document.getElementById('entryFix').value = e.fix || '';
     document.getElementById('entryLink').value = e.link || '';
     document.getElementById('entryAccount').value = e.account || '';
     (e.tags || []).forEach(function(t) {
@@ -2356,6 +2366,7 @@ function openModal(id) {
     document.getElementById('entryLoss').value = '';
     document.getElementById('entryMistake').value = '';
     document.getElementById('entryLesson').value = '';
+    document.getElementById('entryFix').value = '';
     document.getElementById('entryDetail').textContent = '';
     document.getElementById('entryLink').value = '';
     document.getElementById('entryAccount').value = '';
@@ -2485,6 +2496,7 @@ function saveEntry() {
   var loss = document.getElementById('entryLoss').value;
   var mistake = document.getElementById('entryMistake').value.trim();
   var lesson = document.getElementById('entryLesson').value.trim();
+  var fix = document.getElementById('entryFix').value.trim();
   // serialize rich editor: extract text + inline images (preserving order)
   var editorEl = document.getElementById('entryDetail');
   var richContent = serializeRichEditor(editorEl);
@@ -2580,6 +2592,7 @@ function saveEntry() {
     }
     // always send all 3 new fields (DB properties confirmed to exist)
     notionProps['這天犯的錯'] = { rich_text: lesson ? [{ text: { content: lesson } }] : [] };
+    notionProps['需要修正'] = { rich_text: fix ? [{ text: { content: fix } }] : [] };
     notionProps['mood'] = { rich_text: [{ text: { content: currentMood } }] };
     notionProps['做得好'] = { multi_select: goodTags.map(function(t) { return { name: t }; }) };
 
