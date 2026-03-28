@@ -31,8 +31,12 @@ function renderPlanCards() {
     const prioOrder = { high: 0, medium: 1, low: 2 };
     plans.sort((a, b) => (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1) || (a.order || 0) - (b.order || 0));
 
+    // Store sorted plan IDs for drag reorder
+    container._sortedIds = [];
+
     container.textContent = '';
     plans.forEach((p, idx) => {
+        container._sortedIds.push(p.id);
         const prioIcon = p.priority === 'high' ? '🔴' : p.priority === 'low' ? '⚪' : '🟠';
         const descLines = (p.description || '').split('\n');
         const descPreview = descLines.slice(0, 2).join('\n');
@@ -47,19 +51,18 @@ function renderPlanCards() {
 
         // Drag events
         card.addEventListener('dragstart', e => {
-            card.classList.add('dragging');
+            setTimeout(() => card.classList.add('dragging'), 0);
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', p.id);
         });
         card.addEventListener('dragend', () => {
             card.classList.remove('dragging');
-            document.querySelectorAll('.plan-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+            container.querySelectorAll('.plan-card.drag-over').forEach(el => el.classList.remove('drag-over'));
         });
         card.addEventListener('dragover', e => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            const dragging = container.querySelector('.dragging');
-            if (dragging && dragging !== card) {
+            if (!card.classList.contains('dragging')) {
                 card.classList.add('drag-over');
             }
         });
@@ -73,52 +76,17 @@ function renderPlanCards() {
             }
         });
 
+        // Title row
         const header = document.createElement('div');
         header.className = 'plan-card-header';
-
-        // Drag handle
-        const handle = document.createElement('div');
-        handle.className = 'plan-drag-handle';
-        handle.textContent = '⠿';
-        handle.title = '拖曳排序';
-        header.appendChild(handle);
+        header.addEventListener('click', () => togglePlanExpand(p.id));
 
         const titleEl = document.createElement('div');
         titleEl.className = 'plan-card-title';
         titleEl.textContent = prioIcon + ' ' + p.title;
-        titleEl.addEventListener('click', () => togglePlanExpand(p.id));
         header.appendChild(titleEl);
 
-        const actions = document.createElement('div');
-        actions.className = 'plan-card-actions';
-        // Up/down arrows for mobile
-        if (idx > 0) {
-            const upBtn = document.createElement('button');
-            upBtn.className = 'btn btn-small plan-move-btn';
-            upBtn.textContent = '▲';
-            upBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, -1); });
-            actions.appendChild(upBtn);
-        }
-        if (idx < plans.length - 1) {
-            const downBtn = document.createElement('button');
-            downBtn.className = 'btn btn-small plan-move-btn';
-            downBtn.textContent = '▼';
-            downBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, 1); });
-            actions.appendChild(downBtn);
-        }
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn btn-small';
-        editBtn.textContent = '編輯';
-        editBtn.addEventListener('click', e => { e.stopPropagation(); editPlan(p.id); });
-        const delBtn = document.createElement('button');
-        delBtn.className = 'btn btn-small';
-        delBtn.textContent = '刪除';
-        delBtn.style.color = 'var(--danger)';
-        delBtn.addEventListener('click', e => { e.stopPropagation(); deletePlan(p.id); });
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-        header.appendChild(actions);
-
+        // Description
         const body = document.createElement('div');
         body.className = 'plan-card-body';
         body.addEventListener('click', () => togglePlanExpand(p.id));
@@ -141,8 +109,38 @@ function renderPlanCards() {
             body.appendChild(more);
         }
 
+        // Action buttons at bottom
+        const actions = document.createElement('div');
+        actions.className = 'plan-card-actions';
+        if (idx > 0) {
+            const upBtn = document.createElement('button');
+            upBtn.className = 'btn btn-small plan-move-btn';
+            upBtn.textContent = '◀';
+            upBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, -1); });
+            actions.appendChild(upBtn);
+        }
+        if (idx < plans.length - 1) {
+            const downBtn = document.createElement('button');
+            downBtn.className = 'btn btn-small plan-move-btn';
+            downBtn.textContent = '▶';
+            downBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, 1); });
+            actions.appendChild(downBtn);
+        }
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-small';
+        editBtn.textContent = '編輯';
+        editBtn.addEventListener('click', e => { e.stopPropagation(); editPlan(p.id); });
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-small';
+        delBtn.textContent = '刪除';
+        delBtn.style.color = 'var(--danger)';
+        delBtn.addEventListener('click', e => { e.stopPropagation(); deletePlan(p.id); });
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
         card.appendChild(header);
         card.appendChild(body);
+        card.appendChild(actions);
         container.appendChild(card);
     });
 }
