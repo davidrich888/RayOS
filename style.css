@@ -129,8 +129,8 @@
         .wealth-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; height: fit-content; }
         
         /* Quote */
-        .quote-box { background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .quote-box::before { content: '"'; position: absolute; top: -20px; left: 10px; font-size: 120px; color: var(--accent); opacity: 0.1; font-family: 'Cormorant Garamond', serif; }
+        .quote-box { background: linear-gradient(135deg, rgba(212,197,169,0.05) 0%, rgba(212,197,169,0.02) 100%); border: 1px solid rgba(212,197,169,0.08); border-radius: 14px; padding: 22px 28px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .quote-box::before { content: '"'; position: absolute; top: -12px; left: 14px; font-size: 80px; color: var(--accent); opacity: 0.1; font-family: 'Cormorant Garamond', serif; line-height: 1; }
         .quote-text { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic; color: var(--accent); line-height: 1.6; position: relative; z-index: 1; text-align: center; }
         .quote-author { font-size: 11px; color: var(--text-dim); margin-top: 10px; text-align: center; }
         
@@ -193,8 +193,8 @@
         .chart-wrapper { height: 280px; position: relative; }
         
         /* Forms */
-        .form-section { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; margin-bottom: 16px; }
-        .form-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+        .form-section { background: rgba(255,255,255,0.025); border: 1px solid rgba(212,197,169,0.06); padding: 20px; margin-bottom: 16px; border-radius: 14px; }
+        .form-title { font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
         .form-row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
         .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
         .form-label { font-size: 10px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.5px; }
@@ -242,10 +242,10 @@
         .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; margin-bottom: 20px; }
         
         /* Habit Items */
-        .habit-item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: var(--bg-input); border: 1px solid var(--border); cursor: pointer; transition: all 0.3s; }
-        .habit-item:hover { border-color: var(--text-muted); }
-        .habit-item.state-true { background: var(--accent-dim); border-color: var(--accent); }
-        .habit-item.state-false { background: rgba(230,57,70,0.15); border-color: var(--danger); }
+        .habit-item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: rgba(255,255,255,0.025); border: 1px solid rgba(212,197,169,0.06); cursor: pointer; transition: all 0.2s; border-radius: 12px; }
+        .habit-item:hover { border-color: rgba(212,197,169,0.15); }
+        .habit-item.state-true { background: rgba(212,197,169,0.08); border-color: rgba(212,197,169,0.2); }
+        .habit-item.state-false { background: rgba(192,84,79,0.1); border-color: rgba(192,84,79,0.25); }
         .habit-icon { font-size: 28px; }
         .habit-name { font-size: 12px; font-weight: 600; }
         .habit-time { font-size: 10px; color: var(--text-muted); }
@@ -273,11 +273,11 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 16px;
+            padding: 14px 18px;
             margin-bottom: 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(212,197,169,0.06);
+            border-radius: 14px;
         }
         .daily-progress-label {
             font-size: 12px;
@@ -295,10 +295,11 @@
         }
         .daily-progress-fill {
             height: 100%;
-            background: var(--accent);
+            background: linear-gradient(90deg, var(--accent), #b8a07a);
             border-radius: 3px;
             transition: width 0.4s ease;
             width: 0%;
+            box-shadow: 0 0 8px rgba(212,197,169,0.3);
         }
         .daily-progress-count {
             font-size: 14px;
@@ -350,8 +351,8 @@
             z-index: 10;
         }
         .daily-history-wrapper thead th {
-            background: var(--bg-card) !important;
-            border-bottom: 2px solid var(--accent);
+            background: rgba(12,12,14,0.98) !important;
+            border-bottom: 1px solid rgba(212,197,169,0.15);
             padding: 12px 4px;
             font-size: 16px;
             text-align: center;
@@ -366,7 +367,7 @@
         }
         .daily-history-wrapper tbody td {
             padding: 8px 4px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(212,197,169,0.04);
             font-size: 12px;
             text-align: center;
         }
@@ -494,7 +495,7 @@
             
             /* --- Forms --- */
             .form-section { padding: 12px; }
-            .form-title { font-size: 13px; }
+            .form-title { font-size: 9px; }
             .form-row { flex-direction: column; gap: 8px; }
             .form-group { min-width: 0; }
             .form-input, .form-select { padding: 8px 10px; font-size: 13px; }
