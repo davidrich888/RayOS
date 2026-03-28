@@ -32,7 +32,7 @@ function renderPlanCards() {
     plans.sort((a, b) => (a.order || 0) - (b.order || 0) || (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1));
 
     container.textContent = '';
-    plans.forEach(p => {
+    plans.forEach((p, idx) => {
         const prioIcon = p.priority === 'high' ? '🔴' : p.priority === 'low' ? '⚪' : '🟠';
         const descLines = (p.description || '').split('\n');
         const descPreview = descLines.slice(0, 2).join('\n');
@@ -42,18 +42,69 @@ function renderPlanCards() {
         const card = document.createElement('div');
         card.className = 'plan-card' + (isExpanded ? ' expanded' : '');
         card.dataset.planId = p.id;
+        card.draggable = true;
+
+        // Drag events
+        card.addEventListener('dragstart', e => {
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', p.id);
+        });
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            document.querySelectorAll('.plan-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+        });
+        card.addEventListener('dragover', e => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const dragging = container.querySelector('.dragging');
+            if (dragging && dragging !== card) {
+                card.classList.add('drag-over');
+            }
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+        card.addEventListener('drop', e => {
+            e.preventDefault();
+            card.classList.remove('drag-over');
+            const dragId = e.dataTransfer.getData('text/plain');
+            if (dragId && dragId !== p.id) {
+                reorderPlan(dragId, p.id);
+            }
+        });
 
         const header = document.createElement('div');
         header.className = 'plan-card-header';
-        header.addEventListener('click', () => togglePlanExpand(p.id));
+
+        // Drag handle
+        const handle = document.createElement('div');
+        handle.className = 'plan-drag-handle';
+        handle.textContent = '⠿';
+        handle.title = '拖曳排序';
+        header.appendChild(handle);
 
         const titleEl = document.createElement('div');
         titleEl.className = 'plan-card-title';
         titleEl.textContent = prioIcon + ' ' + p.title;
+        titleEl.addEventListener('click', () => togglePlanExpand(p.id));
         header.appendChild(titleEl);
 
         const actions = document.createElement('div');
         actions.className = 'plan-card-actions';
+        // Up/down arrows for mobile
+        if (idx > 0) {
+            const upBtn = document.createElement('button');
+            upBtn.className = 'btn btn-small plan-move-btn';
+            upBtn.textContent = '▲';
+            upBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, -1); });
+            actions.appendChild(upBtn);
+        }
+        if (idx < plans.length - 1) {
+            const downBtn = document.createElement('button');
+            downBtn.className = 'btn btn-small plan-move-btn';
+            downBtn.textContent = '▼';
+            downBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, 1); });
+            actions.appendChild(downBtn);
+        }
         const editBtn = document.createElement('button');
         editBtn.className = 'btn btn-small';
         editBtn.textContent = '編輯';
@@ -69,12 +120,12 @@ function renderPlanCards() {
 
         const body = document.createElement('div');
         body.className = 'plan-card-body';
+        body.addEventListener('click', () => togglePlanExpand(p.id));
         const descEl = document.createElement('div');
         descEl.className = 'plan-card-desc';
         const displayText = isExpanded ? (p.description || '') : descPreview;
         if (displayText) {
             descEl.textContent = displayText;
-            // Preserve line breaks
             descEl.style.whiteSpace = 'pre-wrap';
         } else {
             descEl.style.color = 'var(--text-muted)';
@@ -139,6 +190,58 @@ function renderTodoList() {
         row.appendChild(del);
         container.appendChild(row);
     });
+}
+
+// === Reorder ===
+
+function reorderPlan(dragId, dropId) {
+    const plans = planItems.filter(p => p.type === 'plan' && p.status !== 'archived');
+    const prioOrder = { high: 0, medium: 1, low: 2 };
+    plans.sort((a, b) => (a.order || 0) - (b.order || 0) || (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1));
+
+    const dragIdx = plans.findIndex(p => p.id === dragId);
+    const dropIdx = plans.findIndex(p => p.id === dropId);
+    if (dragIdx === -1 || dropIdx === -1) return;
+
+    const [moved] = plans.splice(dragIdx, 1);
+    plans.splice(dropIdx, 0, moved);
+
+    plans.forEach((p, i) => { p.order = i + 1; });
+    savePlanToLocal();
+    renderPlanCards();
+    syncPlanOrder(plans);
+}
+
+function movePlan(id, direction) {
+    const plans = planItems.filter(p => p.type === 'plan' && p.status !== 'archived');
+    const prioOrder = { high: 0, medium: 1, low: 2 };
+    plans.sort((a, b) => (a.order || 0) - (b.order || 0) || (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1));
+
+    const idx = plans.findIndex(p => p.id === id);
+    const targetIdx = idx + direction;
+    if (idx === -1 || targetIdx < 0 || targetIdx >= plans.length) return;
+
+    [plans[idx], plans[targetIdx]] = [plans[targetIdx], plans[idx]];
+    plans.forEach((p, i) => { p.order = i + 1; });
+    savePlanToLocal();
+    renderPlanCards();
+    syncPlanOrder(plans);
+}
+
+async function syncPlanOrder(plans) {
+    if (!hasNotionDirect()) return;
+    for (const p of plans) {
+        const pageId = planPageIndex[p.id];
+        if (!pageId) continue;
+        try {
+            await notionFetch('/pages/' + pageId, 'PATCH', {
+                properties: { 'Order': { number: p.order } }
+            });
+        } catch (e) {
+            console.error('[Plan] Order sync failed:', p.id, e);
+        }
+    }
+    console.log('[Plan] Order synced to Notion');
 }
 
 // === Actions ===
@@ -366,6 +469,9 @@ async function updatePlanInNotion(id, updates) {
         }
         if (updates.priority !== undefined) {
             props['Priority'] = { select: { name: updates.priority } };
+        }
+        if (updates.order !== undefined) {
+            props['Order'] = { number: updates.order };
         }
         await notionFetch('/pages/' + pageId, 'PATCH', { properties: props });
         console.log('[Plan] Updated in Notion:', id);
