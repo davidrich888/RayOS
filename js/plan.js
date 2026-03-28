@@ -1,6 +1,7 @@
 // ==================== PLAN ====================
 
 let planSyncInProgress = false;
+let _dragPlanId = null;
 
 function savePlanToLocal() {
     localStorage.setItem('plan_items', JSON.stringify(planItems));
@@ -49,32 +50,34 @@ function renderPlanCards() {
         card.dataset.planId = p.id;
         if (isExpanded) card.style.aspectRatio = 'auto';
 
-        // --- Drag & Drop ---
+        // --- Drag & Drop (use JS variable, not dataTransfer) ---
         card.draggable = true;
         card.addEventListener('dragstart', e => {
+            _dragPlanId = p.id;
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', p.id);
-            // Delay adding class so the drag image captures the card first
             requestAnimationFrame(() => card.classList.add('dragging'));
         });
         card.addEventListener('dragend', () => {
             card.classList.remove('dragging');
+            _dragPlanId = null;
             container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
         });
         card.addEventListener('dragover', e => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            if (!card.classList.contains('dragging')) card.classList.add('drag-over');
+            if (_dragPlanId && _dragPlanId !== p.id) card.classList.add('drag-over');
         });
         card.addEventListener('dragleave', e => {
-            // Only remove if actually leaving this card (not entering a child)
             if (!card.contains(e.relatedTarget)) card.classList.remove('drag-over');
         });
         card.addEventListener('drop', e => {
             e.preventDefault();
             card.classList.remove('drag-over');
-            const dragId = e.dataTransfer.getData('text/plain');
-            if (dragId && dragId !== p.id) reorderPlan(dragId, p.id);
+            if (_dragPlanId && _dragPlanId !== p.id) {
+                reorderPlan(_dragPlanId, p.id);
+                _dragPlanId = null;
+            }
         });
 
         // --- Title ---
