@@ -48,7 +48,7 @@
         .header-actions { display: flex; gap: 10px; align-items: center; }
 
         /* Physic Quote */
-        .physic-quote { text-align: center; padding: 20px 32px 8px; font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; letter-spacing: 2px; color: var(--accent); line-height: 1.6; font-style: italic; }
+        .physic-quote { text-align: center; padding: 20px 32px 8px; font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; letter-spacing: 1px; color: var(--accent); line-height: 1.6; font-style: italic; }
 
         /* Buttons */
         .btn { padding: 10px 20px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--text-dim); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s ease; font-family: inherit; border-radius: 9px; display: inline-flex; align-items: center; gap: 5px; }
@@ -135,13 +135,13 @@
         .quote-author { font-size: 11px; color: var(--text-dim); margin-top: 10px; text-align: center; }
         
         /* Goal */
-        .goal-card { background: var(--bg-card); border: 1px solid var(--accent); border-radius: 12px; padding: 20px; }
+        .goal-card { background: rgba(255,255,255,0.025); border: 1px solid rgba(212,197,169,0.15); border-radius: 14px; padding: 20px; }
         .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .goal-label { font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 2px; }
-        .goal-value { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; }
-        .goal-progress { height: 4px; background: var(--border); margin-top: 12px; border-radius: 2px; overflow: hidden; }
-        .goal-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #e0d4bc); transition: width 0.8s ease; position: relative; box-shadow: 0 0 8px rgba(212, 197, 169, 0.4); }
-        .goal-bar::after { content: ''; position: absolute; top: 0; right: 0; width: 20px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3)); border-radius: 2px; animation: goalPulse 2s ease-in-out infinite; }
+        .goal-label { font-size: 9px; font-weight: 700; color: var(--accent); letter-spacing: 2px; }
+        .goal-value { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; }
+        .goal-progress { height: 5px; background: rgba(255,255,255,0.05); margin-top: 12px; border-radius: 3px; overflow: hidden; }
+        .goal-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #b8a07a); transition: width 0.8s ease; position: relative; box-shadow: 0 0 10px rgba(212,197,169,0.3); border-radius: 3px; }
+        .goal-bar::after { content: ''; position: absolute; top: 0; right: 0; width: 20px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3)); border-radius: 3px; animation: goalPulse 2s ease-in-out infinite; }
         @keyframes goalPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         .goal-info { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--text-dim); }
         
@@ -170,25 +170,27 @@
         @keyframes dotPulse { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
         
         /* Summary Grid */
-        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
         #wealth .summary-grid { grid-template-columns: repeat(4, 1fr); }
-        .summary-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.3s; }
-        .summary-item:hover { border-color: var(--text-muted); }
+        .summary-item { background: rgba(255,255,255,0.025); border: 1px solid rgba(212,197,169,0.06); border-radius: 14px; padding: 18px; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+        .summary-item::before { content: ''; position: absolute; top: -20px; right: -20px; width: 70px; height: 70px; border-radius: 50%; filter: blur(35px); opacity: 0.08; background: var(--accent); transition: opacity 0.3s; }
+        .summary-item:hover { border-color: rgba(212,197,169,0.15); box-shadow: 0 4px 16px rgba(0,0,0,0.4); transform: translateY(-2px); }
+        .summary-item:hover::before { opacity: 0.15; }
         .summary-label { font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-value { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; }
         .summary-value.positive { color: var(--success); }
-        .summary-value.negative { color: var(--danger); }
+        .summary-value.negative { color: #e07a5f; }
         .summary-value.accent { color: var(--accent); }
-        
+
         /* Chart */
-        .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 16px; }
+        .chart-container { background: rgba(255,255,255,0.025); border: 1px solid rgba(212,197,169,0.06); border-radius: 14px; padding: 22px; margin-top: 16px; }
         .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-        .chart-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; }
+        .chart-title { font-size: 15px; font-weight: 700; }
         .chart-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-        .chart-tab { padding: 6px 12px; font-size: 10px; font-weight: 600; background: transparent; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all 0.3s; font-family: inherit; }
-        .chart-tab.active, .chart-tab:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-        .chart-toggle { display: flex; background: var(--bg-input); border: 1px solid var(--border); overflow: hidden; }
-        .chart-toggle-btn { padding: 6px 14px; font-size: 10px; font-weight: 600; background: transparent; border: none; color: var(--text-dim); cursor: pointer; transition: all 0.3s; }
+        .chart-tab { padding: 6px 12px; font-size: 10px; font-weight: 600; background: transparent; border: 1px solid rgba(212,197,169,0.08); color: var(--text-dim); cursor: pointer; transition: all 0.2s; font-family: inherit; border-radius: 6px; }
+        .chart-tab.active, .chart-tab:hover { background: var(--accent-dim); border-color: rgba(212,197,169,0.2); color: var(--accent); }
+        .chart-toggle { display: flex; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,197,169,0.08); overflow: hidden; border-radius: 8px; }
+        .chart-toggle-btn { padding: 6px 14px; font-size: 10px; font-weight: 600; background: transparent; border: none; color: var(--text-dim); cursor: pointer; transition: all 0.2s; }
         .chart-toggle-btn.active { background: var(--accent); color: var(--bg); }
         .chart-wrapper { height: 280px; position: relative; }
         
@@ -780,7 +782,7 @@
         .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
 
         /* Summary item subtle shadow */
-        .summary-item { box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .summary-item { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
 
         /* Modal fade-in transition */
         .modal-overlay { opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
@@ -799,7 +801,7 @@
 
         /* Chart container hover */
         .chart-container { transition: border-color 0.3s ease; }
-        .chart-container:hover { border-color: var(--text-muted); }
+        .chart-container:hover { border-color: rgba(212,197,169,0.12); }
 
         /* Business chip radius */
         .business-chip { border-radius: 6px; }
