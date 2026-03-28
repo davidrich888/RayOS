@@ -28,6 +28,34 @@ function renderPlanCards() {
     const container = document.getElementById('plan-cards');
     if (!container) return;
     const plans = getSortedPlans();
+
+    // Setup event delegation ONCE (not per card)
+    if (!container._delegated) {
+        container._delegated = true;
+        container.addEventListener('click', function(e) {
+            const card = e.target.closest('.plan-card');
+            if (!card) return;
+            const id = card.dataset.planId;
+
+            // Edit button
+            if (e.target.closest('.plan-btn-edit')) {
+                e.stopPropagation();
+                editPlan(id);
+                return;
+            }
+            // Delete button
+            if (e.target.closest('.plan-btn-delete')) {
+                e.stopPropagation();
+                deletePlan(id);
+                return;
+            }
+            // Click on card body/header = expand
+            if (!e.target.closest('.plan-card-actions')) {
+                togglePlanExpand(id);
+            }
+        });
+    }
+
     if (plans.length === 0) {
         container.textContent = '';
         const hint = document.createElement('div');
@@ -38,7 +66,7 @@ function renderPlanCards() {
     }
 
     container.textContent = '';
-    plans.forEach((p, idx) => {
+    plans.forEach(p => {
         const prioIcon = p.priority === 'high' ? '🔴' : p.priority === 'low' ? '⚪' : '🟠';
         const descLines = (p.description || '').split('\n');
         const descPreview = descLines.slice(0, 2).join('\n');
@@ -50,22 +78,17 @@ function renderPlanCards() {
         card.dataset.planId = p.id;
         if (isExpanded) card.style.aspectRatio = 'auto';
 
-        // Helper: get planId from any child element (reads from DOM, not closure)
-        function getCardId(el) { return el.closest('.plan-card').dataset.planId; }
-
-        // --- Title ---
+        // Title
         const header = document.createElement('div');
         header.className = 'plan-card-header';
-        header.addEventListener('click', function() { togglePlanExpand(getCardId(this)); });
         const titleEl = document.createElement('div');
         titleEl.className = 'plan-card-title';
         titleEl.textContent = prioIcon + ' ' + p.title;
         header.appendChild(titleEl);
 
-        // --- Description ---
+        // Description
         const body = document.createElement('div');
         body.className = 'plan-card-body';
-        body.addEventListener('click', function() { togglePlanExpand(getCardId(this)); });
         const descEl = document.createElement('div');
         descEl.className = 'plan-card-desc';
         const displayText = isExpanded ? (p.description || '') : descPreview;
@@ -84,18 +107,16 @@ function renderPlanCards() {
             body.appendChild(more);
         }
 
-        // --- Actions (bottom) ---
+        // Actions (bottom) — NO event listeners, delegation handles clicks
         const actions = document.createElement('div');
         actions.className = 'plan-card-actions';
         const editBtn = document.createElement('button');
-        editBtn.className = 'btn btn-small';
+        editBtn.className = 'btn btn-small plan-btn-edit';
         editBtn.textContent = '編輯';
-        editBtn.addEventListener('click', function(e) { e.stopPropagation(); editPlan(getCardId(this)); });
         const delBtn = document.createElement('button');
-        delBtn.className = 'btn btn-small';
+        delBtn.className = 'btn btn-small plan-btn-delete';
         delBtn.textContent = '刪除';
         delBtn.style.color = 'var(--danger)';
-        delBtn.addEventListener('click', function(e) { e.stopPropagation(); deletePlan(getCardId(this)); });
         actions.appendChild(editBtn);
         actions.appendChild(delBtn);
 
@@ -105,7 +126,7 @@ function renderPlanCards() {
         container.appendChild(card);
     });
 
-    // Init SortableJS for drag reorder
+    // Init SortableJS
     if (_planSortable) _planSortable.destroy();
     if (typeof Sortable !== 'undefined' && plans.length > 1) {
         _planSortable = new Sortable(container, {
@@ -118,7 +139,6 @@ function renderPlanCards() {
             filter: '.plan-card-actions',
             preventOnFilter: false,
             onEnd: async function () {
-                // Read new order from DOM (SortableJS already moved elements)
                 const cards = container.querySelectorAll('.plan-card');
                 cards.forEach((card, i) => {
                     const id = card.dataset.planId;
@@ -126,7 +146,6 @@ function renderPlanCards() {
                     if (item) item.order = i + 1;
                 });
                 savePlanToLocal();
-                // No re-render needed: DOM is correct, handlers use data-plan-id (not closures)
                 showToast('正在同步順序...');
                 await syncPlanOrder(getSortedPlans());
                 showToast('✓ 順序已同步');
