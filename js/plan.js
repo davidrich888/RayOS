@@ -29,7 +29,7 @@ function renderPlanCards() {
         return;
     }
     const prioOrder = { high: 0, medium: 1, low: 2 };
-    plans.sort((a, b) => (a.order || 0) - (b.order || 0) || (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1));
+    plans.sort((a, b) => (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1) || (a.order || 0) - (b.order || 0));
 
     container.textContent = '';
     plans.forEach((p, idx) => {
@@ -42,6 +42,7 @@ function renderPlanCards() {
         const card = document.createElement('div');
         card.className = 'plan-card' + (isExpanded ? ' expanded' : '');
         card.dataset.planId = p.id;
+        if (isExpanded) card.style.aspectRatio = 'auto';
         card.draggable = true;
 
         // Drag events
@@ -197,7 +198,7 @@ function renderTodoList() {
 function reorderPlan(dragId, dropId) {
     const plans = planItems.filter(p => p.type === 'plan' && p.status !== 'archived');
     const prioOrder = { high: 0, medium: 1, low: 2 };
-    plans.sort((a, b) => (a.order || 0) - (b.order || 0) || (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1));
+    plans.sort((a, b) => (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1) || (a.order || 0) - (b.order || 0));
 
     const dragIdx = plans.findIndex(p => p.id === dragId);
     const dropIdx = plans.findIndex(p => p.id === dropId);
@@ -215,7 +216,7 @@ function reorderPlan(dragId, dropId) {
 function movePlan(id, direction) {
     const plans = planItems.filter(p => p.type === 'plan' && p.status !== 'archived');
     const prioOrder = { high: 0, medium: 1, low: 2 };
-    plans.sort((a, b) => (a.order || 0) - (b.order || 0) || (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1));
+    plans.sort((a, b) => (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1) || (a.order || 0) - (b.order || 0));
 
     const idx = plans.findIndex(p => p.id === id);
     const targetIdx = idx + direction;
