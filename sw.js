@@ -1,5 +1,5 @@
 // RayOS Service Worker v1
-const CACHE_NAME = 'rayos-v15';
+const CACHE_NAME = 'rayos-v16';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -18,6 +18,7 @@ const STATIC_ASSETS = [
     '/js/physic.js',
     '/js/daily.js',
     '/js/ideas.js',
+    '/js/plan.js',
     '/js/init.js',
     '/icons/icon-192.png',
     '/icons/icon-512.png'

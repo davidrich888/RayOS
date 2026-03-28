@@ -36,10 +36,13 @@ function renderPlanCards() {
             const card = e.target.closest('.plan-card');
             if (!card) return;
             const id = card.dataset.planId;
+            const title = card.dataset.planTitle;
+            console.log('[Plan Click] id:', id, 'title:', title, 'target:', e.target.className);
 
             // Edit button
             if (e.target.closest('.plan-btn-edit')) {
                 e.stopPropagation();
+                console.log('[Plan Edit] opening modal for:', id, title);
                 editPlan(id);
                 return;
             }
