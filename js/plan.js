@@ -1,7 +1,7 @@
 // ==================== PLAN ====================
 
 let planSyncInProgress = false;
-let _dragPlanId = null;
+let _planSortable = null;
 
 function savePlanToLocal() {
     localStorage.setItem('plan_items', JSON.stringify(planItems));
@@ -49,36 +49,6 @@ function renderPlanCards() {
         card.className = 'plan-card' + (isExpanded ? ' expanded' : '');
         card.dataset.planId = p.id;
         if (isExpanded) card.style.aspectRatio = 'auto';
-
-        // --- Drag & Drop (use JS variable, not dataTransfer) ---
-        card.draggable = true;
-        card.addEventListener('dragstart', e => {
-            _dragPlanId = p.id;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', p.id);
-            requestAnimationFrame(() => card.classList.add('dragging'));
-        });
-        card.addEventListener('dragend', () => {
-            card.classList.remove('dragging');
-            _dragPlanId = null;
-            container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-        });
-        card.addEventListener('dragover', e => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            if (_dragPlanId && _dragPlanId !== p.id) card.classList.add('drag-over');
-        });
-        card.addEventListener('dragleave', e => {
-            if (!card.contains(e.relatedTarget)) card.classList.remove('drag-over');
-        });
-        card.addEventListener('drop', e => {
-            e.preventDefault();
-            card.classList.remove('drag-over');
-            if (_dragPlanId && _dragPlanId !== p.id) {
-                reorderPlan(_dragPlanId, p.id);
-                _dragPlanId = null;
-            }
-        });
 
         // --- Title ---
         const header = document.createElement('div');
@@ -145,6 +115,30 @@ function renderPlanCards() {
         card.appendChild(actions);
         container.appendChild(card);
     });
+
+    // Init SortableJS for drag reorder
+    if (_planSortable) _planSortable.destroy();
+    if (typeof Sortable !== 'undefined' && plans.length > 1) {
+        _planSortable = new Sortable(container, {
+            animation: 150,
+            ghostClass: 'plan-card-ghost',
+            chosenClass: 'plan-card-chosen',
+            dragClass: 'plan-card-drag',
+            onEnd: function () {
+                // Read new order from DOM
+                const cards = container.querySelectorAll('.plan-card');
+                const allPlans = getSortedPlans();
+                cards.forEach((card, i) => {
+                    const id = card.dataset.planId;
+                    const item = allPlans.find(p => p.id === id);
+                    if (item) item.order = i + 1;
+                });
+                savePlanToLocal();
+                showToast('✓ 順序已更新');
+                syncPlanOrder(getSortedPlans());
+            }
+        });
+    }
 }
 
 function renderTodoList() {
