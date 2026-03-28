@@ -436,7 +436,7 @@ async function syncPlanFromNotion(silent = false) {
             const order = props['Order']?.number || 0;
             const dueDate = props['DueDate']?.date?.start || null;
 
-            const id = type + '_' + page.id.replace(/-/g, '').substring(0, 8);
+            const id = type + '_' + page.id.replace(/-/g, '');
             newIndex[id] = page.id;
             newItems.push({ id, type, title, description, status, priority, order, dueDate });
         }

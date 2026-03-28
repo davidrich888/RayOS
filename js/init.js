@@ -13,6 +13,15 @@
         localStorage.setItem('daily_data_version', '2');
         console.log('[RayOS] Cleared old preload cache — will sync from Notion');
     }
+    // 🔄 Migration: plan IDs changed from 8-char to full UUID (v1)
+    if (localStorage.getItem('plan_id_version') !== '1') {
+        localStorage.removeItem('plan_items');
+        localStorage.removeItem('plan_page_index');
+        planItems = [];
+        planPageIndex = {};
+        localStorage.setItem('plan_id_version', '1');
+        console.log('[RayOS] Cleared plan cache — IDs changed to full UUID');
+    }
     // 🔄 Migration v4: update body data to verified Notion values (2025-03-08 start)
     if (localStorage.getItem('body_data_version') !== '4') {
         localStorage.removeItem('body_history');
