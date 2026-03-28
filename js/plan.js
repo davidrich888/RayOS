@@ -76,6 +76,9 @@ function renderPlanCards() {
         const card = document.createElement('div');
         card.className = 'plan-card' + (isExpanded ? ' expanded' : '');
         card.dataset.planId = p.id;
+        card.dataset.planTitle = p.title || '';
+        card.dataset.planDesc = p.description || '';
+        card.dataset.planPriority = p.priority || 'medium';
         if (isExpanded) card.style.aspectRatio = 'auto';
 
         // Title
@@ -264,18 +267,17 @@ function showPlanModal(editId) {
     const prioInput = document.getElementById('plan-priority-input');
 
     if (editId) {
-        const item = planItems.find(p => p.id === editId);
-        if (!item) {
-            console.error('[Plan] Edit: item not found for id:', editId);
+        // Read data directly from DOM card (not planItems — avoids stale data after drag)
+        const card = document.querySelector('.plan-card[data-plan-id="' + editId + '"]');
+        if (!card) {
             showToast('找不到計劃項目', true);
             return;
         }
-        console.log('[Plan] Edit item:', editId, 'title:', item.title, 'desc:', item.description, 'prio:', item.priority);
         titleEl.textContent = '編輯計劃';
         idEl.value = editId;
-        titleInput.value = item.title || '';
-        descInput.value = item.description || '';
-        prioInput.value = item.priority || 'medium';
+        titleInput.value = card.dataset.planTitle || '';
+        descInput.value = card.dataset.planDesc || '';
+        prioInput.value = card.dataset.planPriority || 'medium';
     } else {
         titleEl.textContent = '新增計劃';
         idEl.value = '';
@@ -299,16 +301,20 @@ async function savePlan() {
     const editId = idEl.value;
 
     if (editId) {
+        // Update planItems
         const item = planItems.find(p => p.id === editId);
-        if (!item) {
-            console.error('[Plan] Save: item not found:', editId);
-            showToast('找不到計劃項目，請重新整理', true);
-            hideModal('plan-modal');
-            return;
+        if (item) {
+            item.title = title;
+            item.description = desc;
+            item.priority = priority;
         }
-        item.title = title;
-        item.description = desc;
-        item.priority = priority;
+        // Also update DOM card data attributes directly
+        const card = document.querySelector('.plan-card[data-plan-id="' + editId + '"]');
+        if (card) {
+            card.dataset.planTitle = title;
+            card.dataset.planDesc = desc;
+            card.dataset.planPriority = priority;
+        }
         savePlanToLocal();
         renderPlanCards();
         hideModal('plan-modal');
