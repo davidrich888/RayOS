@@ -370,6 +370,32 @@
         .mobile-menu-btn { display: none; position: fixed; top: calc(10px + env(safe-area-inset-top)); left: calc(10px + env(safe-area-inset-left)); z-index: 200; width: 44px; height: 44px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--accent); font-size: 20px; cursor: pointer; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 90; }
         
+        /* ===== PLAN SECTION ===== */
+        .plan-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .plan-section-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
+        .plan-card { background: var(--bg-card); border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 10px; transition: all 0.3s; }
+        .plan-card:hover { border-color: var(--text-muted); }
+        .plan-card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .plan-card-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 700; }
+        .plan-card-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+        .plan-card:hover .plan-card-actions { opacity: 1; }
+        .plan-card-body { margin-top: 10px; }
+        .plan-card-desc { font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+        .plan-card-more { font-size: 11px; color: var(--text-muted); margin-top: 6px; cursor: pointer; }
+        .todo-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); margin-bottom: 6px; transition: all 0.3s; }
+        .todo-item:hover { border-color: var(--text-muted); }
+        .todo-item.done { opacity: 0.5; }
+        .todo-checkbox { width: 22px; height: 22px; border: 2px solid var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; color: var(--accent); flex-shrink: 0; transition: all 0.2s; }
+        .todo-checkbox:hover { border-color: var(--accent); }
+        .todo-item.done .todo-checkbox { border-color: var(--accent); background: var(--accent-dim); }
+        .todo-text { flex: 1; font-size: 14px; color: var(--text); }
+        .todo-item.done .todo-text { text-decoration: line-through; color: var(--text-muted); }
+        .todo-delete { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; opacity: 0; transition: opacity 0.2s; padding: 4px; }
+        .todo-item:hover .todo-delete { opacity: 1; }
+        .todo-delete:hover { color: var(--danger); }
+        .todo-add-row { display: flex; gap: 8px; margin-top: 12px; }
+        .todo-add-row .form-input { flex: 1; }
+
         @media (max-width: 1200px) {
             .wealth-layout:has(.wealth-sidebar) { grid-template-columns: 1fr; }
             .wealth-sidebar { position: relative; top: 0; }
@@ -547,6 +573,10 @@
             .modal { padding: 16px; max-width: 100%; }
             .modal-title { font-size: 18px; margin-bottom: 14px; }
             
+            /* ===== PLAN ===== */
+            .plan-card-actions { opacity: 1; }
+            .todo-delete { opacity: 1; }
+
             /* ===== INFORMATION ===== */
             #information .content { height: calc(100vh - 60px); padding: 0; }
 

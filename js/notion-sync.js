@@ -5,6 +5,7 @@ const BODY_DB_ID = 'f481a3da00de4d9391d293a88cf1c9c1';
 const IDEAS_DB_ID = 'e04c6b41e1ae490baf3396dc7fe80fc5';
 const VIDEOS_DB_ID = '76fb8600ae9649bcb6c475f75f0ec818';
 const BODY_DS_ID = '6b8fea6a-9249-4a7b-a36e-5cd7f6ceb61f';
+const PLAN_DB_ID = '5f505efdebd540c0ab248999e5529ad2';
 const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI', nofap:'NoFap'};
 const NOTION_API = 'https://api.notion.com/v1';
 let notionPageIndex = JSON.parse(localStorage.getItem('notion_page_index') || '{}');

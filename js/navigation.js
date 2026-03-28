@@ -54,6 +54,10 @@ function go(section) {
             if (typeof renderMoodboard === 'function') renderMoodboard();
             if (firstVisit && typeof syncMoodboardFromDrive === 'function') syncMoodboardFromDrive();
             break;
+        case 'plan':
+            if (typeof renderPlanSection === 'function') renderPlanSection();
+            if (firstVisit && canSync && typeof syncPlanFromNotion === 'function') syncPlanFromNotion(true);
+            break;
         case 'information':
             if (typeof renderVideoKnowledgeSummary === 'function') renderVideoKnowledgeSummary();
             if (firstVisit && canSync && typeof syncVideosFromNotion === 'function') syncVideosFromNotion(true);

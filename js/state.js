@@ -16,6 +16,8 @@ let algoEquity = JSON.parse(JSON.stringify(PRELOAD_ALGO_EQUITY));
 let manualEquity = JSON.parse(JSON.stringify(PRELOAD_MANUAL_EQUITY));
 let propRecords = [];
 let dailyHabitsData = {};
+let planItems = [];
+let planPageIndex = JSON.parse(localStorage.getItem('plan_page_index') || '{}');
 
 // Load from localStorage
 try {
@@ -30,7 +32,9 @@ try {
     const storedProp = localStorage.getItem('prop_records');
     if (storedProp) propRecords = JSON.parse(storedProp);
     const storedDaily = localStorage.getItem('daily_habits');
-    if (storedDaily) { 
+    if (storedDaily) {
         dailyHabitsData = JSON.parse(storedDaily);
     }
+    const storedPlan = localStorage.getItem('plan_items');
+    if (storedPlan) planItems = JSON.parse(storedPlan);
 } catch(e) { console.log('localStorage error:', e); }

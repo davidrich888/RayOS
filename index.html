@@ -25,6 +25,7 @@
         <div class="logo"><div class="logo-text">RayOS</div></div>
         <div class="nav-item active" data-section="dashboard"><span class="nav-icon">◉</span><span>Dashboard</span></div>
         <div class="nav-item" data-section="lifecoach"><span class="nav-icon">🤖</span><span>AI Agents</span></div>
+        <div class="nav-item" data-section="plan"><span class="nav-icon">📋</span><span>Plan</span></div>
         <div class="nav-item" data-section="daily"><span class="nav-icon">✓</span><span>Daily</span></div>
         <div class="nav-item" data-section="physic"><span class="nav-icon">🥷</span><span>Physic</span></div>
         <div class="nav-item" data-section="wealth"><span class="nav-icon">$</span><span>Wealth</span></div>
@@ -854,6 +855,65 @@
             </div>
         </section>
 
+        <!-- PLAN -->
+        <section class="section" id="plan">
+            <div class="header">
+                <div class="page-title">Plan</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <span class="sync-dot off" id="plan-sync-dot"></span>
+                    <button class="btn" onclick="syncPlanFromNotion()">🔄 Sync</button>
+                    <button class="btn btn-accent" onclick="window.open('https://www.notion.so/5f505efdebd540c0ab248999e5529ad2','_blank')">Notion</button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="plan-section-header">
+                    <div class="plan-section-title">長期計劃</div>
+                    <button class="btn btn-small" onclick="showModal('plan-modal')">+ 新增計劃</button>
+                </div>
+                <div id="plan-cards"></div>
+
+                <div class="plan-section-header" style="margin-top:32px;">
+                    <div class="plan-section-title">代辦事項</div>
+                </div>
+                <div id="todo-list"></div>
+                <div class="todo-add-row">
+                    <input type="text" class="form-input" id="todo-input" placeholder="新增代辦事項..." onkeypress="if(event.key==='Enter')addTodo()">
+                    <button class="btn btn-accent btn-small" onclick="addTodo()">新增</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Plan Modal -->
+        <div class="modal-overlay" id="plan-modal">
+            <div class="modal">
+                <div class="modal-title" id="plan-modal-title">新增計劃</div>
+                <input type="hidden" id="plan-edit-id">
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label class="form-label">標題</label>
+                    <input type="text" class="form-input" id="plan-title-input" placeholder="計劃名稱">
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label class="form-label">描述</label>
+                    <textarea class="form-input" id="plan-desc-input" rows="6" placeholder="詳細描述..." style="resize:vertical;"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">優先級</label>
+                        <select class="form-input" id="plan-priority-input">
+                            <option value="high">🔴 高</option>
+                            <option value="medium" selected>🟠 中</option>
+                            <option value="low">⚪ 低</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn" onclick="hideModal('plan-modal')">取消</button>
+                    <button class="btn btn-accent" onclick="savePlan()">儲存</button>
+                </div>
+            </div>
+        </div>
+
         <!-- INFORMATION -->
         <section class="section" id="information">
             <div class="header">
@@ -1155,6 +1215,7 @@
     <script src="js/content.js"></script>
     <script src="js/yt-studio.js"></script>
     <script src="js/agents.js"></script>
+    <script src="js/plan.js"></script>
     <script src="js/init.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
