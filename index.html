@@ -23,24 +23,33 @@
     <div class="sidebar-overlay" onclick="toggleMobileMenu()"></div>
     
     <nav class="sidebar">
-        <div class="logo"><div class="logo-text">RayOS</div></div>
-        <div class="nav-item active" data-section="dashboard"><span class="nav-icon">◉</span><span>Dashboard</span></div>
-        <div class="nav-item" data-section="lifecoach"><span class="nav-icon">🤖</span><span>AI Agents</span></div>
-        <div class="nav-item" data-section="plan"><span class="nav-icon">📋</span><span>Plan</span></div>
-        <div class="nav-item" data-section="daily"><span class="nav-icon">✓</span><span>Daily</span></div>
-        <div class="nav-item" data-section="physic"><span class="nav-icon">🥷</span><span>Physic</span></div>
-        <div class="nav-item" data-section="wealth"><span class="nav-icon">$</span><span>Wealth</span></div>
-        <div class="nav-item" data-section="trading"><span class="nav-icon">📈</span><span>Trading</span></div>
-        <div class="nav-item" data-section="content"><span class="nav-icon">📝</span><span>Content</span></div>
-        <div class="nav-item" data-section="business"><span class="nav-icon">📊</span><span>Business</span></div>
-        <div class="nav-item" data-section="information"><span class="nav-icon">📖</span><span>Information</span></div>
+        <div class="logo">
+            <div class="logo-icon">R</div>
+            <div><div class="logo-text">RayOS</div><div class="logo-sub">Personal OS</div></div>
+        </div>
+        <div class="nav-group-label">System</div>
+        <div class="nav-item active" data-section="dashboard"><div class="nav-icon-wrap">◉</div><span>Dashboard</span></div>
+        <div class="nav-item" data-section="lifecoach"><div class="nav-icon-wrap">🤖</div><span>AI Agents</span><span class="nav-badge">13</span></div>
+        <div class="nav-item" data-section="plan"><div class="nav-icon-wrap">📋</div><span>Plan</span></div>
+        <div class="nav-group-label">Life</div>
+        <div class="nav-item" data-section="daily"><div class="nav-icon-wrap">✓</div><span>Daily</span></div>
+        <div class="nav-item" data-section="physic"><div class="nav-icon-wrap">🥷</div><span>Physic</span></div>
+        <div class="nav-item" data-section="wealth"><div class="nav-icon-wrap">$</div><span>Wealth</span></div>
+        <div class="nav-item" data-section="trading"><div class="nav-icon-wrap">📈</div><span>Trading</span></div>
+        <div class="nav-item" data-section="content"><div class="nav-icon-wrap">📝</div><span>Content</span></div>
+        <div class="nav-item" data-section="business"><div class="nav-icon-wrap">📊</div><span>Business</span></div>
+        <div class="nav-item" data-section="information"><div class="nav-icon-wrap">📖</div><span>Information</span></div>
+        <div class="sidebar-footer">
+            <div class="sidebar-avatar">R</div>
+            <div><div class="sidebar-avatar-name">Ray Wang</div><div class="sidebar-avatar-role">Creator & Trader</div></div>
+        </div>
     </nav>
     
     <main class="main">
         <!-- DASHBOARD -->
         <section class="section active" id="dashboard">
             <div class="header">
-                <div class="page-title">Dashboard</div>
+                <div><div class="page-label">Personal Dashboard</div><div class="page-title">Dashboard</div></div>
                 <div class="header-actions">
                     <button class="btn" onclick="showModal('settings-modal')">⚙️ Settings</button>
                 </div>
@@ -59,12 +68,12 @@
             </div>
 
             <div class="stats-row">
-                <div class="stat-box" onclick="go('daily')"><div class="stat-value" id="stat-streak">0</div><div class="stat-label">Streak</div></div>
-                <div class="stat-box" onclick="go('physic')"><div class="stat-value" id="stat-bodyfat">--</div><div class="stat-label">Body Fat</div></div>
-                <div class="stat-box" onclick="go('wealth')"><div class="stat-value" id="stat-wealth">--</div><div class="stat-label">Total Assets</div></div>
-                <div class="stat-box" onclick="go('business')"><div class="stat-value" id="stat-mrr">$0</div><div class="stat-label">MRR</div></div>
-                <div class="stat-box" onclick="go('content')"><div class="stat-value" id="stat-content">0/13</div><div class="stat-label">Content</div></div>
-                <div class="stat-box" onclick="go('information')"><div class="stat-value" id="stat-learning">0</div><div class="stat-label">Learning</div></div>
+                <div class="stat-box" onclick="go('daily')"><div class="stat-box-header"><div class="stat-box-icon">🔥</div></div><div class="stat-value" id="stat-streak">0</div><div class="stat-label">Streak</div></div>
+                <div class="stat-box" onclick="go('physic')"><div class="stat-box-header"><div class="stat-box-icon">💪</div></div><div class="stat-value" id="stat-bodyfat">--</div><div class="stat-label">Body Fat</div></div>
+                <div class="stat-box" onclick="go('wealth')"><div class="stat-box-header"><div class="stat-box-icon">💰</div></div><div class="stat-value" id="stat-wealth">--</div><div class="stat-label">Total Assets</div></div>
+                <div class="stat-box" onclick="go('business')"><div class="stat-box-header"><div class="stat-box-icon">💵</div></div><div class="stat-value" id="stat-mrr">$0</div><div class="stat-label">MRR</div></div>
+                <div class="stat-box" onclick="go('content')"><div class="stat-box-header"><div class="stat-box-icon">📝</div></div><div class="stat-value" id="stat-content">0/13</div><div class="stat-label">Content</div></div>
+                <div class="stat-box" onclick="go('information')"><div class="stat-box-header"><div class="stat-box-icon">📖</div></div><div class="stat-value" id="stat-learning">0</div><div class="stat-label">Learning</div></div>
             </div>
 
             <div class="content">
@@ -859,7 +868,7 @@
         <!-- PLAN -->
         <section class="section" id="plan">
             <div class="header">
-                <div class="page-title">Plan</div>
+                <div><div class="page-label">Goals & Tasks</div><div class="page-title">Plan</div></div>
                 <div class="header-actions">
                     <button class="btn" onclick="go('dashboard')">← Back</button>
                     <span class="sync-dot off" id="plan-sync-dot"></span>
