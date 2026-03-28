@@ -90,11 +90,11 @@
                 loadDailyHabits();
             }
         }, 500);
-        // Auto-sync: Notion Direct (Ideas + Videos + Content + Plan)
+        // Auto-sync: Notion Direct (Ideas + Videos + Content)
+        // Plan syncs on first visit to Plan tab (not on init, to preserve local order)
         if (hasNotionDirect()) {
             setTimeout(() => syncVideosFromNotion(true), 2500);
             setTimeout(() => syncContentFromNotion(true), 3000);
-            setTimeout(() => syncPlanFromNotion(true), 3500);
         }
         // Body auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
         if (getN8nUrl() && !hasNotionDirect()) {

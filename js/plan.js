@@ -124,7 +124,7 @@ function renderPlanCards() {
             ghostClass: 'plan-card-ghost',
             chosenClass: 'plan-card-chosen',
             dragClass: 'plan-card-drag',
-            onEnd: function () {
+            onEnd: async function () {
                 // Read new order from DOM
                 const cards = container.querySelectorAll('.plan-card');
                 const allPlans = getSortedPlans();
@@ -134,8 +134,9 @@ function renderPlanCards() {
                     if (item) item.order = i + 1;
                 });
                 savePlanToLocal();
-                showToast('✓ 順序已更新');
-                syncPlanOrder(getSortedPlans());
+                showToast('正在同步順序...');
+                await syncPlanOrder(getSortedPlans());
+                showToast('✓ 順序已同步');
             }
         });
     }
@@ -224,17 +225,14 @@ function movePlan(id, direction) {
 
 async function syncPlanOrder(plans) {
     if (!hasNotionDirect()) return;
-    for (const p of plans) {
+    const updates = plans.map(p => {
         const pageId = planPageIndex[p.id];
-        if (!pageId) continue;
-        try {
-            await notionFetch('/pages/' + pageId, 'PATCH', {
-                properties: { 'Order': { number: p.order } }
-            });
-        } catch (e) {
-            console.error('[Plan] Order sync failed:', p.id, e);
-        }
-    }
+        if (!pageId) return Promise.resolve();
+        return notionFetch('/pages/' + pageId, 'PATCH', {
+            properties: { 'Order': { number: p.order } }
+        }).catch(e => console.error('[Plan] Order sync failed:', p.id, e));
+    });
+    await Promise.all(updates);
     console.log('[Plan] Order synced to Notion');
 }
 
