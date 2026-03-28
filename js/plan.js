@@ -115,15 +115,16 @@ function renderPlanCards() {
             filter: '.plan-card-actions',
             preventOnFilter: false,
             onEnd: async function () {
-                // Read new order from DOM
+                // Read new order from DOM before re-render
                 const cards = container.querySelectorAll('.plan-card');
-                const allPlans = getSortedPlans();
                 cards.forEach((card, i) => {
                     const id = card.dataset.planId;
-                    const item = allPlans.find(p => p.id === id);
+                    const item = planItems.find(p => p.id === id);
                     if (item) item.order = i + 1;
                 });
                 savePlanToLocal();
+                // Re-render to refresh closures
+                renderPlanCards();
                 showToast('正在同步順序...');
                 await syncPlanOrder(getSortedPlans());
                 showToast('✓ 順序已同步');
@@ -243,7 +244,12 @@ function showPlanModal(editId) {
 
     if (editId) {
         const item = planItems.find(p => p.id === editId);
-        if (!item) return;
+        if (!item) {
+            console.error('[Plan] Edit: item not found for id:', editId);
+            showToast('找不到計劃項目', true);
+            return;
+        }
+        console.log('[Plan] Edit item:', editId, 'title:', item.title, 'desc:', item.description, 'prio:', item.priority);
         titleEl.textContent = '編輯計劃';
         idEl.value = editId;
         titleInput.value = item.title || '';
@@ -273,16 +279,20 @@ async function savePlan() {
 
     if (editId) {
         const item = planItems.find(p => p.id === editId);
-        if (item) {
-            item.title = title;
-            item.description = desc;
-            item.priority = priority;
-            savePlanToLocal();
-            renderPlanCards();
+        if (!item) {
+            console.error('[Plan] Save: item not found:', editId);
+            showToast('找不到計劃項目，請重新整理', true);
             hideModal('plan-modal');
-            showToast('✓ 計劃已更新');
-            await updatePlanInNotion(editId, { title, description: desc, priority });
+            return;
         }
+        item.title = title;
+        item.description = desc;
+        item.priority = priority;
+        savePlanToLocal();
+        renderPlanCards();
+        hideModal('plan-modal');
+        showToast('✓ 計劃已更新');
+        await updatePlanInNotion(editId, { title, description: desc, priority });
     } else {
         // New plan: high priority gets order 0 (front), others append
         const plans = getSortedPlans();
