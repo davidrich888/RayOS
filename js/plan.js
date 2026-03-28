@@ -84,20 +84,6 @@ function renderPlanCards() {
         // --- Actions (bottom) ---
         const actions = document.createElement('div');
         actions.className = 'plan-card-actions';
-        if (idx > 0) {
-            const leftBtn = document.createElement('button');
-            leftBtn.className = 'btn btn-small plan-move-btn';
-            leftBtn.textContent = '◀';
-            leftBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, -1); });
-            actions.appendChild(leftBtn);
-        }
-        if (idx < plans.length - 1) {
-            const rightBtn = document.createElement('button');
-            rightBtn.className = 'btn btn-small plan-move-btn';
-            rightBtn.textContent = '▶';
-            rightBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, 1); });
-            actions.appendChild(rightBtn);
-        }
         const editBtn = document.createElement('button');
         editBtn.className = 'btn btn-small';
         editBtn.textContent = '編輯';
@@ -121,9 +107,13 @@ function renderPlanCards() {
     if (typeof Sortable !== 'undefined' && plans.length > 1) {
         _planSortable = new Sortable(container, {
             animation: 150,
+            delay: 200,
+            delayOnTouchOnly: false,
             ghostClass: 'plan-card-ghost',
             chosenClass: 'plan-card-chosen',
             dragClass: 'plan-card-drag',
+            filter: '.plan-card-actions',
+            preventOnFilter: false,
             onEnd: async function () {
                 // Read new order from DOM
                 const cards = container.querySelectorAll('.plan-card');

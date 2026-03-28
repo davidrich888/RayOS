@@ -399,7 +399,8 @@
         .plan-card-ghost { opacity: 0.3; }
         .plan-card-chosen { cursor: grabbing; }
         .plan-card-drag { box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .plan-move-btn { padding: 4px 8px !important; font-size: 10px !important; line-height: 1; }
+        .plan-card { cursor: grab; }
+        .plan-card:active { cursor: grabbing; }
 
         @media (max-width: 1200px) {
             .wealth-layout:has(.wealth-sidebar) { grid-template-columns: 1fr; }
