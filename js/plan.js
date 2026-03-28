@@ -7,6 +7,13 @@ function savePlanToLocal() {
     localStorage.setItem('plan_page_index', JSON.stringify(planPageIndex));
 }
 
+// Sort plans by order only (priority is visual label, not sort key)
+function getSortedPlans() {
+    return planItems
+        .filter(p => p.type === 'plan' && p.status !== 'archived')
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+}
+
 // === Render ===
 
 function renderPlanSection() {
@@ -19,7 +26,7 @@ function renderPlanSection() {
 function renderPlanCards() {
     const container = document.getElementById('plan-cards');
     if (!container) return;
-    const plans = planItems.filter(p => p.type === 'plan' && p.status !== 'archived');
+    const plans = getSortedPlans();
     if (plans.length === 0) {
         container.textContent = '';
         const hint = document.createElement('div');
@@ -28,15 +35,9 @@ function renderPlanCards() {
         container.appendChild(hint);
         return;
     }
-    const prioOrder = { high: 0, medium: 1, low: 2 };
-    plans.sort((a, b) => (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1) || (a.order || 0) - (b.order || 0));
-
-    // Store sorted plan IDs for drag reorder
-    container._sortedIds = [];
 
     container.textContent = '';
     plans.forEach((p, idx) => {
-        container._sortedIds.push(p.id);
         const prioIcon = p.priority === 'high' ? '🔴' : p.priority === 'low' ? '⚪' : '🟠';
         const descLines = (p.description || '').split('\n');
         const descPreview = descLines.slice(0, 2).join('\n');
@@ -47,46 +48,45 @@ function renderPlanCards() {
         card.className = 'plan-card' + (isExpanded ? ' expanded' : '');
         card.dataset.planId = p.id;
         if (isExpanded) card.style.aspectRatio = 'auto';
-        card.draggable = true;
 
-        // Drag events
+        // --- Drag & Drop ---
+        card.draggable = true;
         card.addEventListener('dragstart', e => {
-            setTimeout(() => card.classList.add('dragging'), 0);
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', p.id);
+            // Delay adding class so the drag image captures the card first
+            requestAnimationFrame(() => card.classList.add('dragging'));
         });
         card.addEventListener('dragend', () => {
             card.classList.remove('dragging');
-            container.querySelectorAll('.plan-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+            container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
         });
         card.addEventListener('dragover', e => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            if (!card.classList.contains('dragging')) {
-                card.classList.add('drag-over');
-            }
+            if (!card.classList.contains('dragging')) card.classList.add('drag-over');
         });
-        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+        card.addEventListener('dragleave', e => {
+            // Only remove if actually leaving this card (not entering a child)
+            if (!card.contains(e.relatedTarget)) card.classList.remove('drag-over');
+        });
         card.addEventListener('drop', e => {
             e.preventDefault();
             card.classList.remove('drag-over');
             const dragId = e.dataTransfer.getData('text/plain');
-            if (dragId && dragId !== p.id) {
-                reorderPlan(dragId, p.id);
-            }
+            if (dragId && dragId !== p.id) reorderPlan(dragId, p.id);
         });
 
-        // Title row
+        // --- Title ---
         const header = document.createElement('div');
         header.className = 'plan-card-header';
         header.addEventListener('click', () => togglePlanExpand(p.id));
-
         const titleEl = document.createElement('div');
         titleEl.className = 'plan-card-title';
         titleEl.textContent = prioIcon + ' ' + p.title;
         header.appendChild(titleEl);
 
-        // Description
+        // --- Description ---
         const body = document.createElement('div');
         body.className = 'plan-card-body';
         body.addEventListener('click', () => togglePlanExpand(p.id));
@@ -101,7 +101,6 @@ function renderPlanCards() {
             descEl.textContent = '無描述';
         }
         body.appendChild(descEl);
-
         if (hasMore && !isExpanded) {
             const more = document.createElement('div');
             more.className = 'plan-card-more';
@@ -109,22 +108,22 @@ function renderPlanCards() {
             body.appendChild(more);
         }
 
-        // Action buttons at bottom
+        // --- Actions (bottom) ---
         const actions = document.createElement('div');
         actions.className = 'plan-card-actions';
         if (idx > 0) {
-            const upBtn = document.createElement('button');
-            upBtn.className = 'btn btn-small plan-move-btn';
-            upBtn.textContent = '◀';
-            upBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, -1); });
-            actions.appendChild(upBtn);
+            const leftBtn = document.createElement('button');
+            leftBtn.className = 'btn btn-small plan-move-btn';
+            leftBtn.textContent = '◀';
+            leftBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, -1); });
+            actions.appendChild(leftBtn);
         }
         if (idx < plans.length - 1) {
-            const downBtn = document.createElement('button');
-            downBtn.className = 'btn btn-small plan-move-btn';
-            downBtn.textContent = '▶';
-            downBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, 1); });
-            actions.appendChild(downBtn);
+            const rightBtn = document.createElement('button');
+            rightBtn.className = 'btn btn-small plan-move-btn';
+            rightBtn.textContent = '▶';
+            rightBtn.addEventListener('click', e => { e.stopPropagation(); movePlan(p.id, 1); });
+            actions.appendChild(rightBtn);
         }
         const editBtn = document.createElement('button');
         editBtn.className = 'btn btn-small';
@@ -194,37 +193,36 @@ function renderTodoList() {
 // === Reorder ===
 
 function reorderPlan(dragId, dropId) {
-    const plans = planItems.filter(p => p.type === 'plan' && p.status !== 'archived');
-    const prioOrder = { high: 0, medium: 1, low: 2 };
-    plans.sort((a, b) => (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1) || (a.order || 0) - (b.order || 0));
-
+    const plans = getSortedPlans();
     const dragIdx = plans.findIndex(p => p.id === dragId);
     const dropIdx = plans.findIndex(p => p.id === dropId);
-    if (dragIdx === -1 || dropIdx === -1) return;
+    if (dragIdx === -1 || dropIdx === -1 || dragIdx === dropIdx) return;
 
     const [moved] = plans.splice(dragIdx, 1);
     plans.splice(dropIdx, 0, moved);
-
     plans.forEach((p, i) => { p.order = i + 1; });
+
     savePlanToLocal();
     renderPlanCards();
     syncPlanOrder(plans);
+    showToast('✓ 順序已更新');
 }
 
 function movePlan(id, direction) {
-    const plans = planItems.filter(p => p.type === 'plan' && p.status !== 'archived');
-    const prioOrder = { high: 0, medium: 1, low: 2 };
-    plans.sort((a, b) => (prioOrder[a.priority] || 1) - (prioOrder[b.priority] || 1) || (a.order || 0) - (b.order || 0));
-
+    const plans = getSortedPlans();
     const idx = plans.findIndex(p => p.id === id);
     const targetIdx = idx + direction;
     if (idx === -1 || targetIdx < 0 || targetIdx >= plans.length) return;
 
-    [plans[idx], plans[targetIdx]] = [plans[targetIdx], plans[idx]];
-    plans.forEach((p, i) => { p.order = i + 1; });
+    // Swap order values
+    const tmpOrder = plans[idx].order;
+    plans[idx].order = plans[targetIdx].order;
+    plans[targetIdx].order = tmpOrder;
+
     savePlanToLocal();
     renderPlanCards();
-    syncPlanOrder(plans);
+    syncPlanOrder([plans[idx], plans[targetIdx]]);
+    showToast('✓ 順序已更新');
 }
 
 async function syncPlanOrder(plans) {
@@ -276,9 +274,7 @@ function showPlanModal(editId) {
     showModal('plan-modal');
 }
 
-function editPlan(id) {
-    showPlanModal(id);
-}
+function editPlan(id) { showPlanModal(id); }
 
 async function savePlan() {
     const idEl = document.getElementById('plan-edit-id');
@@ -303,11 +299,21 @@ async function savePlan() {
             await updatePlanInNotion(editId, { title, description: desc, priority });
         }
     } else {
+        // New plan: high priority gets order 0 (front), others append
+        const plans = getSortedPlans();
+        let newOrder;
+        if (priority === 'high') {
+            // Insert at front, shift others
+            plans.forEach(p => { p.order = (p.order || 0) + 1; });
+            newOrder = 1;
+        } else {
+            newOrder = plans.length + 1;
+        }
+
         const id = 'plan_' + Date.now();
         const newItem = {
             id, type: 'plan', title, description: desc,
-            status: 'active', priority,
-            order: planItems.filter(p => p.type === 'plan').length + 1
+            status: 'active', priority, order: newOrder
         };
         planItems.push(newItem);
         savePlanToLocal();
@@ -315,6 +321,8 @@ async function savePlan() {
         hideModal('plan-modal');
         showToast('✓ 計劃已新增');
         await createPlanInNotion(newItem);
+        // Sync shifted orders if high priority
+        if (priority === 'high' && plans.length > 0) syncPlanOrder(plans);
     }
 }
 
@@ -457,21 +465,16 @@ async function updatePlanInNotion(id, updates) {
     if (!pageId) return;
     try {
         const props = {};
-        if (updates.title !== undefined) {
+        if (updates.title !== undefined)
             props['Title'] = { title: [{ text: { content: updates.title } }] };
-        }
-        if (updates.description !== undefined) {
+        if (updates.description !== undefined)
             props['Description'] = { rich_text: [{ text: { content: updates.description } }] };
-        }
-        if (updates.status !== undefined) {
+        if (updates.status !== undefined)
             props['Status'] = { select: { name: updates.status } };
-        }
-        if (updates.priority !== undefined) {
+        if (updates.priority !== undefined)
             props['Priority'] = { select: { name: updates.priority } };
-        }
-        if (updates.order !== undefined) {
+        if (updates.order !== undefined)
             props['Order'] = { number: updates.order };
-        }
         await notionFetch('/pages/' + pageId, 'PATCH', { properties: props });
         console.log('[Plan] Updated in Notion:', id);
     } catch (e) {
