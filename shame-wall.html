@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>交易恥辱牆 — Trading Shame Wall</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: #1f1f1f transparent; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -168,120 +168,124 @@
   #entriesList {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 0 40px;
   }
 
   .entry {
-    background: linear-gradient(160deg, rgba(28,27,27,0.6), rgba(14,14,14,0.7));
-    border: 1px solid rgba(68,71,72,0.1);
-    border-left: 2px solid #c0544f;
-    border-radius: 10px;
-    padding: 14px 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 0;
+    padding: 24px 0;
     margin-bottom: 0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s;
     position: relative;
     display: flex;
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
-    backdrop-filter: blur(6px);
   }
   .entry:hover {
-    border-left-color: #d4655f;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.35), 0 0 16px rgba(192,84,79,0.03);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.01);
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 12px;
+    border-bottom-color: transparent;
   }
   .entry-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+    align-items: baseline;
+    margin-bottom: 12px;
   }
-  .entry-date { font-size: 11px; color: #706b63; letter-spacing: 0.3px; }
+  .entry-date {
+    font-size: 13px;
+    color: #3a3a3a;
+    font-family: 'Space Grotesk', monospace;
+    letter-spacing: 0.5px;
+  }
   .entry-loss {
-    font-size: 15px;
+    font-family: 'Space Grotesk', monospace;
+    font-size: 24px;
     font-weight: 700;
     color: #c0544f;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.5px;
   }
   .entry-loss.loss-positive {
     color: #5a9e6f;
   }
   .entry-title {
-    font-family: 'Cormorant Garamond', serif;
     font-size: 16px;
-    color: #c0544f;
-    font-weight: 600;
+    color: #b0b0b0;
+    font-weight: 500;
     margin-bottom: 6px;
-    line-height: 1.35;
+    line-height: 1.5;
   }
   .entry-detail {
-    font-size: 12px;
-    color: #777;
-    line-height: 1.5;
+    font-size: 13px;
+    color: rgba(120, 120, 120, 0.6);
+    line-height: 1.6;
     white-space: pre-wrap;
     word-wrap: break-word;
   }
   .entry-detail mark {
-    background: rgba(255, 230, 0, 0.35);
+    background: rgba(255, 230, 0, 0.25);
     color: #e0e0e0;
-    padding: 1px 2px;
+    padding: 1px 3px;
     border-radius: 2px;
   }
   .entry-detail img {
     max-width: 100%;
     max-height: 200px;
-    border-radius: 4px;
+    border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.06);
     display: block;
     margin: 6px 0;
     cursor: pointer;
   }
-  .entry-detail img:hover { border-color: #c0544f; }
+  .entry-detail img:hover { border-color: rgba(192,84,79,0.3); }
   .entry.entry-good {
-    border-left-color: #5a9e6f;
+    /* no left border in minimal style */
   }
   .entry.entry-good .entry-title {
     color: #5a9e6f;
   }
-  /* entry-loss color is based on P&L value, not mood */
-  /* lesson always yellow regardless of mood */
   .entry-lesson {
     font-size: 12px;
     color: #c9a84c;
     font-weight: 500;
-    padding: 8px 10px;
-    margin-top: 8px;
-    background: rgba(201,168,76,0.05);
-    border-left: 2px solid rgba(201,168,76,0.4);
-    border-radius: 0 6px 6px 0;
-    line-height: 1.45;
+    padding: 8px 12px;
+    margin-top: 10px;
+    background: rgba(201,168,76,0.04);
+    border-left: 2px solid rgba(201,168,76,0.3);
+    border-radius: 0 8px 8px 0;
+    line-height: 1.5;
   }
   .entry-tags {
     display: flex;
-    gap: 5px;
-    margin-top: 8px;
+    gap: 8px;
+    margin-top: 12px;
     flex-wrap: wrap;
   }
   .tag {
-    font-size: 9px;
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: rgba(192,84,79,0.06);
-    color: #d4655f;
-    border: 1px solid rgba(192,84,79,0.12);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.2s;
+    font-size: 11px;
+    padding: 2px 0;
+    border-radius: 0;
+    background: none;
+    color: rgba(212, 101, 95, 0.5);
+    border: none;
+    letter-spacing: 0.3px;
+    font-weight: 500;
+    transition: color 0.2s;
   }
-  .tag:hover { background: rgba(192,84,79,0.12); }
+  .tag:hover { color: rgba(212, 101, 95, 0.8); }
   .tag.tag-good {
-    background: rgba(90,158,111,0.06);
-    color: #5a9e6f;
-    border-color: rgba(90,158,111,0.12);
+    color: rgba(90,158,111,0.5);
+    background: none;
+    border: none;
   }
-  .tag.tag-good:hover { background: rgba(90,158,111,0.12); }
+  .tag.tag-good:hover { color: rgba(90,158,111,0.8); }
 
   .add-section {
     margin-top: 30px;
@@ -489,26 +493,35 @@
   }
   .btn-cancel:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
 
+  .entry-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2px;
+    margin-top: auto;
+    padding-top: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .entry:hover .entry-actions {
+    opacity: 1;
+  }
   .entry-action-btn {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
-    color: #5a5650;
+    background: none;
+    border: none;
+    color: #333;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 12px;
     font-family: inherit;
-    padding: 4px 12px;
-    border-radius: 5px;
+    padding: 6px 12px;
+    border-radius: 6px;
     transition: all 0.2s;
-    letter-spacing: 0.3px;
   }
   .entry-action-btn:hover {
-    color: #eae8e2;
-    border-color: rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
+    color: #777;
+    background: rgba(255,255,255,0.04);
   }
   .entry-action-del:hover {
     color: #c0544f;
-    border-color: rgba(192,84,79,0.3);
     background: rgba(192,84,79,0.06);
   }
 
@@ -1050,23 +1063,24 @@
   }
   .entry-screenshots {
     display: flex;
-    gap: 6px;
-    margin-top: 8px;
+    gap: 8px;
+    margin-top: 12px;
     flex-wrap: wrap;
   }
   .entry-screenshots img {
-    height: 80px;
-    border-radius: 4px;
+    height: 100px;
+    border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.06);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s;
+    object-fit: cover;
   }
   .entry-screenshots img:hover {
-    border-color: #c0544f;
-    transform: scale(1.02);
+    border-color: rgba(192,84,79,0.3);
+    transform: scale(1.03);
   }
   .entry-screenshots-small img {
-    height: 100px;
+    height: 120px;
   }
   /* lightbox for single image */
   .lightbox {
@@ -1165,8 +1179,9 @@
     margin-bottom: 16px;
   }
   .detail-modal .dm-tags .tag {
-    font-size: 12px;
-    padding: 4px 10px;
+    font-size: 13px;
+    padding: 4px 0;
+    color: rgba(212, 101, 95, 0.7);
   }
   .detail-modal .dm-screenshots {
     display: flex;
@@ -1217,12 +1232,13 @@
     .calendar-section { padding: 12px; }
     .calendar-day { font-size: 10px; }
 
-    .content { padding: 16px 0; }
-    #entriesList { grid-template-columns: 1fr; gap: 10px; }
-    .entry { padding: 12px; border-radius: 6px; }
+    .content { padding: 16px 12px; }
+    #entriesList { grid-template-columns: 1fr; gap: 0; }
+    .entry { padding: 20px 0; }
     .entry-title { font-size: 15px; }
-    .entry-loss { font-size: 14px; }
-    .entry-screenshots img { height: 60px; }
+    .entry-loss { font-size: 20px; }
+    .entry-screenshots img { height: 80px; }
+    .entry-actions { opacity: 1; }
 
     .modal { padding: 20px 16px; width: 95%; }
 
@@ -1551,7 +1567,10 @@ function ensureNotionSchema() {
 
 function formatDate(dateStr) {
   var d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+  var days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  return mm + '.' + dd + '  ' + days[d.getDay()];
 }
 
 // render text with [hl]...[/hl] as <mark> elements
@@ -2222,7 +2241,7 @@ function renderEntry(e) {
     (e.tags || []).forEach(function(t) {
       const tagEl = document.createElement('span');
       tagEl.className = 'tag';
-      tagEl.textContent = '✗ ' + t;
+      tagEl.textContent = '#' + t;
       tagsEl.appendChild(tagEl);
     });
     card.appendChild(tagsEl);
@@ -2260,9 +2279,9 @@ function renderEntry(e) {
     card.appendChild(ssEl);
   }
 
-  // action buttons at bottom-right
+  // action buttons at bottom-right (hidden until hover)
   var actions = document.createElement('div');
-  actions.style.cssText = 'display:flex;justify-content:flex-end;gap:6px;margin-top:auto;padding-top:10px;';
+  actions.className = 'entry-actions';
 
   var editBtn = document.createElement('button');
   editBtn.className = 'entry-action-btn';
@@ -2304,7 +2323,7 @@ function openDetailModal(entryId) {
     (e.tags || []).forEach(function(t) {
       var tagEl = document.createElement('span');
       tagEl.className = 'tag';
-      tagEl.textContent = '✗ ' + t;
+      tagEl.textContent = '#' + t;
       tagsEl.appendChild(tagEl);
     });
     modal.appendChild(tagsEl);
@@ -2548,7 +2567,7 @@ function openModal(id) {
       if (tagEl) {
         tagEl.dataset.state = 'bad';
         tagEl.className = 'tag-option bad';
-        tagEl.textContent = '✗ ' + t;
+        tagEl.textContent = '#' + t;
       }
     });
     (e.goodTags || []).forEach(function(t) {
@@ -2561,15 +2580,19 @@ function openModal(id) {
     });
     // reconstruct rich editor with inline detail screenshots
     var editorEl = document.getElementById('entryDetail');
-    editorEl.innerHTML = '';
+    editorEl.textContent = '';
     var detailSS = (e.detailScreenshots || []).slice();
     var dsIdx = 0;
     if (e.detail) {
       var parts = e.detail.split('[screenshot]');
       parts.forEach(function(part, i) {
-        if (part) {
+        // Trim \n at [screenshot] boundaries to prevent accumulation on each save
+        var cleanPart = part;
+        if (i > 0) cleanPart = cleanPart.replace(/^\n+/, '');
+        if (i < parts.length - 1) cleanPart = cleanPart.replace(/\n+$/, '');
+        if (cleanPart) {
           // use innerHTML-safe text with <br> for newlines, render [hl] as <mark>
-          var lines = part.split('\n');
+          var lines = cleanPart.split('\n');
           lines.forEach(function(line, li) {
             if (line) renderHighlightedText(line, editorEl);
             if (li < lines.length - 1) editorEl.appendChild(document.createElement('br'));
