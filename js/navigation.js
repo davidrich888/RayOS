@@ -1,5 +1,18 @@
 // ==================== NAVIGATION + UTILS ====================
 
+// Sidebar collapse (desktop)
+function toggleSidebarCollapse() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('collapsed');
+    document.body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('rayos-sidebar-collapsed', sidebar.classList.contains('collapsed'));
+}
+// Restore collapsed state on load
+if (localStorage.getItem('rayos-sidebar-collapsed') === 'true') {
+    document.querySelector('.sidebar').classList.add('collapsed');
+    document.body.classList.add('sidebar-collapsed');
+}
+
 function toggleMobileMenu() {
     document.querySelector('.sidebar').classList.toggle('open');
     document.querySelector('.sidebar-overlay').classList.toggle('show');
