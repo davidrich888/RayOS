@@ -87,7 +87,7 @@ function justifiedLayout(photos) {
 
     // Force 2 rows: find best split point
     // Try every split and pick the one where both rows are closest in height
-    const ROW_H = window.innerWidth <= 768 ? 180 : 280;
+    const ROW_H = window.innerWidth <= 768 ? 240 : 280;
     let bestSplit = Math.floor(photos.length / 2);
     let bestDiff = Infinity;
 
