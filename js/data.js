@@ -313,6 +313,7 @@ const PRELOAD_ALGO_EQUITY = [
     { date: '2026/3/23', idxCumRet: 45.51, equity: 1265120, dailyRet: 1.01, cumRet: 26.11, dd: 16.08 },
     { date: '2026/3/24', idxCumRet: 45.02, equity: 1226740, dailyRet: -3.03, cumRet: 22.28, dd: 18.63 },
     { date: '2026/3/25', idxCumRet: 48.7, equity: 1236120, dailyRet: 0.76, cumRet: 23.22, dd: 18.01 },
+    { date: '2026/3/26', idxCumRet: 48.24, equity: 1210020, dailyRet: -2.11, cumRet: 20.62, dd: 19.74 },
 ];
 
 const PRELOAD_MANUAL_EQUITY = [
@@ -349,7 +350,7 @@ const PRELOAD_MANUAL_EQUITY = [
 
 const MONTHLY_RETURNS = {
     2025: { 1: -1.59, 2: -12.76, 3: 21.77, 4: 10.1, 5: 3.87, 6: -5.44, 7: 1.25, 8: -6.43, 9: 0.28, 10: 4.21, 11: 17.93, 12: -5.68, ytd: 24.49 },
-    2026: { 1: 15.84, 2: 3.47, 3: -17.4, ytd: -0.99 },
+    2026: { 1: 15.84, 2: 3.47, 3: -19.14, ytd: -3.08 },
 };
 
 // Expense monthly aggregated data (from Cathay + Taishin credit card statements)
