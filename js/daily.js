@@ -168,6 +168,23 @@ function updateDailyHistoryTable() {
     }
 }
 
+// === Daily Tab Switching ===
+function setDailyTab(tab) {
+    // Toggle tab buttons
+    document.querySelectorAll('#daily .content-tab-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`#daily .content-tab-btn[data-tab="${tab}"]`);
+    if (btn) btn.classList.add('active');
+
+    // Toggle tab content
+    document.getElementById('daily-tab-habits').style.display = tab === 'daily-habits' ? '' : 'none';
+    document.getElementById('daily-tab-sprint').style.display = tab === 'daily-sprint' ? '' : 'none';
+
+    // Render sprint on switch
+    if (tab === 'daily-sprint' && typeof renderSprintSection === 'function') {
+        renderSprintSection();
+    }
+}
+
 // 歷史表格點擊：三態循環
 async function toggleHistoryHabit(dateStr, habit) {
     if (!dailyHabitsData[dateStr]) dailyHabitsData[dateStr] = {};

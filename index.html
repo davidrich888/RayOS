@@ -216,7 +216,8 @@
                 <div class="wealth-layout">
                     <div class="wealth-main">
                         <div class="tabs">
-                            <div class="tab active" onclick="setTradingTab('shamewall',this)">🔥 恥辱牆</div>
+                            <div class="tab active" onclick="setTradingTab('goals',this)">🎯 目標</div>
+                            <div class="tab" onclick="setTradingTab('shamewall',this)">🔥 恥辱牆</div>
                             <div class="tab" onclick="setTradingTab('algo',this)">🤖 程式交易</div>
                             <div class="tab" onclick="setTradingTab('manual',this)">✋ 手單交易</div>
                             <div class="tab" onclick="setTradingTab('propfirm',this)">🏦 Prop Firm</div>
@@ -263,7 +264,7 @@
                                 <div class="chart-wrapper"><canvas id="manualDDChart"></canvas></div>
                             </div>
                         </div>
-                        <div id="tab-shamewall">
+                        <div id="tab-shamewall" style="display:none;">
                             <iframe id="shamewall-frame" src="/shame-wall.html" data-src="/shame-wall.html" style="width:100%;height:calc(100vh - 160px);border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:#0a0a0a;"></iframe>
                         </div>
                         <div id="tab-propfirm" style="display:none;">
@@ -291,6 +292,27 @@
                                     <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="prop-status"><option value="Challenge">Challenge</option><option value="Funded">Funded</option><option value="Failed">Failed</option><option value="Payout">Payout</option></select></div>
                                 </div>
                                 <div class="form-actions"><button class="btn btn-accent" onclick="savePropRecord()">Add</button></div>
+                            </div>
+                        </div>
+                        <div id="tab-goals">
+                            <div class="goals-section">
+                                <div class="form-section" style="margin-bottom:20px;">
+                                    <div class="form-title">🎯 新增目標</div>
+                                    <div class="form-row">
+                                        <div class="form-group" style="flex:2;"><label class="form-label">目標名稱</label><input type="text" class="form-input" id="tg-title" placeholder="例：FTMO 400K（追求4%）"></div>
+                                        <div class="form-group"><label class="form-label">單次出金</label><input type="number" class="form-input" id="tg-payout" placeholder="16000"></div>
+                                        <div class="form-group"><label class="form-label">考試數</label><input type="number" class="form-input" id="tg-exams" placeholder="2" value="2" style="width:60px;"></div>
+                                    </div>
+                                    <div class="form-actions"><button class="btn btn-accent" onclick="addGoal()">+ 新增</button></div>
+                                </div>
+                            </div>
+                            <div class="goals-section">
+                                <div class="goals-section-title">進行中</div>
+                                <div id="goals-active"></div>
+                            </div>
+                            <div class="goals-section">
+                                <div class="goals-section-title">已完成</div>
+                                <div id="goals-completed"></div>
                             </div>
                         </div>
                     </div>
@@ -491,64 +513,78 @@
                 </div>
             </div>
             <div class="content">
-                <div class="quote-box" style="margin-bottom:20px;text-align:center;">
-                    <div class="quote-text">"If you're under $1,000,000 per year, basically everyone on earth doesn't know you exist.<br><br>4hrs Promotion、4hrs Delivery、4hrs Building.<br><strong style="font-size:20px;">Promote. Deliver. Build.</strong>"</div>
-                    <div class="quote-author">— Alex Hormozi</div>
-                </div>
-                
-                <!-- Today's Progress Bar -->
-                <div class="daily-progress-bar">
-                    <span class="daily-progress-label">Today</span>
-                    <span id="daily-date" style="color:var(--text-dim);font-size:11px;margin-right:12px;"></span>
-                    <div class="daily-progress-track"><div class="daily-progress-fill" id="daily-bar"></div></div>
-                    <span class="daily-progress-count"><span id="daily-done">0</span><span style="color:var(--text-dim);"> / </span><span id="daily-total">7</span></span>
+                <!-- Daily Tabs -->
+                <div style="display:flex;gap:6px;margin-bottom:16px;">
+                    <button class="btn content-tab-btn active" data-tab="daily-habits" onclick="setDailyTab('daily-habits')">✓ Daily Habits</button>
+                    <button class="btn content-tab-btn" data-tab="daily-sprint" onclick="setDailyTab('daily-sprint')">🔥 30天衝刺</button>
                 </div>
 
-                <!-- Hidden habits grid for JS compatibility -->
-                <div id="habits-grid" hidden>
-                    <div class="habit-item" data-habit="trading"></div>
-                    <div class="habit-item" data-habit="advertise"></div>
-                    <div class="habit-item" data-habit="deliver"></div>
-                    <div class="habit-item" data-habit="gym"></div>
-                    <div class="habit-item" data-habit="fatloss"></div>
-                    <div class="habit-item" data-habit="ai"></div>
-                    <div class="habit-item" data-habit="nofap"></div>
-                </div>
+                <!-- Tab: Daily Habits -->
+                <div id="daily-tab-habits">
+                    <div class="quote-box" style="margin-bottom:20px;text-align:center;">
+                        <div class="quote-text">"If you're under $1,000,000 per year, basically everyone on earth doesn't know you exist.<br><br>4hrs Promotion、4hrs Delivery、4hrs Building.<br><strong style="font-size:20px;">Promote. Deliver. Build.</strong>"</div>
+                        <div class="quote-author">— Alex Hormozi</div>
+                    </div>
 
-                <!-- 兩欄等寬等高 -->
-                <div class="daily-grid">
-                    <!-- 左邊: Recent Days (with sticky header) -->
-                    <div class="daily-column">
-                        <div class="form-section" style="padding:16px;height:100%;display:flex;flex-direction:column;">
-                            <div class="form-title" style="font-size:14px;">📊 Recent Days</div>
-                            <div class="daily-history-wrapper" style="flex:1;">
-                                <table id="daily-history-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>📈</th>
-                                            <th>📣</th>
-                                            <th>📦</th>
-                                            <th>💪</th>
-                                            <th>🏃</th>
-                                            <th>🤖</th>
-                                            <th>🔫</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="daily-history-body"></tbody>
-                                </table>
+                    <!-- Today's Progress Bar -->
+                    <div class="daily-progress-bar">
+                        <span class="daily-progress-label">Today</span>
+                        <span id="daily-date" style="color:var(--text-dim);font-size:11px;margin-right:12px;"></span>
+                        <div class="daily-progress-track"><div class="daily-progress-fill" id="daily-bar"></div></div>
+                        <span class="daily-progress-count"><span id="daily-done">0</span><span style="color:var(--text-dim);"> / </span><span id="daily-total">7</span></span>
+                    </div>
+
+                    <!-- Hidden habits grid for JS compatibility -->
+                    <div id="habits-grid" hidden>
+                        <div class="habit-item" data-habit="trading"></div>
+                        <div class="habit-item" data-habit="advertise"></div>
+                        <div class="habit-item" data-habit="deliver"></div>
+                        <div class="habit-item" data-habit="gym"></div>
+                        <div class="habit-item" data-habit="fatloss"></div>
+                        <div class="habit-item" data-habit="ai"></div>
+                        <div class="habit-item" data-habit="nofap"></div>
+                    </div>
+
+                    <!-- 兩欄等寬等高 -->
+                    <div class="daily-grid">
+                        <!-- 左邊: Recent Days (with sticky header) -->
+                        <div class="daily-column">
+                            <div class="form-section" style="padding:16px;height:100%;display:flex;flex-direction:column;">
+                                <div class="form-title" style="font-size:14px;">📊 Recent Days</div>
+                                <div class="daily-history-wrapper" style="flex:1;">
+                                    <table id="daily-history-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>📈</th>
+                                                <th>📣</th>
+                                                <th>📦</th>
+                                                <th>💪</th>
+                                                <th>🏃</th>
+                                                <th>🤖</th>
+                                                <th>🔫</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="daily-history-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右邊: Google Calendar -->
+                        <div class="daily-column">
+                            <div class="form-section" style="padding:12px;height:100%;display:flex;flex-direction:column;">
+                                <div class="form-title" style="font-size:14px;">📅 Calendar</div>
+                                <iframe src="https://calendar.google.com/calendar/embed?src=david86726%40gmail.com&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23000000&ctz=Asia%2FTaipei&mode=MONTH" style="border:none;width:100%;flex:1;min-height:400px;filter:invert(0.9) hue-rotate(180deg);"></iframe>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- 右邊: Google Calendar -->
-                    <div class="daily-column">
-                        <div class="form-section" style="padding:12px;height:100%;display:flex;flex-direction:column;">
-                            <div class="form-title" style="font-size:14px;">📅 Calendar</div>
-                            <iframe src="https://calendar.google.com/calendar/embed?src=david86726%40gmail.com&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23000000&ctz=Asia%2FTaipei&mode=MONTH" style="border:none;width:100%;flex:1;min-height:400px;filter:invert(0.9) hue-rotate(180deg);"></iframe>
-                        </div>
-                    </div>
+                </div>
+
+                <!-- Tab: 30-Day Sprint -->
+                <div id="daily-tab-sprint" style="display:none;">
+                    <div id="sprint-content"></div>
                 </div>
             </div>
         </section>
@@ -1223,6 +1259,7 @@
     <script src="js/trading.js"></script>
     <script src="js/physic.js"></script>
     <script src="js/daily.js"></script>
+    <script src="js/sprint.js"></script>
     <script src="js/content.js"></script>
     <script src="js/yt-studio.js"></script>
     <script src="js/agents.js"></script>

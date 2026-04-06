@@ -42,7 +42,11 @@ function go(section) {
     switch (section) {
         case 'daily':
             if (typeof loadDailyHabits === 'function') loadDailyHabits();
-            if (firstVisit && canSync && typeof syncDailyFromNotionDirect === 'function') syncDailyFromNotionDirect(true);
+            if (typeof renderSprintSection === 'function') renderSprintSection();
+            if (firstVisit && canSync) {
+                if (typeof syncDailyFromNotionDirect === 'function') syncDailyFromNotionDirect(true);
+                if (typeof syncSprintsFromNotion === 'function') syncSprintsFromNotion(true);
+            }
             break;
         case 'content':
             if (typeof renderContentSection === 'function') renderContentSection();

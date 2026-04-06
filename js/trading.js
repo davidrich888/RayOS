@@ -5,7 +5,7 @@ const TRADING_SHEET_ID = '1ozBB17QMML4CmbtNfLEhm4Hu-ffpN3qTRawCa_tPHG4';
 function setTradingTab(tab, btn) {
     document.querySelectorAll('#trading .tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    ['algo', 'manual', 'propfirm', 'shamewall'].forEach(t => {
+    ['algo', 'manual', 'propfirm', 'shamewall', 'goals'].forEach(t => {
         const el = document.getElementById('tab-' + t);
         if (el) el.style.display = tab === t ? 'block' : 'none';
     });
@@ -19,6 +19,12 @@ function setTradingTab(tab, btn) {
     // render manual chart on first visit
     if (tab === 'manual' && typeof updateManualChart === 'function') {
         updateManualChart();
+    }
+    // lazy-load goals on first visit
+    if (tab === 'goals' && !goalsLoaded) {
+        goalsLoaded = true;
+        renderGoals();
+        syncGoalsFromNotion(true);
     }
 }
 
@@ -270,4 +276,435 @@ function savePropRecord() {
     document.getElementById('prop-challenge-fee').value = '';
     document.getElementById('prop-payout-amount').value = '';
     showToast('Record added');
+}
+
+// ==================== TRADING GOALS ====================
+
+const GOALS_DB_ID = '33a629ef6a1381039350e8ac6b3466a8';
+let tradingGoals = JSON.parse(localStorage.getItem('trading_goals') || '[]');
+let goalsPageIndex = JSON.parse(localStorage.getItem('goals_page_index') || '{}');
+let goalsLoaded = true;
+let goalsSyncInProgress = false;
+let _goalsSortable = null;
+
+function saveGoalsToLocal() {
+    localStorage.setItem('trading_goals', JSON.stringify(tradingGoals));
+    localStorage.setItem('goals_page_index', JSON.stringify(goalsPageIndex));
+}
+
+// Ensure milestones array exists (migration for old goals)
+function ensureMilestones(goal) {
+    const exams = goal.exams || 2;
+    const total = exams + 12;
+    if (!goal.milestones || goal.milestones.length !== total) {
+        goal.milestones = new Array(total).fill(false);
+    }
+    if (!goal.exams) goal.exams = exams;
+    if (!goal.order) goal.order = 0;
+}
+
+function getGoalProgress(goal) {
+    ensureMilestones(goal);
+    const done = goal.milestones.filter(Boolean).length;
+    const total = goal.milestones.length;
+    return { done, total, pct: total > 0 ? Math.round((done / total) * 100) : 0 };
+}
+
+function renderGoals() {
+    const activeContainer = document.getElementById('goals-active');
+    const completedContainer = document.getElementById('goals-completed');
+    if (!activeContainer || !completedContainer) return;
+
+    const active = tradingGoals.filter(g => g.status === 'active').sort((a, b) => (a.order || 0) - (b.order || 0));
+    const completed = tradingGoals.filter(g => g.status === 'completed');
+
+    // Render active goals
+    activeContainer.textContent = '';
+    if (active.length === 0) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'color:var(--text-muted);font-size:13px;padding:12px 0;';
+        hint.textContent = '還沒有進行中的目標';
+        activeContainer.appendChild(hint);
+    } else {
+        active.forEach(g => activeContainer.appendChild(buildGoalCard(g, false)));
+    }
+
+    // Render completed goals
+    completedContainer.textContent = '';
+    if (completed.length === 0) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'color:var(--text-muted);font-size:13px;padding:12px 0;';
+        hint.textContent = '還沒有已完成的目標';
+        completedContainer.appendChild(hint);
+    } else {
+        completed.forEach(g => completedContainer.appendChild(buildGoalCard(g, true)));
+    }
+
+    // SortableJS for active goals
+    if (_goalsSortable) _goalsSortable.destroy();
+    if (typeof Sortable !== 'undefined' && active.length > 1) {
+        _goalsSortable = new Sortable(activeContainer, {
+            animation: 150,
+            delay: 200,
+            delayOnTouchOnly: false,
+            ghostClass: 'goal-card-ghost',
+            handle: '.goal-drag-handle',
+            onEnd: async function () {
+                const cards = activeContainer.querySelectorAll('.goal-card');
+                cards.forEach((card, i) => {
+                    const id = card.dataset.goalId;
+                    const item = tradingGoals.find(g => g.id === id);
+                    if (item) item.order = i + 1;
+                });
+                saveGoalsToLocal();
+                showToast('✓ 順序已更新');
+                await syncGoalOrder();
+            }
+        });
+    }
+}
+
+function formatMoney(n) {
+    return '$' + n.toLocaleString('en-US');
+}
+
+function buildGoalCard(goal, isCompleted) {
+    ensureMilestones(goal);
+    const { done, total, pct } = getGoalProgress(goal);
+    const exams = goal.exams || 2;
+    const payoutAmt = goal.target || 0;
+
+    const card = document.createElement('div');
+    card.className = isCompleted ? 'goal-card completed' : 'goal-card';
+    card.dataset.goalId = goal.id;
+
+    // Header: drag handle + title + actions
+    const header = document.createElement('div');
+    header.className = 'goal-card-header';
+
+    if (!isCompleted) {
+        const drag = document.createElement('div');
+        drag.className = 'goal-drag-handle';
+        drag.textContent = '⠿';
+        drag.title = '拖曳排序';
+        header.appendChild(drag);
+    }
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'goal-card-title';
+    titleEl.textContent = goal.title;
+    header.appendChild(titleEl);
+
+    const actions = document.createElement('div');
+    actions.className = 'goal-card-actions';
+    if (isCompleted) {
+        const reBtn = document.createElement('button');
+        reBtn.textContent = '↩';
+        reBtn.title = '重新啟用';
+        reBtn.addEventListener('click', () => reactivateGoal(goal.id));
+        actions.appendChild(reBtn);
+    }
+    const delBtn = document.createElement('button');
+    delBtn.className = 'goal-btn-delete';
+    delBtn.textContent = '✕';
+    delBtn.title = '刪除';
+    delBtn.addEventListener('click', () => deleteGoal(goal.id));
+    actions.appendChild(delBtn);
+    header.appendChild(actions);
+    card.appendChild(header);
+
+    // Progress bar
+    const progressRow = document.createElement('div');
+    progressRow.className = 'goal-progress-row';
+    const bar = document.createElement('div');
+    bar.className = 'goal-progress-bar';
+    const fill = document.createElement('div');
+    fill.className = 'goal-progress-fill' + (pct >= 100 ? ' complete' : '');
+    fill.style.width = pct + '%';
+    bar.appendChild(fill);
+    progressRow.appendChild(bar);
+    const pctEl = document.createElement('div');
+    pctEl.className = 'goal-progress-pct' + (pct >= 100 ? ' complete' : '');
+    pctEl.textContent = pct + '%';
+    progressRow.appendChild(pctEl);
+    card.appendChild(progressRow);
+
+    // Milestones grid
+    const grid = document.createElement('div');
+    grid.className = 'goal-milestones';
+
+    // Exam milestones
+    for (let i = 0; i < exams; i++) {
+        const ms = document.createElement('div');
+        ms.className = 'goal-ms' + (goal.milestones[i] ? ' checked' : '');
+        ms.addEventListener('click', () => toggleMilestone(goal.id, i));
+        const check = document.createElement('span');
+        check.className = 'goal-ms-check';
+        check.textContent = goal.milestones[i] ? '✓' : '';
+        ms.appendChild(check);
+        const label = document.createElement('span');
+        label.className = 'goal-ms-label';
+        label.textContent = exams === 1 ? '考試通過' : '考試 ' + (i + 1);
+        ms.appendChild(label);
+        grid.appendChild(ms);
+    }
+
+    // Payout milestones
+    for (let i = 0; i < 12; i++) {
+        const idx = exams + i;
+        const ms = document.createElement('div');
+        ms.className = 'goal-ms' + (goal.milestones[idx] ? ' checked' : '');
+        ms.addEventListener('click', () => toggleMilestone(goal.id, idx));
+        const check = document.createElement('span');
+        check.className = 'goal-ms-check';
+        check.textContent = goal.milestones[idx] ? '✓' : '';
+        ms.appendChild(check);
+        const label = document.createElement('span');
+        label.className = 'goal-ms-label';
+        label.textContent = '出金 ×' + (i + 1);
+        ms.appendChild(label);
+        const amt = document.createElement('span');
+        amt.className = 'goal-ms-amt';
+        amt.textContent = formatMoney(payoutAmt * (i + 1));
+        ms.appendChild(amt);
+        grid.appendChild(ms);
+    }
+
+    card.appendChild(grid);
+
+    // Meta info
+    const meta = document.createElement('div');
+    meta.className = 'goal-meta';
+    const progressText = document.createElement('span');
+    progressText.textContent = done + ' / ' + total + ' 完成';
+    meta.appendChild(progressText);
+    const dateText = document.createElement('span');
+    let dateStr = goal.createdDate ? goal.createdDate.substring(0, 10) : '';
+    if (goal.completedDate) dateStr += ' · 完成於 ' + goal.completedDate.substring(0, 10);
+    dateText.textContent = dateStr;
+    meta.appendChild(dateText);
+    card.appendChild(meta);
+
+    return card;
+}
+
+// === Milestone Toggle ===
+
+async function toggleMilestone(goalId, idx) {
+    const goal = tradingGoals.find(g => g.id === goalId);
+    if (!goal) return;
+    ensureMilestones(goal);
+    goal.milestones[idx] = !goal.milestones[idx];
+
+    // Update current count
+    const { done, total } = getGoalProgress(goal);
+    goal.current = done;
+
+    // Auto-complete if all done
+    if (done === total && goal.status === 'active') {
+        goal.status = 'completed';
+        goal.completedDate = new Date().toISOString().substring(0, 10);
+        showToast('🎉 全部目標達成！');
+    } else if (done < total && goal.status === 'completed') {
+        goal.status = 'active';
+        goal.completedDate = null;
+    }
+
+    saveGoalsToLocal();
+    renderGoals();
+    await updateGoalInNotion(goalId, {
+        current: goal.current,
+        status: goal.status,
+        completedDate: goal.completedDate,
+        milestones: goal.milestones
+    });
+}
+
+// === CRUD ===
+
+async function addGoal() {
+    const titleEl = document.getElementById('tg-title');
+    const payoutEl = document.getElementById('tg-payout');
+    const examsEl = document.getElementById('tg-exams');
+    const title = titleEl.value.trim();
+    const payoutAmt = parseInt(payoutEl.value) || 0;
+    const exams = Math.max(1, Math.min(3, parseInt(examsEl.value) || 2));
+
+    if (!title) { showToast('請輸入目標名稱', true); return; }
+    if (payoutAmt <= 0) { showToast('單次出金金額必須大於 0', true); return; }
+
+    const total = exams + 12;
+    const now = new Date().toISOString().substring(0, 10);
+    const goal = {
+        id: 'goal_' + Date.now(),
+        title,
+        target: payoutAmt,
+        current: 0,
+        exams,
+        milestones: new Array(total).fill(false),
+        order: tradingGoals.filter(g => g.status === 'active').length + 1,
+        status: 'active',
+        createdDate: now,
+        completedDate: null
+    };
+
+    tradingGoals.push(goal);
+    saveGoalsToLocal();
+    renderGoals();
+    titleEl.value = '';
+    payoutEl.value = '';
+    examsEl.value = '2';
+    showToast('✓ 目標已新增');
+    await createGoalInNotion(goal);
+}
+
+async function reactivateGoal(id) {
+    const goal = tradingGoals.find(g => g.id === id);
+    if (!goal) return;
+    goal.status = 'active';
+    goal.completedDate = null;
+    saveGoalsToLocal();
+    renderGoals();
+    showToast('✓ 目標已重新啟用');
+    await updateGoalInNotion(id, { status: 'active', completedDate: null });
+}
+
+async function deleteGoal(id) {
+    if (!confirm('確定刪除這個目標？')) return;
+    tradingGoals = tradingGoals.filter(g => g.id !== id);
+    saveGoalsToLocal();
+    renderGoals();
+    showToast('✓ 已刪除');
+
+    const pageId = goalsPageIndex[id];
+    if (pageId && hasNotionDirect()) {
+        try {
+            await notionFetch('/pages/' + pageId, 'PATCH', { archived: true });
+        } catch (e) {
+            console.error('[Goals] Delete from Notion failed:', e);
+        }
+    }
+    delete goalsPageIndex[id];
+    saveGoalsToLocal();
+}
+
+// === Drag Reorder ===
+
+async function syncGoalOrder() {
+    if (!hasNotionDirect()) return;
+    const active = tradingGoals.filter(g => g.status === 'active');
+    const updates = active.map(g => {
+        const pageId = goalsPageIndex[g.id];
+        if (!pageId) return Promise.resolve();
+        return notionFetch('/pages/' + pageId, 'PATCH', {
+            properties: { 'Order': { number: g.order } }
+        }).catch(e => console.error('[Goals] Order sync failed:', g.id, e));
+    });
+    await Promise.all(updates);
+}
+
+// === Notion Sync ===
+
+async function syncGoalsFromNotion(silent = false) {
+    if (!hasNotionDirect()) return;
+    if (goalsSyncInProgress) return;
+    goalsSyncInProgress = true;
+    if (!silent) showToast('正在從 Notion 同步目標...');
+
+    try {
+        const data = await notionFetch('/databases/' + GOALS_DB_ID + '/query', 'POST', {
+            page_size: 100,
+            sorts: [{ property: 'Order', direction: 'ascending' }]
+        });
+
+        const newGoals = [];
+        const newIndex = {};
+
+        for (const page of data.results) {
+            if (page.archived) continue;
+            const props = page.properties;
+            const titleArr = props['Title']?.title;
+            if (!titleArr || !titleArr[0]) continue;
+
+            const title = titleArr[0].plain_text;
+            const target = props['Target']?.number || 0;
+            const current = props['Current']?.number || 0;
+            const exams = props['Exams']?.number || 2;
+            const status = props['Status']?.select?.name || 'active';
+            const createdDate = props['CreatedDate']?.date?.start || null;
+            const completedDate = props['CompletedDate']?.date?.start || null;
+            const order = props['Order']?.number || 0;
+
+            // Parse milestones from rich_text JSON
+            let milestones = null;
+            const msText = props['Milestones']?.rich_text?.map(r => r.plain_text).join('') || '';
+            if (msText) {
+                try { milestones = JSON.parse(msText); } catch (e) {}
+            }
+            if (!milestones || milestones.length !== exams + 12) {
+                milestones = new Array(exams + 12).fill(false);
+            }
+
+            const id = 'goal_' + page.id.replace(/-/g, '');
+            newIndex[id] = page.id;
+            newGoals.push({ id, title, target, current, exams, milestones, order, status, createdDate, completedDate });
+        }
+
+        tradingGoals = newGoals;
+        goalsPageIndex = newIndex;
+        saveGoalsToLocal();
+        renderGoals();
+
+        if (!silent) showToast('✓ 已同步 ' + newGoals.length + ' 個目標');
+    } catch (e) {
+        console.error('[Goals] Sync error:', e);
+        if (!silent) showToast('目標同步失敗: ' + e.message, true);
+    } finally {
+        goalsSyncInProgress = false;
+    }
+}
+
+async function createGoalInNotion(goal) {
+    if (!hasNotionDirect()) return;
+    try {
+        const props = {
+            'Title': { title: [{ text: { content: goal.title } }] },
+            'Target': { number: goal.target },
+            'Current': { number: goal.current },
+            'Exams': { number: goal.exams },
+            'Milestones': { rich_text: [{ text: { content: JSON.stringify(goal.milestones) } }] },
+            'Order': { number: goal.order || 0 },
+            'Status': { select: { name: goal.status } },
+            'CreatedDate': { date: { start: goal.createdDate } }
+        };
+        const result = await notionFetch('/pages', 'POST', {
+            parent: { database_id: GOALS_DB_ID },
+            properties: props
+        });
+        if (result?.id) {
+            goalsPageIndex[goal.id] = result.id;
+            saveGoalsToLocal();
+            console.log('[Goals] Created in Notion:', result.id);
+        }
+    } catch (e) {
+        console.error('[Goals] Create in Notion failed:', e);
+    }
+}
+
+async function updateGoalInNotion(id, updates) {
+    if (!hasNotionDirect()) return;
+    const pageId = goalsPageIndex[id];
+    if (!pageId) return;
+    try {
+        const props = {};
+        if (updates.current !== undefined) props['Current'] = { number: updates.current };
+        if (updates.status) props['Status'] = { select: { name: updates.status } };
+        if (updates.completedDate) props['CompletedDate'] = { date: { start: updates.completedDate } };
+        if (updates.completedDate === null) props['CompletedDate'] = { date: null };
+        if (updates.milestones) props['Milestones'] = { rich_text: [{ text: { content: JSON.stringify(updates.milestones) } }] };
+        await notionFetch('/pages/' + pageId, 'PATCH', { properties: props });
+        console.log('[Goals] Updated in Notion:', pageId);
+    } catch (e) {
+        console.error('[Goals] Update in Notion failed:', e);
+    }
 }
