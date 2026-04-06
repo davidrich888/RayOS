@@ -47,7 +47,7 @@ async function syncContentIdeasFromNotion(silent = false) {
                     date: p['建立日期']?.created_time || '',
                     notes: p['備註']?.rich_text?.[0]?.plain_text || ''
                 };
-            }).filter(i => i.text);
+            }).filter(i => i.text && i.type !== '/ideas-agent');
             console.log('[RayOS Content] Ideas loaded:', contentIdeas.length);
             if (!silent) showToast('✓ 靈感池 ' + contentIdeas.length + ' 個');
         }
