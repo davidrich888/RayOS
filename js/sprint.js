@@ -58,17 +58,7 @@ function renderSprintSection() {
         container.appendChild(buildNewSprintForm(actives.length > 0));
     }
 
-    if (past.length > 0) {
-        const pastSection = document.createElement('div');
-        pastSection.className = 'sprint-past-section';
-        const pastTitle = document.createElement('div');
-        pastTitle.className = 'form-title';
-        pastTitle.style.cssText = 'font-size:14px;margin-bottom:12px;';
-        pastTitle.textContent = '📜 歷史衝刺';
-        pastSection.appendChild(pastTitle);
-        past.forEach(s => pastSection.appendChild(buildPastSprintCard(s)));
-        container.appendChild(pastSection);
-    }
+    // Past sprints section removed (duplicates active view)
 }
 
 function buildNewSprintForm(compact) {
@@ -262,6 +252,13 @@ function buildActiveSprintCard(sprint) {
     abandonBtn.onclick = () => abandonSprint(sprint.id);
     actions.appendChild(abandonBtn);
 
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn';
+    deleteBtn.style.cssText = 'font-size:11px;color:#ef4444;';
+    deleteBtn.textContent = '🗑 刪除';
+    deleteBtn.onclick = () => deleteSprint(sprint.id);
+    actions.appendChild(deleteBtn);
+
     card.appendChild(actions);
     return card;
 }
@@ -400,6 +397,26 @@ function abandonSprint(sprintId) {
     renderSprintSection();
     showToast('衝刺已放棄');
     updateSprintInNotion(sprint);
+}
+
+async function deleteSprint(sprintId) {
+    if (!confirm('確定要永久刪除這個衝刺嗎？（無法復原）')) return;
+    const pageId = sprintPageIndex[sprintId];
+    sprintData = sprintData.filter(s => s.id !== sprintId);
+    delete sprintPageIndex[sprintId];
+    saveSprintLocal();
+    localStorage.setItem('sprint_page_index', JSON.stringify(sprintPageIndex));
+    renderSprintSection();
+    showToast('已刪除衝刺');
+
+    // Archive in Notion (Notion API doesn't support permanent delete)
+    if (hasNotionDirect() && pageId) {
+        try {
+            await notionFetch('/pages/' + pageId, 'PATCH', { archived: true });
+        } catch (e) {
+            console.error('[Sprint] Notion archive error:', e);
+        }
+    }
 }
 
 function saveSprintLocal() {
