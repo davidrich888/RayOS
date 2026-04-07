@@ -697,10 +697,19 @@
             .category-total { font-size: 11px; }
             
             /* ===== PHYSIC SECTION ===== */
-            .physic-layout { grid-template-columns: 1fr !important; }
+            .physic-layout { grid-template-columns: 1fr !important; gap: 8px !important; }
             .physic-stats-row { grid-template-columns: repeat(5, 1fr) !important; gap: 4px !important; padding: 8px !important; }
             .physic-stats-row .stat-value { font-size: 18px; }
             .physic-stats-row .stat-label { font-size: 8px; letter-spacing: 0; }
+            #physic .monthly-table { font-size: 10px; }
+            #physic .monthly-table th, #physic .monthly-table td { padding: 6px 4px; }
+            #physic .monthly-table th:first-child, #physic .monthly-table td:first-child { min-width: 70px; }
+
+            /* ===== TRADING GOALS ===== */
+            .goal-milestones { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 4px; }
+            .goal-ms { padding: 5px 8px; font-size: 11px; gap: 6px; }
+            .goal-ms-check { width: 16px; height: 16px; font-size: 10px; }
+            .goal-ms-amt { font-size: 10px; }
             
             /* ===== DAILY SECTION ===== */
             .daily-grid { grid-template-columns: 1fr; }
