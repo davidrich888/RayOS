@@ -255,14 +255,14 @@ function buildActiveSprintCard(sprint) {
 
     const abandonBtn = document.createElement('button');
     abandonBtn.className = 'btn';
-    abandonBtn.style.cssText = 'font-size:11px;color:var(--text-dim);';
+    abandonBtn.style.cssText = 'font-size:10px;color:var(--text-dim);padding:4px 10px;';
     abandonBtn.textContent = '放棄衝刺';
     abandonBtn.onclick = () => abandonSprint(sprint.id);
     actions.appendChild(abandonBtn);
 
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'btn';
-    deleteBtn.style.cssText = 'font-size:11px;color:#ef4444;';
+    deleteBtn.style.cssText = 'font-size:10px;color:#ef4444;padding:4px 10px;';
     deleteBtn.textContent = '🗑 刪除';
     deleteBtn.onclick = () => deleteSprint(sprint.id);
     actions.appendChild(deleteBtn);

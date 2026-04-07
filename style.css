@@ -453,7 +453,7 @@
             transition: all 0.2s;
             border: 1px solid rgba(212,197,169,0.06);
             background: rgba(255,255,255,0.02);
-            padding: 8px 0;
+            padding: 12px 0;
         }
         .sprint-cell.checked {
             background: rgba(212,197,169,0.15);
@@ -479,7 +479,7 @@
             transform: scale(1.05);
         }
         .sprint-cell-num {
-            font-size: 10px;
+            font-size: 13px;
             color: var(--text-dim);
         }
         .sprint-cell.checked .sprint-cell-num {
@@ -494,13 +494,13 @@
             color: #ef4444;
         }
         .sprint-cell-check {
-            font-size: 16px;
+            font-size: 20px;
             color: var(--accent);
             font-weight: 700;
             position: absolute;
         }
         .sprint-cell-fail {
-            font-size: 16px;
+            font-size: 20px;
             color: #ef4444;
             font-weight: 700;
             position: absolute;
@@ -516,7 +516,7 @@
         }
         .sprint-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
             justify-content: flex-end;
             margin-top: 8px;
