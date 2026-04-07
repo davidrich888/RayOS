@@ -485,9 +485,23 @@
         .sprint-cell.checked .sprint-cell-num {
             color: var(--accent);
         }
+        .sprint-cell.failed {
+            background: rgba(239,68,68,0.15);
+            border-color: rgba(239,68,68,0.3);
+            box-shadow: 0 0 8px rgba(239,68,68,0.15);
+        }
+        .sprint-cell.failed .sprint-cell-num {
+            color: #ef4444;
+        }
         .sprint-cell-check {
             font-size: 16px;
             color: var(--accent);
+            font-weight: 700;
+            position: absolute;
+        }
+        .sprint-cell-fail {
+            font-size: 16px;
+            color: #ef4444;
             font-weight: 700;
             position: absolute;
         }

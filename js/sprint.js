@@ -198,16 +198,19 @@ function buildActiveSprintCard(sprint) {
         const dateStr = dayDate.toISOString().split('T')[0];
         const isFuture = i > dayIndex;
         const isToday = i === dayIndex;
-        const checked = days[dayNum] === true;
+        const dayVal = days[dayNum];
+        const checked = dayVal === true;
+        const failed = dayVal && typeof dayVal === 'object' && dayVal.fail;
 
         const cell = document.createElement('div');
         cell.className = 'sprint-cell';
         if (checked) cell.classList.add('checked');
+        else if (failed) cell.classList.add('failed');
         else if (isToday) cell.classList.add('today');
         else if (isFuture) cell.classList.add('future');
         else cell.classList.add('missed');
 
-        cell.title = 'Day ' + dayNum + ' — ' + dateStr;
+        cell.title = 'Day ' + dayNum + ' — ' + dateStr + (failed && dayVal.reason ? '\n原因：' + dayVal.reason : '');
 
         if (!isFuture) {
             const sid = sprint.id;
@@ -226,6 +229,11 @@ function buildActiveSprintCard(sprint) {
             checkSpan.className = 'sprint-cell-check';
             checkSpan.textContent = '✓';
             cell.appendChild(checkSpan);
+        } else if (failed) {
+            const failSpan = document.createElement('span');
+            failSpan.className = 'sprint-cell-fail';
+            failSpan.textContent = '✗';
+            cell.appendChild(failSpan);
         }
 
         grid.appendChild(cell);
@@ -363,7 +371,19 @@ function toggleSprintDay(sprintId, dayNum) {
     if (!sprint) return;
 
     if (!sprint.days) sprint.days = {};
-    sprint.days[dayNum] = !sprint.days[dayNum];
+    const current = sprint.days[dayNum];
+
+    if (!current && current !== false) {
+        // empty → ✓
+        sprint.days[dayNum] = true;
+    } else if (current === true) {
+        // ✓ → ✗ (prompt for reason)
+        const reason = prompt('失敗原因（可留空）：');
+        sprint.days[dayNum] = { fail: true, reason: reason || '' };
+    } else {
+        // ✗ → empty
+        delete sprint.days[dayNum];
+    }
 
     saveSprintLocal();
     renderSprintSection();
@@ -371,7 +391,7 @@ function toggleSprintDay(sprintId, dayNum) {
 
     let allDone = true;
     for (let i = 1; i <= 30; i++) {
-        if (!sprint.days[i]) { allDone = false; break; }
+        if (sprint.days[i] !== true) { allDone = false; break; }
     }
     if (allDone) {
         showToast('🎉 恭喜！30 天全部完成！');
