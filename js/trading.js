@@ -292,14 +292,31 @@ function saveGoalsToLocal() {
     localStorage.setItem('goals_page_index', JSON.stringify(goalsPageIndex));
 }
 
+// Custom sections support: each section = { label, count, amountEach, startNum }
+function getSections(goal) {
+    if (goal.sections && goal.sections.length > 0) return goal.sections;
+    // Backward compat: generate from exams + 12 payouts
+    const exams = goal.exams || 2;
+    return [
+        { label: '考試', count: exams, amountEach: 0, startNum: 1 },
+        { label: '出金', count: 12, amountEach: goal.target || 0, startNum: 1 }
+    ];
+}
+
+function getTotalMilestones(goal) {
+    return getSections(goal).reduce((sum, s) => sum + s.count, 0);
+}
+
 // Ensure milestones array exists (migration for old goals)
 function ensureMilestones(goal) {
-    const exams = goal.exams || 2;
-    const total = exams + 12;
+    const total = getTotalMilestones(goal);
     if (!goal.milestones || goal.milestones.length !== total) {
+        const old = goal.milestones || [];
         goal.milestones = new Array(total).fill(false);
+        for (let i = 0; i < Math.min(old.length, total); i++) {
+            goal.milestones[i] = old[i];
+        }
     }
-    if (!goal.exams) goal.exams = exams;
     if (!goal.order) goal.order = 0;
 }
 
@@ -433,42 +450,39 @@ function buildGoalCard(goal, isCompleted) {
     const grid = document.createElement('div');
     grid.className = 'goal-milestones';
 
-    // Exam milestones
-    for (let i = 0; i < exams; i++) {
-        const ms = document.createElement('div');
-        ms.className = 'goal-ms' + (goal.milestones[i] ? ' checked' : '');
-        ms.addEventListener('click', () => toggleMilestone(goal.id, i));
-        const check = document.createElement('span');
-        check.className = 'goal-ms-check';
-        check.textContent = goal.milestones[i] ? '✓' : '';
-        ms.appendChild(check);
-        const label = document.createElement('span');
-        label.className = 'goal-ms-label';
-        label.textContent = exams === 1 ? '考試通過' : '考試 ' + (i + 1);
-        ms.appendChild(label);
-        grid.appendChild(ms);
-    }
-
-    // Payout milestones
-    for (let i = 0; i < 12; i++) {
-        const idx = exams + i;
-        const ms = document.createElement('div');
-        ms.className = 'goal-ms' + (goal.milestones[idx] ? ' checked' : '');
-        ms.addEventListener('click', () => toggleMilestone(goal.id, idx));
-        const check = document.createElement('span');
-        check.className = 'goal-ms-check';
-        check.textContent = goal.milestones[idx] ? '✓' : '';
-        ms.appendChild(check);
-        const label = document.createElement('span');
-        label.className = 'goal-ms-label';
-        label.textContent = '出金 ×' + (i + 1);
-        ms.appendChild(label);
-        const amt = document.createElement('span');
-        amt.className = 'goal-ms-amt';
-        amt.textContent = formatMoney(payoutAmt * (i + 1));
-        ms.appendChild(amt);
-        grid.appendChild(ms);
-    }
+    // Render milestones by sections
+    const sections = getSections(goal);
+    let msIdx = 0;
+    sections.forEach(section => {
+        for (let i = 0; i < section.count; i++) {
+            const idx = msIdx++;
+            const ms = document.createElement('div');
+            ms.className = 'goal-ms' + (goal.milestones[idx] ? ' checked' : '');
+            ms.addEventListener('click', () => toggleMilestone(goal.id, idx));
+            const check = document.createElement('span');
+            check.className = 'goal-ms-check';
+            check.textContent = goal.milestones[idx] ? '✓' : '';
+            ms.appendChild(check);
+            const label = document.createElement('span');
+            label.className = 'goal-ms-label';
+            const num = (section.startNum || 1) + i;
+            if (section.count === 1) {
+                label.textContent = section.label;
+            } else if (section.amountEach > 0) {
+                label.textContent = section.label + ' ×' + num;
+            } else {
+                label.textContent = section.label + ' ' + num;
+            }
+            ms.appendChild(label);
+            if (section.amountEach > 0) {
+                const amt = document.createElement('span');
+                amt.className = 'goal-ms-amt';
+                amt.textContent = formatMoney(section.amountEach * num);
+                ms.appendChild(amt);
+            }
+            grid.appendChild(ms);
+        }
+    });
 
     card.appendChild(grid);
 
@@ -635,19 +649,31 @@ async function syncGoalsFromNotion(silent = false) {
             const completedDate = props['CompletedDate']?.date?.start || null;
             const order = props['Order']?.number || 0;
 
-            // Parse milestones from rich_text JSON
+            // Parse milestones from rich_text JSON (supports sections format)
             let milestones = null;
+            let sections = null;
             const msText = props['Milestones']?.rich_text?.map(r => r.plain_text).join('') || '';
             if (msText) {
-                try { milestones = JSON.parse(msText); } catch (e) {}
+                try {
+                    const parsed = JSON.parse(msText);
+                    if (Array.isArray(parsed)) {
+                        milestones = parsed;
+                    } else if (parsed && parsed.values) {
+                        milestones = parsed.values;
+                        sections = parsed.sections;
+                    }
+                } catch (e) {}
             }
-            if (!milestones || milestones.length !== exams + 12) {
-                milestones = new Array(exams + 12).fill(false);
+            const expectedTotal = sections
+                ? sections.reduce((sum, s) => sum + s.count, 0)
+                : exams + 12;
+            if (!milestones || milestones.length !== expectedTotal) {
+                milestones = new Array(expectedTotal).fill(false);
             }
 
             const id = 'goal_' + page.id.replace(/-/g, '');
             newIndex[id] = page.id;
-            newGoals.push({ id, title, target, current, exams, milestones, order, status, createdDate, completedDate });
+            newGoals.push({ id, title, target, current, exams, milestones, sections, order, status, createdDate, completedDate });
         }
 
         tradingGoals = newGoals;
@@ -672,7 +698,7 @@ async function createGoalInNotion(goal) {
             'Target': { number: goal.target },
             'Current': { number: goal.current },
             'Exams': { number: goal.exams },
-            'Milestones': { rich_text: [{ text: { content: JSON.stringify(goal.milestones) } }] },
+            'Milestones': { rich_text: [{ text: { content: JSON.stringify(goal.sections ? { sections: goal.sections, values: goal.milestones } : goal.milestones) } }] },
             'Order': { number: goal.order || 0 },
             'Status': { select: { name: goal.status } },
             'CreatedDate': { date: { start: goal.createdDate } }
@@ -701,7 +727,13 @@ async function updateGoalInNotion(id, updates) {
         if (updates.status) props['Status'] = { select: { name: updates.status } };
         if (updates.completedDate) props['CompletedDate'] = { date: { start: updates.completedDate } };
         if (updates.completedDate === null) props['CompletedDate'] = { date: null };
-        if (updates.milestones) props['Milestones'] = { rich_text: [{ text: { content: JSON.stringify(updates.milestones) } }] };
+        if (updates.milestones) {
+            const goal = tradingGoals.find(g => g.id === id);
+            const msData = goal && goal.sections
+                ? { sections: goal.sections, values: updates.milestones }
+                : updates.milestones;
+            props['Milestones'] = { rich_text: [{ text: { content: JSON.stringify(msData) } }] };
+        }
         await notionFetch('/pages/' + pageId, 'PATCH', { properties: props });
         console.log('[Goals] Updated in Notion:', pageId);
     } catch (e) {
