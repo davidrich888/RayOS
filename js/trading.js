@@ -285,6 +285,7 @@ let tradingGoals = JSON.parse(localStorage.getItem('trading_goals') || '[]');
 let goalsPageIndex = JSON.parse(localStorage.getItem('goals_page_index') || '{}');
 let goalsLoaded = true;
 let goalsSyncInProgress = false;
+let goalsUpdatePending = false; // Block sync-from-Notion while update-to-Notion is in flight
 let _goalsSortable = null;
 
 function saveGoalsToLocal() {
@@ -526,12 +527,17 @@ async function toggleMilestone(goalId, idx) {
 
     saveGoalsToLocal();
     renderGoals();
-    await updateGoalInNotion(goalId, {
-        current: goal.current,
-        status: goal.status,
-        completedDate: goal.completedDate,
-        milestones: goal.milestones
-    });
+    goalsUpdatePending = true;
+    try {
+        await updateGoalInNotion(goalId, {
+            current: goal.current,
+            status: goal.status,
+            completedDate: goal.completedDate,
+            milestones: goal.milestones
+        });
+    } finally {
+        goalsUpdatePending = false;
+    }
 }
 
 // === CRUD ===
@@ -621,7 +627,7 @@ async function syncGoalOrder() {
 
 async function syncGoalsFromNotion(silent = false) {
     if (!hasNotionDirect()) return;
-    if (goalsSyncInProgress) return;
+    if (goalsSyncInProgress || goalsUpdatePending) return;
     goalsSyncInProgress = true;
     if (!silent) showToast('正在從 Notion 同步目標...');
 
@@ -718,9 +724,16 @@ async function createGoalInNotion(goal) {
 }
 
 async function updateGoalInNotion(id, updates) {
-    if (!hasNotionDirect()) return;
+    if (!hasNotionDirect()) {
+        showToast('未設定 Notion Token，無法同步', true);
+        return;
+    }
     const pageId = goalsPageIndex[id];
-    if (!pageId) return;
+    if (!pageId) {
+        console.warn('[Goals] No Notion page ID for:', id);
+        showToast('目標尚未同步到 Notion，重新整理頁面試試', true);
+        return;
+    }
     try {
         const props = {};
         if (updates.current !== undefined) props['Current'] = { number: updates.current };
@@ -738,5 +751,6 @@ async function updateGoalInNotion(id, updates) {
         console.log('[Goals] Updated in Notion:', pageId);
     } catch (e) {
         console.error('[Goals] Update in Notion failed:', e);
+        showToast('Notion 同步失敗: ' + e.message, true);
     }
 }
