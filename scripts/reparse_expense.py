@@ -53,6 +53,10 @@ EXPENSE_CATEGORIES = {
         '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT',
         'YAKINIKU', 'IMAHAN', 'KAITENZUSHI', 'JAPAN MEAT',
         'SUTANDOJISEDAI',
+        'FOODCOOP', 'HANGETSU', 'GINGER FARM', 'KUA SA WAT',
+        'GOOD BY SICILY', 'YUZU HOUSE', 'MUUM MUUM',
+        'MILES STUTZERLENB', 'TANBAYA', 'UMEIYA',
+        '可不可',
     ],
     '旅行': [
         'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店',
@@ -65,23 +69,29 @@ EXPENSE_CATEGORIES = {
         'WAYSIM', '酷遊天',
         'FUSOU', 'SNOWBOARD', 'MURASAKISPORTS',
         'ISHIUCHI', 'RESORTCENTER', 'DONQUIJOTE', 'DON QUIJOTE',
+        'KASIKORN', 'HUAIKHWANG', 'PINK DOT NAEBA', 'RESTHAUSE',
+        'EDOGAWABASHI', 'AIS BY OUTLET',
     ],
-    '保險': ['國泰人壽', '保險'],
+    '保險': ['國泰人壽', '保險', 'TOKIO MARINE'],
     '健身': ['WORLDGY', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT'],
     '購物': [
         'PCHOME', '蝦皮', 'LALAPORT', '秀泰', 'GLOBAL MALL', '環球',
         '富邦MOMO', 'MOMO購物', '無印良品', 'MUJI', '金典', '勤美',
         'CONVERSE', '大魯閣', '台灣菸酒', '連加', 'HOLA',
         'TSUTAYA', 'BURTON', 'J STREAM', 'K區',
-        'WHSMITH', 'PIKZELS', 'CHANCHAO',
+        'WHSMITH', 'PIKZELS', 'CHANCHAO', '昇昌',
+        'DOPE & DIRTY', 'THE COACH', 'SABINA',
+        'DUFRY', '采盟', 'JAPANESE SOUVENIR',
     ],
     '生活': [
         '遠傳電信', '遠傳電', '電話費', '寶雅', '屈臣氏', '佑全', '三商藥局',
-        '小北百貨', '全家福', '寶島眼鏡', '昇昌', '燦坤', '年費',
-        'SALON',
+        '小北百貨', '全家福', '寶島眼鏡', '燦坤', '年費',
+        'SALON', 'WORLDVAPESHOP',
+        '歐萊德',
     ],
     '娛樂': ['威秀影城', 'GOOGLE*YOUTUBE', 'GOOGLE *YOUTUBE', 'GOOGLE*TV', 'LINE STO',
-             'DECATHLON', '迪卡儂', '大有運動'],
+             'DECATHLON', '迪卡儂', '大有運動',
+             'YASMIN NIGHT', 'CLOUD NINE'],
 }
 
 # Skip patterns - these are NOT expenses
@@ -92,8 +102,10 @@ FOREIGN_FEE_PATTERNS = ['國外交易手續費', '國外交易服務費']
 
 
 def normalize(text: str) -> str:
-    """Full-width to half-width + uppercase."""
+    """Full-width to half-width + uppercase, strip PUA chars."""
     result = unicodedata.normalize('NFKC', text)
+    # Strip Private Use Area characters (U+E000-U+F8FF) that break substring matching
+    result = ''.join(c for c in result if not ('\uE000' <= c <= '\uF8FF'))
     return result.upper().strip()
 
 
