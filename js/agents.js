@@ -157,6 +157,16 @@ const INFO_META = {
         flow: 'Auto Task 觸發 → Playwright 登入 Skool → 掃描牆 1+2 → 比對現有 → 截圖+抓資料 → WebP → 插入 storyData → git push → TG 通知',
         taskId: 'tft-wall-sync'
     },
+    'taishin-expense-sync': {
+        name: '台新帳單同步',
+        icon: '💳',
+        schedule: '每月 8 號（Auto Task）',
+        purpose: '自動從 Gmail 找到台新信用卡帳單 Email，用 Playwright（真 Chrome）登入帳單頁面，Claude Vision OCR 讀驗證碼，爬取交易明細，分類後更新 RayOS 支出追蹤數據。',
+        sources: ['Gmail（台新帳單信）', 'Playwright + Chrome（帳單頁面）', 'Claude Vision（驗證碼 OCR）'],
+        outputs: ['expense-transactions.json', 'data.js PRELOAD_EXPENSE_MONTHLY', 'Vercel 自動部署', 'TG 通知'],
+        flow: 'Auto Task 觸發 → Gmail 搜信 → 提取連結 → Playwright 登入（Chrome + Vision OCR）→ 爬取明細 → 分類 → 合併 JSON → 更新 data.js → git push → TG 通知',
+        taskId: 'taishin-expense-sync'
+    },
     'weekly-review-data': {
         name: 'Weekly Review Data',
         icon: '📊',

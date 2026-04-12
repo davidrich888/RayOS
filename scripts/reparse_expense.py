@@ -52,6 +52,7 @@ EXPENSE_CATEGORIES = {
         '鐵板燒', '食事', '壽司', 'ICHIRAN', 'UNATOTO', '冒煙的喬',
         '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT',
         'YAKINIKU', 'IMAHAN', 'KAITENZUSHI', 'JAPAN MEAT',
+        'SUTANDOJISEDAI',
     ],
     '旅行': [
         'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店',
