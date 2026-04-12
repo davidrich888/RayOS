@@ -1,5 +1,6 @@
 .DS_Store
 *.DS_Store
+.env
 index.html.backup
 .vercel
 n8n-telegram-daily-digest.json

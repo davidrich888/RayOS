@@ -32,13 +32,14 @@ EXPENSE_CATEGORIES = {
         'SCRIBD', 'NAME-CHEAP', 'NAMECHEAP', 'METACOPIER', 'FORMFLOW', '2CO.COM',
         'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'NOKIA',
         'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE',
+        'GOOGLE WORKSPACE', 'GOOGLE CHROME',
     ],
     'Apple': ['APPLE.COM/BILL', 'APPLE.COM'],
     '交通': [
         'UBER ', 'UBER*', 'GOGORO', 'MOBILE SUICA', 'SUICA', '台灣大車隊',
         'GRAB.COM', 'GRAB ',
         '加油站', '中油', '高鐵', '優步', 'CHARGESPOT', '城市車旅',
-        'ALPHA FLIGHT',
+        'ALPHA FLIGHT', 'JR EAST',
     ],
     '餐飲': [
         'UBEREATS', '優食', 'FOODPANDA', '7-ELEVEN', '全家便利', '萊爾富',
@@ -50,6 +51,7 @@ EXPENSE_CATEGORIES = {
         '統一超商', 'SEVEN-ELEVEN', 'FAMILYMART', 'MINISTOP',
         '鐵板燒', '食事', '壽司', 'ICHIRAN', 'UNATOTO', '冒煙的喬',
         '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT',
+        'YAKINIKU', 'IMAHAN', 'KAITENZUSHI', 'JAPAN MEAT',
     ],
     '旅行': [
         'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店',
@@ -60,6 +62,8 @@ EXPENSE_CATEGORIES = {
         'SUVARNA', 'AIR ARABIA', 'NARITA', 'EDELWEISS', 'SOUTH COAST',
         'SNOWIN', '滑雪', 'PRINCE HOTEL', 'SOLAMACHI', '行旅',
         'WAYSIM', '酷遊天',
+        'FUSOU', 'SNOWBOARD', 'MURASAKISPORTS',
+        'ISHIUCHI', 'RESORTCENTER', 'DONQUIJOTE', 'DON QUIJOTE',
     ],
     '保險': ['國泰人壽', '保險'],
     '健身': ['WORLDGY', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT'],
@@ -73,6 +77,7 @@ EXPENSE_CATEGORIES = {
     '生活': [
         '遠傳電信', '遠傳電', '電話費', '寶雅', '屈臣氏', '佑全', '三商藥局',
         '小北百貨', '全家福', '寶島眼鏡', '昇昌', '燦坤', '年費',
+        'SALON',
     ],
     '娛樂': ['威秀影城', 'GOOGLE*YOUTUBE', 'GOOGLE *YOUTUBE', 'GOOGLE*TV', 'LINE STO',
              'DECATHLON', '迪卡儂', '大有運動'],
