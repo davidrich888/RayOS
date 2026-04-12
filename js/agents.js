@@ -167,6 +167,16 @@ const INFO_META = {
         flow: 'Auto Task 觸發 → Gmail 搜信 → 提取連結 → Playwright 登入（Chrome + Vision OCR）→ 爬取明細 → 分類 → 合併 JSON → 更新 data.js → git push → TG 通知',
         taskId: 'taishin-expense-sync'
     },
+    'cathay-expense-sync': {
+        name: '國泰帳單同步',
+        icon: '💳',
+        schedule: '每月 18 號（Auto Task）',
+        purpose: '自動從 Gmail 下載國泰世華信用卡加密 PDF 帳單，用身分證字號解密，解析交易明細，分類後更新 RayOS 支出追蹤數據。',
+        sources: ['Gmail（國泰帳單 PDF）', 'gws CLI（附件下載）', 'pikepdf（PDF 解密）', 'pdfplumber（表格解析）'],
+        outputs: ['expense-transactions.json', 'data.js PRELOAD_EXPENSE_MONTHLY', 'Notion 月支出+刷卡明細', 'Vercel 自動部署', 'TG 通知'],
+        flow: 'Auto Task 觸發 → gws 搜 Gmail → 下載 PDF 附件 → 解密 → 解析明細 → 分類 → 合併 JSON → 更新 data.js → Notion 同步 → git push → TG 通知',
+        taskId: 'cathay-expense-sync'
+    },
     'weekly-review-data': {
         name: 'Weekly Review Data',
         icon: '📊',
