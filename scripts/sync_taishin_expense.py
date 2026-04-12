@@ -470,6 +470,215 @@ def regenerate_data_js(transactions: list[dict]):
         print(f"    {month}: NT${m['total']:,.0f} ({m['count']} txns)")
 
 
+# ==================== NOTION SYNC ====================
+
+NOTION_EXPENSE_DB = '69291a3a-230f-4483-811f-8072dae1b31c'
+NOTION_API = 'https://api.notion.com/v1'
+NOTION_VERSION = '2022-06-28'
+
+# Map script categories → Notion column names
+CATEGORY_TO_NOTION = {
+    'Prop Firm': 'Prop Firm',
+    '事業': 'Skool',
+    'AI/SaaS': 'AI/SaaS',
+    'Apple': 'Apple',
+    '交通': '交通',
+    '餐飲': '餐飲',
+    '旅行': '旅行',
+    '保險': '保險',
+    '健身': '健身',
+    '購物': '購物',
+    '生活': '生活',
+    '娛樂': '娛樂',
+    '國外手續費': '國外手續費',
+    '其他': '其他',
+}
+
+
+def sync_to_notion(all_transactions: list[dict]) -> int:
+    """Sync monthly expense aggregates to Notion DB.
+
+    Notion DB schema: 月份(title), 總支出, 筆數, + one column per category.
+    Creates new month rows or updates existing ones.
+    Returns number of rows created/updated.
+    """
+    token = os.environ.get('NOTION_TOKEN', '')
+    if not token:
+        print("  Notion sync skipped (no NOTION_TOKEN)")
+        return 0
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+        'Notion-Version': NOTION_VERSION,
+    }
+
+    # Aggregate all transactions by month
+    monthly = defaultdict(lambda: {'total': 0, 'count': 0, 'categories': defaultdict(int)})
+    for t in all_transactions:
+        if t['amount'] <= 0:
+            continue
+        m = monthly[t['month']]
+        m['total'] += t['amount']
+        m['count'] += 1
+        m['categories'][t['category']] += t['amount']
+
+    # Query existing Notion rows to find page IDs for update
+    existing_pages = {}  # month → page_id
+    cursor = None
+    while True:
+        body = {'page_size': 100}
+        if cursor:
+            body['start_cursor'] = cursor
+        resp = requests.post(
+            f'{NOTION_API}/databases/{NOTION_EXPENSE_DB}/query',
+            headers=headers, json=body,
+        )
+        if not resp.ok:
+            print(f"  Notion query error: {resp.status_code} {resp.text[:100]}")
+            return 0
+
+        data = resp.json()
+        for page in data.get('results', []):
+            props = page['properties']
+            title_arr = props.get('月份', {}).get('title', [])
+            month_text = title_arr[0].get('plain_text', '') if title_arr else ''
+            if month_text:
+                existing_pages[month_text] = page['id']
+
+        cursor = data.get('next_cursor')
+        if not cursor:
+            break
+
+    print(f"  Notion: {len(existing_pages)} existing month rows")
+
+    changed = 0
+    for month_key in sorted(monthly.keys()):
+        m = monthly[month_key]
+
+        # Build properties
+        props = {
+            '總支出': {'number': int(round(m['total']))},
+            '筆數': {'number': m['count']},
+        }
+        # Add each category column
+        for script_cat, notion_col in CATEGORY_TO_NOTION.items():
+            val = int(round(m['categories'].get(script_cat, 0)))
+            props[notion_col] = {'number': val if val > 0 else 0}
+
+        if month_key in existing_pages:
+            # Update existing row
+            page_id = existing_pages[month_key]
+            resp = requests.patch(
+                f'{NOTION_API}/pages/{page_id}',
+                headers=headers,
+                json={'properties': props},
+            )
+            if resp.ok:
+                changed += 1
+            else:
+                print(f"  Notion update error ({month_key}): {resp.status_code}")
+        else:
+            # Create new row
+            props['月份'] = {'title': [{'text': {'content': month_key}}]}
+            resp = requests.post(
+                f'{NOTION_API}/pages',
+                headers=headers,
+                json={'parent': {'database_id': NOTION_EXPENSE_DB}, 'properties': props},
+            )
+            if resp.ok:
+                changed += 1
+                print(f"  Notion: created new row for {month_key}")
+            else:
+                print(f"  Notion create error ({month_key}): {resp.status_code}")
+
+    print(f"  Notion: {changed} monthly rows created/updated")
+
+    # Also sync individual transactions to 刷卡明細 DB
+    detail_count = sync_transactions_to_notion(all_transactions, headers)
+    return changed + detail_count
+
+
+NOTION_DETAIL_DB = 'ca2878aa-4fa1-473a-8776-f4d8f9d16d59'
+
+
+def sync_transactions_to_notion(transactions: list[dict], headers: dict) -> int:
+    """Sync individual transactions to Notion 刷卡明細 DB.
+
+    Schema: 描述(title), 分類(select), 日期(date), 月份(rich_text), 金額(number)
+    Deduplicates by checking existing entries for the same months.
+    """
+    positive = [t for t in transactions if t['amount'] > 0]
+    months = set(t['month'] for t in positive)
+
+    # Query existing entries for dedup
+    existing_keys = set()
+    for month in months:
+        cursor = None
+        while True:
+            body = {
+                'filter': {'property': '月份', 'rich_text': {'equals': month}},
+                'page_size': 100,
+            }
+            if cursor:
+                body['start_cursor'] = cursor
+
+            resp = requests.post(
+                f'{NOTION_API}/databases/{NOTION_DETAIL_DB}/query',
+                headers=headers, json=body,
+            )
+            if not resp.ok:
+                print(f"  Notion detail query error: {resp.status_code}")
+                return 0
+
+            data = resp.json()
+            for page in data.get('results', []):
+                props = page['properties']
+                desc_arr = props.get('描述', {}).get('title', [])
+                desc = desc_arr[0].get('plain_text', '') if desc_arr else ''
+                amount = props.get('金額', {}).get('number', 0) or 0
+                date_obj = props.get('日期', {}).get('date') or {}
+                date_str = date_obj.get('start', '')
+                existing_keys.add(f"{date_str}|{desc}|{amount}")
+
+            cursor = data.get('next_cursor')
+            if not cursor:
+                break
+
+    print(f"  Notion detail: {len(existing_keys)} existing transactions")
+
+    # Create missing transactions
+    created = 0
+    for t in positive:
+        notion_date = t['date'].replace('/', '-')
+        key = f"{notion_date}|{t['desc']}|{t['amount']}"
+        if key in existing_keys:
+            continue
+
+        resp = requests.post(
+            f'{NOTION_API}/pages', headers=headers,
+            json={
+                'parent': {'database_id': NOTION_DETAIL_DB},
+                'properties': {
+                    '描述': {'title': [{'text': {'content': t['desc']}}]},
+                    '分類': {'select': {'name': t['category']}},
+                    '日期': {'date': {'start': notion_date}},
+                    '月份': {'rich_text': [{'text': {'content': t['month']}}]},
+                    '金額': {'number': t['amount']},
+                },
+            },
+        )
+        if resp.ok:
+            created += 1
+        else:
+            err = resp.json().get('message', '')[:60]
+            print(f"  Notion detail create error: {err}")
+            continue
+
+    print(f"  Notion detail: {created} new transactions created")
+    return created
+
+
 # ==================== TELEGRAM ====================
 
 def send_telegram(message: str):
@@ -574,7 +783,7 @@ def main():
     print(f"  Positive: {len(positive_txns)}, Negative/refund: {len(negative_txns)}")
 
     # Step 3: Merge with existing data
-    print("\n[3/4] Merging with existing transactions...")
+    print("\n[3/5] Merging with existing transactions...")
     existing = load_existing_transactions()
     print(f"  Existing: {len(existing)} transactions")
 
@@ -586,9 +795,15 @@ def main():
     positive_merged = [t for t in merged if t['amount'] > 0]
     regenerate_data_js(positive_merged)
 
-    # Step 4: Notify
-    print("\n[4/4] Sending notification...")
+    # Step 4: Sync to Notion (monthly aggregates)
+    print("\n[4/5] Syncing to Notion expense database...")
+    notion_created = sync_to_notion(merged)
+
+    # Step 5: Notify
+    print("\n[5/5] Sending notification...")
     summary = build_summary(new_txns)
+    if notion_created > 0:
+        summary += f"\n\n📝 Notion: {notion_created} 筆新增"
     print(f"\n{summary}")
     send_telegram(summary)
 
