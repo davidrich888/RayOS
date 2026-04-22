@@ -404,11 +404,25 @@ def merge_transactions(new_txns: list[dict]) -> tuple[list[dict], int]:
     if TRANSACTIONS_FILE.exists():
         existing = json.loads(TRANSACTIONS_FILE.read_text())
 
-    # Build dedup set
-    existing_keys = set()
+    # Detect and remove pre-existing duplicates
+    seen_keys: dict[tuple, int] = {}
+    pre_dupes = 0
+    clean_existing = []
     for t in existing:
         key = (t['date'], t['desc'], round(t['amount'], 2))
-        existing_keys.add(key)
+        if key in seen_keys:
+            pre_dupes += 1
+        else:
+            seen_keys[key] = len(clean_existing)
+            clean_existing.append(t)
+
+    if pre_dupes > 0:
+        print(f"  ⚠️ Found {pre_dupes} pre-existing duplicates in JSON — removed")
+        send_tg_alert(f"⚠️ 信用卡 JSON 發現 {pre_dupes} 筆重複資料，已自動清除")
+    existing = clean_existing
+
+    # Build dedup set
+    existing_keys = set(seen_keys.keys())
 
     added = 0
     for t in new_txns:
@@ -463,7 +477,7 @@ NOTION_EXPENSE_DB = '69291a3a-230f-4483-811f-8072dae1b31c'   # Monthly aggregate
 NOTION_DETAIL_DB = 'ca2878aa-4fa1-473a-8776-f4d8f9d16d59'    # Per-transaction
 
 CATEGORY_TO_NOTION = {
-    'Prop Firm': 'Prop Firm', '事業': 'Skool', 'AI/SaaS': 'AI/SaaS',
+    'Prop Firm': 'Prop Firm', '事業': '事業', 'AI/SaaS': 'AI/SaaS',
     'Apple': 'Apple', '交通': '交通', '餐飲': '餐飲', '旅行': '旅行',
     '保險': '保險', '健身': '健身', '購物': '購物', '生活': '生活',
     '娛樂': '娛樂', '約會': '約會', '國外手續費': '國外手續費', '其他': '其他',
@@ -537,24 +551,32 @@ def sync_transactions_to_notion(new_transactions: list[dict]):
     # Get affected months
     months = set(t['month'] for t in new_transactions)
 
-    # Query existing entries for those months to dedup
+    # Query existing entries for those months to dedup (with pagination)
     existing_keys = set()
     for month in months:
-        result = notion_request('POST', f'databases/{NOTION_DETAIL_DB}/query', {
-            'filter': {
-                'property': '月份',
-                'rich_text': {'equals': month},
-            },
-            'page_size': 100,
-        })
-        for page in result.get('results', []):
-            props = page.get('properties', {})
-            desc_arr = props.get('描述', {}).get('title', [])
-            amount = props.get('金額', {}).get('number', 0)
-            date_prop = props.get('日期', {}).get('date', {})
-            desc = desc_arr[0]['plain_text'] if desc_arr else ''
-            date = date_prop.get('start', '') if date_prop else ''
-            existing_keys.add((date, desc, amount))
+        start_cursor = None
+        while True:
+            body = {
+                'filter': {
+                    'property': '月份',
+                    'rich_text': {'equals': month},
+                },
+                'page_size': 100,
+            }
+            if start_cursor:
+                body['start_cursor'] = start_cursor
+            result = notion_request('POST', f'databases/{NOTION_DETAIL_DB}/query', body)
+            for page in result.get('results', []):
+                props = page.get('properties', {})
+                desc_arr = props.get('描述', {}).get('title', [])
+                amount = props.get('金額', {}).get('number', 0)
+                date_prop = props.get('日期', {}).get('date', {})
+                desc = desc_arr[0]['plain_text'] if desc_arr else ''
+                date = date_prop.get('start', '') if date_prop else ''
+                existing_keys.add((date, desc, amount))
+            if not result.get('has_more'):
+                break
+            start_cursor = result.get('next_cursor')
 
     print(f"  Notion detail: {len(existing_keys)} existing transactions")
 
@@ -582,6 +604,22 @@ def sync_transactions_to_notion(new_transactions: list[dict]):
 
 
 # ==================== TG NOTIFICATION ====================
+
+def send_tg_alert(message: str):
+    """Send an alert to Telegram when anomalies are detected."""
+    token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+    if not token or not chat_id:
+        return
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            data={'chat_id': chat_id, 'parse_mode': 'Markdown', 'text': message},
+            timeout=10,
+        )
+    except Exception:
+        pass
+
 
 def send_tg_notification(new_count: int, months_affected: set, total_by_month: dict):
     """Send Telegram notification with sync summary."""

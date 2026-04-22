@@ -1625,13 +1625,6 @@
   },
   {
     "date": "2025/10/11",
-    "desc": "國外交易手續費 -711X",
-    "amount": 3.0,
-    "category": "國外手續費",
-    "month": "2025/10"
-  },
-  {
-    "date": "2025/10/11",
     "desc": "7 11 XT EKKAMAI",
     "amount": 212.0,
     "category": "旅行",
@@ -2569,13 +2562,6 @@
     "month": "2025/10"
   },
   {
-    "date": "2025/10/23",
-    "desc": "WWW.GRAB.COMBANGKO",
-    "amount": 30.0,
-    "category": "交通",
-    "month": "2025/10"
-  },
-  {
     "date": "2025/10/24",
     "desc": "WWW.GRAB.COMBANGKO",
     "amount": 527.0,
@@ -2664,20 +2650,6 @@
     "desc": "WWW.GRAB.COMBANGKO",
     "amount": 36.0,
     "category": "交通",
-    "month": "2025/10"
-  },
-  {
-    "date": "2025/10/25",
-    "desc": "國外交易手續費 -JETTS",
-    "amount": 1.0,
-    "category": "國外手續費",
-    "month": "2025/10"
-  },
-  {
-    "date": "2025/10/25",
-    "desc": "JETTS FITNESS-VENDING-DON",
-    "amount": 85.0,
-    "category": "健身",
     "month": "2025/10"
   },
   {
@@ -4711,20 +4683,6 @@
     "month": "2025/11"
   },
   {
-    "date": "2025/11/18",
-    "desc": "TOPSTEPO5779 CHICAG",
-    "amount": 1605.0,
-    "category": "Prop Firm",
-    "month": "2025/11"
-  },
-  {
-    "date": "2025/11/18",
-    "desc": "國外交易服務費-1605.00",
-    "amount": 24.0,
-    "category": "國外手續費",
-    "month": "2025/11"
-  },
-  {
     "date": "2025/11/19",
     "desc": "WWW.GRAB.COMBANGKO",
     "amount": 157.0,
@@ -5973,13 +5931,6 @@
   {
     "date": "2025/12/05",
     "desc": "WWW.GRAB.COMBANGKO",
-    "amount": 26.0,
-    "category": "交通",
-    "month": "2025/12"
-  },
-  {
-    "date": "2025/12/05",
-    "desc": "WWW.GRAB.COMBANGKO",
     "amount": 300.0,
     "category": "交通",
     "month": "2025/12"
@@ -6783,13 +6734,6 @@
     "month": "2025/12"
   },
   {
-    "date": "2025/12/12",
-    "desc": "WWW.GRAB.COMBANGKO",
-    "amount": 5.0,
-    "category": "交通",
-    "month": "2025/12"
-  },
-  {
     "date": "2025/12/13",
     "desc": "國外交易手續費 -THEEM",
     "amount": 21.0,
@@ -7452,20 +7396,6 @@
     "desc": "統一超商-福林",
     "amount": 35.0,
     "category": "餐飲",
-    "month": "2025/12"
-  },
-  {
-    "date": "2025/12/31",
-    "desc": "TRADEIFYHOLLYW",
-    "amount": 6729.0,
-    "category": "Prop Firm",
-    "month": "2025/12"
-  },
-  {
-    "date": "2025/12/31",
-    "desc": "國外交易服務費-6729.00",
-    "amount": 101.0,
-    "category": "國外手續費",
     "month": "2025/12"
   },
   {
@@ -8324,20 +8254,6 @@
   },
   {
     "date": "2026/01/26",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 64.0,
-    "category": "國外手續費",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/26",
-    "desc": "TOPSTEP",
-    "amount": 4273.0,
-    "category": "Prop Firm",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/26",
     "desc": "優食-超吉飯桶大里益",
     "amount": 193.0,
     "category": "餐飲",
@@ -8368,20 +8284,6 @@
     "date": "2026/01/26",
     "desc": "TRADEIFY",
     "amount": 3511.0,
-    "category": "Prop Firm",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/27",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 44.0,
-    "category": "國外手續費",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/27",
-    "desc": "TOPSTEP",
-    "amount": 2939.0,
     "category": "Prop Firm",
     "month": "2026/01"
   },
@@ -8450,13 +8352,6 @@
   },
   {
     "date": "2026/01/28",
-    "desc": "PCHOME1",
-    "amount": 18111.0,
-    "category": "購物",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/28",
     "desc": "優步-飛狗衛星車隊",
     "amount": 220.0,
     "category": "交通",
@@ -8502,48 +8397,6 @@
     "desc": "燦坤3C-新大里店",
     "amount": 999.0,
     "category": "生活",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/29",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 44.0,
-    "category": "國外手續費",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/29",
-    "desc": "TOPSTEP",
-    "amount": 2936.0,
-    "category": "Prop Firm",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/29",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 44.0,
-    "category": "國外手續費",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/29",
-    "desc": "TOPSTEP",
-    "amount": 2936.0,
-    "category": "Prop Firm",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/29",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 44.0,
-    "category": "國外手續費",
-    "month": "2026/01"
-  },
-  {
-    "date": "2026/01/29",
-    "desc": "TOPSTEP",
-    "amount": 2936.0,
-    "category": "Prop Firm",
     "month": "2026/01"
   },
   {
@@ -8877,20 +8730,6 @@
   },
   {
     "date": "2026/02/05",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 44.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/05",
-    "desc": "TOPSTEP",
-    "amount": 2955.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/05",
     "desc": "優食-貳什拌物雞白",
     "amount": 648.0,
     "category": "餐飲",
@@ -8908,34 +8747,6 @@
     "desc": "STREAMYARD.COM",
     "amount": 1423.0,
     "category": "事業",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/05",
-    "desc": "國外交易手續費 -TRADEI",
-    "amount": 53.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/05",
-    "desc": "TRADEIFY",
-    "amount": 3520.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/05",
-    "desc": "國外交易手續費 -TRADEI",
-    "amount": 53.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/05",
-    "desc": "TRADEIFY",
-    "amount": 3520.0,
-    "category": "Prop Firm",
     "month": "2026/02"
   },
   {
@@ -9038,51 +8849,9 @@
   },
   {
     "date": "2026/02/06",
-    "desc": "LUCID TRADINGBASKIN",
-    "amount": 2473.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/06",
-    "desc": "國外交易服務費-2473.00",
-    "amount": 37.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/06",
-    "desc": "LUCID TRADINGBASKIN",
-    "amount": 2061.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/06",
-    "desc": "國外交易服務費-2061.00",
-    "amount": 31.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/06",
     "desc": "優食-日嚐所需健康餐盒A9739 NEW TA",
     "amount": 599.0,
     "category": "餐飲",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/06",
-    "desc": "LUCID TRADINGBASKIN",
-    "amount": 2473.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/06",
-    "desc": "國外交易服務費-2473.00",
-    "amount": 37.0,
-    "category": "國外手續費",
     "month": "2026/02"
   },
   {
@@ -9178,34 +8947,6 @@
   },
   {
     "date": "2026/02/09",
-    "desc": "FUNDEDNEXTO1347 LIMASS",
-    "amount": 2849.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/09",
-    "desc": "國外交易服務費-2849.00",
-    "amount": 42.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/09",
-    "desc": "FUNDEDNEXTO1347 LIMASS",
-    "amount": 2849.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/09",
-    "desc": "國外交易服務費-2849.00",
-    "amount": 42.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/09",
     "desc": "全家便利商店-大里新大益A9739 TAICHU",
     "amount": 318.0,
     "category": "餐飲",
@@ -9213,37 +8954,9 @@
   },
   {
     "date": "2026/02/09",
-    "desc": "FUNDEDNEXTO1347 LIMASS",
-    "amount": 2849.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/09",
-    "desc": "國外交易服務費-2849.00",
-    "amount": 42.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/09",
     "desc": "優食-POK?POK? A9739 NEW TA",
     "amount": 373.0,
     "category": "餐飲",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/09",
-    "desc": "FUNDEDNEXTO1347 LIMASS",
-    "amount": 2849.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/09",
-    "desc": "國外交易服務費-2849.00",
-    "amount": 42.0,
-    "category": "國外手續費",
     "month": "2026/02"
   },
   {
@@ -9278,34 +8991,6 @@
     "date": "2026/02/10",
     "desc": "國外交易服務費-3286.00",
     "amount": 49.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/10",
-    "desc": "E8 FUNDING LLCDALLAS",
-    "amount": 3286.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/10",
-    "desc": "國外交易服務費-3286.00",
-    "amount": 49.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/10",
-    "desc": "E8 FUNDING LLCDALLAS",
-    "amount": 2686.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/10",
-    "desc": "國外交易服務費-2686.00",
-    "amount": 40.0,
     "category": "國外手續費",
     "month": "2026/02"
   },
@@ -9408,20 +9093,6 @@
     "month": "2026/02"
   },
   {
-    "date": "2026/02/12",
-    "desc": "TOPSTEPO5779 CHICAG",
-    "amount": 3596.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/12",
-    "desc": "國外交易服務費-3596.00",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
     "date": "2026/02/13",
     "desc": "優食-SUBWAY大",
     "amount": 245.0,
@@ -9451,37 +9122,9 @@
   },
   {
     "date": "2026/02/13",
-    "desc": "TOPSTEPO5779 CHICAG",
-    "amount": 2520.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/13",
-    "desc": "國外交易服務費-2520.00",
-    "amount": 38.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/13",
     "desc": "寶雅生活館台中漢口二店A9739 TAICHU",
     "amount": 799.0,
     "category": "生活",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/13",
-    "desc": "TOPSTEPO5779 CHICAG",
-    "amount": 2520.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/13",
-    "desc": "國外交易服務費-2520.00",
-    "amount": 38.0,
-    "category": "國外手續費",
     "month": "2026/02"
   },
   {
@@ -9857,20 +9500,6 @@
   },
   {
     "date": "2026/02/23",
-    "desc": "LUCID TRADINGBASKIN",
-    "amount": 2051.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/23",
-    "desc": "國外交易服務費-2051.00",
-    "amount": 31.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/23",
     "desc": "優食-SUBWAY 大里A9739 NEW TA",
     "amount": 818.0,
     "category": "餐飲",
@@ -10094,20 +9723,6 @@
     "month": "2026/02"
   },
   {
-    "date": "2026/02/25",
-    "desc": "TOPSTEPO5779 CHICAG",
-    "amount": 3590.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/25",
-    "desc": "國外交易服務費-3590.00",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
     "date": "2026/02/26",
     "desc": "國外交易手續費 -PRINCE",
     "amount": 2.0,
@@ -10133,48 +9748,6 @@
     "desc": "ANTHROPIC",
     "amount": 634.0,
     "category": "AI/SaaS",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "國外交易手續費 -E8FUN",
-    "amount": 55.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "E8 FUNDING LLC",
-    "amount": 3665.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "國外交易手續費 -E8FUN",
-    "amount": 55.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "E8 FUNDING LLC",
-    "amount": 3665.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "國外交易手續費 -E8FUN",
-    "amount": 55.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "E8 FUNDING LLC",
-    "amount": 3665.0,
-    "category": "Prop Firm",
     "month": "2026/02"
   },
   {
@@ -10231,34 +9804,6 @@
     "desc": "ANTHROPIC",
     "amount": 633.0,
     "category": "AI/SaaS",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "LUCID TRADINGBASKIN",
-    "amount": 2854.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "國外交易服務費-2854.00",
-    "amount": 43.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "LUCID TRADINGBASKIN",
-    "amount": 2854.0,
-    "category": "Prop Firm",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/26",
-    "desc": "國外交易服務費-2854.00",
-    "amount": 43.0,
-    "category": "國外手續費",
     "month": "2026/02"
   },
   {
@@ -10501,13 +10046,6 @@
   },
   {
     "date": "2026/02/28",
-    "desc": "國外交易手續費 -PRINCE",
-    "amount": 3.0,
-    "category": "國外手續費",
-    "month": "2026/02"
-  },
-  {
-    "date": "2026/02/28",
     "desc": "PRINCE HOTELS",
     "amount": 177.0,
     "category": "旅行",
@@ -10567,34 +10105,6 @@
     "desc": "EDELWEISS",
     "amount": 1009.0,
     "category": "旅行",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/01",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/01",
-    "desc": "TOPSTEP",
-    "amount": 3590.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/01",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/01",
-    "desc": "TOPSTEP",
-    "amount": 3590.0,
-    "category": "Prop Firm",
     "month": "2026/03"
   },
   {
@@ -10704,76 +10214,6 @@
   },
   {
     "date": "2026/03/02",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "TOPSTEP",
-    "amount": 3590.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "TOPSTEP",
-    "amount": 3590.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "TOPSTEP",
-    "amount": 3590.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "TOPSTEP",
-    "amount": 3590.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 54.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
-    "desc": "TOPSTEP",
-    "amount": 3590.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/02",
     "desc": "國外交易手續費 -ISHIUC",
     "amount": 3.0,
     "category": "國外手續費",
@@ -10840,314 +10280,6 @@
     "desc": "APEXTRADERFUNDING",
     "amount": 933.0,
     "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 14.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 933.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "國外交易手續費 -EDELWE",
-    "amount": 2.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/03",
-    "desc": "EDELWEISS",
-    "amount": 142.0,
-    "category": "旅行",
     "month": "2026/03"
   },
   {
@@ -11425,34 +10557,6 @@
   },
   {
     "date": "2026/03/06",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 25.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "TOPSTEP",
-    "amount": 1636.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 25.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "TOPSTEP",
-    "amount": 1636.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
     "desc": "國外交易手續費 -APPLE.",
     "amount": 14.0,
     "category": "國外手續費",
@@ -11463,216 +10567,6 @@
     "desc": "APPLE.COM/BILL",
     "amount": 910.0,
     "category": "Apple",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "國外交易手續費 -APEXTR",
-    "amount": 47.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/06",
-    "desc": "APEXTRADERFUNDING",
-    "amount": 3149.0,
-    "category": "Prop Firm",
     "month": "2026/03"
   },
   {
@@ -11950,13 +10844,6 @@
   },
   {
     "date": "2026/03/09",
-    "desc": "國外交易手續費 -TOKYO",
-    "amount": 3.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/09",
     "desc": "TOKYO SOLAMACHI",
     "amount": 216.0,
     "category": "旅行",
@@ -12230,20 +11117,6 @@
   },
   {
     "date": "2026/03/13",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 25.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/13",
-    "desc": "TOPSTEP",
-    "amount": 1642.0,
-    "category": "Prop Firm",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/13",
     "desc": "國外交易手續費 -APPLE.",
     "amount": 34.0,
     "category": "國外手續費",
@@ -12310,20 +11183,6 @@
     "desc": "APPLE.COM/BILL",
     "amount": 990.0,
     "category": "Apple",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/13",
-    "desc": "國外交易手續費 -TOPSTE",
-    "amount": 25.0,
-    "category": "國外手續費",
-    "month": "2026/03"
-  },
-  {
-    "date": "2026/03/13",
-    "desc": "TOPSTEP",
-    "amount": 1642.0,
-    "category": "Prop Firm",
     "month": "2026/03"
   },
   {
