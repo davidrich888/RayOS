@@ -45,17 +45,20 @@ TRANSACTIONS_FILE = DATA_DIR / 'expense-transactions.json'
 DATA_JS_FILE = RAYOS_DIR / 'js' / 'data.js'
 ARCHIVE_DIR = RAYOS_DIR / 'archive' / 'expense-bills'
 ENV_FILE = RAYOS_DIR / '.env'
+WORKSPACE_ENV = RAYOS_DIR.parent / '.env'
+FUNDWITHRAY_ENV = RAYOS_DIR.parent / 'Project_FundwithRay' / '.env'
 
 # ==================== ENV ====================
 
 def load_env():
-    """Load .env file into os.environ."""
-    if ENV_FILE.exists():
-        for line in ENV_FILE.read_text().splitlines():
-            line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                key, val = line.split('=', 1)
-                os.environ.setdefault(key.strip(), val.strip())
+    """Load .env files into os.environ (RayOS first, then FundwithRay as fallback)."""
+    for env_path in [ENV_FILE, WORKSPACE_ENV, FUNDWITHRAY_ENV]:
+        if env_path.exists():
+            for line in env_path.read_text().splitlines():
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, val = line.split('=', 1)
+                    os.environ.setdefault(key.strip(), val.strip())
 
 load_env()
 
@@ -499,7 +502,7 @@ def sync_monthly_to_notion(all_transactions: list[dict]):
         m = monthly[month_key]
         properties = {
             '月份': {'title': [{'text': {'content': month_key}}]},
-            '總金額': {'number': int(round(m['total']))},
+            '總支出': {'number': int(round(m['total']))},
         }
         for cat, amount in m['categories'].items():
             notion_col = CATEGORY_TO_NOTION.get(cat, cat)
