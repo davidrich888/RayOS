@@ -86,6 +86,10 @@ EXPENSE_CATEGORIES = {
         'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE',
         'GOOGLE WORKSPACE', 'GOOGLE CHROME',
     ],
+    '約會': [
+        'TINDER', 'BUMBLE', 'COFFEE MEETS BAGEL', 'CMB ',
+        '浪琴文創', '薆悅', 'MOTEL', '汽車旅館',
+    ],
     'Apple': ['APPLE.COM/BILL', 'APPLE.COM'],
     '交通': [
         'UBER ', 'UBER*', 'GOGORO', 'MOBILE SUICA', 'SUICA', '台灣大車隊',
@@ -109,6 +113,8 @@ EXPENSE_CATEGORIES = {
         'GOOD BY SICILY', 'YUZU HOUSE', 'MUUM MUUM',
         'MILES STUTZERLENB', 'TANBAYA', 'UMEIYA',
         '可不可',
+        'SHAKE SHACK', '海底撈', '牛肉麵', 'SOGO(餐廳)', 'ASAKUSAGYUKATSU',
+        'KOPABORU', 'MAISON CREPERIE', 'C.STAND',
     ],
     '旅行': [
         'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店',
@@ -134,6 +140,7 @@ EXPENSE_CATEGORIES = {
         'WHSMITH', 'PIKZELS', 'CHANCHAO', '昇昌',
         'DOPE & DIRTY', 'THE COACH', 'SABINA',
         'DUFRY', '采盟', 'JAPANESE SOUVENIR',
+        'BIRKENSTOCK', 'DAIKOKU', 'DAISO', 'WASHINOSHINJUKU',
     ],
     '生活': [
         '遠傳電信', '遠傳電', '電話費', '寶雅', '屈臣氏', '佑全', '三商藥局',
@@ -459,7 +466,7 @@ CATEGORY_TO_NOTION = {
     'Prop Firm': 'Prop Firm', '事業': 'Skool', 'AI/SaaS': 'AI/SaaS',
     'Apple': 'Apple', '交通': '交通', '餐飲': '餐飲', '旅行': '旅行',
     '保險': '保險', '健身': '健身', '購物': '購物', '生活': '生活',
-    '娛樂': '娛樂', '國外手續費': '國外手續費', '其他': '其他',
+    '娛樂': '娛樂', '約會': '約會', '國外手續費': '國外手續費', '其他': '其他',
 }
 
 

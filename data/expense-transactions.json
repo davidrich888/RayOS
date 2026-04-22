@@ -12995,7 +12995,7 @@
     "date": "2026/04/01",
     "desc": "WASHINOSHINJUKUHONTEN",
     "amount": 11439.0,
-    "category": "其他",
+    "category": "購物",
     "month": "2026/04"
   },
   {
@@ -13009,7 +13009,7 @@
     "date": "2026/04/02",
     "desc": "DAIKOKU DRUG",
     "amount": 2126.0,
-    "category": "其他",
+    "category": "購物",
     "month": "2026/04"
   },
   {
@@ -13051,7 +13051,7 @@
     "date": "2026/04/02",
     "desc": "SHINJIYUKU KOPABORU/NFC",
     "amount": 847.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13093,7 +13093,7 @@
     "date": "2026/04/02",
     "desc": "ASAKUSAGYUKATSU BUNTEN",
     "amount": 685.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13107,7 +13107,7 @@
     "date": "2026/04/02",
     "desc": "C.STAND SHINJUKU",
     "amount": 585.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13121,7 +13121,7 @@
     "date": "2026/04/02",
     "desc": "BIRKENSTOCK SHINJUKU CO",
     "amount": 10109.0,
-    "category": "其他",
+    "category": "購物",
     "month": "2026/04"
   },
   {
@@ -13163,7 +13163,7 @@
     "date": "2026/04/03",
     "desc": "MAISON CREPERIE",
     "amount": 312.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13177,7 +13177,7 @@
     "date": "2026/04/03",
     "desc": "SHAKE SHACK SHIBUYA",
     "amount": 745.0,
-    "category": "旅行",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13219,7 +13219,7 @@
     "date": "2026/04/03",
     "desc": "SHAKE SHACK SHIBUYA",
     "amount": 827.0,
-    "category": "旅行",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13303,7 +13303,7 @@
     "date": "2026/04/04",
     "desc": "DAISO",
     "amount": 574.0,
-    "category": "其他",
+    "category": "購物",
     "month": "2026/04"
   },
   {
@@ -13450,14 +13450,14 @@
     "date": "2026/04/08",
     "desc": "海底撈火鍋台中廣三SO",
     "amount": 3890.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
     "date": "2026/04/08",
     "desc": "浪琴文創旅館",
     "amount": 880.0,
-    "category": "其他",
+    "category": "約會",
     "month": "2026/04"
   },
   {
@@ -13499,7 +13499,7 @@
     "date": "2026/04/11",
     "desc": "鮮道口福牛肉麵",
     "amount": 735.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13555,7 +13555,7 @@
     "date": "2026/04/13",
     "desc": "廣三SOGO(餐廳)",
     "amount": 2105.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13605,6 +13605,13 @@
     "desc": "ANTHROPIC",
     "amount": 679.0,
     "category": "AI/SaaS",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/22",
+    "desc": "按摩（轉帳）",
+    "amount": 12000,
+    "category": "生活",
     "month": "2026/04"
   }
 ]
