@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""One-time fix: clean Notion detail DB and re-sync from clean JSON.
+"""Fix: clean Notion detail DB and re-sync from clean JSON.
+
+Uses ThreadPoolExecutor for ~3x speedup while respecting Notion rate limits.
 
 Steps:
 1. Query ALL existing entries from Notion detail DB (with pagination)
-2. Archive all existing entries (to avoid duplicates)
-3. Re-create all entries from cleaned expense-transactions.json
-4. Also add '約會' select option if missing
+2. Archive all existing entries (parallel)
+3. Re-create all entries from cleaned expense-transactions.json (parallel)
 """
 
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import requests
@@ -44,28 +46,29 @@ HEADERS = {
     'Content-Type': 'application/json',
 }
 
-API_DELAY = 0.35  # ~3 req/sec to stay under Notion rate limit
+# Notion rate limit: 3 req/sec per integration
+MAX_WORKERS = 3
+API_DELAY = 0.12  # per-thread delay
 
 
 def notion_request(method: str, endpoint: str, data: dict = None) -> dict:
     """Make a Notion API request with retry on 429."""
     url = f"https://api.notion.com/v1/{endpoint}"
-    for attempt in range(3):
+    for attempt in range(5):
         resp = requests.request(method, url, headers=HEADERS, json=data, timeout=30)
         if resp.status_code == 429:
             wait = int(resp.headers.get('Retry-After', 2))
-            print(f"  Rate limited, waiting {wait}s...")
             time.sleep(wait)
             continue
         if resp.status_code >= 400:
-            print(f"  Notion API error {resp.status_code}: {resp.text[:200]}")
+            print(f"  ERR {resp.status_code}: {resp.text[:150]}")
         return resp.json() if resp.text else {}
     return {}
 
 
-def query_all_pages() -> list[dict]:
-    """Query ALL pages from Notion detail DB with pagination."""
-    all_pages = []
+def query_all_pages() -> list[str]:
+    """Query ALL page IDs from Notion detail DB."""
+    all_ids = []
     start_cursor = None
     page_num = 0
 
@@ -77,29 +80,31 @@ def query_all_pages() -> list[dict]:
 
         result = notion_request('POST', f'databases/{NOTION_DETAIL_DB}/query', body)
         pages = result.get('results', [])
-        all_pages.extend(pages)
-        print(f"  Page {page_num}: {len(pages)} results (total: {len(all_pages)})")
+        all_ids.extend(p['id'] for p in pages)
+        print(f"  Query page {page_num}: +{len(pages)} (total: {len(all_ids)})")
 
         if not result.get('has_more'):
             break
         start_cursor = result.get('next_cursor')
         time.sleep(API_DELAY)
 
-    return all_pages
+    return all_ids
 
 
-def archive_page(page_id: str):
-    """Archive (soft-delete) a Notion page."""
-    notion_request('PATCH', f'pages/{page_id}', {'archived': True})
+def archive_page(page_id: str) -> bool:
+    """Archive a single page. Returns True on success."""
     time.sleep(API_DELAY)
+    result = notion_request('PATCH', f'pages/{page_id}', {'archived': True})
+    return bool(result.get('id'))
 
 
-def create_detail_page(txn: dict):
-    """Create a detail entry in Notion."""
+def create_page(txn: dict) -> bool:
+    """Create a detail entry. Returns True on success."""
+    time.sleep(API_DELAY)
     notion_date = txn['date'].replace('/', '-')
     notion_cat = CATEGORY_TO_NOTION.get(txn['category'], txn['category'])
 
-    notion_request('POST', 'pages', {
+    result = notion_request('POST', 'pages', {
         'parent': {'database_id': NOTION_DETAIL_DB},
         'properties': {
             '描述': {'title': [{'text': {'content': txn['desc']}}]},
@@ -109,39 +114,51 @@ def create_detail_page(txn: dict):
             '金額': {'number': round(txn['amount'])},
         },
     })
-    time.sleep(API_DELAY)
+    return bool(result.get('id'))
 
 
 def main():
-    print("=== Notion Detail DB Cleanup ===")
-    print()
+    print("=== Notion Detail DB Rebuild (Threaded) ===\n")
 
     # 1. Load clean JSON
     txns = json.loads(TRANSACTIONS_FILE.read_text())
     print(f"JSON: {len(txns)} clean transactions")
 
-    # 2. Query all existing Notion entries
-    print("\nQuerying all Notion entries...")
-    existing_pages = query_all_pages()
-    print(f"Notion: {len(existing_pages)} existing entries")
+    # 2. Query all existing pages
+    print("\n[1/3] Querying existing entries...")
+    page_ids = query_all_pages()
+    print(f"Found {len(page_ids)} existing entries to archive")
 
-    # 3. Archive ALL existing entries
-    print(f"\nArchiving {len(existing_pages)} existing entries...")
-    for i, page in enumerate(existing_pages):
-        archive_page(page['id'])
-        if (i + 1) % 50 == 0:
-            print(f"  Archived {i + 1}/{len(existing_pages)}")
-    print(f"  Archived all {len(existing_pages)} entries")
+    # 3. Archive all existing entries (parallel)
+    if page_ids:
+        print(f"\n[2/3] Archiving {len(page_ids)} entries...")
+        archived = 0
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+            futures = {pool.submit(archive_page, pid): pid for pid in page_ids}
+            for f in as_completed(futures):
+                archived += 1
+                if archived % 100 == 0 or archived == len(page_ids):
+                    print(f"  Archived {archived}/{len(page_ids)}")
+        print(f"  Done archiving")
+    else:
+        print("\n[2/3] Nothing to archive")
 
-    # 4. Re-create all entries from clean JSON
-    print(f"\nCreating {len(txns)} entries from clean JSON...")
-    for i, txn in enumerate(txns):
-        create_detail_page(txn)
-        if (i + 1) % 50 == 0:
-            print(f"  Created {i + 1}/{len(txns)}")
-    print(f"  Created all {len(txns)} entries")
+    # 4. Re-create all from clean JSON (parallel)
+    print(f"\n[3/3] Creating {len(txns)} entries...")
+    created = 0
+    failed = 0
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+        futures = {pool.submit(create_page, txn): i for i, txn in enumerate(txns)}
+        for f in as_completed(futures):
+            if f.result():
+                created += 1
+            else:
+                failed += 1
+            done = created + failed
+            if done % 100 == 0 or done == len(txns):
+                print(f"  Created {created}/{len(txns)} (failed: {failed})")
 
-    print("\n=== Done ===")
+    print(f"\n=== Done: {created} created, {failed} failed ===")
 
 
 if __name__ == '__main__':
