@@ -122,7 +122,11 @@ EXPENSE_CATEGORIES = {
         'EDOGAWABASHI', 'AIS BY OUTLET',
     ],
     '保險': ['國泰人壽', '保險', 'TOKIO MARINE'],
-    '健身': ['WORLDGY', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT'],
+    '投資自己': [
+        'WORLDGY', 'WORLDGYM', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT',
+        'BOXING', '拳擊', 'UDEMY', 'COURSERA', 'MAVEN', 'COHORT', 'ACADEMY',
+    ],
+    '健身': [],
     '購物': [
         'PCHOME', '蝦皮', 'LALAPORT', '秀泰', 'GLOBAL MALL', '環球',
         '富邦MOMO', 'MOMO購物', '無印良品', 'MUJI', '金典', '勤美',
@@ -455,7 +459,7 @@ NOTION_DETAIL_DB = 'ca2878aa-4fa1-473a-8776-f4d8f9d16d59'    # Per-transaction
 CATEGORY_TO_NOTION = {
     'Prop Firm': 'Prop Firm', '事業': 'Skool', 'AI/SaaS': 'AI/SaaS',
     'Apple': 'Apple', '交通': '交通', '餐飲': '餐飲', '旅行': '旅行',
-    '保險': '保險', '健身': '健身', '購物': '購物', '生活': '生活',
+    '保險': '保險', '健身': '健身', '投資自己': '投資自己', '購物': '購物', '生活': '生活',
     '娛樂': '娛樂', '國外手續費': '國外手續費', '其他': '其他',
 }
 

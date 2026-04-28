@@ -121,7 +121,11 @@ EXPENSE_CATEGORIES = {
         'EDOGAWABASHI', 'AIS BY OUTLET',
     ],
     '保險': ['國泰人壽', '保險', 'TOKIO MARINE'],
-    '健身': ['WORLDGY', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT'],
+    '投資自己': [
+        'WORLDGY', 'WORLDGYM', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT',
+        'BOXING', '拳擊', 'UDEMY', 'COURSERA', 'MAVEN', 'COHORT', 'ACADEMY',
+    ],
+    '健身': [],
     '購物': [
         'PCHOME', '蝦皮', 'LALAPORT', '秀泰', 'GLOBAL MALL', '環球',
         '富邦MOMO', 'MOMO購物', '無印良品', 'MUJI', '金典', '勤美',
@@ -500,6 +504,7 @@ CATEGORY_TO_NOTION = {
     '旅行': '旅行',
     '保險': '保險',
     '健身': '健身',
+    '投資自己': '投資自己',
     '購物': '購物',
     '生活': '生活',
     '娛樂': '娛樂',
