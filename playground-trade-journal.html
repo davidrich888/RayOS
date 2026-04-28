@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Journal Playground</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a0a; color:#e0e0e0; font-family:'Inter',system-ui,sans-serif; }
+.container { display:flex; height:100vh; }
+
+/* Sidebar */
+.sidebar { width:300px; border-right:1px solid rgba(255,255,255,0.08); overflow-y:auto; flex-shrink:0; display:flex; flex-direction:column; }
+.main-panel { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* Header */
+.page-header { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.08); flex-shrink:0; }
+.page-header h2 { font-size:15px; color:#d4c5a9; font-weight:600; }
+.page-header p { font-size:11px; color:rgba(255,255,255,0.3); margin-top:3px; }
+
+/* Upload */
+.upload-area { padding:12px 16px; flex-shrink:0; }
+.upload-btn { background:rgba(212,197,169,0.08); border:1px dashed rgba(212,197,169,0.25); border-radius:6px; padding:14px; cursor:pointer; color:#d4c5a9; font-size:12px; width:100%; transition:background .15s; display:block; text-align:center; }
+.upload-btn:hover { background:rgba(212,197,169,0.12); }
+input[type="file"] { display:none; }
+
+/* Day group */
+.trade-list { flex:1; overflow-y:auto; }
+.day-group { border-bottom:1px solid rgba(255,255,255,0.06); }
+.day-header { padding:10px 16px; font-size:12px; font-weight:600; color:#d4c5a9; background:rgba(212,197,169,0.04); display:flex; justify-content:space-between; position:sticky; top:0; z-index:1; }
+.day-pnl.positive { color:#4ade80; }
+.day-pnl.negative { color:#f87171; }
+
+/* Trade row */
+.trade-row { padding:8px 16px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.03); transition:background .12s; display:flex; justify-content:space-between; align-items:center; }
+.trade-row:hover { background:rgba(255,255,255,0.03); }
+.trade-row.active { background:rgba(212,197,169,0.08); border-left:3px solid #d4c5a9; }
+.trade-info { display:flex; flex-direction:column; gap:1px; }
+.trade-time { font-size:10px; color:rgba(255,255,255,0.35); }
+.trade-side { font-size:11px; font-weight:600; }
+.trade-side.long { color:#4ade80; }
+.trade-side.short { color:#f87171; }
+.trade-pnl { font-size:13px; font-weight:600; }
+.trade-pnl.positive { color:#4ade80; }
+.trade-pnl.negative { color:#f87171; }
+
+/* Chart area */
+.chart-area { flex:1; min-height:0; position:relative; }
+.chart-area iframe, .chart-area .tradingview-widget-container { width:100%; height:100%; border:none; }
+
+/* Bottom panel */
+.bottom-panel { height:200px; flex-shrink:0; border-top:1px solid rgba(255,255,255,0.08); display:flex; overflow:hidden; }
+.bottom-panel.expanded { height:320px; }
+
+/* Stats section */
+.stats-section { flex:1; overflow-y:auto; padding:16px; display:flex; flex-wrap:wrap; gap:1px; background:rgba(255,255,255,0.04); }
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; width:100%; }
+.stat-cell { background:#0a0a0a; padding:10px 14px; }
+.stat-label { font-size:10px; color:rgba(255,255,255,0.35); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px; }
+.stat-value { font-size:16px; font-weight:600; }
+.stat-value.positive { color:#4ade80; }
+.stat-value.negative { color:#f87171; }
+.stat-value.accent { color:#d4c5a9; }
+
+/* Executions */
+.exec-section { width:400px; flex-shrink:0; border-left:1px solid rgba(255,255,255,0.08); overflow-y:auto; padding:12px 16px; }
+.exec-title { font-size:12px; font-weight:600; color:#d4c5a9; margin-bottom:8px; }
+.exec-table { width:100%; border-collapse:collapse; font-size:11px; }
+.exec-table th { text-align:left; padding:6px 8px; color:rgba(255,255,255,0.35); font-weight:500; border-bottom:1px solid rgba(255,255,255,0.08); font-size:10px; text-transform:uppercase; letter-spacing:0.4px; }
+.exec-table td { padding:6px 8px; border-bottom:1px solid rgba(255,255,255,0.04); }
+.entry-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; }
+.entry-dot.buy { background:#4ade80; }
+.entry-dot.sell { background:#f87171; }
+
+/* Day summary strip */
+.day-strip { display:flex; gap:24px; padding:0 16px 10px; align-items:center; }
+.day-strip-item { display:flex; flex-direction:column; gap:1px; }
+.day-strip-label { font-size:9px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:0.4px; }
+.day-strip-value { font-size:13px; font-weight:600; }
+
+/* Running PnL mini */
+.running-pnl-section { width:280px; flex-shrink:0; border-left:1px solid rgba(255,255,255,0.08); padding:12px 16px; display:flex; flex-direction:column; }
+.running-pnl-title { font-size:12px; font-weight:600; color:#d4c5a9; margin-bottom:8px; }
+.running-pnl-canvas { flex:1; }
+
+/* Toggle button */
+.panel-toggle { position:absolute; right:12px; top:-28px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:4px 4px 0 0; padding:4px 12px; font-size:10px; color:rgba(255,255,255,0.4); cursor:pointer; z-index:2; }
+.panel-toggle:hover { color:#d4c5a9; }
+
+/* Empty */
+.empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:rgba(255,255,255,0.25); font-size:13px; }
+.empty-state .icon { font-size:40px; margin-bottom:12px; }
+
+/* Resize handle */
+.resize-handle { height:4px; background:transparent; cursor:ns-resize; flex-shrink:0; }
+.resize-handle:hover { background:rgba(212,197,169,0.2); }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <div class="page-header">
+            <h2>📋 交易日誌</h2>
+            <p>TopStep / TradeZella CSV → TradingView Chart</p>
+        </div>
+        <div class="upload-area">
+            <label class="upload-btn" id="upload-label">
+                📂 上傳 CSV
+                <input type="file" id="csv-input" accept=".csv">
+            </label>
+        </div>
+        <div class="trade-list" id="trade-list"></div>
+    </div>
+    <div class="main-panel">
+        <!-- TradingView Chart -->
+        <div class="chart-area" id="chart-area">
+            <div id="tv-chart-container"></div>
+        </div>
+
+        <!-- Bottom: Stats + Executions + Running PnL -->
+        <div class="bottom-panel" id="bottom-panel" style="position:relative;">
+            <div class="stats-section" id="stats-section">
+                <div class="day-strip" id="day-strip"></div>
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-cell"><div class="stat-label">Net P&L</div><div class="stat-value" id="s-pnl">--</div></div>
+                    <div class="stat-cell"><div class="stat-label">Side</div><div class="stat-value" id="s-side">--</div></div>
+                    <div class="stat-cell"><div class="stat-label">Contracts</div><div class="stat-value" id="s-size">--</div></div>
+                    <div class="stat-cell"><div class="stat-label">Points</div><div class="stat-value" id="s-points">--</div></div>
+                    <div class="stat-cell"><div class="stat-label">Gross P&L</div><div class="stat-value" id="s-gross">--</div></div>
+                    <div class="stat-cell"><div class="stat-label">Fees</div><div class="stat-value" id="s-fees">--</div></div>
+                    <div class="stat-cell"><div class="stat-label">Duration</div><div class="stat-value" id="s-dur">--</div></div>
+                    <div class="stat-cell"><div class="stat-label">Entry → Exit</div><div class="stat-value accent" id="s-prices" style="font-size:13px;">--</div></div>
+                </div>
+            </div>
+            <div class="exec-section" id="exec-section">
+                <div class="exec-title">Executions</div>
+                <table class="exec-table"><thead><tr><th>Action</th><th>Time</th><th>Price</th><th>Qty</th><th>P&L</th></tr></thead><tbody id="exec-body"></tbody></table>
+            </div>
+            <div class="running-pnl-section">
+                <div class="running-pnl-title">Running P&L</div>
+                <canvas class="running-pnl-canvas" id="running-pnl-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== CSV DATA (preloaded) =====
+const RAW_CSV = `Id,ContractName,EnteredAt,ExitedAt,EntryPrice,ExitPrice,Fees,PnL,Size,Type,TradeDay,TradeDuration,Commissions
+2326713831,MYMM6,03/23/2026 20:12:59 +09:00,03/23/2026 20:14:15 +09:00,46974.000000000,47077.000000000,0.74000,51.500000000,1,Long,03/23/2026 00:00:00 -05:00,00:01:16.3460760,
+2326768293,MYMM6,03/23/2026 20:22:18 +09:00,03/23/2026 20:23:24 +09:00,46789.000000000,46767.000000000,0.74000,11.000000000,1,Short,03/23/2026 00:00:00 -05:00,00:01:06.5957260,
+2326768294,MYMM6,03/23/2026 20:22:18 +09:00,03/23/2026 20:23:24 +09:00,46793.000000000,46767.000000000,0.74000,13.000000000,1,Short,03/23/2026 00:00:00 -05:00,00:01:05.8750690,
+2326793526,MYMM6,03/23/2026 20:25:34 +09:00,03/23/2026 20:28:07 +09:00,46833.000000000,46636.000000000,3.70000,-492.500000000,5,Long,03/23/2026 00:00:00 -05:00,00:02:32.3418360,
+2326809547,MYMM6,03/23/2026 20:30:22 +09:00,03/23/2026 20:31:03 +09:00,46791.000000000,46895.000000000,0.74000,52.000000000,1,Long,03/23/2026 00:00:00 -05:00,00:00:40.6797450,
+2327687186,MYMM6,03/23/2026 22:37:47 +09:00,03/23/2026 22:41:13 +09:00,46604.000000000,46616.000000000,0.74000,6.000000000,1,Long,03/23/2026 00:00:00 -05:00,00:03:26.1942230,
+2327787220,MYMM6,03/23/2026 22:41:33 +09:00,03/23/2026 22:44:57 +09:00,46646.000000000,46685.000000000,0.74000,19.500000000,1,Long,03/23/2026 00:00:00 -05:00,00:03:24.1975800,
+2327787221,MYMM6,03/23/2026 22:41:49 +09:00,03/23/2026 22:44:57 +09:00,46679.000000000,46685.000000000,2.96000,12.000000000,4,Long,03/23/2026 00:00:00 -05:00,00:03:07.9087250,
+2327787222,MYMM6,03/23/2026 22:44:39 +09:00,03/23/2026 22:44:57 +09:00,46733.000000000,46685.000000000,0.74000,-24.000000000,1,Long,03/23/2026 00:00:00 -05:00,00:00:17.5617000,
+2328014617,MYMM6,03/23/2026 22:45:02 +09:00,03/23/2026 22:56:21 +09:00,46656.000000000,46703.000000000,0.74000,23.500000000,1,Long,03/23/2026 00:00:00 -05:00,00:11:19.0077370,
+2328014618,MYMM6,03/23/2026 22:45:38 +09:00,03/23/2026 22:56:21 +09:00,46673.000000000,46703.000000000,6.66000,135.000000000,9,Long,03/23/2026 00:00:00 -05:00,00:10:42.5729330,
+2328144802,MYMM6,03/23/2026 23:01:08 +09:00,03/23/2026 23:04:13 +09:00,46809.000000000,46767.000000000,3.70000,-105.000000000,5,Long,03/23/2026 00:00:00 -05:00,00:03:05.3919840,
+2328248752,MYMM6,03/23/2026 23:05:03 +09:00,03/23/2026 23:09:16 +09:00,46723.000000000,46749.000000000,3.70000,-65.000000000,5,Short,03/23/2026 00:00:00 -05:00,00:04:13.2598070,
+2328248753,MYMM6,03/23/2026 23:05:05 +09:00,03/23/2026 23:09:16 +09:00,46729.000000000,46749.000000000,3.70000,-50.000000000,5,Short,03/23/2026 00:00:00 -05:00,00:04:11.5720500,
+2328436149,MYMM6,03/23/2026 23:21:30 +09:00,03/23/2026 23:21:35 +09:00,46873.000000000,46876.000000000,0.74000,1.500000000,1,Long,03/23/2026 00:00:00 -05:00,00:00:05.6460530,
+2328436150,MYMM6,03/23/2026 23:21:30 +09:00,03/23/2026 23:21:35 +09:00,46874.000000000,46876.000000000,0.74000,1.000000000,1,Long,03/23/2026 00:00:00 -05:00,00:00:05.0937880,
+2328835842,MYMM6,03/23/2026 23:30:26 +09:00,03/23/2026 23:47:41 +09:00,46774.000000000,46914.000000000,7.40000,-700.000000000,10,Short,03/23/2026 00:00:00 -05:00,00:17:15.0431620,`;
+
+// ===== CONTRACT → TV SYMBOL MAP =====
+const SYMBOL_MAP = {
+    'MYMM6': 'CBOT:MYM1!',
+    'MYM': 'CBOT:MYM1!',
+    'YMM6': 'CBOT:YM1!',
+    'YM': 'CBOT:YM1!',
+    'ESM6': 'CME:ES1!',
+    'ES': 'CME:ES1!',
+    'NQM6': 'CME:NQ1!',
+    'NQ': 'CME:NQ1!',
+    'MYMM': 'CBOT:MYM1!',
+};
+
+function getSymbol(contract) {
+    // Try exact match first, then prefix match
+    if (SYMBOL_MAP[contract]) return SYMBOL_MAP[contract];
+    const prefix = contract.replace(/[A-Z]\d$/, '');
+    if (SYMBOL_MAP[prefix]) return SYMBOL_MAP[prefix];
+    return 'CBOT:MYM1!';
+}
+
+let allTrades = [];
+let selectedTradeIdx = -1;
+let tvWidget = null;
+
+function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const trades = [];
+    for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].split(',');
+        if (vals.length < 10) continue;
+        const entry = parseTimestamp(vals[2]);
+        const exit = parseTimestamp(vals[3]);
+        trades.push({
+            id: vals[0],
+            contract: vals[1].trim(),
+            enteredAt: entry,
+            exitedAt: exit,
+            entryPrice: parseFloat(vals[4]),
+            exitPrice: parseFloat(vals[5]),
+            fees: parseFloat(vals[6]),
+            pnl: parseFloat(vals[7]),
+            size: parseInt(vals[8]),
+            type: vals[9].trim(),
+            tradeDay: vals[10] ? vals[10].trim() : '',
+            duration: vals[11] ? vals[11].trim() : '',
+        });
+    }
+    return trades;
+}
+
+function parseTimestamp(s) {
+    s = s.trim();
+    const m = s.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})/);
+    if (!m) return new Date();
+    return new Date(parseInt(m[3]), parseInt(m[1])-1, parseInt(m[2]), parseInt(m[4]), parseInt(m[5]), parseInt(m[6]));
+}
+
+function formatTime(d) {
+    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0') + ':' + d.getSeconds().toString().padStart(2,'0');
+}
+
+function formatDuration(durStr) {
+    const m = durStr.match(/(\d{2}):(\d{2}):(\d{2})/);
+    if (!m) return durStr;
+    const h = parseInt(m[1]), min = parseInt(m[2]), sec = parseInt(m[3]);
+    if (h > 0) return h + 'h ' + min + 'm';
+    if (min > 0) return min + 'm ' + sec + 's';
+    return sec + 's';
+}
+
+function groupByDay(trades) {
+    const groups = {};
+    trades.forEach((t, idx) => {
+        const key = t.enteredAt.toISOString().split('T')[0];
+        if (!groups[key]) groups[key] = [];
+        groups[key].push({ ...t, _idx: idx });
+    });
+    return groups;
+}
+
+function renderTradeList() {
+    const el = document.getElementById('trade-list');
+    const groups = groupByDay(allTrades);
+    let html = '';
+    for (const [day, trades] of Object.entries(groups).sort((a,b) => b[0].localeCompare(a[0]))) {
+        const dayPnl = trades.reduce((s, t) => s + t.pnl, 0);
+        const pnlCls = dayPnl >= 0 ? 'positive' : 'negative';
+        const dayLabel = new Date(day + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+        html += '<div class="day-group">';
+        html += '<div class="day-header"><span>' + dayLabel + '</span><span class="day-pnl ' + pnlCls + '">' + (dayPnl >= 0 ? '+' : '') + '$' + dayPnl.toFixed(2) + '</span></div>';
+        trades.forEach(function(t) {
+            var pCls = t.pnl >= 0 ? 'positive' : 'negative';
+            var sCls = t.type.toLowerCase();
+            html += '<div class="trade-row" data-idx="' + t._idx + '" onclick="selectTrade(' + t._idx + ')">';
+            html += '<div class="trade-info"><span class="trade-side ' + sCls + '">' + t.type.toUpperCase() + ' ' + t.size + 'x ' + t.contract + '</span><span class="trade-time">' + formatTime(t.enteredAt) + ' → ' + formatTime(t.exitedAt) + '</span></div>';
+            html += '<div class="trade-pnl ' + pCls + '">' + (t.pnl >= 0 ? '+' : '') + '$' + t.pnl.toFixed(2) + '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+    }
+    el.innerHTML = html;
+}
+
+function selectTrade(idx) {
+    selectedTradeIdx = idx;
+    document.querySelectorAll('.trade-row').forEach(function(r) { r.classList.remove('active'); });
+    var row = document.querySelector('.trade-row[data-idx="' + idx + '"]');
+    if (row) row.classList.add('active');
+    var trade = allTrades[idx];
+    updateTVChart(trade);
+    updateStats(trade);
+    updateExecTable(trade);
+    drawRunningPnL(trade);
+}
+
+// ===== TRADINGVIEW CHART (Advanced Chart Widget) =====
+var currentSymbol = '';
+function updateTVChart(trade) {
+    var container = document.getElementById('tv-chart-container');
+    var symbol = getSymbol(trade.contract);
+
+    // Only reload if symbol changed
+    if (symbol === currentSymbol && container.querySelector('.tradingview-widget-container')) return;
+    currentSymbol = symbol;
+
+    // Clear old widget
+    container.innerHTML = '';
+
+    // Build widget using TradingView's official embed-widget-advanced-chart
+    var wrapper = document.createElement('div');
+    wrapper.className = 'tradingview-widget-container';
+    wrapper.style.height = '100%';
+    wrapper.style.width = '100%';
+
+    var inner = document.createElement('div');
+    inner.className = 'tradingview-widget-container__widget';
+    inner.style.height = '100%';
+    inner.style.width = '100%';
+    wrapper.appendChild(inner);
+
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+    script.async = true;
+    script.textContent = JSON.stringify({
+        'autosize': true,
+        'symbol': symbol,
+        'interval': '5',
+        'timezone': 'Asia/Taipei',
+        'theme': 'dark',
+        'style': '1',
+        'locale': 'zh_TW',
+        'allow_symbol_change': true,
+        'calendar': false,
+        'hide_volume': false,
+        'support_host': 'https://www.tradingview.com'
+    });
+    wrapper.appendChild(script);
+
+    container.appendChild(wrapper);
+}
+
+// ===== STATS PANEL =====
+function updateStats(trade) {
+    var pnlCls = trade.pnl >= 0 ? 'positive' : 'negative';
+    var sideCls = trade.type.toLowerCase() === 'long' ? 'positive' : 'negative';
+    var grossPnl = trade.pnl + trade.fees;
+    var points = Math.abs(trade.exitPrice - trade.entryPrice);
+
+    document.getElementById('s-pnl').textContent = (trade.pnl >= 0 ? '+' : '') + '$' + trade.pnl.toFixed(2);
+    document.getElementById('s-pnl').className = 'stat-value ' + pnlCls;
+    document.getElementById('s-side').textContent = trade.type.toUpperCase();
+    document.getElementById('s-side').className = 'stat-value ' + sideCls;
+    document.getElementById('s-size').textContent = trade.size;
+    document.getElementById('s-size').className = 'stat-value';
+    document.getElementById('s-points').textContent = points.toFixed(1);
+    document.getElementById('s-gross').textContent = (grossPnl >= 0 ? '+' : '') + '$' + grossPnl.toFixed(2);
+    document.getElementById('s-gross').className = 'stat-value ' + (grossPnl >= 0 ? 'positive' : 'negative');
+    document.getElementById('s-fees').textContent = '$' + trade.fees.toFixed(2);
+    document.getElementById('s-dur').textContent = formatDuration(trade.duration);
+    document.getElementById('s-prices').textContent = '$' + trade.entryPrice.toFixed(0) + ' → $' + trade.exitPrice.toFixed(0);
+
+    // Day strip
+    var tradeDay = trade.enteredAt.toISOString().split('T')[0];
+    var dayTrades = allTrades.filter(function(t) { return t.enteredAt.toISOString().split('T')[0] === tradeDay; });
+    var dayPnl = dayTrades.reduce(function(s,t) { return s + t.pnl; }, 0);
+    var dayWins = dayTrades.filter(function(t) { return t.pnl > 0; }).length;
+    var dayContracts = dayTrades.reduce(function(s,t) { return s + t.size; }, 0);
+    var dayPnlCls = dayPnl >= 0 ? 'positive' : 'negative';
+
+    document.getElementById('day-strip').innerHTML =
+        '<div class="day-strip-item"><div class="day-strip-label">Day P&L</div><div class="day-strip-value ' + dayPnlCls + '">' + (dayPnl >= 0?'+':'') + '$' + dayPnl.toFixed(2) + '</div></div>' +
+        '<div class="day-strip-item"><div class="day-strip-label">Trades</div><div class="day-strip-value">' + dayTrades.length + '</div></div>' +
+        '<div class="day-strip-item"><div class="day-strip-label">Win Rate</div><div class="day-strip-value">' + (dayWins/dayTrades.length*100).toFixed(0) + '%</div></div>' +
+        '<div class="day-strip-item"><div class="day-strip-label">Contracts</div><div class="day-strip-value">' + dayContracts + '</div></div>';
+}
+
+// ===== EXECUTIONS TABLE =====
+function updateExecTable(trade) {
+    var pCls = trade.pnl >= 0 ? 'positive' : 'negative';
+    var isLong = trade.type.toLowerCase() === 'long';
+    document.getElementById('exec-body').innerHTML =
+        '<tr><td><span class="entry-dot buy"></span>' + (isLong ? 'Buy' : 'Sell Short') + '</td><td>' + formatTime(trade.enteredAt) + '</td><td>$' + trade.entryPrice.toFixed(0) + '</td><td>' + trade.size + '</td><td>-</td></tr>' +
+        '<tr><td><span class="entry-dot sell"></span>' + (isLong ? 'Sell' : 'Buy Cover') + '</td><td>' + formatTime(trade.exitedAt) + '</td><td>$' + trade.exitPrice.toFixed(0) + '</td><td>' + trade.size + '</td><td class="' + pCls + '">' + (trade.pnl>=0?'+':'') + '$' + trade.pnl.toFixed(2) + '</td></tr>';
+}
+
+// ===== RUNNING PNL =====
+function drawRunningPnL(trade) {
+    var canvas = document.getElementById('running-pnl-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    var W = rect.width, H = rect.height;
+
+    var tradeDay = trade.enteredAt.toISOString().split('T')[0];
+    var dayTrades = allTrades.filter(function(t) { return t.enteredAt.toISOString().split('T')[0] === tradeDay; });
+    var sorted = dayTrades.slice().sort(function(a,b) { return a.exitedAt - b.exitedAt; });
+
+    var running = 0;
+    var points = [{ x:0, y:0 }];
+    sorted.forEach(function(t, i) {
+        running += t.pnl;
+        points.push({ x:i+1, y:running, isCurrent: t.id === trade.id });
+    });
+
+    var maxY = Math.max(0, Math.max.apply(null, points.map(function(p){return p.y;})));
+    var minY = Math.min(0, Math.min.apply(null, points.map(function(p){return p.y;})));
+    var rangeY = (maxY - minY) || 100;
+    var padY = rangeY * 0.2;
+
+    var cL=8, cR=W-8, cT=8, cB=H-16;
+    var cW=cR-cL, cH=cB-cT;
+
+    // Clear
+    ctx.clearRect(0,0,W,H);
+
+    // Zero line
+    var zY = cT + ((maxY+padY)/(rangeY+padY*2))*cH;
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(cL,zY); ctx.lineTo(cR,zY); ctx.stroke();
+    ctx.setLineDash([]);
+
+    var getX = function(i) { return cL + (i/(points.length-1))*cW; };
+    var getY = function(v) { return cT + ((maxY+padY-v)/(rangeY+padY*2))*cH; };
+
+    var lastPnl = points[points.length-1].y;
+
+    // Gradient fill
+    ctx.beginPath();
+    ctx.moveTo(getX(0), getY(0));
+    points.forEach(function(p,i) { ctx.lineTo(getX(i), getY(p.y)); });
+    ctx.lineTo(getX(points.length-1), getY(0));
+    ctx.lineTo(getX(0), getY(0));
+    ctx.closePath();
+    var grad = ctx.createLinearGradient(0, cT, 0, cB);
+    if (lastPnl >= 0) {
+        grad.addColorStop(0, 'rgba(74,222,128,0.15)');
+        grad.addColorStop(1, 'rgba(74,222,128,0)');
+    } else {
+        grad.addColorStop(0, 'rgba(248,113,113,0)');
+        grad.addColorStop(1, 'rgba(248,113,113,0.15)');
+    }
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    ctx.moveTo(getX(0), getY(0));
+    points.forEach(function(p,i) { ctx.lineTo(getX(i), getY(p.y)); });
+    ctx.strokeStyle = lastPnl >= 0 ? '#4ade80' : '#f87171';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Dots
+    points.forEach(function(p,i) {
+        if (i === 0) return;
+        var x = getX(i), y = getY(p.y);
+        ctx.beginPath();
+        ctx.arc(x, y, p.isCurrent ? 5 : 3, 0, Math.PI*2);
+        ctx.fillStyle = p.isCurrent ? '#d4c5a9' : (p.y >= 0 ? '#4ade80' : '#f87171');
+        ctx.fill();
+        if (p.isCurrent) {
+            ctx.strokeStyle = '#d4c5a9';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+    });
+
+    // End label
+    var last = points[points.length-1];
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '10px Inter, system-ui';
+    ctx.textAlign = 'right';
+    ctx.fillText('$' + last.y.toFixed(0), cR, getY(last.y) - 8);
+}
+
+// ===== CSV UPLOAD =====
+document.getElementById('csv-input').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        allTrades = parseCSV(ev.target.result);
+        renderTradeList();
+        document.getElementById('upload-label').textContent = '✅ ' + file.name + ' (' + allTrades.length + ' trades)';
+        if (allTrades.length > 0) selectTrade(0);
+    };
+    reader.readAsText(file);
+});
+
+// ===== INIT =====
+allTrades = parseCSV(RAW_CSV);
+renderTradeList();
+if (allTrades.length > 0) selectTrade(0);
+</script>
+</body>
+</html>

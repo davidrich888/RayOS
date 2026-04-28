@@ -408,12 +408,24 @@ def load_existing_transactions() -> list[dict]:
 
 def merge_transactions(existing: list[dict], new_txns: list[dict]) -> list[dict]:
     """Merge new transactions into existing, avoiding duplicates."""
-    # Build a set of existing transaction keys for dedup
-    existing_keys = set()
+    # Detect and remove pre-existing duplicates first
+    seen: dict[str, int] = {}
+    pre_dupes = 0
+    clean_existing = []
     for t in existing:
         key = f"{t['date']}|{t['desc']}|{t['amount']}"
-        existing_keys.add(key)
+        if key in seen:
+            pre_dupes += 1
+        else:
+            seen[key] = len(clean_existing)
+            clean_existing.append(t)
 
+    if pre_dupes > 0:
+        print(f"  ⚠️ Found {pre_dupes} pre-existing duplicates in JSON — removed")
+        send_tg_alert(f"⚠️ 信用卡 JSON 發現 {pre_dupes} 筆重複資料，已自動清除")
+    existing = clean_existing
+
+    existing_keys = set(seen.keys())
     added = 0
     for t in new_txns:
         key = f"{t['date']}|{t['desc']}|{t['amount']}"
@@ -487,6 +499,24 @@ def regenerate_data_js(transactions: list[dict]):
         print(f"    {month}: NT${m['total']:,.0f} ({m['count']} txns)")
 
 
+# ==================== TG ALERT ====================
+
+def send_tg_alert(message: str):
+    """Send an alert to Telegram when anomalies are detected."""
+    token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+    if not token or not chat_id:
+        return
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            data={'chat_id': chat_id, 'parse_mode': 'Markdown', 'text': message},
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
 # ==================== NOTION SYNC ====================
 
 NOTION_EXPENSE_DB = '69291a3a-230f-4483-811f-8072dae1b31c'
@@ -496,7 +526,7 @@ NOTION_VERSION = '2022-06-28'
 # Map script categories → Notion column names
 CATEGORY_TO_NOTION = {
     'Prop Firm': 'Prop Firm',
-    '事業': 'Skool',
+    '事業': '事業',
     'AI/SaaS': 'AI/SaaS',
     'Apple': 'Apple',
     '交通': '交通',
