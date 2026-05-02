@@ -321,48 +321,89 @@
         </section>
 
         <!-- BUSINESS -->
+        <style>
+            #business .biz-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            #business .biz-table th, #business .biz-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+            #business .biz-table th { background: var(--bg-elevated); color: var(--text-dim); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+            #business .biz-table td.num { text-align: right; font-family: 'SF Mono', monospace; }
+            #business .biz-table tbody tr:hover { background: rgba(212,197,169,0.04); }
+            #business .biz-kpi { padding: 16px; }
+            #business .biz-kpi .lbl { color: var(--text-dim); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+            #business .biz-kpi .val { font-size: 22px; font-weight: 600; color: var(--text); font-family: 'Cormorant Garamond', serif; }
+            #business .biz-kpi .delta { font-size: 11px; color: var(--text-dim); margin-top: 4px; font-family: 'SF Mono', monospace; }
+            #business .biz-kpi .delta.up { color: #4CAF50; }
+            #business .biz-kpi .delta.down { color: #ff8a80; }
+            #business .pace-cell { font-family: 'SF Mono', monospace; font-size: 12px; }
+            #business .biz-funnel-card .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 12px; }
+            #business .biz-funnel-card .row:last-child { border-bottom: none; }
+            #business .biz-funnel-card .row .k { color: var(--text-dim); }
+            #business .biz-funnel-card .row .v { color: var(--text); font-family: 'SF Mono', monospace; }
+            #business .biz-traffic-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; }
+            #business .biz-traffic-row .name { flex: 1; color: var(--text); }
+            #business .biz-traffic-row .pct { color: var(--text-dim); font-family: 'SF Mono', monospace; min-width: 50px; text-align: right; }
+            #business .biz-traffic-row .bar { width: 100px; height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
+            #business .biz-traffic-row .bar > i { display: block; height: 100%; background: var(--accent); }
+            #business .biz-status-ok { color: #4CAF50; }
+            #business .biz-status-fail { color: #ff8a80; }
+            #business .biz-status-skipped { color: var(--text-dim); }
+        </style>
         <section class="section" id="business">
             <div class="header">
-                <div><div class="page-label">Revenue & Growth</div><div class="page-title">Business</div></div>
+                <div><div class="page-label">DataOS — Auto Refresh 06:00 daily</div><div class="page-title">Business</div></div>
                 <div class="header-actions">
                     <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <button class="btn" onclick="showModal('business-modal')">+ Add Business</button>
+                    <span id="biz-data-ts" style="color:var(--text-dim);font-size:11px;font-family:'SF Mono',monospace;"></span>
+                    <button class="btn" onclick="loadBusinessMetrics(true)" title="Reload from JSON">🔄 Refresh</button>
                 </div>
             </div>
-            <div class="content">
-                <div class="business-selector" id="business-selector">
-                    <div class="business-chip active" data-biz="skool-free" onclick="selectBusiness('skool-free',this)">🎓 Skool Free</div>
-                    <div class="business-chip" data-biz="skool-paid" onclick="selectBusiness('skool-paid',this)">💎 Skool Paid</div>
-                    <div class="business-chip" data-biz="youtube" onclick="selectBusiness('youtube',this)">📺 YouTube</div>
-                </div>
-                <div class="wealth-layout">
-                    <div class="wealth-main">
-                        <div class="business-stats">
-                            <div class="business-stat"><div class="business-stat-value" id="biz-members">0</div><div class="business-stat-label">Members</div></div>
-                            <div class="business-stat"><div class="business-stat-value" id="biz-mrr">$0</div><div class="business-stat-label">MRR</div></div>
-                            <div class="business-stat"><div class="business-stat-value" id="biz-growth">0%</div><div class="business-stat-label">Growth</div></div>
-                            <div class="business-stat"><div class="business-stat-value" id="biz-ltv">$0</div><div class="business-stat-label">LTV</div></div>
-                        </div>
-                        <div class="chart-container">
-                            <div class="chart-header">
-                                <div class="chart-title" id="biz-chart-title">Growth</div>
-                                <div class="chart-tabs">
-                                    <button class="chart-tab active" onclick="setBizChart('members',this)">Members</button>
-                                    <button class="chart-tab" onclick="setBizChart('revenue',this)">Revenue</button>
-                                </div>
-                            </div>
-                            <div class="chart-wrapper"><canvas id="bizChart"></canvas></div>
-                        </div>
-                        <div class="form-section">
-                            <div class="form-title">📝 Update Metrics</div>
-                            <div class="form-row">
-                                <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="biz-date"></div>
-                                <div class="form-group"><label class="form-label">Members</label><input type="number" class="form-input" id="biz-members-input" placeholder="0"></div>
-                                <div class="form-group"><label class="form-label">Revenue (USD)</label><input type="number" class="form-input" id="biz-revenue-input" placeholder="0"></div>
-                            </div>
-                            <div class="form-actions"><button class="btn btn-accent" onclick="saveBizMetrics()">Save</button></div>
-                        </div>
+            <div class="content" id="biz-content">
+                <div id="biz-loading" style="text-align:center;padding:40px;color:var(--text-dim);">Loading DataOS…</div>
+
+                <div id="biz-dashboard" style="display:none;">
+                    <!-- Top KPIs -->
+                    <div class="section-label">Top KPIs</div>
+                    <div class="stats-row" id="biz-kpis" style="grid-template-columns:repeat(4,1fr);"></div>
+
+                    <!-- MTD Pacing -->
+                    <div class="section-label" style="margin-top:24px;">📅 Month-to-Date Pacing <span style="color:var(--text-dim);font-weight:400;font-size:12px;">— 北極星：本月跟上月同期比</span></div>
+                    <div id="biz-mtd-note" style="color:var(--text-dim);font-size:11px;margin-bottom:8px;"></div>
+                    <div class="card" style="overflow-x:auto;">
+                        <table class="biz-table" id="biz-mtd-table">
+                            <thead><tr><th>指標</th><th>本月 MTD</th><th>上月同期</th><th>Δ vs 上月</th><th>Pace</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
+
+                    <!-- Skool Funnel -->
+                    <div class="section-label" style="margin-top:24px;">Skool Funnel</div>
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);" id="biz-skool-cards"></div>
+
+                    <!-- Skool Traffic Sources -->
+                    <div class="section-label" style="margin-top:24px;">Skool Traffic Sources <span style="color:var(--text-dim);font-weight:400;font-size:12px;">— Top 8 (30d)</span></div>
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);" id="biz-traffic-cards"></div>
+
+                    <!-- YouTube Studio 28d -->
+                    <div class="section-label" style="margin-top:24px;">YouTube 28d (Studio Analytics)</div>
+                    <div class="card" style="overflow-x:auto;">
+                        <table class="biz-table" id="biz-yt28-table">
+                            <thead><tr><th>Channel</th><th>+Gained</th><th>−Lost</th><th>Net</th><th>Views 28d</th><th>Watch Hrs</th><th>Revenue</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Data Freshness -->
+                    <div class="section-label" style="margin-top:24px;">Data Freshness</div>
+                    <div class="card" style="overflow-x:auto;">
+                        <table class="biz-table" id="biz-freshness-table">
+                            <thead><tr><th>Source</th><th>Latest Run</th><th>Status</th><th>Records</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="biz-error" style="display:none;padding:24px;text-align:center;color:#ff8a80;">
+                    <div style="font-size:14px;margin-bottom:8px;">⚠️ Failed to load business-metrics.json</div>
+                    <div style="color:var(--text-dim);font-size:11px;">Run <code>bash scripts/update_data.sh</code> on Mac mini to regenerate.</div>
                 </div>
             </div>
         </section>

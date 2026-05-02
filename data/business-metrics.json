@@ -1,0 +1,229 @@
+{
+  "generated_at": "2026-05-02T20:39:25+00:00",
+  "kpis": {
+    "yt_fundwithray": {
+      "value": 5460,
+      "delta_7d": null
+    },
+    "yt_tft_story": {
+      "value": 661,
+      "delta_7d": null
+    },
+    "ig_fundwithray": {
+      "value": 11811,
+      "delta_7d": null
+    },
+    "skool_free": {
+      "value": 5662,
+      "delta_7d": null
+    },
+    "skool_tft": {
+      "value": 101,
+      "delta_7d": null
+    },
+    "tft_mrr": {
+      "value": 13255.48,
+      "delta_7d": null
+    },
+    "email_free": {
+      "value": 6030,
+      "delta_7d": null
+    },
+    "email_tft": {
+      "value": 151,
+      "delta_7d": null
+    },
+    "audience_total": {
+      "value": 23594,
+      "delta_7d": null
+    }
+  },
+  "mtd": {
+    "yt_main_subs": {
+      "this_mtd": 0,
+      "last_mtd": null,
+      "pace": null,
+      "kind": "int"
+    },
+    "ig_followers": {
+      "this_mtd": 10,
+      "last_mtd": null,
+      "pace": null,
+      "kind": "int"
+    },
+    "skool_free_members": {
+      "this_mtd": 1,
+      "last_mtd": null,
+      "pace": null,
+      "kind": "int"
+    },
+    "skool_tft_members": {
+      "this_mtd": 0,
+      "last_mtd": null,
+      "pace": null,
+      "kind": "int"
+    },
+    "tft_mrr": {
+      "this_mtd": 0.0,
+      "last_mtd": null,
+      "pace": null,
+      "kind": "money"
+    },
+    "days_into_month": 2
+  },
+  "skool_funnel": {
+    "free": {
+      "members": 5662,
+      "active_members": 5662,
+      "mrr_usd": 333.08,
+      "engagement_pct": 13.37,
+      "retention_pct": 100.0,
+      "conversion_rate": 23.29,
+      "visitors_30d": 2262,
+      "signups_30d": 173,
+      "new_mrr_30d_usd": null,
+      "date": "2026-05-02"
+    },
+    "tft": {
+      "members": 101,
+      "active_members": 101,
+      "mrr_usd": 13255.48,
+      "engagement_pct": 81.19,
+      "retention_pct": 92.65,
+      "conversion_rate": 0.0,
+      "visitors_30d": 225,
+      "signups_30d": 0,
+      "new_mrr_30d_usd": null,
+      "date": "2026-05-02"
+    }
+  },
+  "skool_traffic": {
+    "free": [
+      {
+        "source": "Direct",
+        "visits": 1640,
+        "percent": 66.18
+      },
+      {
+        "source": "YouTube",
+        "visits": 405,
+        "percent": 16.34
+      },
+      {
+        "source": "Instagram",
+        "visits": 225,
+        "percent": 9.08
+      },
+      {
+        "source": "Other",
+        "visits": 66,
+        "percent": 2.66
+      },
+      {
+        "source": "Skool network",
+        "visits": 53,
+        "percent": 2.14
+      },
+      {
+        "source": "fundwithray.com",
+        "visits": 40,
+        "percent": 1.61
+      },
+      {
+        "source": "Google",
+        "visits": 25,
+        "percent": 1.01
+      },
+      {
+        "source": "Threads",
+        "visits": 24,
+        "percent": 0.97
+      }
+    ],
+    "tft": [
+      {
+        "source": "Direct",
+        "visits": 132,
+        "percent": 51.97
+      },
+      {
+        "source": "Skool network",
+        "visits": 81,
+        "percent": 31.89
+      },
+      {
+        "source": "Affiliate",
+        "visits": 15,
+        "percent": 5.91
+      },
+      {
+        "source": "fundwithray.com",
+        "visits": 9,
+        "percent": 3.54
+      },
+      {
+        "source": "Facebook",
+        "visits": 5,
+        "percent": 1.97
+      },
+      {
+        "source": "Other",
+        "visits": 5,
+        "percent": 1.97
+      },
+      {
+        "source": "Instagram",
+        "visits": 4,
+        "percent": 1.57
+      },
+      {
+        "source": "YouTube",
+        "visits": 3,
+        "percent": 1.18
+      }
+    ]
+  },
+  "youtube_28d": {
+    "fundwithray": {
+      "subs_gained_28d": 250,
+      "subs_lost_28d": 51,
+      "views_28d": 29851,
+      "watch_hours_28d": 2108.9,
+      "est_revenue_usd_28d": null,
+      "date": "2026-05-02"
+    }
+  },
+  "youtube_totals": {},
+  "freshness": [
+    {
+      "source": "email",
+      "last_run": "2026-05-02T20:23:57.123618+00:00",
+      "status": "success",
+      "records": 3
+    },
+    {
+      "source": "ga4",
+      "last_run": "2026-05-02T20:23:58.458525+00:00",
+      "status": "skipped",
+      "records": 0
+    },
+    {
+      "source": "ig",
+      "last_run": "2026-05-02T20:24:05.159353+00:00",
+      "status": "success",
+      "records": 1
+    },
+    {
+      "source": "skool",
+      "last_run": "2026-05-02T20:25:58.129634+00:00",
+      "status": "success",
+      "records": 5810
+    },
+    {
+      "source": "youtube",
+      "last_run": "2026-05-02T20:26:04.804005+00:00",
+      "status": "success",
+      "records": 2
+    }
+  ]
+}
