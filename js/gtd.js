@@ -85,13 +85,18 @@ function renderGTDProjects(projects) {
     const el = document.getElementById('gtd-projects');
     if (!el) return;
 
-    if (!projects || projects.length === 0) {
-        el.innerHTML = '<div style="color:var(--text-dim);padding:12px;">No active projects</div>';
+    // Dashboard view: only show Task Audit Quick Wins (QW1-QW12).
+    // The other active projects still live in gtd/projects.md but aren't
+    // surfaced here — Task Audit is the canonical scoreboard.
+    const filtered = (projects || []).filter(p => /^QW\d+/.test(p.name));
+
+    if (filtered.length === 0) {
+        el.innerHTML = '<div style="color:var(--text-dim);padding:12px;">No Task Audit Quick Wins active</div>';
         return;
     }
 
     const byArea = {};
-    for (const p of projects) {
+    for (const p of filtered) {
         const area = p.area || 'Other';
         (byArea[area] = byArea[area] || []).push(p);
     }
