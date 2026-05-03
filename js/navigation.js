@@ -86,6 +86,9 @@ function go(section) {
         case 'business':
             if (typeof loadBusinessMetrics === 'function') loadBusinessMetrics(true);
             break;
+        case 'gtd':
+            if (typeof loadGTDSnapshot === 'function') loadGTDSnapshot(firstVisit);
+            break;
     }
 }
 

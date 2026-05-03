@@ -1,0 +1,155 @@
+{
+  "generated_at": "2026-05-03T17:41:52+00:00",
+  "summary": {
+    "active_projects": 18,
+    "next_actions": 12,
+    "waiting_for": 0,
+    "automation_pct": 15,
+    "automation_target": 30,
+    "automation_baseline_date": "2026-05-04"
+  },
+  "projects": [
+    {
+      "name": "IG Reels Caption 合規修改",
+      "area": "Main Business",
+      "status": "Active — 9 支 Reels 待手動修改",
+      "outcome": "9 支違規 Reels caption 全部換成新版（已備好），避免 Meta 再下架",
+      "next_action": "@me 打開 IG → 第一支 Reel → 套 `ig-account-compliance.md` 末尾 2026-04-22 修正版 caption"
+    },
+    {
+      "name": "Skool AI 批次轉錄",
+      "area": "Main Business",
+      "status": "Stuck — 架構重寫中",
+      "outcome": "TFT/炒股黑客 全 Skool 影片自動轉錄入庫",
+      "next_action": "@claude 重寫 `transcribe_overnight.py` 改用 yt-dlp + pre-filter（Loom 嵌入非 m3u8）。詳見 `Project_Skool_AI/HANDOFF_2026-04-15.md` + `tft-course-scrape.md`"
+    },
+    {
+      "name": "TFT 90天 Activation",
+      "area": "Main Business",
+      "status": "Active — Phase 2 Plan Drafted",
+      "outcome": "4-agent activation team 上線，TFT 學員 90 天 retention 系統化",
+      "next_action": "@me 答 `plans/2026-04-25-tft-activation-team.md` 5 個確認問題 → `/implement`"
+    },
+    {
+      "name": "Project 09 見證牆 — R2 + VSL",
+      "area": "Main Business",
+      "status": "Active — UI 完成，收尾中",
+      "outcome": "見證牆上線（R2 圖片託管 + VSL 影片正常播放）",
+      "next_action": "@claude 設定 R2 bucket 上傳測試圖片，確認 CDN 路徑"
+    },
+    {
+      "name": "TFT 英雄聯盟 Phase 2",
+      "area": "Main Business",
+      "status": "Active — 收尾",
+      "outcome": "帥Ray AI + 正式域名上線",
+      "next_action": "@claude 看 TFT League CLAUDE.md 待辦清單，挑下一個"
+    },
+    {
+      "name": "重新設計免費→付費轉化",
+      "area": "Main Business",
+      "status": "Active — P0 戰略",
+      "outcome": "找出炒股黑客 → 見證牆 → TFT 路徑的 conversion gap，新版漏斗設計",
+      "next_action": "@think 拆解三段路徑，列出每一段的 drop-off 點。Notion 頁面 `344629ef-6a13-8100-a598-c63d85ddd270`"
+    },
+    {
+      "name": "QW1 — C5 Hormozi 3-7 天關心學員（跨平台 nurture）",
+      "area": "Main Business",
+      "status": "Active — Quick Win Top 1（學員留存核心）",
+      "outcome": "學員加入後 3-7 天自動跨平台（Email + IG/Line drip）收到 AI 個性化關心訊息，不再靠 Skool DM 手動",
+      "next_action": "@claude 拆解 C5：列出新成員 trigger 來源（Skool API / ConvertKit tag）+ 跨平台 nurture sequence 草稿（Email × 2 + IG DM × 1）"
+    },
+    {
+      "name": "QW2 — D3 Weekly Review 修好",
+      "area": "Main Business",
+      "status": "Active — Quick Win Top 2（壞了沒看，投入小產出大）",
+      "outcome": "Weekly Review Auto Task 恢復穩定執行，每週 TG 推送內容/事業表現摘要",
+      "next_action": "@claude 跑 `/dx:gha` 或檢查 N8N weekly-review workflow log，找出壞掉的 node + 修復 + 補 health-check"
+    },
+    {
+      "name": "QW3 — O1+O2 N8N/Auto Task watchdog",
+      "area": "Main Business",
+      "status": "Active — Quick Win Top 3（讓所有自動化變得可信）",
+      "outcome": "N8N workflow 與 launchd Auto Task 任一壞掉 → 5 分鐘內 TG 警示 + 嘗試 auto-recover",
+      "next_action": "@claude 擴充 `rayos-health-check` 加 N8N execution status API + Auto Task last-run mtime 檢查 + 自動重試 logic"
+    },
+    {
+      "name": "QW4 — O4 API key/token 過期警示",
+      "area": "Main Business",
+      "status": "Active — Quick Win",
+      "outcome": "所有 API key/token expiry 集中追蹤，過期前 14 天 TG 警告",
+      "next_action": "@claude 建 `expiry-tracker` N8N workflow + Notion DB（key 名稱 / 平台 / 到期日 / 負責 owner）+ 14d 前 cron warn"
+    },
+    {
+      "name": "QW5 — Co1 TG 個人收件噪音降低",
+      "area": "Main Business",
+      "status": "Active — Quick Win（已記 feedback `tg_notification_noise`）",
+      "outcome": "Jarvis Bot 訊息去重 + 嚴重度分類 + 摘要，雜訊 -50%",
+      "next_action": "@claude 設計 TG 訊息分類規則（urgent / info / digest）+ dedup 邏輯 + 1 小時 batch summary"
+    },
+    {
+      "name": "QW6 — Co2 Email inbox 自動分類去廣告",
+      "area": "Main Business",
+      "status": "Active — Quick Win",
+      "outcome": "Gmail 自動標籤 + 廣告/促銷批次封存，每天只看真正重要的",
+      "next_action": "@claude 列 Gmail filter 規則 + AI 分類 prompt（透過 Gmail MCP），先做 ConvertKit/Notion/銀行 三類"
+    },
+    {
+      "name": "QW7 — Co6 IG 被禁第一時間警示",
+      "area": "Main Business",
+      "status": "Active — Quick Win（@fundwithray 已被處罰過 2 次）",
+      "outcome": "IG account status / 直播禁令 / 貼文下架 任一變化 → 5 分鐘內 TG 推送",
+      "next_action": "@claude 寫 IG health-check script（用 Apify IG actor 或 Graph API）+ scheduled 每 2 小時跑 + 異常 TG warn"
+    },
+    {
+      "name": "QW8 — St8 Brainstorm Capture inbox",
+      "area": "Main Business",
+      "status": "Active — Quick Win（Ray 亂記 Line 沒架構）",
+      "outcome": "TG inbox bot 收 Ray 隨手記 → AI 結構化 → 自動分類進 Notion（idea / task / context）",
+      "next_action": "@claude 設計 TG capture bot prompt + Notion 三 DB 路由邏輯（Content Idea / Inbox / project notes）"
+    },
+    {
+      "name": "QW9 — M3 YT 心智圖 → AI 結構/PPT",
+      "area": "Main Business",
+      "status": "Active — Quick Win（Ray 說花最久的事）",
+      "outcome": "YT 影片心智圖階段半自動化：AI 從 hook + outline 直接產 mind-map → PPT 草稿，Ray 只做 review",
+      "next_action": "@claude 看 100x system 既有 outline generator，新增 mind-map 結構輸出（節點 + 子節點 JSON）→ 接 PPT template"
+    },
+    {
+      "name": "QW10 — C12 高風險學員自動 outreach",
+      "area": "Main Business",
+      "status": "Active — Quick Win",
+      "outcome": "retention task 拉的 At-Risk 名單自動進 nurture sequence，不再等人手動接",
+      "next_action": "@claude 串接 retention task 輸出 → ConvertKit tag `at_risk` → 觸發 3 步 nurture（Email + IG DM + 1-on-1 邀請）"
+    },
+    {
+      "name": "QW11 — C13 成果牆數字自動更新",
+      "area": "Main Business",
+      "status": "Active — Quick Win",
+      "outcome": "見證牆 / 成果牆數字（出金累計、學員人數、MRR）每週自動 sync，不再靠 Ray 記得更新",
+      "next_action": "@claude 寫 sync script：Skool API 拉學員數 + DataOS 拉 MRR + R2/Notion 更新成果牆 JSON，每週日 22:00 排程"
+    },
+    {
+      "name": "QW12 — Co7 知識庫語意搜尋",
+      "area": "Main Business",
+      "status": "Active — Quick Win（找舊內容花很久）",
+      "outcome": "Skool / MEMORY / Notion / context 統一語意搜尋，CLI + TG 入口",
+      "next_action": "@claude 用 DataOS embedding pipeline + 既有 Notion content + memory/*.md 建 vector index，先做 CLI demo"
+    }
+  ],
+  "actions": {
+    "@claude": [
+      "**QW1 C5 Hormozi 3-7 天關心**：拆解 trigger 來源（Skool API / ConvertKit tag）+ 跨平台 nurture sequence 草稿（Email × 2 + IG DM × 1）",
+      "**QW2 D3 Weekly Review 修好**：跑 `/dx:gha` 或檢查 N8N weekly-review workflow log，找壞掉的 node + 修復 + 補 health-check",
+      "**QW3 O1+O2 watchdog**：擴充 `rayos-health-check` 加 N8N execution status API + Auto Task last-run mtime 檢查 + auto-recover",
+      "**QW4 O4 API key 過期警示**：建 `expiry-tracker` N8N workflow + Notion DB（key/平台/到期日/owner）+ 14d 前 cron warn",
+      "**QW5 Co1 TG 噪音降低**：設計 TG 訊息分類規則（urgent / info / digest）+ dedup 邏輯 + 1 小時 batch summary",
+      "**QW6 Co2 Email 自動分類**：列 Gmail filter 規則 + AI 分類 prompt（Gmail MCP），先做 ConvertKit/Notion/銀行 三類",
+      "**QW7 Co6 IG 被禁警示**：寫 IG health-check script（Apify IG actor / Graph API）+ 每 2 小時 scheduled + 異常 TG warn",
+      "**QW8 St8 Brainstorm Capture**：設計 TG capture bot prompt + Notion 三 DB 路由邏輯（Content Idea / Inbox / project notes）",
+      "**QW9 M3 心智圖 → AI 結構/PPT**：看 100x outline generator，新增 mind-map 結構輸出（節點 + 子節點 JSON）→ 接 PPT template",
+      "**QW10 C12 高風險學員 outreach**：串接 retention task 輸出 → ConvertKit tag `at_risk` → 3 步 nurture（Email + IG DM + 1-on-1 邀請）",
+      "**QW11 C13 成果牆自動更新**：寫 sync script（Skool API + DataOS MRR + R2/Notion 成果牆 JSON），每週日 22:00 排程",
+      "**QW12 Co7 知識庫語意搜尋**：用 DataOS embedding + 既有 Notion content + memory/*.md 建 vector index，先做 CLI demo"
+    ]
+  }
+}
