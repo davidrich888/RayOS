@@ -95,26 +95,43 @@ function renderGTDProjects(projects) {
         return;
     }
 
-    const byArea = {};
-    for (const p of filtered) {
-        const area = p.area || 'Other';
-        (byArea[area] = byArea[area] || []).push(p);
-    }
+    // Sort: active first (by QW number), then completed (by QW number)
+    const qwNum = p => parseInt((p.name.match(/^QW(\d+)/) || [])[1] || '999', 10);
+    const sorted = [...filtered].sort((a, b) => {
+        if (!!a.completed !== !!b.completed) return a.completed ? 1 : -1;
+        return qwNum(a) - qwNum(b);
+    });
 
-    const html = Object.entries(byArea).map(([area, items]) => `
+    const doneCount = sorted.filter(p => p.completed).length;
+
+    const html = `
         <div style="margin-bottom:20px;">
-            <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">${escapeHTML(area)} · ${items.length}</div>
-            ${items.map(p => `
-                <div class="card" style="padding:12px 14px;margin-bottom:8px;">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:4px;">
-                        <div style="font-weight:600;font-size:14px;">${escapeHTML(p.name)}</div>
-                        <div style="font-size:11px;color:var(--text-dim);white-space:nowrap;">${escapeHTML(p.status.split('—')[0]?.trim() || '')}</div>
+            <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+                Task Audit Quick Wins · ${sorted.length} <span style="color:var(--accent);">(${doneCount} done)</span>
+            </div>
+            ${sorted.map(p => {
+                const isDone = !!p.completed;
+                const cardStyle = isDone
+                    ? 'padding:12px 14px;margin-bottom:8px;opacity:0.5;background:rgba(212,197,169,0.04);'
+                    : 'padding:12px 14px;margin-bottom:8px;';
+                const nameStyle = isDone
+                    ? 'font-weight:600;font-size:14px;text-decoration:line-through;color:var(--text-dim);'
+                    : 'font-weight:600;font-size:14px;';
+                const badge = isDone
+                    ? `<span style="font-size:11px;color:var(--accent);white-space:nowrap;">✅ ${escapeHTML(p.completed_date || 'Done')}</span>`
+                    : `<span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">${escapeHTML(p.status.split('—')[0]?.trim() || 'Active')}</span>`;
+                return `
+                    <div class="card" style="${cardStyle}">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:4px;">
+                            <div style="${nameStyle}">${escapeHTML(p.name)}</div>
+                            ${badge}
+                        </div>
+                        ${!isDone && p.next_action ? `<div style="font-size:12px;color:var(--text-dim);line-height:1.5;">→ ${escapeHTML(p.next_action)}</div>` : ''}
                     </div>
-                    ${p.next_action ? `<div style="font-size:12px;color:var(--text-dim);line-height:1.5;">→ ${escapeHTML(p.next_action)}</div>` : ''}
-                </div>
-            `).join('')}
+                `;
+            }).join('')}
         </div>
-    `).join('');
+    `;
 
     el.innerHTML = html;
 }
