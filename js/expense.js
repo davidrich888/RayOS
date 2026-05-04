@@ -31,6 +31,7 @@ const CATEGORY_COLORS = {
     '國外手續費': '#c4a35a',
     '生活': '#91dcea',
     '娛樂': '#ff9ff3',
+    '薪資成本': '#9b8cdf',
     '其他': '#555'
 };
 
@@ -222,7 +223,7 @@ function renderEmptyExpense() {
 }
 
 // Fixed category column order
-const EXPENSE_COL_ORDER = ['Prop Firm', '事業', 'AI/SaaS', 'Apple', '交通', '餐飲', '旅行', '保險', '健身', '購物', '生活', '娛樂', '國外手續費', '其他'];
+const EXPENSE_COL_ORDER = ['Prop Firm', '事業', 'AI/SaaS', 'Apple', '交通', '餐飲', '旅行', '保險', '健身', '購物', '生活', '娛樂', '薪資成本', '國外手續費', '其他'];
 
 function renderExpenseTable(months) {
     const thStyle = 'padding:6px 8px;text-align:right;white-space:nowrap;font-size:11px;';
