@@ -129,14 +129,16 @@ function renderProjectGroup(title, projects, showDoneCount) {
             </div>
             ${projects.map(p => {
                 const isDone = !!p.completed;
+                const badgeText = (p.status || '').split('—')[0]?.trim() || 'Active';
+                const isTesting = !isDone && badgeText === '測試';
                 const cardStyle = isDone
                     ? 'padding:12px 14px;margin-bottom:8px;opacity:0.5;background:rgba(212,197,169,0.04);'
-                    : 'padding:12px 14px;margin-bottom:8px;';
+                    : isTesting
+                        ? 'padding:12px 14px 12px 12px;margin-bottom:8px;background:rgba(255,255,255,0.045);border-left:2px solid rgba(255,255,255,0.22);'
+                        : 'padding:12px 14px;margin-bottom:8px;';
                 const nameStyle = isDone
                     ? 'font-weight:600;font-size:14px;text-decoration:line-through;color:var(--text-dim);'
                     : 'font-weight:600;font-size:14px;';
-                const badgeText = (p.status || '').split('—')[0]?.trim() || 'Active';
-                const isTesting = badgeText === '測試';
                 const activeBadgeStyle = isTesting
                     ? 'font-size:11px;color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);padding:2px 8px;border-radius:4px;white-space:nowrap;letter-spacing:0.3px;'
                     : 'font-size:11px;color:var(--text-dim);white-space:nowrap;';
