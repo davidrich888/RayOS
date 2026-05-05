@@ -135,9 +135,14 @@ function renderProjectGroup(title, projects, showDoneCount) {
                 const nameStyle = isDone
                     ? 'font-weight:600;font-size:14px;text-decoration:line-through;color:var(--text-dim);'
                     : 'font-weight:600;font-size:14px;';
+                const badgeText = (p.status || '').split('—')[0]?.trim() || 'Active';
+                const isTesting = badgeText === '測試';
+                const activeBadgeStyle = isTesting
+                    ? 'font-size:11px;color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);padding:2px 8px;border-radius:4px;white-space:nowrap;letter-spacing:0.3px;'
+                    : 'font-size:11px;color:var(--text-dim);white-space:nowrap;';
                 const badge = isDone
                     ? `<span style="font-size:11px;color:var(--accent);white-space:nowrap;">✅ ${escapeHTML(p.completed_date || 'Done')}</span>`
-                    : `<span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">${escapeHTML((p.status || '').split('—')[0]?.trim() || 'Active')}</span>`;
+                    : `<span style="${activeBadgeStyle}">${escapeHTML(badgeText)}</span>`;
                 return `
                     <div class="card" style="${cardStyle}">
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:4px;">
