@@ -85,31 +85,49 @@ function renderGTDProjects(projects) {
     const el = document.getElementById('gtd-projects');
     if (!el) return;
 
-    // Dashboard view: only show Task Audit Quick Wins (QW1-QW12).
-    // The other active projects still live in gtd/projects.md but aren't
-    // surfaced here — Task Audit is the canonical scoreboard.
-    const filtered = (projects || []).filter(p => /^QW\d+/.test(p.name));
+    const all = projects || [];
+    const statusBadge = p => (p.status || '').split('—')[0]?.trim() || 'Active';
 
-    if (filtered.length === 0) {
-        el.innerHTML = '<div style="color:var(--text-dim);padding:12px;">No Task Audit Quick Wins active</div>';
+    // Group 1: 測試中 — entries whose Status badge starts with "測試"
+    const testing = all.filter(p => !p.completed && statusBadge(p) === '測試');
+
+    // Group 2: Task Audit Quick Wins (QW1-QW12) — canonical scoreboard
+    const qw = all.filter(p => /^QW\d+/.test(p.name));
+
+    if (testing.length === 0 && qw.length === 0) {
+        el.innerHTML = '<div style="color:var(--text-dim);padding:12px;">No projects in dashboard groups</div>';
         return;
     }
 
-    // Sort: active first (by QW number), then completed (by QW number)
-    const qwNum = p => parseInt((p.name.match(/^QW(\d+)/) || [])[1] || '999', 10);
-    const sorted = [...filtered].sort((a, b) => {
-        if (!!a.completed !== !!b.completed) return a.completed ? 1 : -1;
-        return qwNum(a) - qwNum(b);
-    });
+    let html = '';
 
-    const doneCount = sorted.filter(p => p.completed).length;
+    if (testing.length > 0) {
+        html += renderProjectGroup('測試中', testing, false);
+    }
 
-    const html = `
+    if (qw.length > 0) {
+        const qwNum = p => parseInt((p.name.match(/^QW(\d+)/) || [])[1] || '999', 10);
+        const qwSorted = [...qw].sort((a, b) => {
+            if (!!a.completed !== !!b.completed) return a.completed ? 1 : -1;
+            return qwNum(a) - qwNum(b);
+        });
+        html += renderProjectGroup('Task Audit Quick Wins', qwSorted, true);
+    }
+
+    el.innerHTML = html;
+}
+
+function renderProjectGroup(title, projects, showDoneCount) {
+    const doneCount = projects.filter(p => p.completed).length;
+    const headerSuffix = showDoneCount && doneCount > 0
+        ? ` <span style="color:var(--accent);">(${doneCount} done)</span>`
+        : '';
+    return `
         <div style="margin-bottom:20px;">
             <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
-                Task Audit Quick Wins · ${sorted.length} <span style="color:var(--accent);">(${doneCount} done)</span>
+                ${escapeHTML(title)} · ${projects.length}${headerSuffix}
             </div>
-            ${sorted.map(p => {
+            ${projects.map(p => {
                 const isDone = !!p.completed;
                 const cardStyle = isDone
                     ? 'padding:12px 14px;margin-bottom:8px;opacity:0.5;background:rgba(212,197,169,0.04);'
@@ -119,7 +137,7 @@ function renderGTDProjects(projects) {
                     : 'font-weight:600;font-size:14px;';
                 const badge = isDone
                     ? `<span style="font-size:11px;color:var(--accent);white-space:nowrap;">✅ ${escapeHTML(p.completed_date || 'Done')}</span>`
-                    : `<span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">${escapeHTML(p.status.split('—')[0]?.trim() || 'Active')}</span>`;
+                    : `<span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">${escapeHTML((p.status || '').split('—')[0]?.trim() || 'Active')}</span>`;
                 return `
                     <div class="card" style="${cardStyle}">
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:4px;">
@@ -132,8 +150,6 @@ function renderGTDProjects(projects) {
             }).join('')}
         </div>
     `;
-
-    el.innerHTML = html;
 }
 
 function renderGTDActions(actions) {
