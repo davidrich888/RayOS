@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-04T16:40:20+00:00",
+  "generated_at": "2026-05-05T17:38:44+00:00",
   "summary": {
-    "active_projects": 16,
+    "active_projects": 17,
     "completed_projects": 2,
     "next_actions": 10,
     "waiting_for": 0,
@@ -61,6 +61,15 @@
       "status": "Active — P0 戰略",
       "outcome": "找出炒股黑客 → 見證牆 → TFT 路徑的 conversion gap，新版漏斗設計",
       "next_action": "@think 拆解三段路徑，列出每一段的 drop-off 點。Notion 頁面 `344629ef-6a13-8100-a598-c63d85ddd270`",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "TFT 直播自動上架",
+      "area": "Main Business",
+      "status": "測試 — Step 2-9 寫完，等 Phase 0 spike + 真實直播 e2e（MEMORY #8）",
+      "outcome": "週一晚直播 → 自動產 Phase A draft 上 TG → 週二早 chapters draft → 自動發到 Skool 課程區",
+      "next_action": "@me (a) 跑 Phase 0 spike 驗 Skool selector；(b) 解 TG bot token 衝突；(c) `cp config/com.aios.tft-live-{phase-a,classroom-update}.plist + tg-inbox-poller.plist ~/Library/LaunchAgents/ && launchctl load -w`；(d) 2026-05-12（一）下場直播 e2e",
       "completed": false,
       "completed_date": null
     },
