@@ -59,11 +59,31 @@ module.exports = async function handler(req, res) {
 
         const token = await getAccessToken();
 
+        // Resolve "Body Progress" folder. Try parent-scoped first (more specific),
+        // then fall back to global search anywhere in Drive.
+        let bodyProgress = null;
         const moodboard = await findFolder(token, 'RayOS Moodboard');
-        if (!moodboard) return res.status(404).json({ error: "Folder 'RayOS Moodboard' not found in Drive" });
-
-        const bodyProgress = await findFolder(token, 'Body Progress', moodboard.id);
-        if (!bodyProgress) return res.status(404).json({ error: "Folder 'Body Progress' not found under 'RayOS Moodboard'" });
+        if (moodboard) {
+            bodyProgress = await findFolder(token, 'Body Progress', moodboard.id);
+        }
+        if (!bodyProgress) {
+            // Global fallback — single owner Drive, name 'Body Progress' is unique enough
+            bodyProgress = await findFolder(token, 'Body Progress');
+        }
+        if (!bodyProgress) {
+            // Diagnostic: show what root-level folders exist so the misnamed folder is obvious
+            const roots = await driveList(
+                token,
+                `'root' in parents and mimeType='${FOLDER_MIME}' and trashed=false`,
+                'files(id,name)'
+            );
+            return res.status(404).json({
+                error: "No 'Body Progress' folder found in Drive",
+                hint: "Expected: <any folder> / Body Progress / <YYYY-MM-DD or YYYYMMDD> / *.jpg",
+                rootFoldersFound: roots.map(f => f.name),
+                moodboardFound: !!moodboard
+            });
+        }
 
         const dateFolders = await driveList(
             token,
