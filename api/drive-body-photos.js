@@ -71,16 +71,27 @@ module.exports = async function handler(req, res) {
             bodyProgress = await findFolder(token, 'Body Progress');
         }
         if (!bodyProgress) {
-            // Diagnostic: show what root-level folders exist so the misnamed folder is obvious
+            // Diagnostic: list everything OAuth account can see (root + shared)
             const roots = await driveList(
                 token,
                 `'root' in parents and mimeType='${FOLDER_MIME}' and trashed=false`,
                 'files(id,name)'
             );
+            const allVisible = await driveList(
+                token,
+                `mimeType='${FOLDER_MIME}' and trashed=false`,
+                'files(id,name,parents,ownedByMe,shared)'
+            );
+            const about = await fetch(`${DRIVE_API}/about?fields=user`, {
+                headers: { Authorization: 'Bearer ' + token }
+            }).then(r => r.json()).catch(() => ({}));
             return res.status(404).json({
                 error: "No 'Body Progress' folder found in Drive",
                 hint: "Expected: <any folder> / Body Progress / <YYYY-MM-DD or YYYYMMDD> / *.jpg",
+                oauthAccount: about.user || null,
                 rootFoldersFound: roots.map(f => f.name),
+                allVisibleFoldersCount: allVisible.length,
+                allVisibleFolders: allVisible.slice(0, 50).map(f => ({ name: f.name, ownedByMe: f.ownedByMe, shared: f.shared })),
                 moodboardFound: !!moodboard
             });
         }
