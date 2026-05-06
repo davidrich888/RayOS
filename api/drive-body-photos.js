@@ -1,40 +1,58 @@
-// List body progress photos from Google Drive via OAuth refresh token.
-// Reads: RayOS Moodboard / Body Progress / [YYYY-MM-DD or YYYYMMDD] / *.jpg|png|heic
+// List body progress photos from Google Drive via Service Account.
+// Reads: <any folder shared with SA> / Body Progress / [YYYY-MM-DD or YYYYMMDD] / *.jpg|png|heic
 // Returns: { bodyProgress: { "YYYY-MM-DD": ["lh3_url", ...] }, count }
-// Env vars (shared with drive-upload.js): GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN
+//
+// Setup once:
+//   1. Share the 'Body Progress' folder (or its parent) with the SA email
+//      from GOOGLE_SA_KEY's client_email. Viewer permission is enough.
+//   2. Set Vercel env var GOOGLE_SA_KEY to the full JSON content of the SA key.
+
+const crypto = require('crypto');
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3';
 const FOLDER_MIME = 'application/vnd.google-apps.folder';
 
-async function getAccessToken() {
-    const res = await fetch('https://oauth2.googleapis.com/token', {
+async function getServiceAccountToken() {
+    const raw = process.env.GOOGLE_SA_KEY;
+    if (!raw) throw new Error('GOOGLE_SA_KEY env var not set');
+    let sa;
+    try { sa = JSON.parse(raw); }
+    catch (_) { throw new Error('GOOGLE_SA_KEY is not valid JSON'); }
+
+    const now = Math.floor(Date.now() / 1000);
+    const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+    const claim = Buffer.from(JSON.stringify({
+        iss: sa.client_email,
+        scope: 'https://www.googleapis.com/auth/drive.readonly',
+        aud: 'https://oauth2.googleapis.com/token',
+        exp: now + 3600,
+        iat: now
+    })).toString('base64url');
+    const unsigned = `${header}.${claim}`;
+    const signer = crypto.createSign('RSA-SHA256');
+    signer.update(unsigned);
+    const signature = signer.sign(sa.private_key, 'base64url');
+    const jwt = `${unsigned}.${signature}`;
+
+    const r = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-            client_id: process.env.GOOGLE_CLIENT_ID,
-            client_secret: process.env.GOOGLE_CLIENT_SECRET,
-            refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-            grant_type: 'refresh_token'
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            assertion: jwt
         })
     });
-    const data = await res.json();
-    if (!data.access_token) throw new Error('OAuth refresh failed: ' + JSON.stringify(data));
-    return data.access_token;
+    const j = await r.json();
+    if (!j.access_token) throw new Error('SA token exchange failed: ' + JSON.stringify(j));
+    return { token: j.access_token, email: sa.client_email };
 }
 
 async function driveList(token, q, fields = 'files(id,name,mimeType)') {
-    const url = `${DRIVE_API}/files?q=${encodeURIComponent(q)}&fields=${encodeURIComponent(fields)}&pageSize=200`;
+    const url = `${DRIVE_API}/files?q=${encodeURIComponent(q)}&fields=${encodeURIComponent(fields)}&pageSize=200&supportsAllDrives=true&includeItemsFromAllDrives=true`;
     const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
     if (!res.ok) throw new Error(`Drive list failed (${res.status}): ${await res.text()}`);
     const data = await res.json();
     return data.files || [];
-}
-
-async function findFolder(token, name, parentId) {
-    const parentClause = parentId ? `and '${parentId}' in parents ` : '';
-    const q = `name='${name.replace(/'/g, "\\'")}' and mimeType='${FOLDER_MIME}' ${parentClause}and trashed=false`;
-    const files = await driveList(token, q);
-    return files[0] || null;
 }
 
 // "20260206" -> "2026-02-06"; "2026-2-6" -> "2026-02-06"; passthrough otherwise
@@ -53,50 +71,45 @@ module.exports = async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_REFRESH_TOKEN) {
-            return res.status(500).json({ error: 'Server missing Google OAuth config' });
-        }
+        const { token, email } = await getServiceAccountToken();
 
-        const token = await getAccessToken();
-
-        // Resolve "Body Progress" folder. Try parent-scoped first (more specific),
-        // then fall back to global search anywhere in Drive.
-        let bodyProgress = null;
-        const moodboard = await findFolder(token, 'RayOS Moodboard');
-        if (moodboard) {
-            bodyProgress = await findFolder(token, 'Body Progress', moodboard.id);
-        }
-        if (!bodyProgress) {
-            // Global fallback — single owner Drive, name 'Body Progress' is unique enough
-            bodyProgress = await findFolder(token, 'Body Progress');
-        }
-        if (!bodyProgress) {
-            // Diagnostic: list everything OAuth account can see (root + shared)
-            const roots = await driveList(
-                token,
-                `'root' in parents and mimeType='${FOLDER_MIME}' and trashed=false`,
-                'files(id,name)'
-            );
-            const allVisible = await driveList(
+        // Find 'Body Progress' folder accessible to the SA (anywhere it's shared).
+        const candidates = await driveList(
+            token,
+            `name='Body Progress' and mimeType='${FOLDER_MIME}' and trashed=false`,
+            'files(id,name,parents)'
+        );
+        if (candidates.length === 0) {
+            // Diagnostic: show what folders the SA can see at all
+            const visible = await driveList(
                 token,
                 `mimeType='${FOLDER_MIME}' and trashed=false`,
-                'files(id,name,parents,ownedByMe,shared)'
+                'files(id,name)'
             );
-            const about = await fetch(`${DRIVE_API}/about?fields=user`, {
-                headers: { Authorization: 'Bearer ' + token }
-            }).then(r => r.json()).catch(() => ({}));
-            const tokenInfo = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`)
-                .then(r => r.json()).catch(() => ({}));
             return res.status(404).json({
-                error: "No 'Body Progress' folder found in Drive",
-                hint: "Expected: <any folder> / Body Progress / <YYYY-MM-DD or YYYYMMDD> / *.jpg",
-                oauthAccount: about.user || null,
-                tokenScope: tokenInfo.scope || tokenInfo,
-                rootFoldersFound: roots.map(f => f.name),
-                allVisibleFoldersCount: allVisible.length,
-                allVisibleFolders: allVisible.slice(0, 50).map(f => ({ name: f.name, ownedByMe: f.ownedByMe, shared: f.shared })),
-                moodboardFound: !!moodboard
+                error: "No 'Body Progress' folder shared with service account",
+                hint: `Right-click the 'RayOS Moodboard' (or 'Body Progress') folder in Drive → Share → add ${email} as Viewer`,
+                serviceAccountEmail: email,
+                visibleFoldersCount: visible.length,
+                visibleFolders: visible.slice(0, 30).map(f => f.name)
             });
+        }
+
+        // If multiple matches, prefer one whose parent is 'RayOS Moodboard'; else first.
+        let bodyProgress = candidates[0];
+        if (candidates.length > 1) {
+            for (const c of candidates) {
+                const parents = c.parents || [];
+                for (const pid of parents) {
+                    const parentRes = await fetch(`${DRIVE_API}/files/${pid}?fields=name`, {
+                        headers: { Authorization: 'Bearer ' + token }
+                    });
+                    if (parentRes.ok) {
+                        const p = await parentRes.json();
+                        if (p.name === 'RayOS Moodboard') { bodyProgress = c; break; }
+                    }
+                }
+            }
         }
 
         const dateFolders = await driveList(
@@ -120,9 +133,12 @@ module.exports = async function handler(req, res) {
             if (urls.length > 0) result[date] = urls;
         }
 
-        // Light cache: 60s — fresh enough that new uploads show in 1 minute
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
-        return res.status(200).json({ bodyProgress: result, count: Object.keys(result).length });
+        return res.status(200).json({
+            bodyProgress: result,
+            count: Object.keys(result).length,
+            folderId: bodyProgress.id
+        });
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
