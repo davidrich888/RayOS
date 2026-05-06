@@ -73,10 +73,10 @@ module.exports = async function handler(req, res) {
     try {
         const { token, email } = await getServiceAccountToken();
 
-        // Find 'Body Progress' folder accessible to the SA (anywhere it's shared).
+        // Find body-photo folder by either Chinese or English name.
         const candidates = await driveList(
             token,
-            `name='Body Progress' and mimeType='${FOLDER_MIME}' and trashed=false`,
+            `(name='體態照' or name='Body Progress') and mimeType='${FOLDER_MIME}' and trashed=false`,
             'files(id,name,parents)'
         );
         if (candidates.length === 0) {
@@ -87,8 +87,8 @@ module.exports = async function handler(req, res) {
                 'files(id,name)'
             );
             return res.status(404).json({
-                error: "No 'Body Progress' folder shared with service account",
-                hint: `Right-click the 'RayOS Moodboard' (or 'Body Progress') folder in Drive → Share → add ${email} as Viewer`,
+                error: "No '體態照' or 'Body Progress' folder shared with service account",
+                hint: `Right-click the '體態照' (or 'RayOS Moodboard') folder in Drive → Share → add ${email} as Viewer`,
                 serviceAccountEmail: email,
                 visibleFoldersCount: visible.length,
                 visibleFolders: visible.slice(0, 30).map(f => f.name)

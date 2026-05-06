@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-05-02T20:39:25+00:00",
+  "generated_at": "2026-05-04T22:02:26+00:00",
   "kpis": {
     "yt_fundwithray": {
-      "value": 5460,
+      "value": 5470,
       "delta_7d": null
     },
     "yt_tft_story": {
-      "value": 661,
+      "value": 663,
       "delta_7d": null
     },
     "ig_fundwithray": {
-      "value": 11811,
+      "value": 11813,
       "delta_7d": null
     },
     "skool_free": {
-      "value": 5662,
+      "value": 5667,
       "delta_7d": null
     },
     "skool_tft": {
@@ -26,7 +26,7 @@
       "delta_7d": null
     },
     "email_free": {
-      "value": 6030,
+      "value": 6039,
       "delta_7d": null
     },
     "email_tft": {
@@ -34,25 +34,25 @@
       "delta_7d": null
     },
     "audience_total": {
-      "value": 23594,
+      "value": 23613,
       "delta_7d": null
     }
   },
   "mtd": {
     "yt_main_subs": {
-      "this_mtd": 0,
-      "last_mtd": null,
-      "pace": null,
-      "kind": "int"
-    },
-    "ig_followers": {
       "this_mtd": 10,
       "last_mtd": null,
       "pace": null,
       "kind": "int"
     },
+    "ig_followers": {
+      "this_mtd": 12,
+      "last_mtd": null,
+      "pace": null,
+      "kind": "int"
+    },
     "skool_free_members": {
-      "this_mtd": 1,
+      "this_mtd": 6,
       "last_mtd": null,
       "pace": null,
       "kind": "int"
@@ -69,161 +69,203 @@
       "pace": null,
       "kind": "money"
     },
-    "days_into_month": 2
+    "days_into_month": 4
   },
   "skool_funnel": {
     "free": {
-      "members": 5662,
-      "active_members": 5662,
+      "members": 5667,
+      "active_members": 5667,
       "mrr_usd": 333.08,
-      "engagement_pct": 13.37,
+      "engagement_pct": 13.43,
       "retention_pct": 100.0,
-      "conversion_rate": 23.29,
-      "visitors_30d": 2262,
-      "signups_30d": 173,
+      "conversion_rate": 23.68,
+      "visitors_30d": 2332,
+      "signups_30d": 172,
       "new_mrr_30d_usd": null,
-      "date": "2026-05-02"
+      "date": "2026-05-04"
     },
     "tft": {
       "members": 101,
       "active_members": 101,
       "mrr_usd": 13255.48,
-      "engagement_pct": 81.19,
+      "engagement_pct": 80.2,
       "retention_pct": 92.65,
       "conversion_rate": 0.0,
-      "visitors_30d": 225,
+      "visitors_30d": 220,
       "signups_30d": 0,
       "new_mrr_30d_usd": null,
-      "date": "2026-05-02"
+      "date": "2026-05-04"
     }
   },
   "skool_traffic": {
     "free": [
       {
         "source": "Direct",
-        "visits": 1640,
-        "percent": 66.18
+        "visits": 1715,
+        "percent": 67.18
       },
       {
         "source": "YouTube",
-        "visits": 405,
-        "percent": 16.34
+        "visits": 400,
+        "percent": 15.67
       },
       {
         "source": "Instagram",
-        "visits": 225,
-        "percent": 9.08
+        "visits": 222,
+        "percent": 8.7
       },
       {
         "source": "Other",
-        "visits": 66,
-        "percent": 2.66
+        "visits": 64,
+        "percent": 2.51
       },
       {
         "source": "Skool network",
-        "visits": 53,
-        "percent": 2.14
+        "visits": 64,
+        "percent": 2.51
       },
       {
         "source": "fundwithray.com",
-        "visits": 40,
-        "percent": 1.61
+        "visits": 39,
+        "percent": 1.53
       },
       {
         "source": "Google",
-        "visits": 25,
-        "percent": 1.01
+        "visits": 26,
+        "percent": 1.02
       },
       {
         "source": "Threads",
-        "visits": 24,
-        "percent": 0.97
+        "visits": 23,
+        "percent": 0.9
       }
     ],
     "tft": [
       {
         "source": "Direct",
-        "visits": 132,
-        "percent": 51.97
+        "visits": 128,
+        "percent": 52.03
       },
       {
         "source": "Skool network",
-        "visits": 81,
-        "percent": 31.89
+        "visits": 82,
+        "percent": 33.33
       },
       {
         "source": "Affiliate",
-        "visits": 15,
-        "percent": 5.91
+        "visits": 12,
+        "percent": 4.88
       },
       {
         "source": "fundwithray.com",
         "visits": 9,
-        "percent": 3.54
+        "percent": 3.66
       },
       {
         "source": "Facebook",
         "visits": 5,
-        "percent": 1.97
+        "percent": 2.03
       },
       {
         "source": "Other",
         "visits": 5,
-        "percent": 1.97
+        "percent": 2.03
       },
       {
         "source": "Instagram",
-        "visits": 4,
-        "percent": 1.57
+        "visits": 3,
+        "percent": 1.22
       },
       {
-        "source": "YouTube",
-        "visits": 3,
-        "percent": 1.18
+        "source": "line.me",
+        "visits": 2,
+        "percent": 0.81
       }
     ]
   },
   "youtube_28d": {
     "fundwithray": {
-      "subs_gained_28d": 250,
-      "subs_lost_28d": 51,
-      "views_28d": 29851,
-      "watch_hours_28d": 2108.9,
+      "subs_gained_28d": 231,
+      "subs_lost_28d": 50,
+      "views_28d": 28054,
+      "watch_hours_28d": 1938.7,
       "est_revenue_usd_28d": null,
-      "date": "2026-05-02"
+      "date": "2026-05-04"
     }
   },
   "youtube_totals": {},
   "freshness": [
     {
+      "source": "business_finance",
+      "last_run": "2026-05-04T22:00:03.167857+00:00",
+      "status": "skipped",
+      "records": 0
+    },
+    {
       "source": "email",
-      "last_run": "2026-05-02T20:23:57.123618+00:00",
+      "last_run": "2026-05-04T22:00:06.407387+00:00",
       "status": "success",
       "records": 3
     },
     {
+      "source": "fathom",
+      "last_run": "2026-05-02T23:10:19.122969+00:00",
+      "status": "skipped",
+      "records": 0
+    },
+    {
+      "source": "fireflies",
+      "last_run": "2026-05-02T23:10:19.122951+00:00",
+      "status": "skipped",
+      "records": 0
+    },
+    {
       "source": "ga4",
-      "last_run": "2026-05-02T20:23:58.458525+00:00",
+      "last_run": "2026-05-04T22:00:06.769881+00:00",
       "status": "skipped",
       "records": 0
     },
     {
       "source": "ig",
-      "last_run": "2026-05-02T20:24:05.159353+00:00",
+      "last_run": "2026-05-04T22:00:14.505519+00:00",
       "status": "success",
       "records": 1
     },
     {
       "source": "skool",
-      "last_run": "2026-05-02T20:25:58.129634+00:00",
+      "last_run": "2026-05-04T22:02:18.390140+00:00",
       "status": "success",
-      "records": 5810
+      "records": 178
+    },
+    {
+      "source": "skool_live",
+      "last_run": "2026-05-02T23:10:19.121747+00:00",
+      "status": "skipped",
+      "records": 0
+    },
+    {
+      "source": "slack",
+      "last_run": "2026-05-02T23:10:19.123002+00:00",
+      "status": "skipped",
+      "records": 0
     },
     {
       "source": "youtube",
-      "last_run": "2026-05-02T20:26:04.804005+00:00",
+      "last_run": "2026-05-04T22:02:26.481146+00:00",
       "status": "success",
       "records": 2
+    },
+    {
+      "source": "youtube_analytics",
+      "last_run": "2026-05-04T22:02:26.610393+00:00",
+      "status": "exception",
+      "records": 0
+    },
+    {
+      "source": "yt_live",
+      "last_run": "2026-05-02T23:10:19.122922+00:00",
+      "status": "skipped",
+      "records": 0
     }
   ]
 }
