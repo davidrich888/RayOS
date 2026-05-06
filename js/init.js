@@ -56,6 +56,8 @@
     updateTradingDisplay();
     loadBodyProgressFromDrive(); // Load cached body progress photos before physic display
     updatePhysicDisplay();
+    // 📷 Body photos: silent auto-sync from Drive (built-in OAuth endpoint, no config needed)
+    setTimeout(() => syncBodyPhotosFromDrive(true), 1800);
     loadDailyHabits();
     renderAccountManager();
     updateSyncDot();

@@ -264,19 +264,19 @@ function loadBodyProgressFromDrive() {
     renderPhotoSelects();
 }
 
-async function syncBodyPhotosFromDrive() {
-    const scriptUrl = localStorage.getItem('drive_script_url');
-    if (!scriptUrl) {
-        showToast('請先在 Settings 設定 Google Drive Script URL', true);
-        return;
-    }
-    showToast('📷 同步 Body Progress...');
+// silent=true: triggered on auto-init, suppress success/empty toasts but still surface errors.
+// Endpoint resolution: localStorage override > built-in /api/drive-body-photos (OAuth, zero-config).
+async function syncBodyPhotosFromDrive(silent) {
+    const scriptUrl = localStorage.getItem('drive_script_url') || '/api/drive-body-photos';
+    if (!silent) showToast('📷 同步 Body Progress...');
     try {
         const response = await fetch(scriptUrl);
-        if (!response.ok) throw new Error('HTTP ' + response.status);
+        if (!response.ok) {
+            const detail = await response.text().catch(() => '');
+            throw new Error('HTTP ' + response.status + (detail ? ' — ' + detail.slice(0, 200) : ''));
+        }
         const data = await response.json();
         if (data && data.bodyProgress) {
-            // Normalize date keys (20260206 → 2026-02-06)
             const normalized = {};
             Object.keys(data.bodyProgress).forEach(k => {
                 normalized[normDate(k)] = data.bodyProgress[k];
@@ -286,14 +286,14 @@ async function syncBodyPhotosFromDrive() {
                 bodyProgressDates = normalized;
                 localStorage.setItem('body_progress_drive', JSON.stringify(data.bodyProgress));
                 renderPhotoSelects();
-                showToast('✅ Body Progress: ' + dates.length + ' 個日期已同步');
-            } else {
+                if (!silent) showToast('✅ Body Progress: ' + dates.length + ' 個日期已同步');
+            } else if (!silent) {
                 showToast('⚠️ Body Progress 資料夾沒有找到照片', true);
             }
-        } else {
+        } else if (!silent) {
             showToast('⚠️ 回傳資料中沒有 bodyProgress', true);
         }
-        // Also update moodboard if we got images
+        // Also update moodboard if Apps Script (custom URL) returned images
         if (data && data.images && data.images.length > 0) {
             const urls = data.images.map(img => img.url);
             localStorage.setItem('moodboard_images', JSON.stringify(urls));
@@ -301,7 +301,7 @@ async function syncBodyPhotosFromDrive() {
         }
     } catch(e) {
         console.error('Body photo sync error:', e);
-        showToast('同步失敗: ' + e.message, true);
+        if (!silent) showToast('同步失敗: ' + e.message, true);
     }
 }
 
