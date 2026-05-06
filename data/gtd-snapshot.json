@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-06T19:54:37+00:00",
+  "generated_at": "2026-05-06T20:19:09+00:00",
   "summary": {
     "active_projects": 17,
     "completed_projects": 2,
-    "next_actions": 10,
+    "next_actions": 12,
     "waiting_for": 0,
     "automation_pct": 15,
     "automation_target": 30,
@@ -185,11 +185,13 @@
   "actions": {
     "@claude": [
       "**QW1 C5 Hormozi 3-7 天關心**：拆解 trigger 來源（Skool API / ConvertKit tag）+ 跨平台 nurture sequence 草稿（Email × 2 + IG DM × 1）",
+      "**QW2 D3 Weekly Review 修好**：跑 `/dx:gha` 或檢查 N8N weekly-review workflow log，找壞掉的 node + 修復 + 補 health-check",
       "**QW3 O1+O2 watchdog**：擴充 `rayos-health-check` 加 N8N execution status API + Auto Task last-run mtime 檢查 + auto-recover",
       "**QW4 O4 API key 過期警示**：建 `expiry-tracker` N8N workflow + Notion DB（key/平台/到期日/owner）+ 14d 前 cron warn",
       "**QW5 Co1 TG 噪音降低**：設計 TG 訊息分類規則（urgent / info / digest）+ dedup 邏輯 + 1 小時 batch summary",
       "**QW6 Co2 Email 自動分類**：列 Gmail filter 規則 + AI 分類 prompt（Gmail MCP），先做 ConvertKit/Notion/銀行 三類",
       "**QW7 Co6 IG 被禁警示**：寫 IG health-check script（Apify IG actor / Graph API）+ 每 2 小時 scheduled + 異常 TG warn",
+      "**QW8 St8 Brainstorm Capture**：設計 TG capture bot prompt + Notion 三 DB 路由邏輯（Content Idea / Inbox / project notes）",
       "**QW9 M3 心智圖 → AI 結構/PPT**：看 100x outline generator，新增 mind-map 結構輸出（節點 + 子節點 JSON）→ 接 PPT template",
       "**QW10 C12 高風險學員 outreach**：串接 retention task 輸出 → ConvertKit tag `at_risk` → 3 步 nurture（Email + IG DM + 1-on-1 邀請）",
       "**QW11 C13 成果牆自動更新**：寫 sync script（Skool API + DataOS MRR + R2/Notion 成果牆 JSON），每週日 22:00 排程",
