@@ -85,10 +85,13 @@ module.exports = async function handler(req, res) {
             const about = await fetch(`${DRIVE_API}/about?fields=user`, {
                 headers: { Authorization: 'Bearer ' + token }
             }).then(r => r.json()).catch(() => ({}));
+            const tokenInfo = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`)
+                .then(r => r.json()).catch(() => ({}));
             return res.status(404).json({
                 error: "No 'Body Progress' folder found in Drive",
                 hint: "Expected: <any folder> / Body Progress / <YYYY-MM-DD or YYYYMMDD> / *.jpg",
                 oauthAccount: about.user || null,
+                tokenScope: tokenInfo.scope || tokenInfo,
                 rootFoldersFound: roots.map(f => f.name),
                 allVisibleFoldersCount: allVisible.length,
                 allVisibleFolders: allVisible.slice(0, 50).map(f => ({ name: f.name, ownedByMe: f.ownedByMe, shared: f.shared })),
