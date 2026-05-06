@@ -7,7 +7,8 @@ async function saveBodyData() {
     const fatpct = parseFloat(document.getElementById('body-fatpct').value);
     const notes = document.getElementById('body-notes') ? document.getElementById('body-notes').value : '';
     if (!date || isNaN(weight) || isNaN(fatpct)) return showToast('Fill date, weight & fat%', true);
-    const data = { date, weight, muscle: muscle || 0, fatpct, notes };
+    const fatmass = Math.round(weight * (fatpct / 100) * 10) / 10;
+    const data = { date, weight, muscle: muscle || 0, fatpct, fatmass, notes };
     const existIdx = bodyHistory.findIndex(h => h.date === date);
     if (existIdx >= 0) bodyHistory[existIdx] = data;
     else bodyHistory.push(data);
@@ -40,7 +41,8 @@ async function writeBodyToNotion(data) {
                     Weight: data.weight, 
                     Muscle: data.muscle, 
                     'Fat %': data.fatpct / 100, // Notion stores as decimal
-                    Notes: data.notes || '' 
+                    'Fat Mass': data.fatmass || 0,
+                    Notes: data.notes || ''
                 }
             })
         });
@@ -73,6 +75,7 @@ async function syncBodyFromNotion() {
                     weight: r.Weight || r.weight || 0,
                     muscle: r.Muscle || r.MuscleMass || r.muscle || 0,
                     fatpct: parseFloat(fatPct.toFixed(1)),
+                    fatmass: r['Fat Mass'] || r.fatmass || null,
                     notes: r.Notes || r.notes || ''
                 };
             }).filter(r => r.date).sort((a,b) => a.date.localeCompare(b.date));
@@ -189,7 +192,7 @@ function renderBodyHistoryTable() {
     var sorted = bodyHistory.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
     var h = physicGoal.height / 100;
     if (sorted.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No data — click "Sync Notion" to load</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:24px;">No data — click "Sync Notion" to load</td></tr>';
         return;
     }
     var rows = '';
@@ -200,6 +203,7 @@ function renderBodyHistoryTable() {
         rows += '<tr><td style="text-align:left;">' + dateDisplay + '</td>' +
             '<td>' + (r.weight || '--') + '</td>' +
             '<td>' + (r.fatpct || '--') + '</td>' +
+            '<td>' + (r.fatmass != null ? r.fatmass : '--') + '</td>' +
             '<td>' + (r.muscle || '--') + '</td>' +
             '<td>' + bmi + '</td>' +
             '<td style="font-size:10px;color:var(--text-dim);">' + (r.notes || '') + '</td>' +
