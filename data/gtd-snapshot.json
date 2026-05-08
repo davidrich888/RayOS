@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-08T10:48:47+00:00",
+  "generated_at": "2026-05-08T19:10:54+00:00",
   "summary": {
     "active_projects": 17,
     "completed_projects": 2,
@@ -76,9 +76,9 @@
     {
       "name": "QW1 — C5 Hormozi 3-7 天關心學員（跨平台 nurture）",
       "area": "Main Business",
-      "status": "Active — Quick Win Top 1（學員留存核心）",
+      "status": "測試 — TFT Retention LIVE 已切（2026-05-09，`TFT_DM_LIVE=true`），觀察 launchd 第一次自動觸發是否真寄 email + Skool DM（MEMORY #2）",
       "outcome": "學員加入後 3-7 天自動跨平台（Email + IG/Line drip）收到 AI 個性化關心訊息，不再靠 Skool DM 手動",
-      "next_action": "@claude 拆解 C5：列出新成員 trigger 來源（Skool API / ConvertKit tag）+ 跨平台 nurture sequence 草稿（Email × 2 + IG DM × 1）",
+      "next_action": "@me 等下次 watchdog 自動觸發 → TG 收摘要 → 抽查 1-2 個學員實際收到的 email 長相；若 OK 改 Status 為 Completed",
       "completed": false,
       "completed_date": null
     },
