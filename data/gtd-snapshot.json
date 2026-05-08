@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-08T19:11:02+00:00",
+  "generated_at": "2026-05-08T19:23:44+00:00",
   "summary": {
     "active_projects": 17,
     "completed_projects": 2,
@@ -157,9 +157,9 @@
     {
       "name": "QW10 — C12 高風險學員自動 outreach",
       "area": "Main Business",
-      "status": "Active — Quick Win",
+      "status": "測試 — 已被 QW1 TFT Retention LIVE 覆蓋（`old_7d/14d/21d/30d` + `cancelling_save` 五種沉默學員場景，`classify.py`），Email + Skool DM 雙通道，等 watchdog 自動觸發驗證後與 QW1 同步標 Completed（縮 scope：原 IG DM + 1-on-1 邀請暫不做）",
       "outcome": "retention task 拉的 At-Risk 名單自動進 nurture sequence，不再等人手動接",
-      "next_action": "@claude 串接 retention task 輸出 → ConvertKit tag `at_risk` → 觸發 3 步 nurture（Email + IG DM + 1-on-1 邀請）",
+      "next_action": "@me 等 QW1 watchdog 首次自動觸發 → 抽查 1-2 個 old_Xd / cancelling_save 學員實寄結果 → 若 OK 改 Status 為 Completed",
       "completed": false,
       "completed_date": null
     },
