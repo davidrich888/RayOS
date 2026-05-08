@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-08T19:30:16+00:00",
+  "generated_at": "2026-05-08T19:32:40+00:00",
   "summary": {
     "active_projects": 29,
     "completed_projects": 2,
@@ -148,9 +148,9 @@
     {
       "name": "QW9 — M3 YT 心智圖 → AI 結構/PPT",
       "area": "Main Business",
-      "status": "Active — Quick Win（Ray 說花最久的事）",
+      "status": "測試 — ContentPipeline v2 B 路線已完整：`/capture→/research→/title→/script→/ppt(B)→.pptx`（master-mode auto-render，Q&A → outline → styled .pptx 全自動），等 Ray 用實際影片跑一輪 + v4.pptx 目視驗收（MEMORY: ppt-render master-mode v1 + `/ppt` B route `749fb85`）",
       "outcome": "YT 影片心智圖階段半自動化：AI 從 hook + outline 直接產 mind-map → PPT 草稿，Ray 只做 review",
-      "next_action": "@claude 看 100x system 既有 outline generator，新增 mind-map 結構輸出（節點 + 子節點 JSON）→ 接 PPT template",
+      "next_action": "@me 用一支真實 YT 影片跑完整 B 路線 → v4.pptx 驗收結構 / 字級 / 動畫 → OK 後改 Status 為 Completed",
       "completed": false,
       "completed_date": null
     },
