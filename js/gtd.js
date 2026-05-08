@@ -92,7 +92,9 @@ function renderGTDProjects(projects) {
     const testing = all.filter(p => !p.completed && statusBadge(p) === '測試');
 
     // Group 2: Task Audit Quick Wins (QW1-QW12) — canonical scoreboard
-    const qw = all.filter(p => /^QW\d+/.test(p.name));
+    // Status「測試」優先級最高 — 已在 testing 的 QW 不能重複出現在這組
+    const testingSet = new Set(testing);
+    const qw = all.filter(p => /^QW\d+/.test(p.name) && !testingSet.has(p));
 
     if (testing.length === 0 && qw.length === 0) {
         el.innerHTML = '<div style="color:var(--text-dim);padding:12px;">No projects in dashboard groups</div>';
