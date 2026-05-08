@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-08T19:25:33+00:00",
+  "generated_at": "2026-05-08T19:30:12+00:00",
   "summary": {
-    "active_projects": 16,
+    "active_projects": 29,
     "completed_projects": 2,
     "next_actions": 12,
     "waiting_for": 0,
@@ -169,6 +169,123 @@
       "status": "Active — Quick Win（找舊內容花很久）",
       "outcome": "Skool / MEMORY / Notion / context 統一語意搜尋，CLI + TG 入口",
       "next_action": "@claude 用 DataOS embedding pipeline + 既有 Notion content + memory/*.md 建 vector index，先做 CLI demo",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW13 — M22 Email 30 封 Nurture 序列（TFT 漏斗 P0）",
+      "area": "Main Business",
+      "status": "Active — Strategic Win ⭐（漏斗核心，MEMORY #5）",
+      "outcome": "炒股黑客 / TFT_Cancel / TFT_Churned 受眾自動跑 30 封長期 nurture（教育 + 案例 + 軟銷售），ConvertKit 觸發 + AI 個性化",
+      "next_action": "@claude 設計 30 封結構（Hormozi DNA + Dan Henry WHY/WHAT/WHEN/HOW）→ ConvertKit sequence + 觸發條件 + AI variable 個性化",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW14 — S20 1-on-1 Voice Agent Sales（取代諮詢成交）",
+      "area": "Main Business",
+      "status": "Active — Strategic Win（依賴 S19 sales call 錄影知識庫先建）",
+      "outcome": "高意向 lead 不用排 1-on-1 真人，voice agent 用 Ray 過往 sales call 為知識庫，自然對話成交 / 預約付費學員",
+      "next_action": "@claude 先收集 S19（過往 sales call 錄影 → 轉錄 → embed），再評估 voice agent 平台（Vapi / Retell / 11labs Agents）",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW15 — D4 月/季 AI 檢討（IntelOS auto-synth）",
+      "area": "Main Business",
+      "status": "Active — Strategic Win（D3 Weekly ✅，往上擴 monthly/quarterly）",
+      "outcome": "每月 / 每季自動 synthesize 上一期所有 weekly review → 趨勢 / 缺口 / 該調整的策略 → TG + Notion",
+      "next_action": "@claude 擴充 `/north-star`：新增 `/north-star --monthly` 與 `--quarterly` 模式，吃過去 4 / 13 週的 weekly review snapshot",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW16 — D5+D7 內容表現 + Retention 深挖 AI Agent",
+      "area": "Main Business",
+      "status": "Active — Strategic Win",
+      "outcome": "每週 AI agent 自動拉內容 / retention 數據，給出「哪片 hook 失效 / 哪段 retention drop / 為什麼」的 root cause 分析",
+      "next_action": "@claude 設計 agent prompt + 接 DataOS（YT Analytics、Skool、ConvertKit），先 weekly trial run",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW17 — Content Pipeline 全自動化（M2+M9+M11+M13）",
+      "area": "Main Business",
+      "status": "Active — Strategic Win 🟢（助理瓶頸最大）",
+      "outcome": "100x system + Longs2Shorts + IG Caption + Reels 腳本 串成 multi-agent pipeline，助理只做 review / 上架",
+      "next_action": "@claude 盤點 4 條 pipeline 現狀（哪些已半自動）→ 設計統一 orchestrator + 共用 context store（hook / brand voice / CTA）",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW18 — Trading AI Companion（Tr2+3+5+8+9）",
+      "area": "Main Business",
+      "status": "Active — Strategic Win",
+      "outcome": "TG 對話 + 截圖 → MultiCharts data → AI 整合「日誌 + 權益曲線 + 復盤 + 盤後 + RiskGuard」一體化",
+      "next_action": "@claude 設計資料流：MultiCharts export → DataOS trades table → AI synthesizer → TG 日誌 / 復盤 draft",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW19 — M17+C8 IG 限動自動化 + 直播 AI 切 Highlights",
+      "area": "Main Business",
+      "status": "Active — Strategic Win",
+      "outcome": "IG 限動：AI 寫圖文 + 排程；TFT 直播：AI 自動偵測高峰 → 切 highlights → IG/Reels draft",
+      "next_action": "@claude (a) IG 限動：定 template + AI 內容 + n8n 排程；(b) 直播 highlights：先 POC 用 transcript heat-score 找高峰段",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW20 — S13 轉介紹流程系統化（Refer-a-friend）",
+      "area": "Main Business",
+      "status": "Active — Strategic Win（目前完全沒做好）",
+      "outcome": "TFT 學員可拿專屬推薦碼 → 自動分潤 → 公開排行榜（leaderboard），social proof + 增長雙效",
+      "next_action": "@claude 設計推薦碼結構 + 分潤規則 + Skool / Notion 排行 view + 自動通知推薦人",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW21 — S7 TFT Onboarding 自動化頁面 ⭐",
+      "area": "Main Business",
+      "status": "Active — Strategic Win（影響 D1-D7 留存 + C5 Hormozi 關心效果，目前完全手動）",
+      "outcome": "新學員付費後自動拿 onboarding 頁面（歡迎影片 + 任務清單 + 第一週路線圖），減手動 + 提升留存",
+      "next_action": "@claude 看參考 https://www.instagram.com/reel/DYBiR7nxWdT/ → 設計 onboarding 頁面 wireframe + 自動歡迎序列 + Skool 任務 hook",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW22 — P10 個人 AI 對話（個人版 RayOS）",
+      "area": "Main Business",
+      "status": "Active — Strategic Win（不混事業）",
+      "outcome": "獨立 personal MCP / 私人 AI，存 Ray 個人健康 / 財務 / 學習 / 關係，跟事業 AIOS 隔離",
+      "next_action": "@claude 規劃 personal scope（不碰 business memory）+ 獨立 RayOS instance 或 sub-namespace",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW23 — C20+C16 學員出金 Case Study Pipeline + CRM 統一",
+      "area": "Main Business",
+      "status": "Active — Strategic Win（C20 已 80%，C16 從 0 開始）",
+      "outcome": "(a) 出金 case study：YT 直播 → AI 剪 → Story → 成果牆全自動；(b) 學員 CRM：Skool / 付款 / 進度 / 出金 統一視圖",
+      "next_action": "@claude (a) 補 C20 剩 20%（自動化 Story 上架 + 成果牆 sync）；(b) 設計 DataOS 學員視圖 schema + Notion CRM mirror",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW24 — S15 TFT 續約自動提醒",
+      "area": "Main Business",
+      "status": "Active — Quick Win（TFT 2yr / 1yr 到期前提早接觸）",
+      "outcome": "TFT_Premium / Standard 學員到期前 N 天 → TG warn Ray + 自動發續約信",
+      "next_action": "@claude 從 Skool 學員 join_date 算到期日 + ConvertKit sequence + 14d / 7d / 1d 三段提醒",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW25 — S21 ManyChat × Claude Code IG DM Setter",
+      "area": "Main Business",
+      "status": "⏸ Blocked — 等 IG 帳號合規（9 Reels caption 改完 + 142d 直播禁令過）",
+      "outcome": "AI 自動回 IG DM，把高意向粉絲導進 TFT 申請流程（參考 https://youtu.be/wAPy3aD-7Tc）",
+      "next_action": "@me 先解 BLOCKED #0（9 Reels caption），再設計 ManyChat → Claude webhook + DM playbook",
       "completed": false,
       "completed_date": null
     }
