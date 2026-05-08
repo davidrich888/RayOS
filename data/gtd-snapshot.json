@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-08T19:23:56+00:00",
+  "generated_at": "2026-05-08T19:25:26+00:00",
   "summary": {
-    "active_projects": 17,
+    "active_projects": 16,
     "completed_projects": 2,
     "next_actions": 12,
     "waiting_for": 0,
@@ -151,15 +151,6 @@
       "status": "Active — Quick Win（Ray 說花最久的事）",
       "outcome": "YT 影片心智圖階段半自動化：AI 從 hook + outline 直接產 mind-map → PPT 草稿，Ray 只做 review",
       "next_action": "@claude 看 100x system 既有 outline generator，新增 mind-map 結構輸出（節點 + 子節點 JSON）→ 接 PPT template",
-      "completed": false,
-      "completed_date": null
-    },
-    {
-      "name": "QW10 — C12 高風險學員自動 outreach",
-      "area": "Main Business",
-      "status": "測試 — 已被 QW1 TFT Retention LIVE 覆蓋（`old_7d/14d/21d/30d` + `cancelling_save` 五種沉默學員場景，`classify.py`），Email + Skool DM 雙通道，等 watchdog 自動觸發驗證後與 QW1 同步標 Completed（縮 scope：原 IG DM + 1-on-1 邀請暫不做）",
-      "outcome": "retention task 拉的 At-Risk 名單自動進 nurture sequence，不再等人手動接",
-      "next_action": "@me 等 QW1 watchdog 首次自動觸發 → 抽查 1-2 個 old_Xd / cancelling_save 學員實寄結果 → 若 OK 改 Status 為 Completed",
       "completed": false,
       "completed_date": null
     },
