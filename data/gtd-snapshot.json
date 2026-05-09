@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-09T05:50:04+00:00",
+  "generated_at": "2026-05-09T05:51:38+00:00",
   "summary": {
-    "active_projects": 29,
+    "active_projects": 31,
     "completed_projects": 2,
     "next_actions": 12,
     "waiting_for": 0,
@@ -286,6 +286,24 @@
       "status": "⏸ Blocked — 等 IG 帳號合規（9 Reels caption 改完 + 142d 直播禁令過）",
       "outcome": "AI 自動回 IG DM，把高意向粉絲導進 TFT 申請流程（參考 https://youtu.be/wAPy3aD-7Tc）",
       "next_action": "@me 先解 BLOCKED #0（9 Reels caption），再設計 ManyChat → Claude webhook + DM playbook",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "AI Clipping 自動化服務（Whop 接案）",
+      "area": "Side Projects",
+      "status": "Backlog",
+      "outcome": "在 Whop 平台上架 AI 影片 clipping 服務，用 AI 批量處理短片剪輯，按成果收費，打造被動收入管道",
+      "next_action": "@me 看 IG Reel（captured #13）→ 研究 Whop clipping 市場定價 → 評估 MVP 工作量（用既有工具能做到幾成）",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "AI OnlyFans 自動化帳號",
+      "area": "Side Projects",
+      "status": "Backlog — 觀望（平台風險 + 法規灰色地帶，暫緩）",
+      "outcome": "用 AI 生成一致角色 + 內容，在 OnlyFans 上經營訂閱制帳號，自動化內容產線",
+      "next_action": "@me 確認 OnlyFans 對 AI-generated content 的最新政策 → 若合規再開始 POC",
       "completed": false,
       "completed_date": null
     }
