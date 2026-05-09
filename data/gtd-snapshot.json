@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-09T05:51:38+00:00",
+  "generated_at": "2026-05-09T05:53:43+00:00",
   "summary": {
-    "active_projects": 31,
+    "active_projects": 32,
     "completed_projects": 2,
     "next_actions": 12,
     "waiting_for": 0,
@@ -295,6 +295,15 @@
       "status": "Backlog",
       "outcome": "在 Whop 平台上架 AI 影片 clipping 服務，用 AI 批量處理短片剪輯，按成果收費，打造被動收入管道",
       "next_action": "@me 看 IG Reel（captured #13）→ 研究 Whop clipping 市場定價 → 評估 MVP 工作量（用既有工具能做到幾成）",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "Skool Affiliate × AI Avatar + Hormozi Clipping Flywheel",
+      "area": "Side Projects",
+      "status": "Backlog",
+      "outcome": "建立 faceless 內容帳號（AI Avatar 主持）→ 剪 Hormozi 長片成 Reels/YT 長片 → 引流到 Skool 社群 → Skool Affiliate 收佣 → 年費會員送 AI 工具包",
+      "next_action": "@me 決定社群定位（主題） → @claude 評估 AI Avatar 平台成本 + Skool Affiliate 申請條件",
       "completed": false,
       "completed_date": null
     },
