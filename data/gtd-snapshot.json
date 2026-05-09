@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-09T12:40:35+00:00",
+  "generated_at": "2026-05-09T12:40:50+00:00",
   "summary": {
     "active_projects": 32,
     "completed_projects": 3,
-    "next_actions": 10,
+    "next_actions": 9,
     "waiting_for": 0,
     "automation_pct": 15,
     "automation_target": 30,
@@ -328,8 +328,7 @@
   ],
   "actions": {
     "@claude": [
-      "**QW1 C5 Hormozi 3-7 天關心**：等 watchdog 自動觸發 → TG 摘要 → 抽查實寄 email 長相 → 改 Status 為 Completed",
-      "**QW2 TFT Milestone Emails（Hormozi 正向放大）⭐**：等 QW1 D-2 LIVE 穩定後啟動。依 `memory/tft-retention-milestone-emails-proposal.md` 6 個 task：",
+      "**QW2 TFT Milestone Emails（Hormozi 正向放大）⭐**：QW1 已 Completed，可以開工。依 `memory/tft-retention-milestone-emails-proposal.md` 6 個 task：",
       "**QW3 O1+O2 watchdog**：擴充 `rayos-health-check` 加 N8N execution status API + Auto Task last-run mtime 檢查 + auto-recover",
       "**QW4 O4 API key 過期警示**：建 `expiry-tracker` N8N workflow + Notion DB（key/平台/到期日/owner）+ 14d 前 cron warn",
       "**QW5 Co1 TG 噪音降低**：設計 TG 訊息分類規則（urgent / info / digest）+ dedup 邏輯 + 1 小時 batch summary",
