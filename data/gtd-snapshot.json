@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-09T10:55:51+00:00",
+  "generated_at": "2026-05-09T12:40:19+00:00",
   "summary": {
-    "active_projects": 33,
-    "completed_projects": 2,
+    "active_projects": 32,
+    "completed_projects": 3,
     "next_actions": 10,
     "waiting_for": 0,
     "automation_pct": 15,
@@ -76,11 +76,11 @@
     {
       "name": "QW1 — C5 Hormozi 3-7 天關心學員（跨平台 nurture）",
       "area": "Main Business",
-      "status": "測試 — TFT Retention LIVE 已切（2026-05-09，`TFT_DM_LIVE=true`），觀察 launchd 第一次自動觸發是否真寄 email + Skool DM（MEMORY #2）",
-      "outcome": "學員加入後 3-7 天自動跨平台（Email + IG/Line drip）收到 AI 個性化關心訊息，不再靠 Skool DM 手動",
-      "next_action": "@me 等下次 watchdog 自動觸發 → TG 收摘要 → 抽查 1-2 個學員實際收到的 email 長相；若 OK 改 Status 為 Completed",
-      "completed": false,
-      "completed_date": null
+      "status": "Completed — TFT Retention LIVE 上線（`TFT_DM_LIVE=true` + launchd watchdog daily），2026-05-09 manual test 7 封 footer template bug 已修（commit `37549c6`，v4 PUT non-additive，補 `email_template_id` 一起 PUT），inbox 驗證 TFT footer ✅。launchd 自動觸發轉為日常監控",
+      "outcome": "",
+      "next_action": "",
+      "completed": true,
+      "completed_date": "2026-05-09"
     },
     {
       "name": "QW2 — TFT Milestone & Progress Emails（正向放大留存）⭐",
