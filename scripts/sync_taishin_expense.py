@@ -27,6 +27,7 @@ import base64
 import json
 import os
 import re
+import subprocess
 import sys
 import unicodedata
 from collections import defaultdict
@@ -44,17 +45,20 @@ TRANSACTIONS_FILE = DATA_DIR / 'expense-transactions.json'
 DATA_JS_FILE = RAYOS_DIR / 'js' / 'data.js'
 ARCHIVE_DIR = RAYOS_DIR / 'archive' / 'expense-bills'
 ENV_FILE = RAYOS_DIR / '.env'
+WORKSPACE_ENV = RAYOS_DIR.parent / '.env'
 
 # ==================== ENV ====================
 
 def load_env():
-    """Load .env file into os.environ."""
-    if ENV_FILE.exists():
-        for line in ENV_FILE.read_text().splitlines():
-            line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                key, val = line.split('=', 1)
-                os.environ.setdefault(key.strip(), val.strip())
+    """Load .env files into os.environ. Tries Project_RayOS first then workspace root."""
+    for env_path in [ENV_FILE, WORKSPACE_ENV]:
+        if env_path.exists():
+            for line in env_path.read_text().splitlines():
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, val = line.split('=', 1)
+                    _k = key.strip()
+                    os.environ[_k] = os.environ.get(_k) or val.strip()
 
 load_env()
 
@@ -99,6 +103,7 @@ EXPENSE_CATEGORIES = {
         '統一超商', 'SEVEN-ELEVEN', 'FAMILYMART', 'MINISTOP',
         '鐵板燒', '食事', '壽司', 'ICHIRAN', 'UNATOTO', '冒煙的喬',
         '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT',
+        'LOUISA', 'HECHO', '厝秘',
         'YAKINIKU', 'IMAHAN', 'KAITENZUSHI', 'JAPAN MEAT',
         'SUTANDOJISEDAI',
         'FOODCOOP', 'HANGETSU', 'GINGER FARM', 'KUA SA WAT',
@@ -124,6 +129,7 @@ EXPENSE_CATEGORIES = {
     '投資自己': [
         'WORLDGY', 'WORLDGYM', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT',
         'BOXING', '拳擊', 'UDEMY', 'COURSERA', 'MAVEN', 'COHORT', 'ACADEMY',
+        'AAAACCELERATOR',
     ],
     '健身': [],
     '購物': [
@@ -259,6 +265,79 @@ def parse_taishin_html(html_content: str) -> list[dict]:
 
     print(f"  Parsed {len(transactions)} transactions from HTML")
     return transactions
+
+
+# ==================== GMAIL URL DOWNLOAD ====================
+
+def download_taishin_url_from_gmail() -> str:
+    """Use gws CLI to find latest Taishin statement email and extract the link URL."""
+    print("  Searching Gmail for latest Taishin statement...")
+
+    # 1) Search latest Taishin statement email
+    result = subprocess.run(
+        ['gws', 'gmail', 'users', 'messages', 'list', '--params', json.dumps({
+            'userId': 'me',
+            'q': 'from:webmaster@bhurecv.taishinbank.com.tw',
+            'maxResults': 1,
+        })],
+        capture_output=True, text=True, timeout=30,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"gws search failed: {result.stderr}")
+
+    data = json.loads(result.stdout)
+    messages = data.get('messages', [])
+    if not messages:
+        raise RuntimeError("No Taishin statement email found in Gmail")
+
+    msg_id = messages[0]['id']
+    print(f"  Found message: {msg_id}")
+
+    # 2) Fetch full message body
+    result = subprocess.run(
+        ['gws', 'gmail', 'users', 'messages', 'get', '--params', json.dumps({
+            'userId': 'me', 'id': msg_id, 'format': 'full',
+        })],
+        capture_output=True, text=True, timeout=30,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"gws get failed: {result.stderr}")
+    msg = json.loads(result.stdout)
+
+    headers = msg.get('payload', {}).get('headers', [])
+    subject = next((h['value'] for h in headers if h['name'] == 'Subject'), 'unknown')
+    print(f"  Subject: {subject}")
+
+    # 3) Walk MIME tree, collect every body part as text
+    def collect_bodies(part: dict) -> list[str]:
+        chunks: list[str] = []
+        body_data = part.get('body', {}).get('data', '')
+        if body_data:
+            try:
+                decoded = base64.urlsafe_b64decode(body_data + '==').decode('utf-8', errors='replace')
+                chunks.append(decoded)
+            except Exception:
+                pass
+        for sub in part.get('parts', []):
+            chunks.extend(collect_bodies(sub))
+        return chunks
+
+    bodies = collect_bodies(msg.get('payload', {}))
+    if not bodies:
+        raise RuntimeError("No readable body in Taishin email")
+
+    full_text = '\n'.join(bodies)
+
+    # 4) Extract candidate URLs and pick the Taishin one
+    urls = re.findall(r'https://[^\s"\'<>]+', full_text)
+    candidates = [u for u in urls if 'taishin' in u.lower()]
+    if not candidates:
+        preview = full_text[:300].replace('\n', ' ')
+        raise RuntimeError(f"No Taishin URL found in email body ({len(urls)} URLs total). Preview: {preview}")
+
+    target_url = candidates[0].rstrip('.,)>')
+    print(f"  URL: {target_url[:90]}...")
+    return target_url
 
 
 # ==================== PLAYWRIGHT SCRAPING ====================
@@ -811,9 +890,14 @@ def main():
 
     elif args.auto:
         print("\n[1/4] Auto mode: searching Gmail for latest statement...")
-        print("  ERROR: Auto Gmail search requires running within Claude Code.")
-        print("  Use --url with the statement link instead.")
-        sys.exit(1)
+        try:
+            statement_url = download_taishin_url_from_gmail()
+        except Exception as exc:
+            err = f"Taishin auto Gmail lookup failed: {exc}"
+            print(f"  ERROR: {err}")
+            send_telegram(f"⚠️ 台新帳單自動同步失敗\n\n{err}")
+            sys.exit(1)
+        html_content = scrape_taishin_statement(statement_url)
 
     # Step 2: Parse transactions
     print("\n[2/4] Parsing transaction table...")
