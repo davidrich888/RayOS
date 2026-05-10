@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-10T17:00:25+00:00",
+  "generated_at": "2026-05-10T17:00:40+00:00",
   "summary": {
-    "active_projects": 33,
+    "active_projects": 34,
     "completed_projects": 2,
     "next_actions": 9,
     "waiting_for": 0,
@@ -43,6 +43,15 @@
       "status": "Active — UI 完成，收尾中",
       "outcome": "見證牆上線（R2 圖片託管 + VSL 影片正常播放）",
       "next_action": "@claude 設定 R2 bucket 上傳測試圖片，確認 CDN 路徑",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "TFT 見證牆 sync 自動化",
+      "area": "Main Business",
+      "status": "測試 — `tft-wall-sync.py` launchd weekly 跑 ✅（commit `d99872d` 自動 webp 重生 + 強制 PIL stretch-resize 1314×427 自我校正），等下次 cron 真實 fire 驗證",
+      "outcome": "學員故事 + 出金證書 image carousel 每週自動 sync，webp + 比例 self-correct",
+      "next_action": "@me 觀察下次 launchd 自動 fire（每週日 22:00）→ 驗 webp 重生 + 比例 self-correct 生效",
       "completed": false,
       "completed_date": null
     },
