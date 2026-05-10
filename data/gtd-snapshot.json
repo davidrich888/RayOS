@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-10T16:36:13+00:00",
+  "generated_at": "2026-05-10T17:00:25+00:00",
   "summary": {
     "active_projects": 33,
     "completed_projects": 2,
@@ -166,9 +166,9 @@
     {
       "name": "QW11 — C13 成果牆數字自動更新",
       "area": "Main Business",
-      "status": "測試 — `tft-wall-sync.py` launchd weekly 跑 ✅（commit `d99872d` 自動 webp 重生 + 強制 PIL stretch-resize 1314×427 自我校正），等下次 cron 真實 fire 驗證",
+      "status": "Active — Quick Win",
       "outcome": "見證牆 / 成果牆數字（出金累計、學員人數、MRR）每週自動 sync，不再靠 Ray 記得更新",
-      "next_action": "@me 觀察下次 launchd 自動 fire（每週日 22:00）→ 驗 webp + 比例自我校正生效 → 再展開 number sync (Skool API + DataOS MRR)",
+      "next_action": "@claude 寫 sync script：Skool API 拉學員數 + DataOS 拉 MRR + R2/Notion 更新成果牆 JSON，每週日 22:00 排程",
       "completed": false,
       "completed_date": null
     },
