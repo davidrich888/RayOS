@@ -92,16 +92,11 @@ function renderGTDProjects(projects) {
     const testing = all.filter(p => !p.completed && statusBadge(p) === '測試');
     const testingSet = new Set(testing);
 
-    // Group 2: Active Projects — non-QW, non-testing, non-completed (第一段 active projects)
-    const active = all.filter(p =>
-        !p.completed && !testingSet.has(p) && !/^QW\d+/.test(p.name)
-    );
-
-    // Group 3: Task Audit Quick Wins (QW…) — canonical scoreboard
+    // Group 2: Task Audit Quick Wins (QW…) — canonical scoreboard
     // Status「測試」優先級最高 — 已在 testing 的 QW 不能重複出現在這組
     const qw = all.filter(p => /^QW\d+/.test(p.name) && !testingSet.has(p));
 
-    if (testing.length === 0 && active.length === 0 && qw.length === 0) {
+    if (testing.length === 0 && qw.length === 0) {
         el.innerHTML = '<div style="color:var(--text-dim);padding:12px;">No projects in dashboard groups</div>';
         return;
     }
@@ -110,10 +105,6 @@ function renderGTDProjects(projects) {
 
     if (testing.length > 0) {
         html += renderProjectGroup('測試中', testing, false);
-    }
-
-    if (active.length > 0) {
-        html += renderProjectGroup('Active Projects', active, false);
     }
 
     if (qw.length > 0) {
