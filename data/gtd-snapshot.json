@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-10T17:00:40+00:00",
+  "generated_at": "2026-05-13T06:09:56+00:00",
   "summary": {
     "active_projects": 34,
     "completed_projects": 2,
@@ -95,8 +95,8 @@
       "name": "QW2 — TFT Milestone & Progress Emails（正向放大留存）⭐",
       "area": "Main Business",
       "status": "Active — Strategic Win 🔴 HIGH（Hormozi $100M Retention p7/17/23/29/34；補 QW1「只救火」盲點）。QW1 已 Completed，可以開工",
-      "outcome": "學員達 3 個關鍵 milestone 時自動發 A-C-A 結構 Email（Acknowledge 你做到了 → Connect 你在路線圖位置 → Action 下一步）。M1: 第 1 篇檢討 + 10 筆交易 / M2: 連 4 週檢討 + 2 場直播 / M3: 第一次通過挑戰 or 出金",
-      "next_action": "@claude 寫 T1 觸發邏輯 SQL + 3 封 A-C-A Email 文案，沿用 ConvertKit TFT 模板（id 5196915）。完整方案 → `memory/tft-retention-milestone-emails-proposal.md`",
+      "outcome": "學員達 4 個關鍵 milestone 時自動發 A-C-A 結構 Email。M1: 第 1 篇檢討 / M2: 連 4 週檢討 + 2 場直播 / M3: 第一次通過挑戰 or 出金 / **M4: 第 10 篇檢討（習慣建立確認 ← 2026-05-13 數據：11+篇學員流失率 23% vs 0篇 66%，這是真正的分水嶺）**",
+      "next_action": "@claude ①先發第一輪 16 人（草稿在 `outputs/pending/2026-05-11-qw2-milestone-emails-3封-draft.md`，需 Ray OK）②T1 加 M4 觸發 SQL（review_count=10）③寫 M4 Email 文案。完整方案 → `memory/tft-retention-milestone-emails-proposal.md`",
       "completed": false,
       "completed_date": null
     },
