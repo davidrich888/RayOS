@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-19T07:46:39+00:00",
+  "generated_at": "2026-05-19T17:39:36+00:00",
   "summary": {
-    "active_projects": 35,
+    "active_projects": 36,
     "completed_projects": 2,
     "next_actions": 9,
     "waiting_for": 0,
@@ -97,6 +97,15 @@
       "status": "測試 — TFT Retention LIVE 上線觀察期（launchd watchdog daily ✅），14d 觀察至 2026-05-19 → 通過後改 Completed + Phase 5 cleanup（刪舊腳本 + drop gamification 殘欄）",
       "outcome": "自動 watchdog 偵測 TFT 學員 D3-D7 沉默 → 觸發 Hormozi-style retention email（A-C-A 結構），減少早期流失",
       "next_action": "@me 觀察 launchd watchdog 至 2026-05-19；inbox spot-check footer template 持續正確",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "TFT 社群每日資料抓取（10 collector 全鏈路）",
+      "area": "Main Business",
+      "status": "測試 — 10 個 launchd 每天 08:00-08:40 跑 TFT 全鏈路：skool-tft(members) / skool-posts / skool-post-comments / skool-post-insights / skool-dms / tft-ck-reconcile / tft-ck-subscribers / skool-course-progress / tft-retention-watchdog / tft-inbox-collector。5/19 那一輪 9/10 ✅（posts 135 / coach_comments 1479 / insights 1430 / member_progress 25607 / members_raw 1906 / ck_subscribers 5563 / inbox 56），**🔴 com.rayos.skool-dms 5/19 exit code=1，skool_dm_messages.MAX(collected_at) 只到 2026-05-18**（疑似 [[feedback_launchd_sqlite_authorization_denied]] 重現）",
+      "outcome": "每日 08:00-08:40 launchd 串完跑全部 TFT 社群資料抓取，10 個 table `MAX(date)` ≥ yesterday 都成立；任一條失敗自動回報（Daily Brief / TG）",
+      "next_action": "@me (a) 觀察 2026-05-20 08:00-08:40 自動 fire；(b) @claude 修 skool-dms 昨日 fail — `launchctl print gui/$UID/com.rayos.skool-dms` 看 stderr log path → unload/load 一輪，對照 [[feedback_launchd_sqlite_authorization_denied]]",
       "completed": false,
       "completed_date": null
     },
