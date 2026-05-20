@@ -806,7 +806,8 @@ def sync_transactions_to_notion(transactions: list[dict], headers: dict) -> int:
                 amount = props.get('金額', {}).get('number', 0) or 0
                 date_obj = props.get('日期', {}).get('date') or {}
                 date_str = date_obj.get('start', '')
-                existing_keys.add(f"{date_str}|{desc}|{amount}")
+                # Normalize amount to int so 635 (Notion int) == 635.0 (JSON float)
+                existing_keys.add(f"{date_str}|{desc}|{int(round(amount))}")
 
             cursor = data.get('next_cursor')
             if not cursor:
@@ -818,7 +819,7 @@ def sync_transactions_to_notion(transactions: list[dict], headers: dict) -> int:
     created = 0
     for t in positive:
         notion_date = t['date'].replace('/', '-')
-        key = f"{notion_date}|{t['desc']}|{t['amount']}"
+        key = f"{notion_date}|{t['desc']}|{int(round(t['amount']))}"
         if key in existing_keys:
             continue
 
@@ -831,7 +832,7 @@ def sync_transactions_to_notion(transactions: list[dict], headers: dict) -> int:
                     '分類': {'select': {'name': t['category']}},
                     '日期': {'date': {'start': notion_date}},
                     '月份': {'rich_text': [{'text': {'content': t['month']}}]},
-                    '金額': {'number': t['amount']},
+                    '金額': {'number': int(round(t['amount']))},
                 },
             },
         )

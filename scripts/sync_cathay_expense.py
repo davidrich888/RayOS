@@ -582,7 +582,8 @@ def sync_transactions_to_notion(new_transactions: list[dict]):
                 date_prop = props.get('日期', {}).get('date', {})
                 desc = desc_arr[0]['plain_text'] if desc_arr else ''
                 date = date_prop.get('start', '') if date_prop else ''
-                existing_keys.add((date, desc, amount))
+                # Normalize amount to int so 635 (Notion int) == 635.0 (JSON float)
+                existing_keys.add((date, desc, int(round(amount or 0))))
             if not result.get('has_more'):
                 break
             start_cursor = result.get('next_cursor')
@@ -593,7 +594,7 @@ def sync_transactions_to_notion(new_transactions: list[dict]):
     for txn in new_transactions:
         # Format date for Notion (YYYY/MM/DD → YYYY-MM-DD)
         notion_date = txn['date'].replace('/', '-')
-        key = (notion_date, txn['desc'], round(txn['amount']))
+        key = (notion_date, txn['desc'], int(round(txn['amount'])))
         if key in existing_keys:
             continue
 
@@ -604,7 +605,7 @@ def sync_transactions_to_notion(new_transactions: list[dict]):
                 '分類': {'select': {'name': CATEGORY_TO_NOTION.get(txn['category'], txn['category'])}},
                 '日期': {'date': {'start': notion_date}},
                 '月份': {'rich_text': [{'text': {'content': txn['month']}}]},
-                '金額': {'number': round(txn['amount'])},
+                '金額': {'number': int(round(txn['amount']))},
             },
         })
         created += 1
