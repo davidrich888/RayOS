@@ -58,7 +58,8 @@ def load_env():
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
                     key, val = line.split('=', 1)
-                    os.environ.setdefault(key.strip(), val.strip())
+                    _k = key.strip()
+                    os.environ[_k] = os.environ.get(_k) or val.strip()
 
 load_env()
 
@@ -222,6 +223,10 @@ def download_cathay_pdf_from_gmail():
         raise RuntimeError(f"gws search failed: {result.stderr}")
 
     data = json.loads(result.stdout)
+    # gws can exit 0 yet return an API error payload (e.g. expired OAuth token).
+    # Surface it explicitly instead of the misleading "no email found" below.
+    if isinstance(data, dict) and 'error' in data:
+        raise RuntimeError(f"gws API error: {data['error'].get('message', data['error'])}")
     messages = data.get('messages', [])
     if not messages:
         raise RuntimeError("No Cathay statement email found in Gmail")

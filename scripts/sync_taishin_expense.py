@@ -286,6 +286,10 @@ def download_taishin_url_from_gmail() -> str:
         raise RuntimeError(f"gws search failed: {result.stderr}")
 
     data = json.loads(result.stdout)
+    # gws can exit 0 yet return an API error payload (e.g. expired OAuth token).
+    # Surface it explicitly instead of the misleading "no email found" below.
+    if isinstance(data, dict) and 'error' in data:
+        raise RuntimeError(f"gws API error: {data['error'].get('message', data['error'])}")
     messages = data.get('messages', [])
     if not messages:
         raise RuntimeError("No Taishin statement email found in Gmail")
@@ -328,14 +332,18 @@ def download_taishin_url_from_gmail() -> str:
 
     full_text = '\n'.join(bodies)
 
-    # 4) Extract candidate URLs and pick the Taishin one
+    # 4) Extract the statement link — must be the OnlineBill.aspx URL.
+    # The email also contains header/banner images on bhurecv.taishinbank.com.tw,
+    # so a plain "taishin" substring match grabs a header.jpg and the login page
+    # never loads. Match the actual bill endpoint and pick the longest variant
+    # (the plain-text part line-wraps it; the HTML href has the full query string).
     urls = re.findall(r'https://[^\s"\'<>]+', full_text)
-    candidates = [u for u in urls if 'taishin' in u.lower()]
+    candidates = [u for u in urls if 'onlinebill.aspx' in u.lower()]
     if not candidates:
         preview = full_text[:300].replace('\n', ' ')
-        raise RuntimeError(f"No Taishin URL found in email body ({len(urls)} URLs total). Preview: {preview}")
+        raise RuntimeError(f"No Taishin OnlineBill URL found in email body ({len(urls)} URLs total). Preview: {preview}")
 
-    target_url = candidates[0].rstrip('.,)>')
+    target_url = max(candidates, key=len).replace('&amp;', '&').rstrip('.,)>')
     print(f"  URL: {target_url[:90]}...")
     return target_url
 
