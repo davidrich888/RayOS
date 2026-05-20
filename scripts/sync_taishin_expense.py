@@ -364,9 +364,13 @@ def scrape_taishin_statement(url: str) -> str:
     """
     from playwright.sync_api import sync_playwright
 
+    # Taishin OnlineBill login password (#pdf_auto_no). Since the 2024-12 (民國113/12)
+    # statement, natural persons use: last 2 digits of national ID + birthday MMDD = 6
+    # digits (e.g. ID A22****13, born Aug 3 → "130803"). NOT the full ID. Set this
+    # 6-digit value in .env as TAISHIN_BILL_PASSWORD.
     password = os.environ.get('TAISHIN_BILL_PASSWORD', '')
     if not password:
-        print("ERROR: TAISHIN_BILL_PASSWORD not set in .env")
+        print("ERROR: TAISHIN_BILL_PASSWORD not set in .env (need 身分證後2碼+生日MMDD = 6 digits)")
         sys.exit(1)
 
     anthropic_key = os.environ.get('ANTHROPIC_API_KEY', '')
@@ -424,10 +428,20 @@ def scrape_taishin_statement(url: str) -> str:
             page.click('#btnView')
             time.sleep(4)
 
-            # Check result
+            # Check result. A wrong password lands on a page reading "登入密碼錯誤"
+            # while a wrong captcha reads "認證失敗". Bail immediately on a password
+            # error (retrying with the same password just risks a lockout); only the
+            # captcha case is worth retrying. The page also has no transaction table,
+            # so without this check the old code treated the error page as success
+            # and silently parsed 0 transactions.
             body_text = page.inner_text('body')
+            if '密碼錯誤' in body_text:
+                print("  登入密碼錯誤 — wrong password, aborting (check TAISHIN_BILL_PASSWORD"
+                      " = 身分證後2碼+生日MMDD, 6 digits)")
+                browser.close()
+                sys.exit(1)
             if '認證失敗' in body_text:
-                print("  認證失敗, retrying...")
+                print("  認證失敗 (captcha misread?), retrying...")
                 continue
 
             # Success
