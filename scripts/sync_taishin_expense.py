@@ -273,11 +273,16 @@ def download_taishin_url_from_gmail() -> str:
     """Use gws CLI to find latest Taishin statement email and extract the link URL."""
     print("  Searching Gmail for latest Taishin statement...")
 
-    # 1) Search latest Taishin statement email
+    # 1) Search latest Taishin CREDIT-CARD statement email.
+    # The same sender (webmaster@bhurecv) also sends "綜合對帳單" (a bank-account
+    # statement delivered as an encrypted PDF with NO OnlineBill link). Without the
+    # subject filter, maxResults:1 grabs whichever arrived last and may pick the
+    # bank statement, breaking OnlineBill extraction. "信用卡行動帳單" is the credit
+    # card statement, which carries the OnlineBill.aspx link this flow needs.
     result = subprocess.run(
         ['gws', 'gmail', 'users', 'messages', 'list', '--params', json.dumps({
             'userId': 'me',
-            'q': 'from:webmaster@bhurecv.taishinbank.com.tw',
+            'q': 'from:webmaster@bhurecv.taishinbank.com.tw subject:信用卡行動帳單',
             'maxResults': 1,
         })],
         capture_output=True, text=True, timeout=30,
