@@ -378,14 +378,20 @@ def scrape_taishin_statement(url: str) -> str:
         print("ERROR: ANTHROPIC_API_KEY not set in .env")
         sys.exit(1)
 
-    MAX_ATTEMPTS = 5
+    MAX_ATTEMPTS = 8
     import time
 
     with sync_playwright() as p:
-        # Must use real Chrome — Taishin blocks Chromium
-        browser = p.chromium.launch(channel='chrome', headless=True)
+        # Must use real Chrome — Taishin blocks Chromium AND headless automation.
+        # headless=False is required: Taishin's login returns "認證失敗" for headless
+        # sessions even with a correct password + captcha (verified 2026-05-20).
+        browser = p.chromium.launch(channel='chrome', headless=False)
         context = browser.new_context(
             viewport={'width': 1280, 'height': 900},
+            # 3x DPI so the small captcha element screenshots at high resolution —
+            # Claude Vision misreads the low-res ~150x40px default badly (5/5 fails
+            # observed 2026-05-20), sharp 3x screenshots read reliably.
+            device_scale_factor=3,
             user_agent=(
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                 'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -421,9 +427,16 @@ def scrape_taishin_statement(url: str) -> str:
                 print(f"  Bad captcha length ({len(captcha)}), retrying...")
                 continue
 
-            # Fill form and submit
-            page.fill('#pdf_auto_no', password)
-            page.fill('#txtVcode', captcha)
+            # Real keystrokes, NOT fill(). Taishin rejects programmatic value-set:
+            # verified 2026-05-20 that manual typing in the very same automated
+            # browser logs in, but page.fill() (which sets .value + only an input
+            # event) yields 認證失敗 even with a correct password + captcha. type()
+            # fires keydown/keypress/keyup/input per char so the form's anti-bot
+            # accepts the input.
+            page.click('#pdf_auto_no')
+            page.type('#pdf_auto_no', password, delay=120)
+            page.click('#txtVcode')
+            page.type('#txtVcode', captcha, delay=120)
             time.sleep(0.3)
             page.click('#btnView')
             time.sleep(4)
