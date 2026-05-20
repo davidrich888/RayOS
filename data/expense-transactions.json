@@ -12523,6 +12523,20 @@
     "month": "2026/04"
   },
   {
+    "date": "2026/04/15",
+    "desc": "WORLDGY",
+    "amount": 888.0,
+    "category": "投資自己",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/15",
+    "desc": "優步福爾摩沙股份有公司",
+    "amount": 532.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
     "date": "2026/04/16",
     "desc": "ANTHROPIC",
     "amount": 679,
@@ -12565,10 +12579,52 @@
     "month": "2026/04"
   },
   {
+    "date": "2026/04/16",
+    "desc": "ANTHROPIC",
+    "amount": 669.0,
+    "category": "AI/SaaS",
+    "month": "2026/04"
+  },
+  {
     "date": "2026/04/17",
     "desc": "優步-蛋白盒子健康餐盒 A9739 TAIPEI",
     "amount": 532.0,
     "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/17",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 20.0,
+    "category": "國外手續費",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/17",
+    "desc": "APPLE.COM/BILL",
+    "amount": 1320.0,
+    "category": "Apple",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/17",
+    "desc": "星巴克大里門市",
+    "amount": 160.0,
+    "category": "餐飲",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/17",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 22.0,
+    "category": "國外手續費",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/17",
+    "desc": "APPLE.COM/BILL",
+    "amount": 1490.0,
+    "category": "Apple",
     "month": "2026/04"
   },
   {
@@ -12604,6 +12660,13 @@
     "desc": "統一超商-庄鎂A9739 TAICHU",
     "amount": 154.0,
     "category": "餐飲",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/19",
+    "desc": "優步-秧米YUMEA",
+    "amount": 695.0,
+    "category": "交通",
     "month": "2026/04"
   },
   {
@@ -12656,6 +12719,27 @@
     "month": "2026/04"
   },
   {
+    "date": "2026/04/21",
+    "desc": "統一超商-中高鐵",
+    "amount": 124.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/21",
+    "desc": "高鐵台中站",
+    "amount": 700.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/21",
+    "desc": "CHIAODUOHO",
+    "amount": 2222.0,
+    "category": "其他",
+    "month": "2026/04"
+  },
+  {
     "date": "2026/04/22",
     "desc": "按摩（轉帳）",
     "amount": 12000,
@@ -12677,6 +12761,48 @@
     "month": "2026/04"
   },
   {
+    "date": "2026/04/22",
+    "desc": "統一超商-統領",
+    "amount": 40.0,
+    "category": "餐飲",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/22",
+    "desc": "高鐵板橋站",
+    "amount": 645.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/22",
+    "desc": "CHARGESPOT",
+    "amount": 38.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/22",
+    "desc": "統一超商-連發",
+    "amount": 175.0,
+    "category": "餐飲",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/22",
+    "desc": "三商餐飲股份有限公司中",
+    "amount": 599.0,
+    "category": "其他",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/22",
+    "desc": "中油-大里加油站",
+    "amount": 237.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
     "date": "2026/04/23",
     "desc": "TOPSTEPO5779 CHICAG",
     "amount": 2947.0,
@@ -12691,6 +12817,20 @@
     "month": "2026/04"
   },
   {
+    "date": "2026/04/23",
+    "desc": "全聯福利中心-大里益民",
+    "amount": 366.0,
+    "category": "餐飲",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/23",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 688.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
     "date": "2026/04/24",
     "desc": "TOPSTEPO5779 CHICAG",
     "amount": 1625.0,
@@ -12702,6 +12842,62 @@
     "desc": "國外交易服務費-1625.00",
     "amount": 24.0,
     "category": "國外手續費",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/24",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 538.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/24",
+    "desc": "GOGORONETW",
+    "amount": 499.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/25",
+    "desc": "淡定的蚌",
+    "amount": 3223.0,
+    "category": "其他",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/25",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 28.0,
+    "category": "國外手續費",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/25",
+    "desc": "APPLE.COM/BILL",
+    "amount": 1835.0,
+    "category": "Apple",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/25",
+    "desc": "統一超商-向美",
+    "amount": 69.0,
+    "category": "餐飲",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/26",
+    "desc": "優步-中天衛星車隊",
+    "amount": 473.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/26",
+    "desc": "全聯福利中心-台中中清",
+    "amount": 183.0,
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -12754,6 +12950,34 @@
     "month": "2026/04"
   },
   {
+    "date": "2026/04/27",
+    "desc": "國外交易手續費 -TOPSTE",
+    "amount": 24.0,
+    "category": "國外手續費",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/27",
+    "desc": "TOPSTEP",
+    "amount": 1619.0,
+    "category": "Prop Firm",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/27",
+    "desc": "全聯福利中心-大里益民",
+    "amount": 437.0,
+    "category": "餐飲",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/27",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 505.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
     "date": "2026/04/28",
     "desc": "AAAACCELERATORAUCKLA",
     "amount": 9652.0,
@@ -12782,6 +13006,55 @@
     "month": "2026/04"
   },
   {
+    "date": "2026/04/28",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 661.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/28",
+    "desc": "PCHOME1",
+    "amount": 3546.0,
+    "category": "購物",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/28",
+    "desc": "寶雅生活館台中漢口二店",
+    "amount": 335.0,
+    "category": "生活",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/29",
+    "desc": "卡啡那-大墩店",
+    "amount": 275.0,
+    "category": "其他",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/29",
+    "desc": "優步-秧米YUMEA",
+    "amount": 692.0,
+    "category": "交通",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/29",
+    "desc": "國外交易手續費 -AAAACC",
+    "amount": 2241.0,
+    "category": "國外手續費",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/29",
+    "desc": "AAAACCELERATOR",
+    "amount": 149383.0,
+    "category": "其他",
+    "month": "2026/04"
+  },
+  {
     "date": "2026/04/30",
     "desc": "LUCID TRADINGBASKIN",
     "amount": 2660.0,
@@ -12793,6 +13066,13 @@
     "desc": "國外交易服務費-2660.00",
     "amount": 40.0,
     "category": "國外手續費",
+    "month": "2026/04"
+  },
+  {
+    "date": "2026/04/30",
+    "desc": "優步-POK?MPOK",
+    "amount": 529.0,
+    "category": "交通",
     "month": "2026/04"
   },
   {
@@ -12835,6 +13115,27 @@
     "desc": "國外交易服務費-300.00",
     "amount": 5.0,
     "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/01",
+    "desc": "國外交易手續費 -ELEVEN",
+    "amount": 2.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/01",
+    "desc": "ELEVENLABS.IO",
+    "amount": 159.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/01",
+    "desc": "優步-秧米YUMEA",
+    "amount": 592.0,
+    "category": "交通",
     "month": "2026/05"
   },
   {
@@ -12922,10 +13223,304 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/03",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 10.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/03",
+    "desc": "ANTHROPIC",
+    "amount": 637.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/03",
+    "desc": "優步-暗巷烤雞總店",
+    "amount": 668.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/04",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 628.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/05",
     "desc": "遠傳電信股份有限公司TAIPEI",
     "amount": 1011.0,
     "category": "生活",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/05",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 10.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/05",
+    "desc": "ANTHROPIC",
+    "amount": 635.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/05",
+    "desc": "國外交易手續費 -STREAM",
+    "amount": 21.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/05",
+    "desc": "STREAMYARD.COM",
+    "amount": 1425.0,
+    "category": "事業",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/05",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 688.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "國外交易手續費 -MRCRM",
+    "amount": 45.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "MRCR MOBILE PAY",
+    "amount": 3000.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "ATCCOFFEE",
+    "amount": 185.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "PCHOME1",
+    "amount": 3557.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "ATCCOFFEE",
+    "amount": 440.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 3.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "APPLE.COM/BILL",
+    "amount": 220.0,
+    "category": "Apple",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "國外交易手續費 -PADDLE",
+    "amount": 14.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "PADDLE.NET* N8N CLOUD1",
+    "amount": 932.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 10.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "ANTHROPIC",
+    "amount": 638.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "國外交易手續費 -MRCRM",
+    "amount": 15.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "MRCR MOBILE PAY",
+    "amount": 1000.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "國外交易手續費 -CLAUDE",
+    "amount": 95.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/06",
+    "desc": "CLAUDE.AI SUBSCRIPTION",
+    "amount": 6318.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/08",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 45.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/08",
+    "desc": "APPLE.COM/BILL",
+    "amount": 2990.0,
+    "category": "Apple",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/08",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 30.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/09",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 9.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/09",
+    "desc": "ANTHROPIC",
+    "amount": 632.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/10",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 28.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/10",
+    "desc": "APPLE.COM/BILL",
+    "amount": 1840.0,
+    "category": "Apple",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/10",
+    "desc": "優步-全聯福利中心大",
+    "amount": 1487.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/10",
+    "desc": "優步-海人鹽水雞大里",
+    "amount": 470.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/11",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 631.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/11",
+    "desc": "國外交易手續費 -APIFY*",
+    "amount": 14.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/11",
+    "desc": "APIFY* INV#20260511069",
+    "amount": 908.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/12",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 9.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/12",
+    "desc": "ANTHROPIC",
+    "amount": 628.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/12",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 643.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/13",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 10.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/13",
+    "desc": "ANTHROPIC",
+    "amount": 635.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/14",
+    "desc": "星巴克大里門市",
+    "amount": 170.0,
+    "category": "餐飲",
     "month": "2026/05"
   }
 ]
