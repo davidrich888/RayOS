@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-21T06:16:54+00:00",
+  "generated_at": "2026-05-21T06:18:00+00:00",
   "summary": {
     "active_projects": 36,
     "completed_projects": 2,
@@ -285,7 +285,7 @@
       "area": "Main Business",
       "status": "Active — Strategic Win（影響 D1-D7 留存 + C5 Hormozi 關心效果，目前完全手動）",
       "outcome": "新學員付費後自動拿 onboarding 頁面（歡迎影片 + 任務清單 + 第一週路線圖），減手動 + 提升留存",
-      "next_action": "@claude 看參考 https://www.instagram.com/reel/DYBiR7nxWdT/ → 設計 onboarding 頁面 wireframe + 自動歡迎序列 + Skool 任務 hook",
+      "next_action": "@claude 看參考 https://www.instagram.com/reel/DYBiR7nxWdT/ → 設計 onboarding 頁面 wireframe + 自動歡迎序列（補 D0 加入信缺口，現在只靠 Skool no-reply 信、學員回信會被退）+ Skool 任務 hook",
       "completed": false,
       "completed_date": null
     },
