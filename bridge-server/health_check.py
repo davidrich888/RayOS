@@ -13,6 +13,30 @@ import urllib.request
 import urllib.error
 import ssl
 
+
+def _load_workspace_env() -> None:
+    """Inject workspace-root .env vars so launchd (no shell profile) gets the
+    Telegram token. Only fills keys that are unset or empty (a present-but-empty
+    env var would otherwise silently disable Telegram)."""
+    env_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", ".env")
+    )
+    try:
+        with open(env_path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, val = line.partition("=")
+                key, val = key.strip(), val.strip().strip('"').strip("'")
+                if val and not os.environ.get(key):
+                    os.environ[key] = val
+    except FileNotFoundError:
+        pass
+
+
+_load_workspace_env()
+
 # ── Config ──────────────────────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '925855884')
