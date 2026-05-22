@@ -2,8 +2,11 @@
 # Start Cloudflare Quick Tunnel for bridge server
 # Captures the random URL and updates N8N workflow automatically
 
+# NOTE (2026-05-22): tunnel retired. Secret removed from source — was a live N8N
+# API key committed to a PUBLIC repo. Now read from env (set in workspace .env).
+# The leaked key MUST be rotated in the N8N UI to actually neutralise it.
 LOG="/tmp/cloudflare-tunnel.log"
-N8N_API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMzE1OWNjZC01NDcyLTQyZTUtOGUwMy0zMGUyNTVlMjE0MWQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzcwOTAyNDE3fQ.00291E8JEI0bcmFaKCzYVA0rmGkAkGHVrcLi5p_vxng"
+N8N_API_KEY="${N8N_API_KEY:-}"
 N8N_BASE="https://david86726.app.n8n.cloud/api/v1"
 WORKFLOW_ID="JIQEHaoB7XSz2EKuMEexy"
 BRIDGE_TOKEN="rayos2026bridge"
