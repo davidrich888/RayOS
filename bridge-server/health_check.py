@@ -44,7 +44,6 @@ NOTION_TOKEN = os.environ.get('NOTION_TOKEN', '')  # from Vercel env, optional f
 
 VERCEL_URL = 'https://ray-os.vercel.app'
 BRIDGE_URL = 'http://localhost:3001'
-TUNNEL_URL_FILE = '/tmp/bridge-tunnel-url.txt'
 
 # Notion DBs to verify
 NOTION_DBS = {
@@ -130,27 +129,10 @@ def check_bridge() -> list[dict]:
         'detail': 'OK' if bridge_ok else f'HTTP {code} — {body[:100]}',
     })
 
-    # Check Cloudflare tunnel
-    tunnel_url = ''
-    try:
-        with open(TUNNEL_URL_FILE, 'r') as f:
-            tunnel_url = f.read().strip()
-    except FileNotFoundError:
-        pass
-
-    if tunnel_url:
-        code, body = http_get(f'{tunnel_url}/health', timeout=15)
-        results.append({
-            'name': 'Cloudflare Tunnel',
-            'ok': code == 200,
-            'detail': f'OK ({tunnel_url[:40]}...)' if code == 200 else f'HTTP {code}',
-        })
-    else:
-        results.append({
-            'name': 'Cloudflare Tunnel',
-            'ok': False,
-            'detail': 'No tunnel URL file found',
-        })
+    # Cloudflare tunnel check removed 2026-05-22: the bridge tunnel was retired
+    # (YT subtitles migrated to Apify, no remaining consumers). The launchd job
+    # com.rayos.cloudflare-tunnel was unloaded and its plist archived to
+    # ~/.rayos/disabled-plists/. See memory reference_launchd_health_and_gws_token.
 
     return results
 
