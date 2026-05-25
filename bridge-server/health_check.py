@@ -37,6 +37,14 @@ def _load_workspace_env() -> None:
 
 _load_workspace_env()
 
+import yaml
+from pathlib import Path
+
+from watchdog_n8n import check_n8n_critical
+
+CONFIG_DIR = Path(__file__).resolve().parent.parent / 'config'
+N8N_API_KEY = os.environ.get('N8N_API_KEY', '')
+
 # ── Config ──────────────────────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '925855884')
@@ -184,6 +192,19 @@ def check_yt_subtitle() -> list[dict]:
         return [{'name': 'YT Subtitle API', 'ok': False, 'detail': f'HTTP {code}'}]
 
 
+def format_n8n_alerts(alerts: list[dict]) -> str:
+    """Format N8N critical alerts for Telegram message."""
+    if not alerts:
+        return ''
+    lines = [f'\n*🚨 N8N Critical Failures ({len(alerts)})*']
+    for a in alerts:
+        when = a['last_two_failed_at'][0] or '?'
+        lines.append(f"• {a['workflow_name']} — 連續 2 次 fail")
+        lines.append(f"  最後失敗：{when}")
+        lines.append(f"  {a['url']}")
+    return '\n'.join(lines)
+
+
 def send_telegram(message: str) -> bool:
     """Send Telegram notification."""
     if not TELEGRAM_BOT_TOKEN:
@@ -211,26 +232,47 @@ def main():
     all_results.extend(check_yt_subtitle())
     all_results.extend(check_notion_dbs())
 
+    # Block A — N8N critical workflow check
+    n8n_alerts: list[dict] = []
+    n8n_config_path = CONFIG_DIR / 'n8n_critical_workflows.yaml'
+    if N8N_API_KEY and n8n_config_path.exists():
+        try:
+            with open(n8n_config_path) as f:
+                n8n_config = yaml.safe_load(f)
+            n8n_alerts = check_n8n_critical(n8n_config, N8N_API_KEY)
+            print(f'[Health Check] N8N critical: {len(n8n_alerts)} alerts')
+        except Exception as e:
+            print(f'[Health Check] N8N check failed: {e}')
+            all_results.append({'name': 'N8N watchdog', 'ok': False, 'detail': f'self-check failed: {e}'})
+    else:
+        print('[Health Check] N8N check skipped (no API key or config)')
+
     # Build report
     ok_count = sum(1 for r in all_results if r['ok'])
     fail_count = len(all_results) - ok_count
     failures = [r for r in all_results if not r['ok']]
 
-    if fail_count == 0:
+    n8n_section = format_n8n_alerts(n8n_alerts)
+    has_n8n_alerts = bool(n8n_alerts)
+
+    if fail_count == 0 and not has_n8n_alerts:
         msg = f"*RayOS Health Check*\n\n{ok_count}/{len(all_results)} checks passed"
-        print(f'[Health Check] All {ok_count} checks passed')
+        print(f'[Health Check] All {ok_count} checks passed, no N8N alerts')
     else:
         lines = [f"*RayOS Health Check*\n"]
         lines.append(f"{ok_count}/{len(all_results)} passed, *{fail_count} FAILED*\n")
-        lines.append("*Failed:*")
-        for r in failures:
-            lines.append(f"  {r['name']}: {r['detail']}")
+        if failures:
+            lines.append("*Failed:*")
+            for r in failures:
+                lines.append(f"  {r['name']}: {r['detail']}")
         lines.append("\n*Passed:*")
         for r in all_results:
             if r['ok']:
                 lines.append(f"  {r['name']}")
+        if n8n_section:
+            lines.append(n8n_section)
         msg = '\n'.join(lines)
-        print(f'[Health Check] {fail_count} failures detected')
+        print(f'[Health Check] {fail_count} failures + {len(n8n_alerts)} N8N alerts')
 
     # Print full report to stdout
     for r in all_results:
@@ -241,7 +283,7 @@ def main():
     send_telegram(msg)
 
     # Exit code for scripting
-    sys.exit(0 if fail_count == 0 else 1)
+    sys.exit(0 if (fail_count == 0 and not has_n8n_alerts) else 1)
 
 
 if __name__ == '__main__':
