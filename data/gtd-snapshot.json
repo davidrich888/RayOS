@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-21T18:30:11+00:00",
+  "generated_at": "2026-05-25T05:20:02+00:00",
   "summary": {
     "active_projects": 36,
     "completed_projects": 2,
@@ -283,7 +283,7 @@
     {
       "name": "QW21 — S7 TFT Onboarding 自動化頁面 ⭐",
       "area": "Main Business",
-      "status": "Active — Strategic Win（影響 D1-D7 留存 + C5 Hormozi 關心效果，目前完全手動）",
+      "status": "測試 — onboarding 頁面 ship LIVE 2026-05-22（fundwithray.com/tft/onboarding.html，9 題 wizard + 10 條法律版協議 + 簽名 PDF 存 DataOS + Skool 名/DataOS 雙寫）。觀察期等 Ray 驗收 + 填 4 placeholder（VSL URL/問卷/任務/出口連結）+ 律師覆核違約金 & 第十條授權範圍。MEMORY #25",
       "outcome": "新學員付費後自動拿 onboarding 頁面（歡迎影片 + 任務清單 + 第一週路線圖），減手動 + 提升留存",
       "next_action": "@claude 看參考 https://www.instagram.com/reel/DYBiR7nxWdT/ → 設計 onboarding 頁面 wireframe + 自動歡迎序列（補 D0 加入信缺口，現在只靠 Skool no-reply 信、學員回信會被退）+ Skool 任務 hook",
       "completed": false,
