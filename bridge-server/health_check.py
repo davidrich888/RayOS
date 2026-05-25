@@ -219,13 +219,13 @@ def format_launchd_alerts(alerts: list[dict]) -> str:
     if recovered:
         sections.append(f'\n*⚠️ launchd Tasks Recovered ({len(recovered)})*')
         for a in recovered:
-            sections.append(f"• {a['label']} 漏跑 {a['hours_late']:.1f}h")
-            sections.append(f"  → {a['detail']} ✅")
+            sections.append(f"• {a.get('label', '?')} 漏跑 {a.get('hours_late', 0):.1f}h")
+            sections.append(f"  → {a.get('detail', '')} ✅")
     if manual:
         sections.append(f'\n*🆘 launchd Manual Required ({len(manual)})*')
         for a in manual:
-            sections.append(f"• {a['label']} 漏跑 {a['hours_late']:.1f}h")
-            sections.append(f"  {a['detail']}")
+            sections.append(f"• {a.get('label', '?')} 漏跑 {a.get('hours_late', 0):.1f}h")
+            sections.append(f"  {a.get('detail', '')}")
     return '\n'.join(sections)
 
 
@@ -301,7 +301,10 @@ def main():
         print(f'[Health Check] All {ok_count} checks passed, no alerts')
     else:
         lines = [f"*RayOS Health Check*\n"]
-        lines.append(f"{ok_count}/{len(all_results)} passed, *{fail_count} FAILED*\n")
+        if fail_count > 0:
+            lines.append(f"{ok_count}/{len(all_results)} passed, *{fail_count} FAILED*\n")
+        else:
+            lines.append(f"{ok_count}/{len(all_results)} passed\n")
         if failures:
             lines.append("*Failed:*")
             for r in failures:
