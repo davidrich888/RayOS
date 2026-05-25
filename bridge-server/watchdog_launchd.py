@@ -58,6 +58,8 @@ def check_launchd_tasks(config: dict[str, Any], history_path: Path,
          'hours_late': float, 'detail': str}
 
     dry_run=True: 不真的呼叫 launchctl，只回 alert "would reload"（用於測試）.
+    Note: dry_run alerts use severity='recovered' to mean "would recover" — callers
+    counting successes must distinguish via the detail string '[dry-run]' prefix.
     """
     now = time.time()
     history = _load_history(history_path)
@@ -104,7 +106,7 @@ def check_launchd_tasks(config: dict[str, Any], history_path: Path,
             else:
                 alerts.append({'label': label, 'severity': 'manual',
                                'hours_late': hours_late,
-                               'detail': 'reload sent but marker not updated within 10s'})
+                               'detail': f'reload sent but marker not updated within {verify_wait_s}s'})
         else:
             alerts.append({'label': label, 'severity': 'manual',
                            'hours_late': hours_late, 'detail': detail})
