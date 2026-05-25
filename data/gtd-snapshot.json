@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-25T17:40:42+00:00",
+  "generated_at": "2026-05-25T17:48:50+00:00",
   "summary": {
     "active_projects": 35,
     "completed_projects": 3,
     "next_actions": 9,
     "waiting_for": 0,
-    "automation_pct": 15,
+    "automation_pct": 22,
     "automation_target": 30,
     "automation_baseline_date": "2026-05-04"
   },
