@@ -198,7 +198,7 @@ def format_n8n_alerts(alerts: list[dict]) -> str:
         return ''
     lines = [f'\n*🚨 N8N Critical Failures ({len(alerts)})*']
     for a in alerts:
-        when = a['last_two_failed_at'][0] or '?'
+        when = (a.get('last_two_failed_at') or ['?'])[0] or '?'
         lines.append(f"• {a['workflow_name']} — 連續 2 次 fail")
         lines.append(f"  最後失敗：{when}")
         lines.append(f"  {a['url']}")
