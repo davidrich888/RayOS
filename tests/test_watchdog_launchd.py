@@ -155,6 +155,55 @@ def test_real_reload_marker_not_updated(tmp_path):
     assert 'not updated' in alerts[0]['detail']
 
 
+def test_empty_primary_falls_back_to_err(tmp_path):
+    """Python logging writes to stderr by default — .log stays empty while
+    .err has real activity. Watchdog should treat .err mtime as evidence."""
+    marker = tmp_path / 'task.log'
+    marker.write_text('')  # empty, like real launchd StandardOutPath when script logs via stderr
+    old = time.time() - 100 * 3600
+    os.utime(marker, (old, old))
+
+    err = tmp_path / 'task.err'
+    err.write_text('INFO real log lines')
+    fresh = time.time() - 2 * 3600
+    os.utime(err, (fresh, fresh))
+
+    config = _make_yaml_config([{
+        'label': 'com.test.stderr-only',
+        'plist': str(tmp_path / 'fake.plist'),
+        'expected_interval_hours': 24,
+        'marker_path': str(marker),
+        'priority': 'A',
+    }])
+    history_path = tmp_path / 'history.json'
+    alerts = check_launchd_tasks(config, history_path, dry_run=True)
+    assert alerts == []  # .err is fresh → task is healthy
+
+
+def test_empty_primary_falls_back_to_error_log_suffix(tmp_path):
+    """Some plists use .error.log (not .err) for StandardErrorPath."""
+    marker = tmp_path / 'task.log'
+    marker.write_text('')
+    old = time.time() - 100 * 3600
+    os.utime(marker, (old, old))
+
+    err = tmp_path / 'task.error.log'
+    err.write_text('INFO real log lines')
+    fresh = time.time() - 2 * 3600
+    os.utime(err, (fresh, fresh))
+
+    config = _make_yaml_config([{
+        'label': 'com.test.error-log-suffix',
+        'plist': str(tmp_path / 'fake.plist'),
+        'expected_interval_hours': 24,
+        'marker_path': str(marker),
+        'priority': 'A',
+    }])
+    history_path = tmp_path / 'history.json'
+    alerts = check_launchd_tasks(config, history_path, dry_run=True)
+    assert alerts == []
+
+
 def test_bootstrap_failure(tmp_path):
     """launchctl bootstrap exit 非 0 → severity=manual"""
     marker = tmp_path / 'fail.log'

@@ -23,11 +23,29 @@ def _save_history(history_path: Path, history: dict[str, float]) -> None:
 
 
 def _marker_mtime(marker_path: str) -> float | None:
-    """Return mtime in epoch seconds, or None if missing."""
+    """Return mtime in epoch seconds, or None if no evidence found.
+
+    Falls back to .err / .error.log siblings when primary marker is empty.
+    Reason: Python's logging module writes to stderr by default, so launchd-
+    spawned scripts often leave StandardOutPath (`.log`, size=0, mtime frozen
+    at first redirect) untouched while all activity lands in StandardErrorPath.
+    """
+    candidates: list[float] = []
     try:
-        return os.path.getmtime(marker_path)
+        if os.path.getsize(marker_path) > 0:
+            candidates.append(os.path.getmtime(marker_path))
     except FileNotFoundError:
-        return None
+        pass
+
+    primary = Path(marker_path)
+    for sibling in (primary.with_suffix('.err'), primary.with_suffix('.error.log')):
+        try:
+            if os.path.getsize(sibling) > 0:
+                candidates.append(os.path.getmtime(sibling))
+        except FileNotFoundError:
+            pass
+
+    return max(candidates) if candidates else None
 
 
 def _reload_launchd(label: str, plist: str) -> tuple[bool, str]:
