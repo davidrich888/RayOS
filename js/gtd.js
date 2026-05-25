@@ -96,7 +96,12 @@ function renderGTDProjects(projects) {
     // Status「測試」優先級最高 — 已在 testing 的 QW 不能重複出現在這組
     const qw = all.filter(p => /^QW\d+/.test(p.name) && !testingSet.has(p));
 
-    if (testing.length === 0 && qw.length === 0) {
+    // Group 3: 最近完成 (non-QW completed) — QW 已在 group 2 顯示，避免重複
+    const recentlyDone = all
+        .filter(p => p.completed && !/^QW\d+/.test(p.name))
+        .sort((a, b) => (b.completed_date || '').localeCompare(a.completed_date || ''));
+
+    if (testing.length === 0 && qw.length === 0 && recentlyDone.length === 0) {
         el.innerHTML = '<div style="color:var(--text-dim);padding:12px;">No projects in dashboard groups</div>';
         return;
     }
@@ -114,6 +119,10 @@ function renderGTDProjects(projects) {
             return qwNum(a) - qwNum(b);
         });
         html += renderProjectGroup('Task Audit Quick Wins', qwSorted, true);
+    }
+
+    if (recentlyDone.length > 0) {
+        html += renderProjectGroup('最近完成', recentlyDone, false);
     }
 
     el.innerHTML = html;
