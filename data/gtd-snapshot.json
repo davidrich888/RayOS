@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-25T17:54:29+00:00",
+  "generated_at": "2026-05-25T19:15:01+00:00",
   "summary": {
-    "active_projects": 36,
-    "completed_projects": 3,
+    "active_projects": 35,
+    "completed_projects": 4,
     "next_actions": 9,
     "waiting_for": 0,
     "automation_pct": 22,
@@ -103,11 +103,11 @@
     {
       "name": "QW1 — C5 Hormozi 3-7 天關心學員（跨平台 nurture）",
       "area": "Main Business",
-      "status": "測試 — TFT Retention LIVE 上線觀察期（launchd watchdog daily ✅），14d 觀察至 2026-05-19 → 通過後改 Completed + Phase 5 cleanup（刪舊腳本 + drop gamification 殘欄）",
+      "status": "Completed ✅ 2026-05-26 — 14d 觀察期 (05-12~05-19) launchd watchdog daily 全綠，切 Resend 後 (05-16) 持續穩定。Ground truth: 05-12~05-26 共 109 封實際 Resend sent（其中 retention 20 封 + intro backfill 84 封 + 其他 5 封），delivered 44 / opened 17 / clicked 1，**bounce 0% / complaint 0%（紅線 5% / 0.3% 全守住）**",
       "outcome": "自動 watchdog 偵測 TFT 學員 D3-D7 沉默 → 觸發 Hormozi-style retention email（A-C-A 結構），減少早期流失",
-      "next_action": "@me 觀察 launchd watchdog 至 2026-05-19；inbox spot-check footer template 持續正確",
-      "completed": false,
-      "completed_date": null
+      "next_action": "",
+      "completed": true,
+      "completed_date": "2026-05-26"
     },
     {
       "name": "TFT 社群每日資料抓取（10 collector 全鏈路）",
