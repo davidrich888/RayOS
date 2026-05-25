@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import sys
 import urllib.request
 import urllib.error
 import ssl
@@ -20,7 +21,8 @@ def _fetch_executions(workflow_id: str, api_key: str, base_url: str, limit: int 
         with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
             data = json.loads(resp.read().decode('utf-8'))
             return data.get('data', [])
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, TimeoutError):
+    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, TimeoutError) as e:
+        print(f'[watchdog_n8n] _fetch_executions failed for {workflow_id}: {e}', file=sys.stderr)
         return []
 
 

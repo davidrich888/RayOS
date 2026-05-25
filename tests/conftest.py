@@ -7,7 +7,6 @@ BRIDGE_DIR = PROJECT_ROOT / 'bridge-server'
 sys.path.insert(0, str(BRIDGE_DIR))
 
 
-import importlib
 # 讓 `import bridge_server.watchdog_n8n` 等價於從 bridge-server/ 載入
 import types
 pkg = types.ModuleType('bridge_server')
