@@ -92,13 +92,13 @@ function renderGTDProjects(projects) {
     const testing = all.filter(p => !p.completed && statusBadge(p) === '測試');
     const testingSet = new Set(testing);
 
-    // Group 2: Task Audit Quick Wins (QW…) — canonical scoreboard
-    // Status「測試」優先級最高 — 已在 testing 的 QW 不能重複出現在這組
-    const qw = all.filter(p => /^QW\d+/.test(p.name) && !testingSet.has(p));
+    // Group 2: Task Audit Quick Wins (QW…) — canonical scoreboard (active only)
+    // Status「測試」優先級最高；completed 一律收進 group 3，避免雙重顯示
+    const qw = all.filter(p => /^QW\d+/.test(p.name) && !testingSet.has(p) && !p.completed);
 
-    // Group 3: 最近完成 (non-QW completed) — QW 已在 group 2 顯示，避免重複
+    // Group 3: 最近完成 — 所有 completed 項目（含 QW），按 completed_date 新→舊
     const recentlyDone = all
-        .filter(p => p.completed && !/^QW\d+/.test(p.name))
+        .filter(p => p.completed)
         .sort((a, b) => (b.completed_date || '').localeCompare(a.completed_date || ''));
 
     if (testing.length === 0 && qw.length === 0 && recentlyDone.length === 0) {
@@ -173,7 +173,11 @@ function renderProjectGroup(title, projects, showDoneCount) {
 function renderGTDActions(actions) {
     const el = document.getElementById('gtd-actions');
     if (!el) return;
-
+    // Next Actions section retired — next_action shown inline on each project card instead
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+    // eslint-disable-next-line no-unreachable
     if (!actions || Object.keys(actions).length === 0) {
         el.innerHTML = '<div style="color:var(--text-dim);padding:12px;">No next actions defined</div>';
         return;
