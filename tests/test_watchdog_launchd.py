@@ -3,7 +3,7 @@ import os
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from bridge_server.watchdog_launchd import check_launchd_tasks
 
@@ -87,3 +87,104 @@ def test_recent_reload_blocks_second_attempt(tmp_path):
     assert len(alerts) == 1
     assert alerts[0]['severity'] == 'manual'
     assert '24h' in alerts[0]['detail']
+
+
+def test_real_reload_success_updates_marker(tmp_path):
+    """模擬 launchctl reload 後 marker mtime 更新 → severity=recovered"""
+    marker = tmp_path / 'recover.log'
+    _touch(marker, age_hours=72)
+    plist = tmp_path / 'fake.plist'
+    plist.write_text('')
+
+    config = _make_yaml_config([{
+        'label': 'com.test.recover',
+        'plist': str(plist),
+        'expected_interval_hours': 24,
+        'marker_path': str(marker),
+        'priority': 'A',
+    }])
+    history_path = tmp_path / 'history.json'
+
+    def fake_run(cmd, **kwargs):
+        result = MagicMock()
+        result.returncode = 0
+        result.stderr = b''
+        # 在 bootstrap 那一步「真的」把 marker mtime 更新成現在
+        if cmd[1] == 'bootstrap':
+            marker.touch()
+        return result
+
+    with patch('bridge_server.watchdog_launchd.subprocess.run', side_effect=fake_run), \
+         patch('bridge_server.watchdog_launchd.time.sleep'):  # 跳過 10s 等待
+        alerts = check_launchd_tasks(config, history_path, dry_run=False, verify_wait_s=0)
+
+    assert len(alerts) == 1
+    assert alerts[0]['severity'] == 'recovered'
+    assert 'marker updated' in alerts[0]['detail']
+
+
+def test_real_reload_marker_not_updated(tmp_path):
+    """launchctl 跑了但 marker 沒更新 → severity=manual"""
+    marker = tmp_path / 'fail.log'
+    _touch(marker, age_hours=72)
+    original_mtime = marker.stat().st_mtime
+    plist = tmp_path / 'fake.plist'
+    plist.write_text('')
+
+    config = _make_yaml_config([{
+        'label': 'com.test.fail',
+        'plist': str(plist),
+        'expected_interval_hours': 24,
+        'marker_path': str(marker),
+        'priority': 'A',
+    }])
+    history_path = tmp_path / 'history.json'
+
+    def fake_run(cmd, **kwargs):
+        result = MagicMock()
+        result.returncode = 0
+        result.stderr = b''
+        return result  # 不碰 marker
+
+    with patch('bridge_server.watchdog_launchd.subprocess.run', side_effect=fake_run), \
+         patch('bridge_server.watchdog_launchd.time.sleep'):
+        alerts = check_launchd_tasks(config, history_path, dry_run=False, verify_wait_s=0)
+
+    assert len(alerts) == 1
+    assert alerts[0]['severity'] == 'manual'
+    assert 'not updated' in alerts[0]['detail']
+
+
+def test_bootstrap_failure(tmp_path):
+    """launchctl bootstrap exit 非 0 → severity=manual"""
+    marker = tmp_path / 'fail.log'
+    _touch(marker, age_hours=72)
+    plist = tmp_path / 'fake.plist'
+    plist.write_text('')
+
+    config = _make_yaml_config([{
+        'label': 'com.test.crash',
+        'plist': str(plist),
+        'expected_interval_hours': 24,
+        'marker_path': str(marker),
+        'priority': 'A',
+    }])
+    history_path = tmp_path / 'history.json'
+
+    def fake_run(cmd, **kwargs):
+        result = MagicMock()
+        if cmd[1] == 'bootstrap':
+            result.returncode = 5
+            result.stderr = b'permission denied'
+        else:
+            result.returncode = 0
+            result.stderr = b''
+        return result
+
+    with patch('bridge_server.watchdog_launchd.subprocess.run', side_effect=fake_run), \
+         patch('bridge_server.watchdog_launchd.time.sleep'):
+        alerts = check_launchd_tasks(config, history_path, dry_run=False, verify_wait_s=0)
+
+    assert len(alerts) == 1
+    assert alerts[0]['severity'] == 'manual'
+    assert 'bootstrap failed' in alerts[0]['detail']
