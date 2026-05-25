@@ -18,8 +18,15 @@ def _load_history(history_path: Path) -> dict[str, float]:
 
 
 def _save_history(history_path: Path, history: dict[str, float]) -> None:
+    """Atomic write: write to .tmp then os.replace().
+
+    A mid-write crash would otherwise corrupt history.json and silently
+    disable the 24h anti-loop guard on the next run.
+    """
     history_path.parent.mkdir(parents=True, exist_ok=True)
-    history_path.write_text(json.dumps(history, indent=2))
+    tmp = history_path.with_suffix(history_path.suffix + '.tmp')
+    tmp.write_text(json.dumps(history, indent=2))
+    os.replace(tmp, history_path)
 
 
 def _marker_mtime(marker_path: str) -> float | None:
@@ -68,7 +75,8 @@ def _reload_launchd(label: str, plist: str) -> tuple[bool, str]:
 
 
 def check_launchd_tasks(config: dict[str, Any], history_path: Path,
-                        dry_run: bool = False, verify_wait_s: int = 10) -> list[dict[str, Any]]:
+                        dry_run: bool = False, verify_wait_s: int = 10,
+                        reload_ceiling: int = 5) -> list[dict[str, Any]]:
     """For each task, check marker mtime, reload if stale, return alerts.
 
     Alert dict shape:
@@ -78,10 +86,16 @@ def check_launchd_tasks(config: dict[str, Any], history_path: Path,
     dry_run=True: 不真的呼叫 launchctl，只回 alert "would reload"（用於測試）.
     Note: dry_run alerts use severity='recovered' to mean "would recover" — callers
     counting successes must distinguish via the detail string '[dry-run]' prefix.
+
+    reload_ceiling: circuit breaker. Once this many reloads have been attempted
+    in one invocation, remaining stale tasks are returned as severity='manual'
+    with 'reload ceiling reached' in detail — protects against a marker-detection
+    bug from triggering a mass reload event.
     """
     now = time.time()
     history = _load_history(history_path)
     alerts: list[dict[str, Any]] = []
+    reloads_attempted = 0
 
     for task in config['tasks']:
         label = task['label']
@@ -113,7 +127,18 @@ def check_launchd_tasks(config: dict[str, Any], history_path: Path,
                            'hours_late': hours_late, 'detail': '[dry-run] would reload'})
             continue
 
+        # Circuit breaker: don't mass-reload if many tasks went stale at once.
+        if reloads_attempted >= reload_ceiling:
+            alerts.append({
+                'label': label,
+                'severity': 'manual',
+                'hours_late': hours_late,
+                'detail': f'reload ceiling reached ({reload_ceiling}), skipped — likely watchdog misfire, investigate',
+            })
+            continue
+
         ok, detail = _reload_launchd(label, task['plist'])
+        reloads_attempted += 1
         history[label] = now
         if ok:
             time.sleep(verify_wait_s)

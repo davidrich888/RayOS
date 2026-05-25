@@ -155,6 +155,63 @@ def test_real_reload_marker_not_updated(tmp_path):
     assert 'not updated' in alerts[0]['detail']
 
 
+def test_save_history_uses_atomic_replace(tmp_path):
+    """Atomic write: should go through os.replace() so a mid-write crash
+    cannot corrupt history.json and silently disable the anti-loop guard."""
+    marker = tmp_path / 'stale.log'
+    _touch(marker, age_hours=72)
+    config = _make_yaml_config([{
+        'label': 'com.test.atomic',
+        'plist': str(tmp_path / 'fake.plist'),
+        'expected_interval_hours': 24,
+        'marker_path': str(marker),
+        'priority': 'A',
+    }])
+    history_path = tmp_path / 'history.json'
+
+    with patch('bridge_server.watchdog_launchd.os.replace') as mock_replace:
+        check_launchd_tasks(config, history_path, dry_run=True)
+        assert mock_replace.called, '_save_history should atomically replace via os.replace'
+
+
+def test_reload_ceiling_blocks_excess_reloads(tmp_path):
+    """Circuit breaker: with ceiling=2, first 2 stale tasks attempt reload,
+    rest are returned as severity=manual with 'reload ceiling' in detail.
+    Protects against mass-reload events when a marker-detection bug misfires."""
+    plist = tmp_path / 'fake.plist'
+    plist.write_text('')
+    tasks = []
+    for i in range(5):
+        marker = tmp_path / f'stale_{i}.log'
+        _touch(marker, age_hours=72)
+        tasks.append({
+            'label': f'com.test.ceil_{i}',
+            'plist': str(plist),
+            'expected_interval_hours': 24,
+            'marker_path': str(marker),
+            'priority': 'A',
+        })
+    config = _make_yaml_config(tasks)
+    history_path = tmp_path / 'history.json'
+
+    def fake_run(cmd, **kwargs):
+        result = MagicMock()
+        result.returncode = 0
+        result.stderr = b''
+        return result  # don't touch markers → reloads marked 'manual', not 'recovered'
+
+    with patch('bridge_server.watchdog_launchd.subprocess.run', side_effect=fake_run), \
+         patch('bridge_server.watchdog_launchd.time.sleep'):
+        alerts = check_launchd_tasks(config, history_path, dry_run=False,
+                                     verify_wait_s=0, reload_ceiling=2)
+
+    assert len(alerts) == 5
+    ceiling_blocked = [a for a in alerts if 'ceiling' in a['detail']]
+    assert len(ceiling_blocked) == 3
+    for a in ceiling_blocked:
+        assert a['severity'] == 'manual'
+
+
 def test_empty_primary_falls_back_to_err(tmp_path):
     """Python logging writes to stderr by default — .log stays empty while
     .err has real activity. Watchdog should treat .err mtime as evidence."""

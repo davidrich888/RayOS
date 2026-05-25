@@ -293,7 +293,7 @@ def main():
 
     n8n_section = format_n8n_alerts(n8n_alerts)
     launchd_section = format_launchd_alerts(launchd_alerts)
-    has_alerts = bool(n8n_alerts) or any(a['severity'] == 'manual' for a in launchd_alerts)
+    has_alerts = bool(n8n_alerts) or any(a.get('severity') == 'manual' for a in launchd_alerts)
     # recovered 不算 alert（自己救起來了），但仍要 TG 通報
 
     if fail_count == 0 and not n8n_alerts and not launchd_alerts:
