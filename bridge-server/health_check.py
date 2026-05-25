@@ -41,9 +41,13 @@ import yaml
 from pathlib import Path
 
 from watchdog_n8n import check_n8n_critical
+from watchdog_launchd import check_launchd_tasks
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / 'config'
 N8N_API_KEY = os.environ.get('N8N_API_KEY', '')
+
+RAYOS_DIR = Path.home() / '.rayos'
+RELOAD_HISTORY_PATH = RAYOS_DIR / 'reload_history.json'
 
 # ── Config ──────────────────────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
@@ -205,6 +209,26 @@ def format_n8n_alerts(alerts: list[dict]) -> str:
     return '\n'.join(lines)
 
 
+def format_launchd_alerts(alerts: list[dict]) -> str:
+    """Split alerts by severity into recovered / manual sections."""
+    if not alerts:
+        return ''
+    recovered = [a for a in alerts if a['severity'] == 'recovered']
+    manual = [a for a in alerts if a['severity'] == 'manual']
+    sections = []
+    if recovered:
+        sections.append(f'\n*⚠️ launchd Tasks Recovered ({len(recovered)})*')
+        for a in recovered:
+            sections.append(f"• {a['label']} 漏跑 {a['hours_late']:.1f}h")
+            sections.append(f"  → {a['detail']} ✅")
+    if manual:
+        sections.append(f'\n*🆘 launchd Manual Required ({len(manual)})*')
+        for a in manual:
+            sections.append(f"• {a['label']} 漏跑 {a['hours_late']:.1f}h")
+            sections.append(f"  {a['detail']}")
+    return '\n'.join(sections)
+
+
 def send_telegram(message: str) -> bool:
     """Send Telegram notification."""
     if not TELEGRAM_BOT_TOKEN:
@@ -247,17 +271,34 @@ def main():
     else:
         print('[Health Check] N8N check skipped (no API key or config)')
 
+    # Block B — launchd auto task mtime check + auto-reload
+    launchd_alerts: list[dict] = []
+    launchd_config_path = CONFIG_DIR / 'launchd_tasks.yaml'
+    if launchd_config_path.exists():
+        try:
+            with open(launchd_config_path) as f:
+                launchd_config = yaml.safe_load(f)
+            launchd_alerts = check_launchd_tasks(launchd_config, RELOAD_HISTORY_PATH)
+            print(f'[Health Check] launchd: {len(launchd_alerts)} alerts')
+        except Exception as e:
+            print(f'[Health Check] launchd check failed: {e}')
+            all_results.append({'name': 'launchd watchdog', 'ok': False, 'detail': f'self-check failed: {e}'})
+    else:
+        print('[Health Check] launchd check skipped (no config yaml)')
+
     # Build report
     ok_count = sum(1 for r in all_results if r['ok'])
     fail_count = len(all_results) - ok_count
     failures = [r for r in all_results if not r['ok']]
 
     n8n_section = format_n8n_alerts(n8n_alerts)
-    has_n8n_alerts = bool(n8n_alerts)
+    launchd_section = format_launchd_alerts(launchd_alerts)
+    has_alerts = bool(n8n_alerts) or any(a['severity'] == 'manual' for a in launchd_alerts)
+    # recovered 不算 alert（自己救起來了），但仍要 TG 通報
 
-    if fail_count == 0 and not has_n8n_alerts:
+    if fail_count == 0 and not n8n_alerts and not launchd_alerts:
         msg = f"*RayOS Health Check*\n\n{ok_count}/{len(all_results)} checks passed"
-        print(f'[Health Check] All {ok_count} checks passed, no N8N alerts')
+        print(f'[Health Check] All {ok_count} checks passed, no alerts')
     else:
         lines = [f"*RayOS Health Check*\n"]
         lines.append(f"{ok_count}/{len(all_results)} passed, *{fail_count} FAILED*\n")
@@ -271,8 +312,10 @@ def main():
                 lines.append(f"  {r['name']}")
         if n8n_section:
             lines.append(n8n_section)
+        if launchd_section:
+            lines.append(launchd_section)
         msg = '\n'.join(lines)
-        print(f'[Health Check] {fail_count} failures + {len(n8n_alerts)} N8N alerts')
+        print(f'[Health Check] {fail_count} fail + {len(n8n_alerts)} N8N + {len(launchd_alerts)} launchd alerts')
 
     # Print full report to stdout
     for r in all_results:
@@ -283,7 +326,7 @@ def main():
     send_telegram(msg)
 
     # Exit code for scripting
-    sys.exit(0 if (fail_count == 0 and not has_n8n_alerts) else 1)
+    sys.exit(0 if (fail_count == 0 and not has_alerts) else 1)
 
 
 if __name__ == '__main__':
