@@ -1,0 +1,119 @@
+# launchd daily task → marker file mtime watchdog config
+# Phase 0 audit 2026-05-25: 19 daily tasks, all priority A (plist already has StandardOutPath)
+# 不放 com.aios.rayos-health-check（watchdog 自己）
+# priority: A=existing log path / B=added StandardOutPath / C=script edit (none this round)
+
+tasks:
+  - label: com.aios.data-collect
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.data-collect.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-data-collect.log
+    priority: A
+
+  - label: com.aios.data-audit
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.data-audit.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-data-audit.log
+    priority: A
+
+  - label: com.aios.trading-data-sync
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.trading-data-sync.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-trading-data-sync.log
+    priority: A
+
+  - label: com.aios.daily-brief
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.daily-brief.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-daily-brief.log
+    priority: A
+
+  - label: com.rayos.skool-tft
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.skool-tft.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/skool-tft.log
+    priority: A
+
+  - label: com.rayos.credit-card-expense
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.credit-card-expense.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/credit-card-expense.log
+    priority: A
+
+  - label: com.rayos.skool-posts
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.skool-posts.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/skool-posts.log
+    priority: A
+
+  - label: com.rayos.skool-post-comments
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.skool-post-comments.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/skool-post-comments.log
+    priority: A
+
+  - label: com.rayos.skool-post-insights
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.skool-post-insights.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/rayos-skool-post-insights.log
+    priority: A
+
+  - label: com.rayos.skool-dms
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.skool-dms.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/skool-dms.log
+    priority: A
+
+  - label: com.rayos.skool-hackers-delta
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.skool-hackers-delta.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/skool-hackers-delta.log
+    priority: A
+
+  - label: com.rayos.tft-ck-reconcile
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.tft-ck-reconcile.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/tft-ck-reconcile.log
+    priority: A
+
+  - label: com.aios.tft-ck-subscribers
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.tft-ck-subscribers.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-tft-ck-subscribers.log
+    priority: A
+
+  - label: com.aios.tft-retention-watchdog
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.tft-retention-watchdog.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-tft-retention-watchdog.log
+    priority: A
+
+  - label: com.rayos.skool-course-progress
+    plist: /Users/jarvis/Library/LaunchAgents/com.rayos.skool-course-progress.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/rayos-skool-course-progress.log
+    priority: A
+
+  - label: com.aios.tft-inbox-collector
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.tft-inbox-collector.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-tft-inbox-collector.log
+    priority: A
+
+  - label: com.aios.tft-warm-leads-etl
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.tft-warm-leads-etl.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-tft-warm-leads-etl.log
+    priority: A
+
+  - label: com.aios.tft-warm-leads-push
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.tft-warm-leads-push.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-tft-warm-leads-push.log
+    priority: A
+
+  - label: com.aios.tft-warm-leads-conversion
+    plist: /Users/jarvis/Library/LaunchAgents/com.aios.tft-warm-leads-conversion.plist
+    expected_interval_hours: 24
+    marker_path: /Users/jarvis/Library/Logs/aios-tft-warm-leads-conversion.log
+    priority: A
