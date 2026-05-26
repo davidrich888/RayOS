@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-25T19:15:41+00:00",
+  "generated_at": "2026-05-26T16:32:48+00:00",
   "summary": {
-    "active_projects": 35,
+    "active_projects": 36,
     "completed_projects": 4,
     "next_actions": 9,
     "waiting_for": 0,
@@ -43,6 +43,15 @@
       "status": "Active — UI 完成，收尾中",
       "outcome": "見證牆上線（R2 圖片託管 + VSL 影片正常播放）",
       "next_action": "@claude 設定 R2 bucket 上傳測試圖片，確認 CDN 路徑",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "🌟 TFT Live Proof Engine（Hormozi-inspired）",
+      "area": "Main Business",
+      "status": "測試 — Spec + PoC 2 支 Ray verdict「兩個都還不錯」（2026-05-27）。Hormozi AI 修正方向：**內容先（手動實拍 Track 2）→ 工程後**。30-day proof sprint 啟動：W1 抽 4 場直播 × 5 段 = 20-30 支 Shorts 草稿。MEMORY #33",
+      "outcome": "TFT 每週直播 → chunk + sanitize + Ray-voice 重寫 → YT Shorts 公開分發 → 攔 cold traffic 倒流炒股黑客（免費）→ TFT（付費）。把已存在的 proof 公開分發出去，不新增 Ray commitment",
+      "next_action": "@claude 從 `reference/live-transcripts/2026-05-25-tft-transcript.md` 抽 5 段 Track 2/Track 3 chunk → 產 5 份 YT Shorts 草稿到 `outputs/pending/20260527-shorts-batch/` → Ray 評後拍 2-3 支發主頻 FundwithRay 看流量",
       "completed": false,
       "completed_date": null
     },
