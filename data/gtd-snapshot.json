@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-26T16:32:48+00:00",
+  "generated_at": "2026-05-27T18:09:40+00:00",
   "summary": {
     "active_projects": 36,
     "completed_projects": 4,
@@ -49,9 +49,9 @@
     {
       "name": "🌟 TFT Live Proof Engine（Hormozi-inspired）",
       "area": "Main Business",
-      "status": "測試 — Spec + PoC 2 支 Ray verdict「兩個都還不錯」（2026-05-27）。Hormozi AI 修正方向：**內容先（手動實拍 Track 2）→ 工程後**。30-day proof sprint 啟動：W1 抽 4 場直播 × 5 段 = 20-30 支 Shorts 草稿。MEMORY #33",
-      "outcome": "TFT 每週直播 → chunk + sanitize + Ray-voice 重寫 → YT Shorts 公開分發 → 攔 cold traffic 倒流炒股黑客（免費）→ TFT（付費）。把已存在的 proof 公開分發出去，不新增 Ray commitment",
-      "next_action": "@claude 從 `reference/live-transcripts/2026-05-25-tft-transcript.md` 抽 5 段 Track 2/Track 3 chunk → 產 5 份 YT Shorts 草稿到 `outputs/pending/20260527-shorts-batch/` → Ray 評後拍 2-3 支發主頻 FundwithRay 看流量",
+      "status": "測試 — 2026-05-28 三層解鎖：(1) 內容層 Hormozi 框架落地 HookScore rubric + Top 4 D1/D3/D5/D7 reorder + 6 弱 hook 重寫（`reference_tft_live_shorts_workflow`） (2) 源頭 `skool_calendar_events` collector + launchd 08:42 ship LIVE（`reference_skool_calendar_collector`）—Skool calendar 自動進 DataOS，知道哪天有直播 (3) 畫面層改用 **StreamYard 多 track 錄影**取代 Skool call，學員訪談式 4 條 mp4 / Ray 直撥 2 條 mp4，解 PII+Chrome tab+缺臉。前一輪 5/25+5/27 共 20 支 mp4 reject（畫面廢、過度依賴「不是 A 是 B」）。MEMORY #33",
+      "outcome": "TFT 每週直播 → 抽 Hormozi hook + 多 track vstack 拼 → YT Shorts 公開分發 → 攔 cold traffic 倒流炒股黑客（免費）→ TFT（付費）。把已存在的 proof 公開分發出去，不新增 Ray commitment",
+      "next_action": "@ray 下次 StreamYard 直播完手動 Download mp4（學員訪談 4 條 / Ray 直撥 2 條）丟到本機資料夾 → @claude 跑 cut PoC 套兩種 layout preset + HookScore 抽 hook（強制 ≥50% 身分開場 + ≥33% 數字 proof）→ Ray 看樣品 → OK 才動 StreamYard 自動下載 collector（PoC-before-automate 鐵則）",
       "completed": false,
       "completed_date": null
     },
