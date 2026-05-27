@@ -52,7 +52,6 @@ function updateWealthDisplay() {
         const lat = wealthHistory[wealthHistory.length - 1];
         const total = lat.totalAssets || 0;
         document.getElementById('display-total').textContent = formatMoney(total);
-        document.getElementById('stat-wealth').textContent = formatMoney(total);
         document.getElementById('display-lastdate').textContent = lat.date || '--';
         document.getElementById('goal-current').textContent = formatNumber(total);
         const pct = Math.min(100, (total / wealthGoal) * 100);
@@ -70,12 +69,21 @@ function updateWealthDisplay() {
             document.getElementById('display-yearly').className = 'summary-value ' + (yg >= 0 ? 'positive' : 'negative');
         }
         const mdd = lat.mdd;
+        const statMdd = document.getElementById('stat-mdd');
         if (mdd !== null && mdd !== undefined && mdd !== 0) {
             document.getElementById('display-mdd').textContent = formatMoney(mdd);
             document.getElementById('display-mdd').className = 'summary-value negative';
+            if (statMdd) {
+                statMdd.textContent = formatMoney(mdd);
+                statMdd.style.color = '#e07a5f';
+            }
         } else {
             document.getElementById('display-mdd').textContent = '0';
             document.getElementById('display-mdd').className = 'summary-value';
+            if (statMdd) {
+                statMdd.textContent = '0';
+                statMdd.style.color = '';
+            }
         }
         updateWealthChart();
     }
