@@ -37,6 +37,7 @@ def _load_workspace_env() -> None:
 
 _load_workspace_env()
 
+import subprocess
 import yaml
 from pathlib import Path
 
@@ -44,6 +45,24 @@ from watchdog_n8n import check_n8n_critical
 from watchdog_launchd import check_launchd_tasks
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / 'config'
+
+
+def _watchdog_version() -> str:
+    """Short git sha of the repo this health_check.py lives in.
+
+    Stamped onto the Telegram message so stale alerts can be matched to a
+    specific commit (e.g. the 2026-05-25 false-alarm batch surfaced from a
+    pre-74bc813 watchdog and would otherwise look indistinguishable from
+    a fresh report)."""
+    repo = Path(__file__).resolve().parent.parent
+    try:
+        out = subprocess.run(
+            ['git', '-C', str(repo), 'rev-parse', '--short', 'HEAD'],
+            capture_output=True, timeout=2, text=True,
+        )
+        return out.stdout.strip() or 'unknown'
+    except Exception:
+        return 'unknown'
 N8N_API_KEY = os.environ.get('N8N_API_KEY', '')
 
 RAYOS_DIR = Path.home() / '.rayos'
@@ -215,6 +234,7 @@ def format_launchd_alerts(alerts: list[dict]) -> str:
         return ''
     recovered = [a for a in alerts if a['severity'] == 'recovered']
     manual = [a for a in alerts if a['severity'] == 'manual']
+    config_alerts = [a for a in alerts if a['severity'] == 'config']
     sections = []
     if recovered:
         sections.append(f'\n*⚠️ launchd Tasks Recovered ({len(recovered)})*')
@@ -225,6 +245,11 @@ def format_launchd_alerts(alerts: list[dict]) -> str:
         sections.append(f'\n*🆘 launchd Manual Required ({len(manual)})*')
         for a in manual:
             sections.append(f"• {a.get('label', '?')} 漏跑 {a.get('hours_late', 0):.1f}h")
+            sections.append(f"  {a.get('detail', '')}")
+    if config_alerts:
+        sections.append(f'\n*🛠 launchd Config Drift ({len(config_alerts)})*')
+        for a in config_alerts:
+            sections.append(f"• {a.get('label', '?')}")
             sections.append(f"  {a.get('detail', '')}")
     return '\n'.join(sections)
 
@@ -296,11 +321,12 @@ def main():
     has_alerts = bool(n8n_alerts) or any(a.get('severity') == 'manual' for a in launchd_alerts)
     # recovered 不算 alert（自己救起來了），但仍要 TG 通報
 
+    version = _watchdog_version()
     if fail_count == 0 and not n8n_alerts and not launchd_alerts:
-        msg = f"*RayOS Health Check*\n\n{ok_count}/{len(all_results)} checks passed"
+        msg = f"*RayOS Health Check* `[git {version}]`\n\n{ok_count}/{len(all_results)} checks passed"
         print(f'[Health Check] All {ok_count} checks passed, no alerts')
     else:
-        lines = [f"*RayOS Health Check*\n"]
+        lines = [f"*RayOS Health Check* `[git {version}]`\n"]
         if fail_count > 0:
             lines.append(f"{ok_count}/{len(all_results)} passed, *{fail_count} FAILED*\n")
         else:

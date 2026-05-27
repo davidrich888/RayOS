@@ -234,7 +234,9 @@ def test_empty_primary_falls_back_to_err(tmp_path):
     }])
     history_path = tmp_path / 'history.json'
     alerts = check_launchd_tasks(config, history_path, dry_run=True)
-    assert alerts == []  # .err is fresh → task is healthy
+    # .err is fresh → task is not stale. A 'config' alert is expected separately
+    # (the marker_path points at the dead .log) but does not gate health.
+    assert [a for a in alerts if a['severity'] in ('recovered', 'manual')] == []
 
 
 def test_empty_primary_falls_back_to_error_log_suffix(tmp_path):
@@ -258,7 +260,38 @@ def test_empty_primary_falls_back_to_error_log_suffix(tmp_path):
     }])
     history_path = tmp_path / 'history.json'
     alerts = check_launchd_tasks(config, history_path, dry_run=True)
-    assert alerts == []
+    assert [a for a in alerts if a['severity'] in ('recovered', 'manual')] == []
+
+
+def test_dead_marker_detection_emits_config_alert(tmp_path):
+    """Primary .log is empty + .err has fresh data → severity='config' alert
+    surfaces the marker_path typo without blocking the healthy run."""
+    marker = tmp_path / 'task.log'
+    marker.write_text('')  # size=0 like real launchd StandardOutPath with stderr-only script
+    old = time.time() - 100 * 3600
+    os.utime(marker, (old, old))
+
+    err = tmp_path / 'task.err'
+    err.write_text('INFO real activity')
+    fresh = time.time() - 2 * 3600
+    os.utime(err, (fresh, fresh))
+
+    config = _make_yaml_config([{
+        'label': 'com.test.dead-marker',
+        'plist': str(tmp_path / 'fake.plist'),
+        'expected_interval_hours': 24,
+        'marker_path': str(marker),
+        'priority': 'A',
+    }])
+    history_path = tmp_path / 'history.json'
+    alerts = check_launchd_tasks(config, history_path, dry_run=True)
+
+    config_alerts = [a for a in alerts if a['severity'] == 'config']
+    assert len(config_alerts) == 1
+    assert config_alerts[0]['label'] == 'com.test.dead-marker'
+    assert '.err' in config_alerts[0]['detail']
+    # No stale/recovered alerts — fallback kept the task healthy
+    assert [a for a in alerts if a['severity'] in ('recovered', 'manual')] == []
 
 
 def test_bootstrap_failure(tmp_path):

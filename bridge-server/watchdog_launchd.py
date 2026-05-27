@@ -55,6 +55,46 @@ def _marker_mtime(marker_path: str) -> float | None:
     return max(candidates) if candidates else None
 
 
+def _detect_dead_markers(config: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return severity='config' alerts for tasks whose marker_path is dead.
+
+    Dead marker = primary file exists with size=0 while a sibling (.err /
+    .error.log) holds fresh data ≥24h newer. Caused by Python's logging
+    writing to stderr while plist's StandardOutPath (.log) stays empty —
+    the marker is technically there but never updates, defeating the
+    staleness check.
+
+    These do not block the main run (the _marker_mtime fallback already
+    keeps detection accurate); they surface config drift to Telegram so
+    the marker_path can be corrected before the next ambiguity bites.
+    """
+    alerts: list[dict[str, Any]] = []
+    for task in config['tasks']:
+        marker = task['marker_path']
+        primary = Path(marker)
+        try:
+            psize = os.path.getsize(marker)
+            pmtime = os.path.getmtime(marker)
+        except FileNotFoundError:
+            continue
+        if psize > 0:
+            continue
+        for suffix in ('.err', '.error.log'):
+            sibling = primary.with_suffix(suffix)
+            try:
+                if os.path.getsize(sibling) > 0 and os.path.getmtime(sibling) > pmtime + 24 * 3600:
+                    alerts.append({
+                        'label': task['label'],
+                        'severity': 'config',
+                        'hours_late': 0.0,
+                        'detail': f"marker_path '{primary.name}' is empty; '{sibling.name}' has fresh data — update config to use the .err sibling",
+                    })
+                    break
+            except FileNotFoundError:
+                continue
+    return alerts
+
+
 def _reload_launchd(label: str, plist: str) -> tuple[bool, str]:
     """bootout + bootstrap + kickstart. Returns (success, detail)."""
     uid = os.getuid()
@@ -94,7 +134,7 @@ def check_launchd_tasks(config: dict[str, Any], history_path: Path,
     """
     now = time.time()
     history = _load_history(history_path)
-    alerts: list[dict[str, Any]] = []
+    alerts: list[dict[str, Any]] = list(_detect_dead_markers(config))
     reloads_attempted = 0
 
     for task in config['tasks']:
