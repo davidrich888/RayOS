@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-27T18:09:40+00:00",
+  "generated_at": "2026-05-28T16:28:40+00:00",
   "summary": {
-    "active_projects": 36,
+    "active_projects": 37,
     "completed_projects": 4,
     "next_actions": 9,
     "waiting_for": 0,
@@ -52,6 +52,15 @@
       "status": "測試 — 2026-05-28 三層解鎖：(1) 內容層 Hormozi 框架落地 HookScore rubric + Top 4 D1/D3/D5/D7 reorder + 6 弱 hook 重寫（`reference_tft_live_shorts_workflow`） (2) 源頭 `skool_calendar_events` collector + launchd 08:42 ship LIVE（`reference_skool_calendar_collector`）—Skool calendar 自動進 DataOS，知道哪天有直播 (3) 畫面層改用 **StreamYard 多 track 錄影**取代 Skool call，學員訪談式 4 條 mp4 / Ray 直撥 2 條 mp4，解 PII+Chrome tab+缺臉。前一輪 5/25+5/27 共 20 支 mp4 reject（畫面廢、過度依賴「不是 A 是 B」）。MEMORY #33",
       "outcome": "TFT 每週直播 → 抽 Hormozi hook + 多 track vstack 拼 → YT Shorts 公開分發 → 攔 cold traffic 倒流炒股黑客（免費）→ TFT（付費）。把已存在的 proof 公開分發出去，不新增 Ray commitment",
       "next_action": "@ray 下次 StreamYard 直播完手動 Download mp4（學員訪談 4 條 / Ray 直撥 2 條）丟到本機資料夾 → @claude 跑 cut PoC 套兩種 layout preset + HookScore 抽 hook（強制 ≥50% 身分開場 + ≥33% 數字 proof）→ Ray 看樣品 → OK 才動 StreamYard 自動下載 collector（PoC-before-automate 鐵則）",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "🌟 TFT Weekly Error Radar Pack（Hormozi Consumable）",
+      "area": "Main Business",
+      "status": "測試 — 2026-05-29 W1 sample ship `outputs/pending/2026-05-28-tft-error-radar-w22-sample.md`：5 個錯誤模式（吳承翰實質教學 5 條 + Altino 5/25 直播時間軸萃出）+ 1 頁盤前 30s 自查清單 + 1 個 Anti-Tilt 任務（寫「為什麼進」）+ 附錄 A/B/C。過 Hormozi 5 ✅ + 角色 mapping + 台灣法規 filter。製作 ~60 min。Hormozi AI 2026-05-28 拍板 Option D（A/B/C 改當附錄）。MEMORY #41 候選",
+      "outcome": "週更 TFT「本週社群 Top 5 錯誤 + 自查清單 + Anti-Tilt」consumable pack → 學員不拿就會虧 → membership retention 從 sell-once 改 continuity layer（$79-149/月加在現有 TFT 之上）。W1-12 PoC 通過後接 TFT 英雄聯盟（`trades`/`trade_tags`/`notes`/`discipline`）自動聚合 SQL，升級 W∞ 自動版",
+      "next_action": "@ray review W1 sample 6 項 checklist（5 個 Error 選對？檢查規則具體？Anti-Tilt 對？附錄 B 安全？口吻過？長度可？）+ 填附錄 A（1 句改變的想法）+ 附錄 C（1 筆已平倉 trade 完整心理過程）→ OK → @ray 明確說「OK 發 Resend」→ 走 Resend TFT_Active 白名單發送 → W2-W12 持續手動萃驗 metrics（開信率 ≥40% / 自查清單 self-report ≥30% / retention proxy +5pp）",
       "completed": false,
       "completed_date": null
     },
