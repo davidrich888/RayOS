@@ -1374,6 +1374,16 @@
                     .catch(err => console.warn('[RayOS] SW registration failed:', err));
             });
         }
+
+        /* Dashboard 質感升級：滑鼠追蹤聚光（2026-05-30）。
+           只在 #dashboard 內的卡片生效，事件委派到 document，無依賴、不影響既有功能。 */
+        document.addEventListener('mousemove', (e) => {
+            const el = e.target.closest('#dashboard .stat-box, #dashboard .card');
+            if (!el) return;
+            const r = el.getBoundingClientRect();
+            el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+            el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+        });
     </script>
 </body>
 </html>
