@@ -22,6 +22,11 @@
         localStorage.setItem('plan_id_version', '1');
         console.log('[RayOS] Cleared plan cache — IDs changed to full UUID');
     }
+    // 🔄 Migration: drop legacy drive_script_url (built-in /api/drive-body-photos handles it)
+    if (localStorage.getItem('drive_body_photos_endpoint_v') !== '1') {
+        localStorage.removeItem('drive_script_url');
+        localStorage.setItem('drive_body_photos_endpoint_v', '1');
+    }
     // 🔄 Migration v4: update body data to verified Notion values (2025-03-08 start)
     if (localStorage.getItem('body_data_version') !== '4') {
         localStorage.removeItem('body_history');
@@ -56,6 +61,8 @@
     updateTradingDisplay();
     loadBodyProgressFromDrive(); // Load cached body progress photos before physic display
     updatePhysicDisplay();
+    // 📷 Body photos: silent auto-sync from Drive (built-in OAuth endpoint, no config needed)
+    setTimeout(() => syncBodyPhotosFromDrive(true), 1800);
     loadDailyHabits();
     renderAccountManager();
     updateSyncDot();

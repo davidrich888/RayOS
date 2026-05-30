@@ -8,3 +8,6 @@ n8n-telegram-idea-bot.json
 bridge-server/.env
 bridge-server/node_modules/
 bridge-server/bridge.log
+
+# Raw bank statement pastes (contain card last-4 + phone digits + full transaction details)
+data/raw/

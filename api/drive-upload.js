@@ -10,13 +10,13 @@ module.exports = async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { image, filename, mimeType } = req.body || {};
+    const { image, filename, mimeType, folderId: bodyFolderId } = req.body || {};
     if (!image) return res.status(400).json({ error: 'Missing image (base64)' });
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
-    const folderId = process.env.DRIVE_FOLDER_ID || '1TSx5ZXXhMVU7maBQPoGO-IAuFngc33Zx';
+    const folderId = bodyFolderId || process.env.DRIVE_FOLDER_ID || '1TSx5ZXXhMVU7maBQPoGO-IAuFngc33Zx';
 
     if (!clientId || !clientSecret || !refreshToken) {
         return res.status(500).json({ error: 'Server missing Google OAuth config' });
@@ -93,11 +93,15 @@ module.exports = async function handler(req, res) {
 
         // Step 4: Return public URL
         const publicUrl = `https://lh3.googleusercontent.com/d/${fileData.id}=s1200`;
+        const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileData.id}`;
 
         return res.status(200).json({
             success: true,
             url: publicUrl,
-            fileId: fileData.id
+            downloadUrl,
+            viewUrl: fileData.webViewLink || `https://drive.google.com/file/d/${fileData.id}/view`,
+            fileId: fileData.id,
+            name: fileData.name
         });
     } catch (e) {
         return res.status(500).json({ error: e.message });

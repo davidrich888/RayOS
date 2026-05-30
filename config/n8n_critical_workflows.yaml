@@ -1,0 +1,9 @@
+# N8N critical workflows watched by rayos-health-check
+# 規則：最近 2 次 execution 都 status=error → critical alert
+# Phase 2 想到再加（保守起手只盯 2 個）
+n8n_base_url: https://david86726.app.n8n.cloud
+critical_workflows:
+  - id: xdhhi5iaFBI8grPO
+    name: Voice Review A
+  - id: nZXUE7yfzh7Xgh16
+    name: Voice Review B

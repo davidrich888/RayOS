@@ -27,6 +27,7 @@ import base64
 import json
 import os
 import re
+import subprocess
 import sys
 import unicodedata
 from collections import defaultdict
@@ -44,17 +45,20 @@ TRANSACTIONS_FILE = DATA_DIR / 'expense-transactions.json'
 DATA_JS_FILE = RAYOS_DIR / 'js' / 'data.js'
 ARCHIVE_DIR = RAYOS_DIR / 'archive' / 'expense-bills'
 ENV_FILE = RAYOS_DIR / '.env'
+WORKSPACE_ENV = RAYOS_DIR.parent / '.env'
 
 # ==================== ENV ====================
 
 def load_env():
-    """Load .env file into os.environ."""
-    if ENV_FILE.exists():
-        for line in ENV_FILE.read_text().splitlines():
-            line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                key, val = line.split('=', 1)
-                os.environ.setdefault(key.strip(), val.strip())
+    """Load .env files into os.environ. Tries Project_RayOS first then workspace root."""
+    for env_path in [ENV_FILE, WORKSPACE_ENV]:
+        if env_path.exists():
+            for line in env_path.read_text().splitlines():
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, val = line.split('=', 1)
+                    _k = key.strip()
+                    os.environ[_k] = os.environ.get(_k) or val.strip()
 
 load_env()
 
@@ -99,6 +103,7 @@ EXPENSE_CATEGORIES = {
         '統一超商', 'SEVEN-ELEVEN', 'FAMILYMART', 'MINISTOP',
         '鐵板燒', '食事', '壽司', 'ICHIRAN', 'UNATOTO', '冒煙的喬',
         '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT',
+        'LOUISA', 'HECHO', '厝秘',
         'YAKINIKU', 'IMAHAN', 'KAITENZUSHI', 'JAPAN MEAT',
         'SUTANDOJISEDAI',
         'FOODCOOP', 'HANGETSU', 'GINGER FARM', 'KUA SA WAT',
@@ -124,6 +129,7 @@ EXPENSE_CATEGORIES = {
     '投資自己': [
         'WORLDGY', 'WORLDGYM', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT',
         'BOXING', '拳擊', 'UDEMY', 'COURSERA', 'MAVEN', 'COHORT', 'ACADEMY',
+        'AAAACCELERATOR',
     ],
     '健身': [],
     '購物': [
@@ -261,6 +267,92 @@ def parse_taishin_html(html_content: str) -> list[dict]:
     return transactions
 
 
+# ==================== GMAIL URL DOWNLOAD ====================
+
+def download_taishin_url_from_gmail() -> str:
+    """Use gws CLI to find latest Taishin statement email and extract the link URL."""
+    print("  Searching Gmail for latest Taishin statement...")
+
+    # 1) Search latest Taishin CREDIT-CARD statement email.
+    # The same sender (webmaster@bhurecv) also sends "綜合對帳單" (a bank-account
+    # statement delivered as an encrypted PDF with NO OnlineBill link). Without the
+    # subject filter, maxResults:1 grabs whichever arrived last and may pick the
+    # bank statement, breaking OnlineBill extraction. "信用卡行動帳單" is the credit
+    # card statement, which carries the OnlineBill.aspx link this flow needs.
+    result = subprocess.run(
+        ['gws', 'gmail', 'users', 'messages', 'list', '--params', json.dumps({
+            'userId': 'me',
+            'q': 'from:webmaster@bhurecv.taishinbank.com.tw subject:信用卡行動帳單',
+            'maxResults': 1,
+        })],
+        capture_output=True, text=True, timeout=30,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"gws search failed: {result.stderr}")
+
+    data = json.loads(result.stdout)
+    # gws can exit 0 yet return an API error payload (e.g. expired OAuth token).
+    # Surface it explicitly instead of the misleading "no email found" below.
+    if isinstance(data, dict) and 'error' in data:
+        raise RuntimeError(f"gws API error: {data['error'].get('message', data['error'])}")
+    messages = data.get('messages', [])
+    if not messages:
+        raise RuntimeError("No Taishin statement email found in Gmail")
+
+    msg_id = messages[0]['id']
+    print(f"  Found message: {msg_id}")
+
+    # 2) Fetch full message body
+    result = subprocess.run(
+        ['gws', 'gmail', 'users', 'messages', 'get', '--params', json.dumps({
+            'userId': 'me', 'id': msg_id, 'format': 'full',
+        })],
+        capture_output=True, text=True, timeout=30,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"gws get failed: {result.stderr}")
+    msg = json.loads(result.stdout)
+
+    headers = msg.get('payload', {}).get('headers', [])
+    subject = next((h['value'] for h in headers if h['name'] == 'Subject'), 'unknown')
+    print(f"  Subject: {subject}")
+
+    # 3) Walk MIME tree, collect every body part as text
+    def collect_bodies(part: dict) -> list[str]:
+        chunks: list[str] = []
+        body_data = part.get('body', {}).get('data', '')
+        if body_data:
+            try:
+                decoded = base64.urlsafe_b64decode(body_data + '==').decode('utf-8', errors='replace')
+                chunks.append(decoded)
+            except Exception:
+                pass
+        for sub in part.get('parts', []):
+            chunks.extend(collect_bodies(sub))
+        return chunks
+
+    bodies = collect_bodies(msg.get('payload', {}))
+    if not bodies:
+        raise RuntimeError("No readable body in Taishin email")
+
+    full_text = '\n'.join(bodies)
+
+    # 4) Extract the statement link — must be the OnlineBill.aspx URL.
+    # The email also contains header/banner images on bhurecv.taishinbank.com.tw,
+    # so a plain "taishin" substring match grabs a header.jpg and the login page
+    # never loads. Match the actual bill endpoint and pick the longest variant
+    # (the plain-text part line-wraps it; the HTML href has the full query string).
+    urls = re.findall(r'https://[^\s"\'<>]+', full_text)
+    candidates = [u for u in urls if 'onlinebill.aspx' in u.lower()]
+    if not candidates:
+        preview = full_text[:300].replace('\n', ' ')
+        raise RuntimeError(f"No Taishin OnlineBill URL found in email body ({len(urls)} URLs total). Preview: {preview}")
+
+    target_url = max(candidates, key=len).replace('&amp;', '&').rstrip('.,)>')
+    print(f"  URL: {target_url[:90]}...")
+    return target_url
+
+
 # ==================== PLAYWRIGHT SCRAPING ====================
 
 def scrape_taishin_statement(url: str) -> str:
@@ -272,9 +364,13 @@ def scrape_taishin_statement(url: str) -> str:
     """
     from playwright.sync_api import sync_playwright
 
+    # Taishin OnlineBill login password (#pdf_auto_no). Since the 2024-12 (民國113/12)
+    # statement, natural persons use: last 2 digits of national ID + birthday MMDD = 6
+    # digits (e.g. ID A22****13, born Aug 3 → "130803"). NOT the full ID. Set this
+    # 6-digit value in .env as TAISHIN_BILL_PASSWORD.
     password = os.environ.get('TAISHIN_BILL_PASSWORD', '')
     if not password:
-        print("ERROR: TAISHIN_BILL_PASSWORD not set in .env")
+        print("ERROR: TAISHIN_BILL_PASSWORD not set in .env (need 身分證後2碼+生日MMDD = 6 digits)")
         sys.exit(1)
 
     anthropic_key = os.environ.get('ANTHROPIC_API_KEY', '')
@@ -282,14 +378,20 @@ def scrape_taishin_statement(url: str) -> str:
         print("ERROR: ANTHROPIC_API_KEY not set in .env")
         sys.exit(1)
 
-    MAX_ATTEMPTS = 5
+    MAX_ATTEMPTS = 8
     import time
 
     with sync_playwright() as p:
-        # Must use real Chrome — Taishin blocks Chromium
-        browser = p.chromium.launch(channel='chrome', headless=True)
+        # Must use real Chrome — Taishin blocks Chromium AND headless automation.
+        # headless=False is required: Taishin's login returns "認證失敗" for headless
+        # sessions even with a correct password + captcha (verified 2026-05-20).
+        browser = p.chromium.launch(channel='chrome', headless=False)
         context = browser.new_context(
             viewport={'width': 1280, 'height': 900},
+            # 3x DPI so the small captcha element screenshots at high resolution —
+            # Claude Vision misreads the low-res ~150x40px default badly (5/5 fails
+            # observed 2026-05-20), sharp 3x screenshots read reliably.
+            device_scale_factor=3,
             user_agent=(
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                 'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -325,17 +427,34 @@ def scrape_taishin_statement(url: str) -> str:
                 print(f"  Bad captcha length ({len(captcha)}), retrying...")
                 continue
 
-            # Fill form and submit
-            page.fill('#pdf_auto_no', password)
-            page.fill('#txtVcode', captcha)
+            # Real keystrokes, NOT fill(). Taishin rejects programmatic value-set:
+            # verified 2026-05-20 that manual typing in the very same automated
+            # browser logs in, but page.fill() (which sets .value + only an input
+            # event) yields 認證失敗 even with a correct password + captcha. type()
+            # fires keydown/keypress/keyup/input per char so the form's anti-bot
+            # accepts the input.
+            page.click('#pdf_auto_no')
+            page.type('#pdf_auto_no', password, delay=120)
+            page.click('#txtVcode')
+            page.type('#txtVcode', captcha, delay=120)
             time.sleep(0.3)
             page.click('#btnView')
             time.sleep(4)
 
-            # Check result
+            # Check result. A wrong password lands on a page reading "登入密碼錯誤"
+            # while a wrong captcha reads "認證失敗". Bail immediately on a password
+            # error (retrying with the same password just risks a lockout); only the
+            # captcha case is worth retrying. The page also has no transaction table,
+            # so without this check the old code treated the error page as success
+            # and silently parsed 0 transactions.
             body_text = page.inner_text('body')
+            if '密碼錯誤' in body_text:
+                print("  登入密碼錯誤 — wrong password, aborting (check TAISHIN_BILL_PASSWORD"
+                      " = 身分證後2碼+生日MMDD, 6 digits)")
+                browser.close()
+                sys.exit(1)
             if '認證失敗' in body_text:
-                print("  認證失敗, retrying...")
+                print("  認證失敗 (captcha misread?), retrying...")
                 continue
 
             # Success
@@ -687,7 +806,8 @@ def sync_transactions_to_notion(transactions: list[dict], headers: dict) -> int:
                 amount = props.get('金額', {}).get('number', 0) or 0
                 date_obj = props.get('日期', {}).get('date') or {}
                 date_str = date_obj.get('start', '')
-                existing_keys.add(f"{date_str}|{desc}|{amount}")
+                # Normalize amount to int so 635 (Notion int) == 635.0 (JSON float)
+                existing_keys.add(f"{date_str}|{desc}|{int(round(amount))}")
 
             cursor = data.get('next_cursor')
             if not cursor:
@@ -699,7 +819,7 @@ def sync_transactions_to_notion(transactions: list[dict], headers: dict) -> int:
     created = 0
     for t in positive:
         notion_date = t['date'].replace('/', '-')
-        key = f"{notion_date}|{t['desc']}|{t['amount']}"
+        key = f"{notion_date}|{t['desc']}|{int(round(t['amount']))}"
         if key in existing_keys:
             continue
 
@@ -712,7 +832,7 @@ def sync_transactions_to_notion(transactions: list[dict], headers: dict) -> int:
                     '分類': {'select': {'name': t['category']}},
                     '日期': {'date': {'start': notion_date}},
                     '月份': {'rich_text': [{'text': {'content': t['month']}}]},
-                    '金額': {'number': t['amount']},
+                    '金額': {'number': int(round(t['amount']))},
                 },
             },
         )
@@ -811,9 +931,14 @@ def main():
 
     elif args.auto:
         print("\n[1/4] Auto mode: searching Gmail for latest statement...")
-        print("  ERROR: Auto Gmail search requires running within Claude Code.")
-        print("  Use --url with the statement link instead.")
-        sys.exit(1)
+        try:
+            statement_url = download_taishin_url_from_gmail()
+        except Exception as exc:
+            err = f"Taishin auto Gmail lookup failed: {exc}"
+            print(f"  ERROR: {err}")
+            send_telegram(f"⚠️ 台新帳單自動同步失敗\n\n{err}")
+            sys.exit(1)
+        html_content = scrape_taishin_statement(statement_url)
 
     # Step 2: Parse transactions
     print("\n[2/4] Parsing transaction table...")

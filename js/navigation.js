@@ -83,6 +83,12 @@ function go(section) {
             if (typeof updateLifeOverview === 'function') updateLifeOverview();
             if (typeof autoAnalyzeLife === 'function') autoAnalyzeLife();
             break;
+        case 'business':
+            if (typeof loadBusinessMetrics === 'function') loadBusinessMetrics(true);
+            break;
+        case 'gtd':
+            if (typeof loadGTDSnapshot === 'function') loadGTDSnapshot(firstVisit);
+            break;
     }
 }
 

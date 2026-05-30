@@ -17,6 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()">&#9776;</button>
@@ -31,6 +32,7 @@
         <div class="nav-item active" data-section="dashboard"><div class="nav-icon-wrap">◉</div><span>Dashboard</span></div>
         <div class="nav-item" data-section="lifecoach"><div class="nav-icon-wrap">🤖</div><span>AI Agents</span><span class="nav-badge">13</span></div>
         <div class="nav-item" data-section="plan"><div class="nav-icon-wrap">📋</div><span>Plan</span></div>
+        <div class="nav-item" data-section="gtd"><div class="nav-icon-wrap">✅</div><span>GTD</span></div>
         <div class="nav-group-label">Life</div>
         <div class="nav-item" data-section="daily"><div class="nav-icon-wrap">✓</div><span>Daily</span></div>
         <div class="nav-item" data-section="physic"><div class="nav-icon-wrap">🥷</div><span>Physic</span></div>
@@ -71,7 +73,7 @@
             <div class="stats-row">
                 <div class="stat-box" onclick="go('daily')"><div class="stat-box-header"><div class="stat-box-icon">🔥</div></div><div class="stat-value" id="stat-streak">0</div><div class="stat-label">Streak</div></div>
                 <div class="stat-box" onclick="go('physic')"><div class="stat-box-header"><div class="stat-box-icon">💪</div></div><div class="stat-value" id="stat-bodyfat">--</div><div class="stat-label">Body Fat</div></div>
-                <div class="stat-box" onclick="go('wealth')"><div class="stat-box-header"><div class="stat-box-icon">💰</div></div><div class="stat-value" id="stat-wealth">--</div><div class="stat-label">Total Assets</div></div>
+                <div class="stat-box" onclick="go('wealth')"><div class="stat-box-header"><div class="stat-box-icon">📉</div></div><div class="stat-value" id="stat-mdd">--</div><div class="stat-label">MDD</div></div>
                 <div class="stat-box" onclick="go('business')"><div class="stat-box-header"><div class="stat-box-icon">💵</div></div><div class="stat-value" id="stat-mrr">$0</div><div class="stat-label">MRR</div></div>
                 <div class="stat-box" onclick="go('content')"><div class="stat-box-header"><div class="stat-box-icon">📝</div></div><div class="stat-value" id="stat-content">0/13</div><div class="stat-label">Content</div></div>
                 <div class="stat-box" onclick="go('information')"><div class="stat-box-header"><div class="stat-box-icon">📖</div></div><div class="stat-value" id="stat-learning">0</div><div class="stat-label">Learning</div></div>
@@ -176,6 +178,13 @@
 
                         <!-- EXPENSE TAB -->
                         <div id="tab-expense-page" style="display:none;">
+                            <div style="background:linear-gradient(135deg,rgba(212,197,169,0.12),rgba(212,197,169,0.04));border:1px solid rgba(212,197,169,0.35);border-left:3px solid #d4c5a9;border-radius:8px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+                                <span style="font-size:22px;">🎯</span>
+                                <div>
+                                    <div style="color:#d4c5a9;font-weight:600;font-size:14px;letter-spacing:0.03em;">2026 省錢目標：個人支出 ≤ $50,000 / 月</div>
+                                    <div style="color:rgba(255,255,255,0.45);font-size:12px;margin-top:2px;">不含旅行、Prop Firm、AI工具、課程、保險｜執行期 2026-05 ~ 10 月</div>
+                                </div>
+                            </div>
                             <div class="summary-grid" style="grid-template-columns:repeat(4,1fr);">
                                 <div class="summary-item"><div class="summary-label">本月總支出</div><div class="summary-value accent" id="expense-total">--</div></div>
                                 <div class="summary-item"><div class="summary-label">vs 上月</div><div class="summary-value" id="expense-vs-prev">--</div></div>
@@ -321,48 +330,89 @@
         </section>
 
         <!-- BUSINESS -->
+        <style>
+            #business .biz-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            #business .biz-table th, #business .biz-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+            #business .biz-table th { background: var(--bg-elevated); color: var(--text-dim); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+            #business .biz-table td.num { text-align: right; font-family: 'SF Mono', monospace; }
+            #business .biz-table tbody tr:hover { background: rgba(212,197,169,0.04); }
+            #business .biz-kpi { padding: 16px; }
+            #business .biz-kpi .lbl { color: var(--text-dim); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+            #business .biz-kpi .val { font-size: 22px; font-weight: 600; color: var(--text); font-family: 'Cormorant Garamond', serif; }
+            #business .biz-kpi .delta { font-size: 11px; color: var(--text-dim); margin-top: 4px; font-family: 'SF Mono', monospace; }
+            #business .biz-kpi .delta.up { color: #4CAF50; }
+            #business .biz-kpi .delta.down { color: #ff8a80; }
+            #business .pace-cell { font-family: 'SF Mono', monospace; font-size: 12px; }
+            #business .biz-funnel-card .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 12px; }
+            #business .biz-funnel-card .row:last-child { border-bottom: none; }
+            #business .biz-funnel-card .row .k { color: var(--text-dim); }
+            #business .biz-funnel-card .row .v { color: var(--text); font-family: 'SF Mono', monospace; }
+            #business .biz-traffic-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; }
+            #business .biz-traffic-row .name { flex: 1; color: var(--text); }
+            #business .biz-traffic-row .pct { color: var(--text-dim); font-family: 'SF Mono', monospace; min-width: 50px; text-align: right; }
+            #business .biz-traffic-row .bar { width: 100px; height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
+            #business .biz-traffic-row .bar > i { display: block; height: 100%; background: var(--accent); }
+            #business .biz-status-ok { color: #4CAF50; }
+            #business .biz-status-fail { color: #ff8a80; }
+            #business .biz-status-skipped { color: var(--text-dim); }
+        </style>
         <section class="section" id="business">
             <div class="header">
-                <div><div class="page-label">Revenue & Growth</div><div class="page-title">Business</div></div>
+                <div><div class="page-label">DataOS — Auto Refresh 06:00 daily</div><div class="page-title">Business</div></div>
                 <div class="header-actions">
                     <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <button class="btn" onclick="showModal('business-modal')">+ Add Business</button>
+                    <span id="biz-data-ts" style="color:var(--text-dim);font-size:11px;font-family:'SF Mono',monospace;"></span>
+                    <button class="btn" onclick="loadBusinessMetrics(true)" title="Reload from JSON">🔄 Refresh</button>
                 </div>
             </div>
-            <div class="content">
-                <div class="business-selector" id="business-selector">
-                    <div class="business-chip active" data-biz="skool-free" onclick="selectBusiness('skool-free',this)">🎓 Skool Free</div>
-                    <div class="business-chip" data-biz="skool-paid" onclick="selectBusiness('skool-paid',this)">💎 Skool Paid</div>
-                    <div class="business-chip" data-biz="youtube" onclick="selectBusiness('youtube',this)">📺 YouTube</div>
-                </div>
-                <div class="wealth-layout">
-                    <div class="wealth-main">
-                        <div class="business-stats">
-                            <div class="business-stat"><div class="business-stat-value" id="biz-members">0</div><div class="business-stat-label">Members</div></div>
-                            <div class="business-stat"><div class="business-stat-value" id="biz-mrr">$0</div><div class="business-stat-label">MRR</div></div>
-                            <div class="business-stat"><div class="business-stat-value" id="biz-growth">0%</div><div class="business-stat-label">Growth</div></div>
-                            <div class="business-stat"><div class="business-stat-value" id="biz-ltv">$0</div><div class="business-stat-label">LTV</div></div>
-                        </div>
-                        <div class="chart-container">
-                            <div class="chart-header">
-                                <div class="chart-title" id="biz-chart-title">Growth</div>
-                                <div class="chart-tabs">
-                                    <button class="chart-tab active" onclick="setBizChart('members',this)">Members</button>
-                                    <button class="chart-tab" onclick="setBizChart('revenue',this)">Revenue</button>
-                                </div>
-                            </div>
-                            <div class="chart-wrapper"><canvas id="bizChart"></canvas></div>
-                        </div>
-                        <div class="form-section">
-                            <div class="form-title">📝 Update Metrics</div>
-                            <div class="form-row">
-                                <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="biz-date"></div>
-                                <div class="form-group"><label class="form-label">Members</label><input type="number" class="form-input" id="biz-members-input" placeholder="0"></div>
-                                <div class="form-group"><label class="form-label">Revenue (USD)</label><input type="number" class="form-input" id="biz-revenue-input" placeholder="0"></div>
-                            </div>
-                            <div class="form-actions"><button class="btn btn-accent" onclick="saveBizMetrics()">Save</button></div>
-                        </div>
+            <div class="content" id="biz-content">
+                <div id="biz-loading" style="text-align:center;padding:40px;color:var(--text-dim);">Loading DataOS…</div>
+
+                <div id="biz-dashboard" style="display:none;">
+                    <!-- Top KPIs -->
+                    <div class="section-label">Top KPIs</div>
+                    <div class="stats-row" id="biz-kpis" style="grid-template-columns:repeat(4,1fr);"></div>
+
+                    <!-- MTD Pacing -->
+                    <div class="section-label" style="margin-top:24px;">📅 Month-to-Date Pacing <span style="color:var(--text-dim);font-weight:400;font-size:12px;">— 北極星：本月跟上月同期比</span></div>
+                    <div id="biz-mtd-note" style="color:var(--text-dim);font-size:11px;margin-bottom:8px;"></div>
+                    <div class="card" style="overflow-x:auto;">
+                        <table class="biz-table" id="biz-mtd-table">
+                            <thead><tr><th>指標</th><th>本月 MTD</th><th>上月同期</th><th>Δ vs 上月</th><th>Pace</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
+
+                    <!-- Skool Funnel -->
+                    <div class="section-label" style="margin-top:24px;">Skool Funnel</div>
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);" id="biz-skool-cards"></div>
+
+                    <!-- Skool Traffic Sources -->
+                    <div class="section-label" style="margin-top:24px;">Skool Traffic Sources <span style="color:var(--text-dim);font-weight:400;font-size:12px;">— Top 8 (30d)</span></div>
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);" id="biz-traffic-cards"></div>
+
+                    <!-- YouTube Studio 28d -->
+                    <div class="section-label" style="margin-top:24px;">YouTube 28d (Studio Analytics)</div>
+                    <div class="card" style="overflow-x:auto;">
+                        <table class="biz-table" id="biz-yt28-table">
+                            <thead><tr><th>Channel</th><th>+Gained</th><th>−Lost</th><th>Net</th><th>Views 28d</th><th>Watch Hrs</th><th>Revenue</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Data Freshness -->
+                    <div class="section-label" style="margin-top:24px;">Data Freshness</div>
+                    <div class="card" style="overflow-x:auto;">
+                        <table class="biz-table" id="biz-freshness-table">
+                            <thead><tr><th>Source</th><th>Latest Run</th><th>Status</th><th>Records</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="biz-error" style="display:none;padding:24px;text-align:center;color:#ff8a80;">
+                    <div style="font-size:14px;margin-bottom:8px;">⚠️ Failed to load business-metrics.json</div>
+                    <div style="color:var(--text-dim);font-size:11px;">Run <code>bash scripts/update_data.sh</code> on Mac mini to regenerate.</div>
                 </div>
             </div>
         </section>
@@ -473,7 +523,7 @@
                             <div class="form-title">&#128202; History</div>
                             <div style="max-height:360px;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;">
                                 <table class="monthly-table">
-                                    <thead><tr><th>Date</th><th>Weight</th><th>Fat %</th><th>Muscle</th><th>BMI</th><th>Notes</th><th></th></tr></thead>
+                                    <thead><tr><th>Date</th><th>Weight</th><th>Fat %</th><th>Fat Mass</th><th>Muscle</th><th>BMI</th><th>Notes</th><th></th></tr></thead>
                                     <tbody id="body-history-body"></tbody>
                                 </table>
                             </div>
@@ -725,195 +775,166 @@
         <!-- AI LIFE COACH -->
         <section class="section" id="lifecoach">
             <div class="header">
-                <div><div class="page-label">Automation</div><div class="page-title">AI Agents</div></div>
+                <div><div class="page-label">Automation</div><div class="page-title">已完成自動化</div></div>
                 <div class="header-actions">
                     <button class="btn" onclick="go('dashboard')">← Back</button>
-                    <button class="btn" onclick="loadAgentExecutions()">↻ Refresh Status</button>
-                    <button class="btn btn-accent" onclick="window.open('https://david86726.app.n8n.cloud','_blank')">Open N8N ↗</button>
                 </div>
             </div>
             <div class="content">
                 <!-- View Toggle -->
                 <div class="view-toggle-bar" style="display:flex;gap:4px;margin-bottom:16px;background:rgba(212,197,169,0.08);padding:4px;border-radius:10px;width:fit-content;border:1px solid var(--border);">
-                    <button class="view-tab active" data-view="agents" onclick="switchAgentsView('agents')" style="padding:8px 18px;font-size:12px;background:var(--accent);color:var(--bg);border:none;border-radius:7px;cursor:pointer;font-weight:600;letter-spacing:0.5px;transition:all 0.15s;">AI Agents</button>
+                    <button class="view-tab active" data-view="agents" onclick="switchAgentsView('agents')" style="padding:8px 18px;font-size:12px;background:var(--accent);color:var(--bg);border:none;border-radius:7px;cursor:pointer;font-weight:600;letter-spacing:0.5px;transition:all 0.15s;">已完成自動化</button>
                     <button class="view-tab" data-view="status-board" onclick="switchAgentsView('status-board')" style="padding:8px 18px;font-size:12px;background:transparent;color:var(--text-dim);border:none;border-radius:7px;cursor:pointer;font-weight:500;letter-spacing:0.5px;transition:all 0.15s;">Status Board</button>
                 </div>
 
-                <!-- AGENTS VIEW -->
+                <!-- AGENTS VIEW (replaced: 已完成自動化) -->
                 <div id="agents-view">
-                <!-- Hero Stats Bar -->
-                <div class="stats-row" style="margin-bottom:20px;grid-template-columns:auto repeat(4, 1fr);align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(135deg, var(--bg-elevated), rgba(212,197,169,0.06));border:1px solid var(--border);border-radius:12px;">
-                    <div id="agent-health-indicator" style="display:flex;flex-direction:column;align-items:center;padding:8px 20px 8px 8px;border-right:1px solid var(--border);">
-                        <div style="font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:700;color:#4CAF50;line-height:1;" id="agent-health-pct">—</div>
-                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-top:2px;">System Health</div>
-                    </div>
-                    <div class="stat-card" style="text-align:center;padding:12px 8px;background:linear-gradient(135deg,rgba(212,197,169,0.08),rgba(212,197,169,0.02));border-radius:8px;border:1px solid rgba(212,197,169,0.1);">
-                        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--accent);line-height:1;">13</div>
-                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-top:4px;">Total Workflows</div>
-                    </div>
-                    <div class="stat-card" style="text-align:center;padding:12px 8px;background:linear-gradient(135deg,rgba(212,197,169,0.08),rgba(212,197,169,0.02));border-radius:8px;border:1px solid rgba(212,197,169,0.1);">
-                        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--accent);line-height:1;">6</div>
-                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-top:4px;">Decision Agents</div>
-                    </div>
-                    <div class="stat-card" style="text-align:center;padding:12px 8px;background:linear-gradient(135deg,rgba(212,197,169,0.08),rgba(212,197,169,0.02));border-radius:8px;border:1px solid rgba(212,197,169,0.1);">
-                        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--accent);line-height:1;">6</div>
-                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-top:4px;">Data Sync</div>
-                    </div>
-                    <div class="stat-card" style="text-align:center;padding:12px 8px;background:linear-gradient(135deg,rgba(212,197,169,0.08),rgba(212,197,169,0.02));border-radius:8px;border:1px solid rgba(212,197,169,0.1);">
-                        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--accent);line-height:1;">3</div>
-                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-top:4px;">Tools</div>
+
+                <!-- Intro: 為什麼有這頁 -->
+                <div style="margin-bottom:20px;padding:18px 22px;background:linear-gradient(135deg,var(--bg-elevated),rgba(212,197,169,0.04));border:1px solid var(--border);border-radius:12px;">
+                    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--accent);letter-spacing:0.5px;margin-bottom:6px;">已上線真自動化</div>
+                    <div style="font-size:12px;color:var(--text-dim);line-height:1.7;">
+                        只列<strong style="color:var(--text);">不需要我做任何事就會自動跑</strong>的系統 — 全部是 macOS launchd 註冊的鬧鐘，到時間會自動觸發，不需要開 Claude Code session。每一條都標明<strong style="color:var(--text);">目的（為什麼存在）</strong>與<strong style="color:var(--text);">頻率</strong>，避免哪天忘記某個系統在做什麼。<br>
+                        <span style="color:var(--accent);">排除：</span>需要開 Claude session 才會觸發的半自動 task（weekly-review / memory-consolidation / taishin-expense-sync 等）、純基礎設施（cloudflare-tunnel / service-watchdog）。
                     </div>
                 </div>
 
-                <!-- Execution Overview — compact with donut + daily bar chart -->
-                <div class="form-section" style="padding:16px;margin-bottom:16px;background:linear-gradient(135deg,var(--bg-elevated),rgba(212,197,169,0.04));border:1px solid var(--border);border-radius:12px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <div class="form-title" style="margin:0;">Execution Overview — 最近 7 天</div>
-                        <div id="agent-last-activity" style="font-size:10px;color:var(--text-dim);"></div>
+                <!-- Stats Bar -->
+                <div class="stats-row" style="margin-bottom:24px;grid-template-columns:repeat(3, 1fr);gap:12px;">
+                    <div class="stat-card" style="text-align:center;padding:16px 8px;background:linear-gradient(135deg,rgba(212,197,169,0.1),rgba(212,197,169,0.02));border:1px solid rgba(212,197,169,0.15);border-radius:10px;">
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--accent);line-height:1;">15</div>
+                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-top:6px;">已上線真自動</div>
                     </div>
-                    <div id="agent-overview" style="display:grid;grid-template-columns:150px 1fr;gap:20px;margin-top:14px;align-items:start;">
-                        <div style="display:flex;flex-direction:column;align-items:center;">
-                            <canvas id="agent-exec-chart" width="150" height="150" style="max-width:150px;"></canvas>
-                            <div id="agent-exec-totals" style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;"></div>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:12px;">
-                            <canvas id="agent-daily-chart" width="400" height="120" style="width:100%;max-height:120px;"></canvas>
-                            <div id="agent-exec-summary" style="font-size:11px;color:var(--text-dim);line-height:1.6;display:flex;flex-wrap:wrap;gap:4px 12px;">Loading...</div>
-                        </div>
+                    <div class="stat-card" style="text-align:center;padding:16px 8px;background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.2);border-radius:10px;">
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:#4CAF50;line-height:1;">13</div>
+                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-dim);margin-top:6px;">健康 ✓</div>
+                    </div>
+                    <div class="stat-card" style="text-align:center;padding:16px 8px;background:rgba(255,152,0,0.06);border:1px solid rgba(255,152,0,0.25);border-radius:10px;">
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:#FFB74D;line-height:1;">2</div>
+                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-dim);margin-top:6px;">警告 ⚠</div>
                     </div>
                 </div>
 
-                <!-- Decision Agents — Tier 1 (Strategic) + Tier 2 (Operational) -->
-                <div class="form-section" style="padding:16px;margin-bottom:16px;border:1px solid var(--border);border-radius:12px;">
-                    <div class="form-title">Decision Agents</div>
-                    <div id="agent-cards" style="display:grid;gap:10px;margin-top:12px;">
-                        <!-- Tier 1: Strategic — larger cards with gold gradient -->
-                        <div class="agent-row" data-wf="xMk2f3DEyNFRRSkh" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:linear-gradient(135deg,rgba(212,197,169,0.06),rgba(212,197,169,0.02));border-radius:10px;border-left:3px solid #4CAF50;border:1px solid rgba(212,197,169,0.12);border-left:3px solid #4CAF50;">
-                            <div style="font-size:28px;width:36px;text-align:center;">📊</div>
-                            <div style="flex:1;">
-                                <div style="font-weight:600;color:var(--text);font-size:15px;letter-spacing:0.3px;">Analyst<span style="font-size:11px;color:var(--text-dim);font-weight:400;margin-left:6px;">週報 · 每週日 09:00</span></div>
-                                <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">YT/IG/內容表現分析 → Claude 週報 → TG 審核 → Notion</div>
-                                <div class="agent-exec-status" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
-                            </div>
-                            <div class="agent-status-dot" style="font-size:10px;color:#4CAF50;white-space:nowrap;">● Active</div>
+                <!-- Section 1: TFT 業務自動化 -->
+                <div class="auto-section">
+                    <div class="auto-section-header">
+                        <div>
+                            <div class="auto-section-title">TFT 業務自動化</div>
+                            <div class="auto-section-purpose">為什麼存在：TFT 是付費社群（$2,990 ~ $9,999），retention、直播上架、付款對帳是日常營運痛點，自動化後省下每週 5+ 小時人工。</div>
                         </div>
-                        <div class="agent-row" data-wf="4w8F5PJQSgBbgwt3" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:linear-gradient(135deg,rgba(212,197,169,0.06),rgba(212,197,169,0.02));border-radius:10px;border:1px solid rgba(212,197,169,0.12);border-left:3px solid #4CAF50;">
-                            <div style="font-size:28px;width:36px;text-align:center;">🧠</div>
-                            <div style="flex:1;">
-                                <div style="font-weight:600;color:var(--text);font-size:15px;letter-spacing:0.3px;">Strategist<span style="font-size:11px;color:var(--text-dim);font-weight:400;margin-left:6px;">選題推薦 · 每週一 09:00</span></div>
-                                <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">競品+Content Log → 支柱/Hook缺口分析 → 推薦 3 選題 → TG</div>
-                                <div class="agent-exec-status" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
-                            </div>
-                            <div class="agent-status-dot" style="font-size:10px;color:#4CAF50;white-space:nowrap;">● Active</div>
-                        </div>
-                        <!-- Tier 2: Operational — compact cards -->
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                            <div class="agent-row" data-wf="kyub9m4XA5YUMymB" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(212,197,169,0.05);border-radius:8px;border-left:3px solid #4CAF50;">
-                                <div style="font-size:20px;">🔔</div>
-                                <div style="flex:1;min-width:0;">
-                                    <div style="font-weight:600;color:var(--text);font-size:13px;">TG Handler</div>
-                                    <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">TG 按鈕審核 → 更新 Notion 狀態</div>
-                                    <div class="agent-exec-status" style="font-size:10px;color:var(--text-dim);margin-top:3px;"></div>
-                                </div>
-                                <div class="agent-status-dot" style="font-size:9px;color:#4CAF50;white-space:nowrap;">● Active</div>
-                            </div>
-                            <div class="agent-row" data-wf="IJaIpFsUJ0bgudS2" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(212,197,169,0.05);border-radius:8px;border-left:3px solid #4CAF50;">
-                                <div style="font-size:20px;">🕵️</div>
-                                <div style="flex:1;min-width:0;">
-                                    <div style="font-weight:600;color:var(--text);font-size:13px;">每日競品報告</div>
-                                    <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">23 個競品頻道 → Claude 分析 → Notion + TG</div>
-                                    <div class="agent-exec-status" style="font-size:10px;color:var(--text-dim);margin-top:3px;"></div>
-                                </div>
-                                <div class="agent-status-dot" style="font-size:9px;color:#4CAF50;white-space:nowrap;">● Active</div>
-                            </div>
-                            <div class="agent-row" data-wf="FYfe4h2SFVhcwK28" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(212,197,169,0.05);border-radius:8px;border-left:3px solid #4CAF50;">
-                                <div style="font-size:20px;">📈</div>
-                                <div style="flex:1;min-width:0;">
-                                    <div style="font-weight:600;color:var(--text);font-size:13px;">週度競品洞察</div>
-                                    <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">本週競品累積數據 → 深度策略分析 → TG</div>
-                                    <div class="agent-exec-status" style="font-size:10px;color:var(--text-dim);margin-top:3px;"></div>
-                                </div>
-                                <div class="agent-status-dot" style="font-size:9px;color:#4CAF50;white-space:nowrap;">● Active</div>
-                            </div>
-                            <div class="agent-row" data-wf="DVSLSNGAO6GoVh0Q" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(212,197,169,0.05);border-radius:8px;border-left:3px solid #4CAF50;">
-                                <div style="font-size:20px;">📊</div>
-                                <div style="flex:1;min-width:0;">
-                                    <div style="font-weight:600;color:var(--text);font-size:13px;">Performance Feedback</div>
-                                    <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">最差影片+Email → 失敗原因分析 → Notion</div>
-                                    <div class="agent-exec-status" style="font-size:10px;color:var(--text-dim);margin-top:3px;"></div>
-                                </div>
-                                <div class="agent-status-dot" style="font-size:9px;color:#4CAF50;white-space:nowrap;">● Active</div>
-                            </div>
-                        </div>
+                        <div class="auto-section-count">4</div>
                     </div>
+                    <table class="auto-table">
+                        <thead><tr><th style="width:30%">名稱</th><th style="width:16%">頻率</th><th>目的</th><th style="width:10%">健康</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>com.aios.tft-retention-watchdog</strong></td><td>每天 08:35</td><td>掃即將流失學員 → 自動發 8 封 retention email + DM 草稿 → TG 摘要（已切 LIVE）</td><td>✓</td></tr>
+                            <tr><td><strong>com.rayos.tft-ck-reconcile</strong></td><td>每天 08:30</td><td>TFT × ConvertKit 三方對帳（active/cancelling/churned tag 強制同步）</td><td>✓</td></tr>
+                            <tr><td><strong>com.aios.tft-live-phase-a</strong></td><td>週一 23:00</td><td>TFT 直播 Phase A：自動產 metadata → Skool 公告草稿</td><td>✓</td></tr>
+                            <tr><td><strong>com.aios.tft-live-classroom-update</strong></td><td>週二 07:00</td><td>TFT 直播 Phase B：上架到 Skool 課程庫 + classroom 更新</td><td>✓</td></tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- Data Sync + Tools — visual status dots + badge schedule -->
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                    <div class="form-section" style="padding:16px;border:1px solid var(--border);border-radius:12px;">
-                        <div class="form-title">Data Sync</div>
-                        <div style="display:grid;gap:6px;margin-top:10px;font-size:12px;">
-                            <div class="info-row" data-info="yt-main-sync" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> YT 主頻道同步</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">週日 02:00</span>
-                            </div>
-                            <div class="info-row" data-info="tft-story-sync" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> TFT Story 同步</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">週日 02:00</span>
-                            </div>
-                            <div class="info-row" data-info="ig-profile-monthly" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> IG Profile 月報</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">每月 1 號</span>
-                            </div>
-                            <div class="info-row" data-info="ig-reels-weekly" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> IG Reels 週報</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">週日 02:30</span>
-                            </div>
-                            <div class="agent-row" data-wf="r7327CJ8dXoO6TW5" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;border-left:3px solid #4CAF50;">
-                                <div style="flex:1;min-width:0;">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                                        <span style="font-weight:600;color:var(--text);font-size:12px;">Skool Sync（TFT）</span>
-                                        <span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">每天 09:00</span>
-                                    </div>
-                                    <div class="agent-exec-status" style="font-size:10px;color:var(--text-dim);margin-top:3px;"></div>
-                                </div>
-                                <div class="agent-status-dot" style="font-size:9px;color:#4CAF50;white-space:nowrap;">● Active</div>
-                            </div>
-                            <div class="info-row" data-info="skool-sync-sh" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> Skool Sync（炒股黑客）</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">每天 08:00</span>
-                            </div>
-                            <div class="info-row" data-info="tft-wall-sync" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> TFT 見證牆自動新增</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">每 7 天</span>
-                            </div>
-                            <div class="info-row" data-info="taishin-expense-sync" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> 台新帳單同步</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">每月 8 號</span>
-                            </div>
-                            <div class="info-row" data-info="cathay-expense-sync" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> 國泰帳單同步</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">每月 18 號</span>
-                            </div>
+                <!-- Section 2: 業務數據蒐集 -->
+                <div class="auto-section">
+                    <div class="auto-section-header">
+                        <div>
+                            <div class="auto-section-title">業務數據蒐集</div>
+                            <div class="auto-section-purpose">為什麼存在：每天清晨自動拉 YT/IG/Email/交易數據，整合成 Daily Brief 推到 TG。早上一打開手機就能看到「昨天事業全貌」，不用一個個平台 check。</div>
                         </div>
+                        <div class="auto-section-count">5</div>
                     </div>
-                    <div class="form-section" style="padding:16px;border:1px solid var(--border);border-radius:12px;">
-                        <div class="form-title">Tools</div>
-                        <div style="display:grid;gap:6px;margin-top:10px;font-size:12px;">
-                            <div class="info-row" data-info="agent-memory-read" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> Agent Memory Read</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">Webhook</span>
-                            </div>
-                            <div class="info-row" data-info="agent-memory-write" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> Agent Memory Write</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">Webhook</span>
-                            </div>
-                            <div class="info-row" data-info="weekly-review-data" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:#4CAF50;font-size:8px;">●</span> Weekly Review Data</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.1);color:var(--text-dim);padding:2px 8px;border-radius:4px;">Webhook</span>
-                            </div>
-                        </div>
-                        <div class="form-title" style="margin-top:14px;">Coming Next</div>
-                        <div style="display:grid;gap:6px;margin-top:8px;font-size:12px;">
-                            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;opacity:0.4;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:var(--text-dim);font-size:8px;">○</span> Producer（內容生產）</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.06);color:var(--text-dim);padding:2px 8px;border-radius:4px;">Phase 2</span>
-                            </div>
-                            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;opacity:0.4;">
-                                <span style="color:var(--text-dim);display:flex;align-items:center;gap:6px;"><span style="color:var(--text-dim);font-size:8px;">○</span> Distribution（自動發布）</span><span style="font-family:'SF Mono',monospace;font-size:10px;background:rgba(212,197,169,0.06);color:var(--text-dim);padding:2px 8px;border-radius:4px;">Phase 3</span>
-                            </div>
-                        </div>
-                    </div>
+                    <table class="auto-table">
+                        <thead><tr><th style="width:30%">名稱</th><th style="width:16%">頻率</th><th>目的</th><th style="width:10%">健康</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>com.aios.data-collect</strong></td><td>每天 06:00</td><td>業務數字採集（YT / IG / TFT / 交易 → key-metrics.md 來源）</td><td>✓</td></tr>
+                            <tr><td><strong>com.aios.data-audit</strong></td><td>每天 06:30</td><td>數據完整性稽核（驗證 collect 的數字合理）</td><td>✓</td></tr>
+                            <tr><td><strong>com.aios.daily-brief</strong></td><td>每天 07:00</td><td>整合昨日業務數字 → CommandOS TG 推送 Daily Brief</td><td>✓</td></tr>
+                            <tr><td><strong>com.aios.trading-data-sync</strong></td><td>每天</td><td>MT5 三 instance 績效 → js/data.js 預載 → git push</td><td>✓</td></tr>
+                            <tr><td><strong>com.aios.email-performance</strong></td><td>每週</td><td>ConvertKit broadcast 開信率/點擊率 → performance-tracker</td><td>✓</td></tr>
+                        </tbody>
+                    </table>
                 </div>
+
+                <!-- Section 3: Skool 社群同步 -->
+                <div class="auto-section">
+                    <div class="auto-section-header">
+                        <div>
+                            <div class="auto-section-title">Skool 社群同步</div>
+                            <div class="auto-section-purpose">為什麼存在：Skool 沒有公開 API，必須每天 cookie auth 拉成員 / 互動 / 課程進度，存到本地 SQLite 才能做後續對帳、retention 分析、見證牆生成。</div>
+                        </div>
+                        <div class="auto-section-count">2</div>
+                    </div>
+                    <table class="auto-table">
+                        <thead><tr><th style="width:30%">名稱</th><th style="width:16%">頻率</th><th>目的</th><th style="width:10%">健康</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>com.rayos.skool-tft</strong></td><td>每天 08:00</td><td>TFT 付費社群成員 / 互動 / 課程進度 → 本地 SQLite</td><td>✓</td></tr>
+                            <tr><td><strong>com.rayos.skool-hackers-delta</strong></td><td>每天 08:30</td><td>炒股黑客新加入 / 退出差異 → JSON</td><td>✓</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Section 4: 個人 / 財務 -->
+                <div class="auto-section">
+                    <div class="auto-section-header">
+                        <div>
+                            <div class="auto-section-title">個人 / 財務</div>
+                            <div class="auto-section-purpose">為什麼存在：個人資料跨 Mac mini / MacBook 同步，月中自動推送個人支出進度（$50K 年度預算追蹤）。</div>
+                        </div>
+                        <div class="auto-section-count">2</div>
+                    </div>
+                    <table class="auto-table">
+                        <thead><tr><th style="width:30%">名稱</th><th style="width:16%">頻率</th><th>目的</th><th style="width:10%">健康</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>com.aios.personal-sync</strong></td><td>每 60 分</td><td>個人 DB / Sheets 跨機同步</td><td style="color:#FFB74D;">⚠ exit 2</td></tr>
+                            <tr><td><strong>com.rayos.expense-check</strong></td><td>每月 15 號 09:00</td><td>月中支出進度 → TG alert（與 $50K 預算比對）</td><td>✓</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Section 5: 系統 / GTD -->
+                <div class="auto-section">
+                    <div class="auto-section-header">
+                        <div>
+                            <div class="auto-section-title">系統 / GTD</div>
+                            <div class="auto-section-purpose">為什麼存在：GTD 待辦變動即時觸發 dashboard 重建；TG inbox 持續監聽 Ray 從手機拋進來的訊息，路由到對應系統。</div>
+                        </div>
+                        <div class="auto-section-count">2</div>
+                    </div>
+                    <table class="auto-table">
+                        <thead><tr><th style="width:30%">名稱</th><th style="width:16%">頻率</th><th>目的</th><th style="width:10%">健康</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>com.aios.gtd-watcher</strong></td><td>WatchPath 即時</td><td>gtd/ 目錄任何變動 → 重產 dashboard snapshot</td><td>✓</td></tr>
+                            <tr><td><strong>com.aios.tg-inbox-poller</strong></td><td>KeepAlive 持續</td><td>TG inbox 訊息 → 路由到 Notion / 對應 workflow</td><td style="color:#FFB74D;">⚠ exit 1</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer -->
+                <div style="margin-top:20px;padding:14px 18px;background:rgba(212,197,169,0.04);border:1px dashed var(--border);border-radius:8px;font-size:11px;color:var(--text-dim);line-height:1.7;">
+                    <strong style="color:var(--accent);">資料來源：</strong><code style="background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:3px;">launchctl list</code> + <code style="background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:3px;">~/Library/LaunchAgents/com.{rayos,aios}.*.plist</code>（17 個 plist 全數驗過 ProgramArguments）<br>
+                    <span style="opacity:0.7;"><strong>排除清單</strong>：半自動 Auto Task（weekly-review / memory-consolidation / rayos-health-check / tft-wall-sync / taishin-expense-sync / cathay-expense-sync — 需 Claude Code session 啟動才檢查）；純基礎設施（cloudflare-tunnel / service-watchdog / cc-channels-watchdog 已停業務線）；舊版重複（skool-sync-sh 已退役 2026-05-09）。<strong>2 條警告</strong>：personal-sync exit 2 + tg-inbox-poller exit 1，建議追查 root cause。</span>
+                </div>
+
                 </div><!-- /agents-view -->
+
+                <style>
+                    .auto-section { margin-bottom: 24px; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--bg-elevated); }
+                    .auto-section-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:16px 20px; background:linear-gradient(135deg, rgba(212,197,169,0.06), transparent); border-bottom:1px solid var(--border); }
+                    .auto-section-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:600; color:var(--accent); letter-spacing:0.5px; line-height:1.2; }
+                    .auto-section-purpose { font-size:11px; color:var(--text-dim); line-height:1.7; margin-top:6px; max-width:780px; }
+                    .auto-section-count { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:700; color:var(--text); opacity:0.4; line-height:1; flex-shrink:0; padding-top:4px; }
+                    .auto-table { width:100%; border-collapse:collapse; font-size:12px; }
+                    .auto-table thead th { text-align:left; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); padding:10px 16px; background:rgba(0,0,0,0.15); border-bottom:1px solid var(--border); }
+                    .auto-table tbody td { padding:12px 16px; border-bottom:1px solid rgba(212,197,169,0.06); color:var(--text-dim); vertical-align:top; line-height:1.5; }
+                    .auto-table tbody tr:last-child td { border-bottom:none; }
+                    .auto-table tbody tr:hover { background:rgba(212,197,169,0.03); }
+                    .auto-table tbody td strong { color:var(--text); font-weight:600; font-family:'SF Mono', monospace; font-size:11.5px; letter-spacing:0.2px; }
+                    .auto-type-task, .auto-type-launchd, .auto-type-n8n { display:inline-block; font-size:9.5px; font-weight:600; letter-spacing:0.8px; padding:3px 8px; border-radius:4px; text-transform:uppercase; white-space:nowrap; }
+                    .auto-type-task { background:rgba(76,175,80,0.12); color:#81C784; border:1px solid rgba(76,175,80,0.25); }
+                    .auto-type-launchd { background:rgba(33,150,243,0.12); color:#64B5F6; border:1px solid rgba(33,150,243,0.25); }
+                    .auto-type-n8n { background:rgba(244,143,177,0.12); color:#F48FB1; border:1px solid rgba(244,143,177,0.25); }
+                </style>
 
                 <!-- STATUS BOARD VIEW -->
                 <div id="status-board-view" style="display:none;">
@@ -1060,6 +1081,37 @@
                 </div>
             </div>
         </div>
+
+        <!-- GTD -->
+        <section class="section" id="gtd">
+            <div class="header">
+                <div><div class="page-label">Workspace · gtd/*.md → JSON snapshot</div><div class="page-title">GTD</div></div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <span id="gtd-data-ts" style="color:var(--text-dim);font-size:11px;font-family:'SF Mono',monospace;"></span>
+                    <button class="btn" onclick="loadGTDSnapshot(true)" title="Reload snapshot">🔄 Refresh</button>
+                </div>
+            </div>
+            <div class="content">
+                <div id="gtd-loading" style="text-align:center;padding:40px;color:var(--text-dim);">Loading GTD snapshot…</div>
+
+                <div id="gtd-dashboard" style="display:none;">
+                    <div class="section-label">Summary</div>
+                    <div class="stats-row" id="gtd-kpis" style="grid-template-columns:repeat(4,1fr);"></div>
+
+                    <div class="section-label" style="margin-top:24px;">Active Projects</div>
+                    <div id="gtd-projects"></div>
+
+                    <div class="section-label" style="margin-top:24px;">Next Actions</div>
+                    <div id="gtd-actions"></div>
+                </div>
+
+                <div id="gtd-error" style="display:none;padding:24px;text-align:center;color:#ff8a80;">
+                    <div style="font-size:14px;margin-bottom:8px;">⚠️ Failed to load gtd-snapshot.json</div>
+                    <div style="color:var(--text-dim);font-size:11px;">Run <code>python3 scripts/gtd_to_rayos_json.py</code> on workspace to regenerate.</div>
+                </div>
+            </div>
+        </section>
 
         <!-- INFORMATION -->
         <section class="section" id="information">
@@ -1365,6 +1417,7 @@
     <script src="js/agents.js"></script>
     <script src="js/status-board.js"></script>
     <script src="js/plan.js"></script>
+    <script src="js/gtd.js"></script>
     <script src="js/init.js"></script>
     <script>
         if ('serviceWorker' in navigator) {

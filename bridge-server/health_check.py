@@ -13,6 +13,61 @@ import urllib.request
 import urllib.error
 import ssl
 
+
+def _load_workspace_env() -> None:
+    """Inject workspace-root .env vars so launchd (no shell profile) gets the
+    Telegram token. Only fills keys that are unset or empty (a present-but-empty
+    env var would otherwise silently disable Telegram)."""
+    env_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", ".env")
+    )
+    try:
+        with open(env_path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, val = line.partition("=")
+                key, val = key.strip(), val.strip().strip('"').strip("'")
+                if val and not os.environ.get(key):
+                    os.environ[key] = val
+    except FileNotFoundError:
+        pass
+
+
+_load_workspace_env()
+
+import subprocess
+import yaml
+from pathlib import Path
+
+from watchdog_n8n import check_n8n_critical
+from watchdog_launchd import check_launchd_tasks
+
+CONFIG_DIR = Path(__file__).resolve().parent.parent / 'config'
+
+
+def _watchdog_version() -> str:
+    """Short git sha of the repo this health_check.py lives in.
+
+    Stamped onto the Telegram message so stale alerts can be matched to a
+    specific commit (e.g. the 2026-05-25 false-alarm batch surfaced from a
+    pre-74bc813 watchdog and would otherwise look indistinguishable from
+    a fresh report)."""
+    repo = Path(__file__).resolve().parent.parent
+    try:
+        out = subprocess.run(
+            ['git', '-C', str(repo), 'rev-parse', '--short', 'HEAD'],
+            capture_output=True, timeout=2, text=True,
+        )
+        return out.stdout.strip() or 'unknown'
+    except Exception:
+        return 'unknown'
+N8N_API_KEY = os.environ.get('N8N_API_KEY', '')
+
+RAYOS_DIR = Path.home() / '.rayos'
+RELOAD_HISTORY_PATH = RAYOS_DIR / 'reload_history.json'
+
 # ── Config ──────────────────────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '925855884')
@@ -20,7 +75,6 @@ NOTION_TOKEN = os.environ.get('NOTION_TOKEN', '')  # from Vercel env, optional f
 
 VERCEL_URL = 'https://ray-os.vercel.app'
 BRIDGE_URL = 'http://localhost:3001'
-TUNNEL_URL_FILE = '/tmp/bridge-tunnel-url.txt'
 
 # Notion DBs to verify
 NOTION_DBS = {
@@ -106,27 +160,10 @@ def check_bridge() -> list[dict]:
         'detail': 'OK' if bridge_ok else f'HTTP {code} — {body[:100]}',
     })
 
-    # Check Cloudflare tunnel
-    tunnel_url = ''
-    try:
-        with open(TUNNEL_URL_FILE, 'r') as f:
-            tunnel_url = f.read().strip()
-    except FileNotFoundError:
-        pass
-
-    if tunnel_url:
-        code, body = http_get(f'{tunnel_url}/health', timeout=15)
-        results.append({
-            'name': 'Cloudflare Tunnel',
-            'ok': code == 200,
-            'detail': f'OK ({tunnel_url[:40]}...)' if code == 200 else f'HTTP {code}',
-        })
-    else:
-        results.append({
-            'name': 'Cloudflare Tunnel',
-            'ok': False,
-            'detail': 'No tunnel URL file found',
-        })
+    # Cloudflare tunnel check removed 2026-05-22: the bridge tunnel was retired
+    # (YT subtitles migrated to Apify, no remaining consumers). The launchd job
+    # com.rayos.cloudflare-tunnel was unloaded and its plist archived to
+    # ~/.rayos/disabled-plists/. See memory reference_launchd_health_and_gws_token.
 
     return results
 
@@ -178,6 +215,45 @@ def check_yt_subtitle() -> list[dict]:
         return [{'name': 'YT Subtitle API', 'ok': False, 'detail': f'HTTP {code}'}]
 
 
+def format_n8n_alerts(alerts: list[dict]) -> str:
+    """Format N8N critical alerts for Telegram message."""
+    if not alerts:
+        return ''
+    lines = [f'\n*🚨 N8N Critical Failures ({len(alerts)})*']
+    for a in alerts:
+        when = (a.get('last_two_failed_at') or ['?'])[0] or '?'
+        lines.append(f"• {a['workflow_name']} — 連續 2 次 fail")
+        lines.append(f"  最後失敗：{when}")
+        lines.append(f"  {a['url']}")
+    return '\n'.join(lines)
+
+
+def format_launchd_alerts(alerts: list[dict]) -> str:
+    """Split alerts by severity into recovered / manual sections."""
+    if not alerts:
+        return ''
+    recovered = [a for a in alerts if a['severity'] == 'recovered']
+    manual = [a for a in alerts if a['severity'] == 'manual']
+    config_alerts = [a for a in alerts if a['severity'] == 'config']
+    sections = []
+    if recovered:
+        sections.append(f'\n*⚠️ launchd Tasks Recovered ({len(recovered)})*')
+        for a in recovered:
+            sections.append(f"• {a.get('label', '?')} 漏跑 {a.get('hours_late', 0):.1f}h")
+            sections.append(f"  → {a.get('detail', '')} ✅")
+    if manual:
+        sections.append(f'\n*🆘 launchd Manual Required ({len(manual)})*')
+        for a in manual:
+            sections.append(f"• {a.get('label', '?')} 漏跑 {a.get('hours_late', 0):.1f}h")
+            sections.append(f"  {a.get('detail', '')}")
+    if config_alerts:
+        sections.append(f'\n*🛠 launchd Config Drift ({len(config_alerts)})*')
+        for a in config_alerts:
+            sections.append(f"• {a.get('label', '?')}")
+            sections.append(f"  {a.get('detail', '')}")
+    return '\n'.join(sections)
+
+
 def send_telegram(message: str) -> bool:
     """Send Telegram notification."""
     if not TELEGRAM_BOT_TOKEN:
@@ -205,26 +281,70 @@ def main():
     all_results.extend(check_yt_subtitle())
     all_results.extend(check_notion_dbs())
 
+    # Block A — N8N critical workflow check
+    n8n_alerts: list[dict] = []
+    n8n_config_path = CONFIG_DIR / 'n8n_critical_workflows.yaml'
+    if N8N_API_KEY and n8n_config_path.exists():
+        try:
+            with open(n8n_config_path) as f:
+                n8n_config = yaml.safe_load(f)
+            n8n_alerts = check_n8n_critical(n8n_config, N8N_API_KEY)
+            print(f'[Health Check] N8N critical: {len(n8n_alerts)} alerts')
+        except Exception as e:
+            print(f'[Health Check] N8N check failed: {e}')
+            all_results.append({'name': 'N8N watchdog', 'ok': False, 'detail': f'self-check failed: {e}'})
+    else:
+        print('[Health Check] N8N check skipped (no API key or config)')
+
+    # Block B — launchd auto task mtime check + auto-reload
+    launchd_alerts: list[dict] = []
+    launchd_config_path = CONFIG_DIR / 'launchd_tasks.yaml'
+    if launchd_config_path.exists():
+        try:
+            with open(launchd_config_path) as f:
+                launchd_config = yaml.safe_load(f)
+            launchd_alerts = check_launchd_tasks(launchd_config, RELOAD_HISTORY_PATH)
+            print(f'[Health Check] launchd: {len(launchd_alerts)} alerts')
+        except Exception as e:
+            print(f'[Health Check] launchd check failed: {e}')
+            all_results.append({'name': 'launchd watchdog', 'ok': False, 'detail': f'self-check failed: {e}'})
+    else:
+        print('[Health Check] launchd check skipped (no config yaml)')
+
     # Build report
     ok_count = sum(1 for r in all_results if r['ok'])
     fail_count = len(all_results) - ok_count
     failures = [r for r in all_results if not r['ok']]
 
-    if fail_count == 0:
-        msg = f"*RayOS Health Check*\n\n{ok_count}/{len(all_results)} checks passed"
-        print(f'[Health Check] All {ok_count} checks passed')
+    n8n_section = format_n8n_alerts(n8n_alerts)
+    launchd_section = format_launchd_alerts(launchd_alerts)
+    has_alerts = bool(n8n_alerts) or any(a.get('severity') == 'manual' for a in launchd_alerts)
+    # recovered 不算 alert（自己救起來了），但仍要 TG 通報
+
+    version = _watchdog_version()
+    if fail_count == 0 and not n8n_alerts and not launchd_alerts:
+        msg = f"*RayOS Health Check* `[git {version}]`\n\n{ok_count}/{len(all_results)} checks passed"
+        print(f'[Health Check] All {ok_count} checks passed, no alerts')
     else:
-        lines = [f"*RayOS Health Check*\n"]
-        lines.append(f"{ok_count}/{len(all_results)} passed, *{fail_count} FAILED*\n")
-        lines.append("*Failed:*")
-        for r in failures:
-            lines.append(f"  {r['name']}: {r['detail']}")
+        lines = [f"*RayOS Health Check* `[git {version}]`\n"]
+        if fail_count > 0:
+            lines.append(f"{ok_count}/{len(all_results)} passed, *{fail_count} FAILED*\n")
+        else:
+            lines.append(f"{ok_count}/{len(all_results)} passed\n")
+        if failures:
+            lines.append("*Failed:*")
+            for r in failures:
+                lines.append(f"  {r['name']}: {r['detail']}")
         lines.append("\n*Passed:*")
         for r in all_results:
             if r['ok']:
                 lines.append(f"  {r['name']}")
+        if n8n_section:
+            lines.append(n8n_section)
+        if launchd_section:
+            lines.append(launchd_section)
         msg = '\n'.join(lines)
-        print(f'[Health Check] {fail_count} failures detected')
+        print(f'[Health Check] {fail_count} fail + {len(n8n_alerts)} N8N + {len(launchd_alerts)} launchd alerts')
 
     # Print full report to stdout
     for r in all_results:
@@ -235,7 +355,7 @@ def main():
     send_telegram(msg)
 
     # Exit code for scripting
-    sys.exit(0 if fail_count == 0 else 1)
+    sys.exit(0 if (fail_count == 0 and not has_alerts) else 1)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Re-parse all credit card bills with updated classification rules."""
+"""DEPRECATED historical re-parser for credit card bills (Sep 2025-Mar 2026).
+
+Dashboard expense data is now generated from Notion by sync_expense_dashboard.py
+(Notion = source of truth for hand-curated categories). This script is kept only
+as a historical-backfill fallback. It merges with the existing json so a re-run
+preserves curated categories and never deletes months it does not parse, but
+prefer sync_expense_dashboard.py for any routine regeneration.
+"""
 
 import csv
 import json
@@ -368,6 +375,30 @@ def main():
 
     all_transactions = [c for i, c in enumerate(charges) if i not in matched_charge_ids]
     print(f"Total transactions (after refund matching): {len(all_transactions)}")
+
+    # DEPRECATED: dashboard expense data is now generated from Notion by
+    # sync_expense_dashboard.py (Notion = source of truth for categories). This
+    # historical re-parser only covers the bills listed above (Sep 2025-Mar 2026)
+    # and must NOT clobber months it does not parse. So merge with the existing
+    # json: (1) preserve hand-curated categories for rows it re-parses, since
+    # keyword classify() cannot reproduce manual judgments (e.g. P.SKOOL as
+    # 投資自己 in some months but 事業 in others); (2) keep all rows from months
+    # this run did not produce, so April/May etc. survive a re-run.
+    prev_json = os.path.join(os.path.dirname(__file__), '..', 'data', 'expense-transactions.json')
+    if os.path.exists(prev_json):
+        with open(prev_json, 'r', encoding='utf-8') as f:
+            prev_txns = json.load(f)
+        prev_cat = {(p['date'], p['desc'], int(round(p['amount']))): p['category'] for p in prev_txns}
+        parsed_months = {t['month'] for t in all_transactions}
+        preserved = 0
+        for t in all_transactions:
+            key = (t['date'], t['desc'], int(round(t['amount'])))
+            if key in prev_cat and prev_cat[key] != t['category']:
+                t['category'] = prev_cat[key]
+                preserved += 1
+        kept = [p for p in prev_txns if p['month'] not in parsed_months]
+        all_transactions.extend(kept)
+        print(f"  Preserved {preserved} curated categories; kept {len(kept)} rows from non-reparsed months")
 
     # Aggregate by month
     monthly = defaultdict(lambda: {'total': 0, 'count': 0, 'categories': defaultdict(int)})
