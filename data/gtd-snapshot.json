@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-03T15:41:00+00:00",
+  "generated_at": "2026-06-03T15:43:39+00:00",
   "summary": {
-    "active_projects": 36,
-    "completed_projects": 5,
+    "active_projects": 37,
+    "completed_projects": 6,
     "next_actions": 8,
     "waiting_for": 0,
     "automation_pct": 22,
@@ -94,11 +94,11 @@
     {
       "name": "TFT 直播自動上架",
       "area": "Main Business",
-      "status": "測試 — Step 2-9 寫完，等 Phase 0 spike + 真實直播 e2e（MEMORY #8）",
+      "status": "Completed ✅ 2026-06-03 — 直播 → Phase A draft → chapters → 自動發 Skool 課程區全鏈路上線。`tft-live-classroom-update` launchd 週二 07:00 LIVE；`tft-live-phase-a` 退役改 `streamyard-schedule-today` 每日掃描自動排（MEMORY #33）",
       "outcome": "週一晚直播 → 自動產 Phase A draft 上 TG → 週二早 chapters draft → 自動發到 Skool 課程區",
-      "next_action": "@me (a) 跑 Phase 0 spike 驗 Skool selector；(b) 解 TG bot token 衝突；(c) `cp config/com.aios.tft-live-{phase-a,classroom-update}.plist + tg-inbox-poller.plist ~/Library/LaunchAgents/ && launchctl load -w`；(d) 2026-05-12（一）下場直播 e2e",
-      "completed": false,
-      "completed_date": null
+      "next_action": "~~@me (a) 跑 Phase 0 spike 驗 Skool selector；(b) 解 TG bot token 衝突；(c) cp plist + launchctl load；(d) 下場直播 e2e~~ 已完成",
+      "completed": true,
+      "completed_date": "2026-06-03"
     },
     {
       "name": "MT5 EA 鎖定 self-healing（換帳號零手動）",
@@ -349,6 +349,24 @@
       "status": "⏸ Blocked — 等 IG 帳號合規（9 Reels caption 改完 + 142d 直播禁令過）",
       "outcome": "AI 自動回 IG DM，把高意向粉絲導進 TFT 申請流程（參考 https://youtu.be/wAPy3aD-7Tc）",
       "next_action": "@me 先解 BLOCKED #0（9 Reels caption），再設計 ManyChat → Claude webhook + DM playbook",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW3 — River 直播 + 實戰影片 時間軸 + 自動上架",
+      "area": "Main Business",
+      "status": "Backlog — 待開工。「TFT 直播自動上架」(已 Completed 2026-06-03) 的延伸，把同一套管線套到 River 的內容。（註：編號 QW3 與「N8N/Auto Task watchdog」共號，後者 Status=測試 顯示在測試中組，不衝突）",
+      "outcome": "River 的每週直播 + 實戰交易影片 → 自動產時間軸 chapters → 自動上架到對應目的地（Skool 課程區 / 頻道）",
+      "next_action": "@ray 確認 River 影片來源（StreamYard？哪個頻道？）+ 上架目的地 + 範圍 → @claude 評估能否直接複用 `tft-live-classroom-update` / `streamyard-schedule-today` 管線，列出要改的點",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW27 — Onboarding 歡迎影片",
+      "area": "Main Business",
+      "status": "Backlog — 待開工。新學員 onboarding 流程的歡迎影片（可搭配 QW21 TFT Onboarding 頁面）",
+      "outcome": "新學員加入後看到歡迎影片 → 降低早期流失、第一時間建立連結與信任",
+      "next_action": "@ray 確認是哪個 onboarding（TFT？炒股黑客？）+ 影片放哪（onboarding 頁面 / Skool / email）+ 內容大綱 → 錄製 → 上架",
       "completed": false,
       "completed_date": null
     },
