@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-03T08:24:18+00:00",
+  "generated_at": "2026-06-03T08:29:08+00:00",
   "summary": {
-    "active_projects": 37,
+    "active_projects": 38,
     "completed_projects": 5,
     "next_actions": 9,
     "waiting_for": 0,
@@ -353,11 +353,20 @@
       "completed_date": null
     },
     {
-      "name": "QW26 — River 直播 + 實戰影片 時間軸 + 自動上架",
+      "name": "QW3 — River 直播 + 實戰影片 時間軸 + 自動上架",
       "area": "Main Business",
-      "status": "Backlog — 待開工。「TFT 直播自動上架」(已 Completed 2026-06-03) 的延伸，把同一套管線套到 River 的內容",
+      "status": "Backlog — 待開工。「TFT 直播自動上架」(已 Completed 2026-06-03) 的延伸，把同一套管線套到 River 的內容。（註：編號 QW3 與「N8N/Auto Task watchdog」共號，後者 Status=測試 顯示在測試中組，不衝突）",
       "outcome": "River 的每週直播 + 實戰交易影片 → 自動產時間軸 chapters → 自動上架到對應目的地（Skool 課程區 / 頻道）",
       "next_action": "@ray 確認 River 影片來源（StreamYard？哪個頻道？）+ 上架目的地 + 範圍 → @claude 評估能否直接複用 `tft-live-classroom-update` / `streamyard-schedule-today` 管線，列出要改的點",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW27 — Onboarding 歡迎影片",
+      "area": "Main Business",
+      "status": "Backlog — 待開工。新學員 onboarding 流程的歡迎影片（可搭配 QW21 TFT Onboarding 頁面）",
+      "outcome": "新學員加入後看到歡迎影片 → 降低早期流失、第一時間建立連結與信任",
+      "next_action": "@ray 確認是哪個 onboarding（TFT？炒股黑客？）+ 影片放哪（onboarding 頁面 / Skool / email）+ 內容大綱 → 錄製 → 上架",
       "completed": false,
       "completed_date": null
     },
