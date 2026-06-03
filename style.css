@@ -1118,3 +1118,115 @@
 }
 .goal-drag-handle:hover { opacity: 1; }
 .goal-card-ghost { opacity: 0.3; }
+
+/* ============================================================
+   Dashboard 質感升級（2026-05-30，frontend-design / nexus 派生）
+   全部 scope 在 #dashboard 之下 → 只影響第一頁，其他 view 不動。
+   只新增、不改任何既有規則。技法來源：nexus glass-panel /
+   spotlight-card / film grain + stratum inset 受光邊。
+   ============================================================ */
+
+/* 全頁 film grain（極淡底片顆粒，消塑膠感）。pointer-events:none 不擋互動 */
+#dashboard::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- 數據卡 → 玻璃面板 + 滑鼠聚光 ---- */
+#dashboard .stat-box {
+    background: linear-gradient(150deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012));
+    border: 1px solid rgba(212,197,169,0.10);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 10px 30px -14px rgba(0,0,0,0.75);
+}
+/* 把既有的角落光暈 ::before 改成跟隨滑鼠的聚光（預設 top-center，無 JS 也好看）*/
+#dashboard .stat-box::before {
+    top: 0; left: 0; right: auto;
+    width: auto; height: auto; inset: 0;
+    border-radius: 14px;
+    filter: none;
+    background: radial-gradient(420px circle at var(--mx,50%) var(--my,0%), rgba(212,197,169,0.14), transparent 42%);
+    opacity: 0;
+}
+#dashboard .stat-box:hover {
+    transform: translateY(-4px);
+    border-color: rgba(212,197,169,0.28);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 16px 44px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(212,197,169,0.08);
+}
+#dashboard .stat-box:hover::before { opacity: 1; }
+#dashboard .stat-box-icon {
+    background: radial-gradient(circle at 30% 25%, rgba(212,197,169,0.22), rgba(212,197,169,0.06));
+    box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 2px 6px rgba(0,0,0,0.4);
+    color: var(--accent);
+}
+#dashboard .stat-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-variant-numeric: tabular-nums;
+    color: #f1ead9;
+}
+#dashboard .stat-label {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: rgba(212,197,169,0.55);
+    margin-top: 8px;
+}
+
+/* ---- VISION 願景板 → 暗角聚焦 + 標題金色光暈 ---- */
+#dashboard .moodboard-wrapper {
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 16px 48px -16px rgba(0,0,0,0.8);
+}
+#dashboard .moodboard-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.55) 100%);
+}
+#dashboard .moodboard-title {
+    text-shadow: 0 4px 60px rgba(0,0,0,0.95), 0 0 34px rgba(212,197,169,0.18);
+}
+#dashboard .moodboard-sub { color: var(--accent); opacity: 0.85; }
+
+/* ---- Target 目標卡 → 玻璃 + 聚光；高光卡呼吸光暈 ---- */
+#dashboard .card {
+    position: relative;
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 10px 30px -16px rgba(0,0,0,0.7);
+}
+#dashboard .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(460px circle at var(--mx,50%) var(--my,0%), rgba(212,197,169,0.12), transparent 42%);
+}
+#dashboard .card:hover { border-color: rgba(212,197,169,0.22); }
+#dashboard .card:hover::before { opacity: 1; }
+#dashboard .card-highlight { animation: rayos-breathe 4.5s ease-in-out infinite; }
+@keyframes rayos-breathe {
+    0%, 100% { box-shadow: 0 0 22px rgba(212,197,169,0.12), inset 0 1px 0 rgba(212,197,169,0.14); }
+    50%      { box-shadow: 0 0 38px rgba(212,197,169,0.22), inset 0 1px 0 rgba(212,197,169,0.18); }
+}
+
+/* 尊重「減少動態」偏好：關掉呼吸動畫 */
+@media (prefers-reduced-motion: reduce) {
+    #dashboard .card-highlight { animation: none; }
+}
