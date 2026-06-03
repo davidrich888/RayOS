@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-06-03T15:40:02+00:00",
+  "generated_at": "2026-06-03T15:40:18+00:00",
   "summary": {
     "active_projects": 37,
     "completed_projects": 4,
-    "next_actions": 9,
+    "next_actions": 8,
     "waiting_for": 0,
     "automation_pct": 22,
     "automation_target": 30,
@@ -383,7 +383,6 @@
   "actions": {
     "@claude": [
       "**QW2 TFT Milestone Emails（Hormozi 正向放大）⭐**：QW1 已 Completed，可以開工。依 `memory/tft-retention-milestone-emails-proposal.md` 6 個 task：",
-      "**QW3 O1+O2 watchdog**：擴充 `rayos-health-check` 加 N8N execution status API + Auto Task last-run mtime 檢查 + auto-recover",
       "**QW4 O4 API key 過期警示**：建 `expiry-tracker` N8N workflow + Notion DB（key/平台/到期日/owner）+ 14d 前 cron warn",
       "**QW5 Co1 TG 噪音降低**：設計 TG 訊息分類規則（urgent / info / digest）+ dedup 邏輯 + 1 小時 batch summary",
       "**QW6 Co2 Email 自動分類**：列 Gmail filter 規則 + AI 分類 prompt（Gmail MCP），先做 ConvertKit/Notion/銀行 三類",
