@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-03T18:28:46+00:00",
+  "generated_at": "2026-06-03T18:31:03+00:00",
   "summary": {
-    "active_projects": 37,
-    "completed_projects": 6,
+    "active_projects": 36,
+    "completed_projects": 7,
     "next_actions": 9,
     "waiting_for": 0,
     "automation_pct": 22,
@@ -157,11 +157,11 @@
     {
       "name": "QW3 — O1+O2 N8N/Auto Task watchdog",
       "area": "Main Business",
-      "status": "測試 — 等明早 7:30 launchd 首次正式跑（ship 2026-05-26, commits `74bc813` + `e0c834a`）",
+      "status": "Completed — 2026-06-04",
       "outcome": "N8N workflow 與 launchd Auto Task 任一壞掉 → 5 分鐘內 TG 警示 + 嘗試 auto-recover",
-      "next_action": "@ray 觀察 2026-05-27 07:30 TG 報告「19/19 healthy」→ 標 Completed；異常則回報根因",
-      "completed": false,
-      "completed_date": null
+      "next_action": "~~@ray 觀察 2026-05-27 07:30 TG 報告「19/19 healthy」→ 標 Completed~~",
+      "completed": true,
+      "completed_date": "2026-06-04"
     },
     {
       "name": "QW4 — O4 API key/token 過期警示",
