@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-03T15:44:55+00:00",
+  "generated_at": "2026-06-03T15:53:40+00:00",
   "summary": {
-    "active_projects": 37,
-    "completed_projects": 6,
+    "active_projects": 36,
+    "completed_projects": 7,
     "next_actions": 8,
     "waiting_for": 0,
     "automation_pct": 22,
@@ -211,11 +211,11 @@
     {
       "name": "QW9 — M3 YT 心智圖 → AI 結構/PPT",
       "area": "Main Business",
-      "status": "測試 — ContentPipeline v2 B 路線已完整：`/capture→/research→/title→/script→/ppt(B)→.pptx`（master-mode auto-render，Q&A → outline → styled .pptx 全自動），等 Ray 用實際影片跑一輪 + v4.pptx 目視驗收（MEMORY: ppt-render master-mode v1 + `/ppt` B route `749fb85`）",
+      "status": "Completed ✅ 2026-06-03 — Ray 驗收 sign-off：ContentPipeline v2 B 路線完整跑通（`/capture→/research→/title→/script→/ppt(B)→.pptx` master-mode auto-render），v4.pptx 結構/字級/動畫驗收 OK（MEMORY: ppt-render master-mode v1 + `/ppt` B route `749fb85`）",
       "outcome": "YT 影片心智圖階段半自動化：AI 從 hook + outline 直接產 mind-map → PPT 草稿，Ray 只做 review",
-      "next_action": "@me 用一支真實 YT 影片跑完整 B 路線 → v4.pptx 驗收結構 / 字級 / 動畫 → OK 後改 Status 為 Completed",
-      "completed": false,
-      "completed_date": null
+      "next_action": "—（已完成）",
+      "completed": true,
+      "completed_date": "2026-06-03"
     },
     {
       "name": "QW11 — C13 成果牆數字自動更新",
