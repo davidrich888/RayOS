@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-06-03T15:54:10+00:00",
+  "generated_at": "2026-06-03T18:28:46+00:00",
   "summary": {
-    "active_projects": 36,
-    "completed_projects": 7,
-    "next_actions": 7,
+    "active_projects": 37,
+    "completed_projects": 6,
+    "next_actions": 9,
     "waiting_for": 0,
     "automation_pct": 22,
     "automation_target": 30,
@@ -139,7 +139,7 @@
     {
       "name": "QW2 — TFT Milestone & Progress Emails（正向放大留存）⭐",
       "area": "Main Business",
-      "status": "Active — Strategic Win 🔴 HIGH（Hormozi $100M Retention p7/17/23/29/34；補 QW1「只救火」盲點）。QW1 已 Completed，可以開工",
+      "status": "測試 — collector+backfill ALL ✅ 05-28，posts 3,808 / comments 17,709。M1+M3 名單可重撈，待 Ray「OK 寄」（`outputs/pending/2026-05-11-qw2-milestone-emails-3封-draft.md`）",
       "outcome": "學員達 4 個關鍵 milestone 時自動發 A-C-A 結構 Email。M1: 第 1 篇檢討 / M2: 連 4 週檢討 + 2 場直播 / M3: 第一次通過挑戰 or 出金 / **M4: 第 10 篇檢討（習慣建立確認 ← 2026-05-13 數據：11+篇學員流失率 23% vs 0篇 66%，這是真正的分水嶺）**",
       "next_action": "@claude ①先發第一輪 16 人（草稿在 `outputs/pending/2026-05-11-qw2-milestone-emails-3封-draft.md`，需 Ray OK）②T1 加 M4 觸發 SQL（review_count=10）③寫 M4 Email 文案。完整方案 → `memory/tft-retention-milestone-emails-proposal.md`",
       "completed": false,
@@ -157,11 +157,11 @@
     {
       "name": "QW3 — O1+O2 N8N/Auto Task watchdog",
       "area": "Main Business",
-      "status": "Completed ✅ 2026-06-03 — 驗收通過：`com.aios.rayos-health-check` 自 05-27 起每天 07:30 跑滿一週，06-03 最後一輪 exit code=0「N8N: 0 alerts / launchd: 0 alerts / 10 checks all passed」，`.error.log` 0 bytes（stderr fallback 修正後零誤判）。ship commits `74bc813` + `e0c834a`",
+      "status": "測試 — 等明早 7:30 launchd 首次正式跑（ship 2026-05-26, commits `74bc813` + `e0c834a`）",
       "outcome": "N8N workflow 與 launchd Auto Task 任一壞掉 → 5 分鐘內 TG 警示 + 嘗試 auto-recover",
-      "next_action": "—（已完成）",
-      "completed": true,
-      "completed_date": "2026-06-03"
+      "next_action": "@ray 觀察 2026-05-27 07:30 TG 報告「19/19 healthy」→ 標 Completed；異常則回報根因",
+      "completed": false,
+      "completed_date": null
     },
     {
       "name": "QW4 — O4 API key/token 過期警示",
@@ -211,9 +211,9 @@
     {
       "name": "QW9 — M3 YT 心智圖 → AI 結構/PPT",
       "area": "Main Business",
-      "status": "Completed ✅ 2026-06-03 — Ray 驗收 sign-off：ContentPipeline v2 B 路線完整跑通（`/capture→/research→/title→/script→/ppt(B)→.pptx` master-mode auto-render），v4.pptx 結構/字級/動畫驗收 OK（MEMORY: ppt-render master-mode v1 + `/ppt` B route `749fb85`）",
+      "status": "Completed — 2026-06-03",
       "outcome": "YT 影片心智圖階段半自動化：AI 從 hook + outline 直接產 mind-map → PPT 草稿，Ray 只做 review",
-      "next_action": "—（已完成）",
+      "next_action": "~~@me 用一支真實 YT 影片跑完整 B 路線 → v4.pptx 驗收結構 / 字級 / 動畫 → OK 後改 Status 為 Completed~~",
       "completed": true,
       "completed_date": "2026-06-03"
     },
@@ -274,7 +274,7 @@
     {
       "name": "QW17 — Content Pipeline 全自動化（M2+M9+M11+M13）",
       "area": "Main Business",
-      "status": "Active — Strategic Win 🟢（助理瓶頸最大）",
+      "status": "測試 — 2026-06-03",
       "outcome": "100x system + Longs2Shorts + IG Caption + Reels 腳本 串成 multi-agent pipeline，助理只做 review / 上架",
       "next_action": "@claude 盤點 4 條 pipeline 現狀（哪些已半自動）→ 設計統一 orchestrator + 共用 context store（hook / brand voice / CTA）",
       "completed": false,
@@ -401,10 +401,12 @@
   "actions": {
     "@claude": [
       "**QW2 TFT Milestone Emails（Hormozi 正向放大）⭐**：QW1 已 Completed，可以開工。依 `memory/tft-retention-milestone-emails-proposal.md` 6 個 task：",
+      "**QW3 O1+O2 watchdog**：擴充 `rayos-health-check` 加 N8N execution status API + Auto Task last-run mtime 檢查 + auto-recover",
       "**QW4 O4 API key 過期警示**：建 `expiry-tracker` N8N workflow + Notion DB（key/平台/到期日/owner）+ 14d 前 cron warn",
       "**QW5 Co1 TG 噪音降低**：設計 TG 訊息分類規則（urgent / info / digest）+ dedup 邏輯 + 1 小時 batch summary",
       "**QW6 Co2 Email 自動分類**：列 Gmail filter 規則 + AI 分類 prompt（Gmail MCP），先做 ConvertKit/Notion/銀行 三類",
       "**QW7 Co6 IG 被禁警示**：寫 IG health-check script（Apify IG actor / Graph API）+ 每 2 小時 scheduled + 異常 TG warn",
+      "**QW9 M3 心智圖 → AI 結構/PPT**：等實際影片跑完整 B 路線 → v4.pptx 驗收結構 / 字級 / 動畫 → OK 後改 Status 為 Completed",
       "**QW11 C13 成果牆自動更新**：寫 sync script（Skool API + DataOS MRR + R2/Notion 成果牆 JSON），每週日 22:00 排程",
       "**QW12 Co7 知識庫語意搜尋**：用 DataOS embedding + 既有 Notion content + memory/*.md 建 vector index，先做 CLI demo"
     ]
