@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-03T15:40:33+00:00",
+  "generated_at": "2026-06-03T15:40:56+00:00",
   "summary": {
-    "active_projects": 37,
-    "completed_projects": 4,
+    "active_projects": 36,
+    "completed_projects": 5,
     "next_actions": 8,
     "waiting_for": 0,
     "automation_pct": 22,
@@ -160,8 +160,8 @@
       "status": "Completed ✅ 2026-06-03 — 驗收通過：`com.aios.rayos-health-check` 自 05-27 起每天 07:30 跑滿一週，06-03 最後一輪 exit code=0「N8N: 0 alerts / launchd: 0 alerts / 10 checks all passed」，`.error.log` 0 bytes（stderr fallback 修正後零誤判）。ship commits `74bc813` + `e0c834a`",
       "outcome": "N8N workflow 與 launchd Auto Task 任一壞掉 → 5 分鐘內 TG 警示 + 嘗試 auto-recover",
       "next_action": "—（已完成）",
-      "completed": false,
-      "completed_date": null
+      "completed": true,
+      "completed_date": "2026-06-03"
     },
     {
       "name": "QW4 — O4 API key/token 過期警示",
