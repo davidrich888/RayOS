@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-03T15:32:53+00:00",
+  "generated_at": "2026-06-03T15:39:42+00:00",
   "summary": {
-    "active_projects": 38,
-    "completed_projects": 5,
+    "active_projects": 37,
+    "completed_projects": 6,
     "next_actions": 9,
     "waiting_for": 0,
     "automation_pct": 22,
@@ -214,8 +214,8 @@
       "status": "Completed — 2026-06-03",
       "outcome": "YT 影片心智圖階段半自動化：AI 從 hook + outline 直接產 mind-map → PPT 草稿，Ray 只做 review",
       "next_action": "~~@me 用一支真實 YT 影片跑完整 B 路線 → v4.pptx 驗收結構 / 字級 / 動畫 → OK 後改 Status 為 Completed~~",
-      "completed": false,
-      "completed_date": null
+      "completed": true,
+      "completed_date": "2026-06-03"
     },
     {
       "name": "QW11 — C13 成果牆數字自動更新",
@@ -274,7 +274,7 @@
     {
       "name": "QW17 — Content Pipeline 全自動化（M2+M9+M11+M13）",
       "area": "Main Business",
-      "status": "Active — Strategic Win 🟢（助理瓶頸最大）",
+      "status": "測試 — 2026-06-03",
       "outcome": "100x system + Longs2Shorts + IG Caption + Reels 腳本 串成 multi-agent pipeline，助理只做 review / 上架",
       "next_action": "@claude 盤點 4 條 pipeline 現狀（哪些已半自動）→ 設計統一 orchestrator + 共用 context store（hook / brand voice / CTA）",
       "completed": false,
