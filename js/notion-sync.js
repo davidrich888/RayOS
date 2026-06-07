@@ -6,7 +6,7 @@ const IDEAS_DB_ID = 'e04c6b41e1ae490baf3396dc7fe80fc5';
 const VIDEOS_DB_ID = '76fb8600ae9649bcb6c475f75f0ec818';
 const BODY_DS_ID = '6b8fea6a-9249-4a7b-a36e-5cd7f6ceb61f';
 const PLAN_DB_ID = '5f505efdebd540c0ab248999e5529ad2';
-const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI', nofap:'NoFap'};
+const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI', nofap:'NoFap', sleep:'Sleep'};
 const NOTION_API = 'https://api.notion.com/v1';
 let notionPageIndex = JSON.parse(localStorage.getItem('notion_page_index') || '{}');
 let syncInProgress = false;
@@ -78,7 +78,8 @@ async function syncDailyFromNotionDirect(silent = false) {
                 gym: props['Gym']?.checkbox === true ? true : null,
                 fatloss: (props['FatLoss']?.checkbox || props['Fat Loss']?.checkbox) === true ? true : null,
                 ai: props['AI']?.checkbox === true ? true : null,
-                nofap: props['NoFap']?.checkbox === true ? true : null
+                nofap: props['NoFap']?.checkbox === true ? true : null,
+                sleep: props['Sleep']?.checkbox === true ? true : null
             };
             count++;
         }
@@ -130,7 +131,8 @@ async function createDayInNotionDirect(dateStr) {
             'Gym': { checkbox: !!habits.gym },
             'FatLoss': { checkbox: !!habits.fatloss },
             'AI': { checkbox: !!habits.ai },
-            'NoFap': { checkbox: !!habits.nofap }
+            'NoFap': { checkbox: !!habits.nofap },
+            'Sleep': { checkbox: !!habits.sleep }
         };
         // Add date property
         props['\u65e5\u671f'] = { date: { start: dateStr } };
@@ -196,7 +198,8 @@ async function syncDailyFromNotion(silent = false) {
                     gym: (nd.Gym || nd.gym) === true ? true : null,
                     fatloss: (nd.FatLoss || nd['Fat Loss'] || nd.fatloss) === true ? true : null,
                     ai: (nd.AI || nd.ai) === true ? true : null,
-                    nofap: (nd.NoFap || nd.nofap) === true ? true : null
+                    nofap: (nd.NoFap || nd.nofap) === true ? true : null,
+                    sleep: (nd.Sleep || nd.sleep) === true ? true : null
                 };
             });
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
@@ -418,7 +421,7 @@ function checkNewDay() {
     if (now !== curDay) {
         curDay = now;
         if (!dailyHabitsData[now]) {
-            dailyHabitsData[now] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null};
+            dailyHabitsData[now] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null,sleep:null};
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
         }
         // 不自動建立 Notion 項目，等使用者勾選時再建立
@@ -494,7 +497,7 @@ async function createNext7Days() {
                     continue;
                 }
                 if (!dailyHabitsData[dateStr]) {
-                    dailyHabitsData[dateStr] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null};
+                    dailyHabitsData[dateStr] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null,sleep:null};
                 }
                 await createDayInNotionDirect(dateStr);
                 if (dateStr < todayStr) {

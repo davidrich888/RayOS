@@ -1,6 +1,6 @@
 // ==================== DAILY HABITS ====================
 
-const ALL_HABITS = ['trading', 'advertise', 'deliver', 'gym', 'fatloss', 'ai', 'nofap'];
+const ALL_HABITS = ['trading', 'advertise', 'deliver', 'gym', 'fatloss', 'ai', 'nofap', 'sleep'];
 
 // 三態循環：null → true → false → null
 function cycleHabit(habit) {
