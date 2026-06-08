@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-05T10:12:28+00:00",
+  "generated_at": "2026-06-08T10:51:43+00:00",
   "summary": {
-    "active_projects": 36,
+    "active_projects": 37,
     "completed_projects": 7,
     "next_actions": 7,
     "waiting_for": 0,
@@ -367,6 +367,15 @@
       "status": "Backlog — 待開工。新學員 onboarding 流程的歡迎影片（可搭配 QW21 TFT Onboarding 頁面）",
       "outcome": "新學員加入後看到歡迎影片 → 降低早期流失、第一時間建立連結與信任",
       "next_action": "@ray 確認是哪個 onboarding（TFT？炒股黑客？）+ 影片放哪（onboarding 頁面 / Skool / email）+ 內容大綱 → 錄製 → 上架",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW28 — TFT Landing Page 客服機器人",
+      "area": "Main Business",
+      "status": "Backlog — 待開工。TFT landing page（fundwithray.com/tft）上的 AI 客服機器人，回答潛在學員的常見問題（價格 / 三個 tier 差異 / 退費 / 適合誰 / 如何開始），降低成交摩擦。",
+      "outcome": "潛在學員在 landing page 即時得到答案 → 提升頁面停留與申請轉化、減 Ray 手動回覆 DM/email",
+      "next_action": "@ray 確認範圍（純 FAQ bot vs 導流到申請流程 vs 收 lead）+ 放哪個頁面 + 知識來源（TFT 課程介紹 / 定價 / FAQ 語料）→ @claude 評估技術路線（嵌入式 widget + Claude API，知識庫接 DataOS TFT 語料）",
       "completed": false,
       "completed_date": null
     },
