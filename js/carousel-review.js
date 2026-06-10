@@ -94,17 +94,17 @@ function renderCarouselDecks(decks) {
         updateCarouselCount(decks);
         return;
     }
+    // The 📋 複製反饋 button lives in the sticky page header (always visible); this bar is
+    // just the hint, which can scroll away with the deck list without hiding the action.
     const bar = '<div class="cr-bar">' +
         '<span class="cr-hint">在要改的 slide / 整組備註打字（留空＝驗收）。離開欄位自動存進 DataOS，' +
-        'Claude 直接讀 feedback 重生被標的 slide。</span>' +
-        '<button type="button" id="cr-copy-all" class="cr-peek-btn">📋 Copy All Feedback</button></div>';
+        'Claude 直接讀 feedback 重生被標的 slide。右上「📋 複製反饋」可一鍵複製全部。</span></div>';
     wrap.innerHTML = bar + decks.map(carouselDeckHTML).join('');
 
     wrap.querySelectorAll('.cr-approve-box').forEach((box) =>
         box.addEventListener('change', () => onCarouselApprove(box)));
     // 展開/收合 peek: see an approved deck's slides without un-approving it.
     wrap.querySelectorAll('.cr-peek-btn').forEach((btn) => {
-        if (btn.id === 'cr-copy-all') return;
         btn.addEventListener('click', () => {
             const sec = btn.closest('.cr-deck');
             const open = sec.classList.toggle('peek');
@@ -116,8 +116,6 @@ function renderCarouselDecks(decks) {
         ta.addEventListener('input', () => ta.classList.toggle('filled', ta.value.trim() !== ''));
         ta.addEventListener('blur', () => onCarouselFeedbackSave(ta.dataset.deck));
     });
-    const copyBtn = document.getElementById('cr-copy-all');
-    if (copyBtn) copyBtn.addEventListener('click', copyAllCarouselFeedback);
     updateCarouselCount(decks);
 }
 
