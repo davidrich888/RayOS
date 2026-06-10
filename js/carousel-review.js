@@ -136,7 +136,9 @@ async function onCarouselFeedbackSave(deckSlug) {
     const tag = document.querySelector(`.cr-saved[data-deck="${CSS.escape(deckSlug)}"]`);
     const feedback = collectDeckFeedback(deckSlug);
     try {
-        const res = await fetch('/api/carousel-feedback', {
+        // Shares /api/carousel-approve (feedback mode) — a separate endpoint would be a
+        // 13th serverless function, over Vercel Hobby's 12 limit, breaking every deploy.
+        const res = await fetch('/api/carousel-approve', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ deck_slug: deckSlug, feedback }),
