@@ -50,10 +50,16 @@ function carouselIsApproved(status) {
 function carouselDeckHTML(d) {
     const approved = carouselIsApproved(d.status);
     const urls = Array.isArray(d.slide_urls) ? d.slide_urls : [];
+    const fb = (d.feedback && typeof d.feedback === 'object') ? d.feedback : {};
     const grid = urls.length
-        ? urls.map((u, i) =>
-            `<figure class="cr-slide"><img src="${crEsc(u)}" alt="slide${i + 1}" loading="lazy"/>` +
-            `<figcaption>slide${String(i + 1).padStart(2, '0')}</figcaption></figure>`).join('')
+        ? urls.map((u, i) => {
+            const key = 'slide' + String(i + 1).padStart(2, '0');
+            const raw = fb[key] || '';
+            return `<figure class="cr-slide"><img src="${crEsc(u)}" alt="slide${i + 1}" loading="lazy"/>` +
+                `<figcaption>${key}</figcaption>` +
+                `<textarea class="cr-note${raw ? ' filled' : ''}" data-deck="${crEsc(d.deck_slug)}" data-scope="${key}" ` +
+                `placeholder="改什麼？（留空 = 驗收，跳過重生）">${crEsc(raw)}</textarea></figure>`;
+        }).join('')
         : '<div class="cr-noimg">（無 slide_urls，重跑 upload_deck_slides.py）</div>';
     return `
     <section class="cr-deck ${approved ? 'approved-collapsed' : ''}" data-deck="${crEsc(d.deck_slug)}">
@@ -62,7 +68,8 @@ function carouselDeckHTML(d) {
           <h3>${crEsc(d.deck_slug)}</h3>
           ${d.source_yt_title ? `<p class="cr-src">📺 來源 YT：${crEsc(d.source_yt_title)}</p>` : ''}
           <p class="cr-sub">${d.slide_count || urls.length} slides · <code>${crEsc(d.style || '')}</code>` +
-            `${d.topic ? ' · ' + crEsc(d.topic) : ''} <span class="cr-status cr-status-${crEsc(d.status)}">${crEsc(d.status)}</span></p>
+            `${d.topic ? ' · ' + crEsc(d.topic) : ''} <span class="cr-status cr-status-${crEsc(d.status)}">${crEsc(d.status)}</span>` +
+            ` <span class="cr-saved" data-deck="${crEsc(d.deck_slug)}"></span></p>
         </div>
         <div class="cr-head-actions">
           <button type="button" class="cr-peek-btn">展開</button>
@@ -72,6 +79,8 @@ function carouselDeckHTML(d) {
           </label>
         </div>
       </header>
+      <textarea class="cr-note cr-note-top${fb.top ? ' filled' : ''}" data-deck="${crEsc(d.deck_slug)}" data-scope="top" ` +
+        `placeholder="整組層級的備註（例如：全部背景換暖色 / 語氣太硬）">${crEsc(fb.top || '')}</textarea>
       <div class="cr-grid">${grid}</div>
     </section>`;
 }
@@ -85,18 +94,86 @@ function renderCarouselDecks(decks) {
         updateCarouselCount(decks);
         return;
     }
-    wrap.innerHTML = decks.map(carouselDeckHTML).join('');
+    const bar = '<div class="cr-bar">' +
+        '<span class="cr-hint">在要改的 slide / 整組備註打字（留空＝驗收）。離開欄位自動存進 DataOS，' +
+        'Claude 直接讀 feedback 重生被標的 slide。</span>' +
+        '<button type="button" id="cr-copy-all" class="cr-peek-btn">📋 Copy All Feedback</button></div>';
+    wrap.innerHTML = bar + decks.map(carouselDeckHTML).join('');
 
     wrap.querySelectorAll('.cr-approve-box').forEach((box) =>
         box.addEventListener('change', () => onCarouselApprove(box)));
     // 展開/收合 peek: see an approved deck's slides without un-approving it.
-    wrap.querySelectorAll('.cr-peek-btn').forEach((btn) =>
+    wrap.querySelectorAll('.cr-peek-btn').forEach((btn) => {
+        if (btn.id === 'cr-copy-all') return;
         btn.addEventListener('click', () => {
             const sec = btn.closest('.cr-deck');
             const open = sec.classList.toggle('peek');
             btn.textContent = open ? '收合' : '展開';
-        }));
+        });
+    });
+    // feedback: persist a deck's notes to DataOS when Ray leaves any of its textareas.
+    wrap.querySelectorAll('.cr-note').forEach((ta) => {
+        ta.addEventListener('input', () => ta.classList.toggle('filled', ta.value.trim() !== ''));
+        ta.addEventListener('blur', () => onCarouselFeedbackSave(ta.dataset.deck));
+    });
+    const copyBtn = document.getElementById('cr-copy-all');
+    if (copyBtn) copyBtn.addEventListener('click', copyAllCarouselFeedback);
     updateCarouselCount(decks);
+}
+
+// Gather a deck's textarea notes into a { top, slideNN } object, omitting empties.
+function collectDeckFeedback(deckSlug) {
+    const fb = {};
+    document.querySelectorAll(`.cr-note[data-deck="${CSS.escape(deckSlug)}"]`).forEach((ta) => {
+        const v = ta.value.trim();
+        if (v) fb[ta.dataset.scope] = v;
+    });
+    return fb;
+}
+
+async function onCarouselFeedbackSave(deckSlug) {
+    if (!deckSlug) return;
+    const tag = document.querySelector(`.cr-saved[data-deck="${CSS.escape(deckSlug)}"]`);
+    const feedback = collectDeckFeedback(deckSlug);
+    try {
+        const res = await fetch('/api/carousel-feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deck_slug: deckSlug, feedback }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+            throw new Error((data.error && JSON.stringify(data.error)) || ('HTTP ' + res.status));
+        }
+        if (tag) {
+            const n = Object.keys(feedback).length;
+            tag.textContent = n ? `· 已存 ${n} 則反饋` : '· 反饋已清空';
+            tag.classList.remove('err');
+        }
+    } catch (e) {
+        if (tag) { tag.textContent = '· 反饋存檔失敗'; tag.classList.add('err'); }
+        if (typeof showToast === 'function') showToast('反饋存檔失敗：' + e.message, true);
+    }
+}
+
+// Build a markdown digest of every deck's notes for pasting back to Claude Code (the notes
+// already live in DataOS; this is the manual escape hatch / quick copy Ray liked).
+function copyAllCarouselFeedback() {
+    const lines = [];
+    document.querySelectorAll('.cr-deck').forEach((sec) => {
+        const slug = sec.dataset.deck;
+        const fb = collectDeckFeedback(slug);
+        const keys = Object.keys(fb);
+        if (!keys.length) return;
+        lines.push(`## ${slug}`);
+        if (fb.top) lines.push(`- (整組) ${fb.top}`);
+        keys.filter((k) => k !== 'top').sort().forEach((k) => lines.push(`- ${k}: ${fb[k]}`));
+        lines.push('');
+    });
+    const md = lines.join('\n').trim() || '（目前沒有任何反饋）';
+    const done = () => { if (typeof showToast === 'function') showToast('已複製反饋 markdown'); };
+    if (navigator.clipboard) navigator.clipboard.writeText(md).then(done, () => done());
+    else done();
 }
 
 function updateCarouselCount(decks) {
