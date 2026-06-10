@@ -41,6 +41,7 @@
         <div class="nav-item" data-section="content"><div class="nav-icon-wrap">📝</div><span>Content</span></div>
         <div class="nav-item" data-section="business"><div class="nav-icon-wrap">📊</div><span>Business</span></div>
         <div class="nav-item" data-section="information"><div class="nav-icon-wrap">📖</div><span>Information</span></div>
+        <div class="nav-item" data-section="carousel-review"><div class="nav-icon-wrap">🖼️</div><span>Carousel</span></div>
         <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="收合側欄">«</button>
         <div class="sidebar-footer">
             <div class="sidebar-avatar">R</div>
@@ -1116,6 +1117,66 @@
             </div>
         </section>
 
+        <!-- CAROUSEL REVIEW (cloud-native replacement for local review_server.py) -->
+        <section class="section" id="carousel-review">
+            <style>
+              #carousel-review .cr-deck { margin-bottom:28px; padding:16px; background:#15151a;
+                  border:1px solid var(--border); border-radius:12px; }
+              #carousel-review .cr-head { display:flex; align-items:flex-start; justify-content:space-between;
+                  gap:14px; flex-wrap:wrap; }
+              #carousel-review .cr-head h3 { margin:0; color:var(--accent); font-size:16px;
+                  font-family:'SF Mono',monospace; }
+              #carousel-review .cr-sub { color:var(--text-dim); font-size:12px; margin:5px 0 0; }
+              #carousel-review .cr-sub code { background:#222; padding:1px 6px; border-radius:4px; font-size:11px; }
+              #carousel-review .cr-status { margin-left:8px; padding:1px 8px; border-radius:999px;
+                  font-size:11px; font-weight:700; }
+              #carousel-review .cr-status-pending { background:#3a2f10; color:#e8c266; }
+              #carousel-review .cr-status-approved,
+              #carousel-review .cr-status-scheduled,
+              #carousel-review .cr-status-published { background:#16331c; color:#7bd88f; }
+              #carousel-review .cr-status-rejected { background:#331616; color:#ff8a80; }
+              #carousel-review .cr-head-actions { display:flex; align-items:center; gap:10px; }
+              #carousel-review .cr-approve { display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+                  user-select:none; background:#1a1a1a; border:1px solid #2e7d32; border-radius:999px; padding:7px 14px; }
+              #carousel-review .cr-approve input { width:16px; height:16px; accent-color:#2e7d32; cursor:pointer; }
+              #carousel-review .cr-approve-label { font-size:13px; font-weight:700; color:#7bd88f; }
+              #carousel-review .cr-approve.done { background:#16331c; border-color:#3ea75a; }
+              #carousel-review .cr-approve.err .cr-approve-label { color:#ff8a80; }
+              #carousel-review .cr-peek-btn { display:none; background:#1a1a1a; color:#bbb; border:1px solid #333;
+                  border-radius:999px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+              /* approved decks collapse their slides + sink to the bottom so 待審 stays scannable */
+              #carousel-review #carousel-decks { display:flex; flex-direction:column; }
+              #carousel-review .cr-deck { order:0; }
+              #carousel-review .cr-deck.approved-collapsed { order:1; opacity:0.7; }
+              #carousel-review .cr-deck.approved-collapsed .cr-grid { display:none; }
+              #carousel-review .cr-deck.approved-collapsed .cr-peek-btn { display:inline-block; }
+              #carousel-review .cr-deck.approved-collapsed.peek { opacity:1; }
+              #carousel-review .cr-deck.approved-collapsed.peek .cr-grid { display:grid; }
+              #carousel-review .cr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+                  gap:14px; margin-top:14px; }
+              #carousel-review .cr-slide { margin:0; }
+              #carousel-review .cr-slide img { width:100%; aspect-ratio:1080/1350; object-fit:cover;
+                  border-radius:8px; background:#000; display:block; }
+              #carousel-review .cr-slide figcaption { font-size:11px; color:var(--text-dim); margin-top:5px; }
+              #carousel-review .cr-noimg { color:var(--text-dim); font-size:12px; padding:10px 0; }
+              #carousel-review .cr-empty { color:var(--text-dim); padding:30px; text-align:center; }
+              #carousel-review .cr-empty code { background:#222; padding:2px 6px; border-radius:4px; }
+            </style>
+            <div class="header">
+                <div><div class="page-label">DataOS · carousel_publish_queue（核准＝進待發佇列，不自動發 IG）</div><div class="page-title">Carousel 審核</div></div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <span id="carousel-count" style="color:var(--text-dim);font-size:11px;font-family:'SF Mono',monospace;"></span>
+                    <button class="btn" onclick="loadCarouselReview(true)" title="Reload queue">🔄 Refresh</button>
+                </div>
+            </div>
+            <div class="content">
+                <div id="carousel-loading" style="text-align:center;padding:40px;color:var(--text-dim);">Loading carousel queue…</div>
+                <div id="carousel-error" style="display:none;padding:24px;text-align:center;color:#ff8a80;"></div>
+                <div id="carousel-decks"></div>
+            </div>
+        </section>
+
         <!-- INFORMATION -->
         <section class="section" id="information">
             <div class="header">
@@ -1421,6 +1482,7 @@
     <script src="js/status-board.js"></script>
     <script src="js/plan.js"></script>
     <script src="js/gtd.js"></script>
+    <script src="js/carousel-review.js"></script>
     <script src="js/init.js"></script>
     <script>
         if ('serviceWorker' in navigator) {

@@ -89,6 +89,9 @@ function go(section) {
         case 'gtd':
             if (typeof loadGTDSnapshot === 'function') loadGTDSnapshot(firstVisit);
             break;
+        case 'carousel-review':
+            if (typeof loadCarouselReview === 'function') loadCarouselReview(firstVisit);
+            break;
     }
 }
 
