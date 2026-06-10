@@ -1157,7 +1157,21 @@
                   gap:14px; margin-top:14px; }
               #carousel-review .cr-slide { margin:0; }
               #carousel-review .cr-slide img { width:100%; aspect-ratio:1080/1350; object-fit:cover;
-                  border-radius:8px; background:#000; display:block; }
+                  border-radius:8px; background:#000; display:block; cursor:zoom-in;
+                  transition:opacity .15s; }
+              #carousel-review .cr-slide img:hover { opacity:.85; }
+              /* lightbox: click a slide to see it full-size (thumbnails are object-fit:cover so cropped) */
+              #cr-lightbox { position:fixed; inset:0; z-index:9999; display:none;
+                  align-items:center; justify-content:center; background:rgba(0,0,0,.92);
+                  cursor:zoom-out; padding:24px; box-sizing:border-box; }
+              #cr-lightbox.open { display:flex; }
+              #cr-lightbox img { max-width:100%; max-height:100%; object-fit:contain;
+                  border-radius:6px; box-shadow:0 8px 40px rgba(0,0,0,.6); }
+              #cr-lightbox .cr-lb-close { position:absolute; top:18px; right:24px; font-size:34px;
+                  line-height:1; color:#fff; background:none; border:none; cursor:pointer; opacity:.8; }
+              #cr-lightbox .cr-lb-close:hover { opacity:1; }
+              #cr-lightbox .cr-lb-cap { position:absolute; bottom:18px; left:0; right:0; text-align:center;
+                  color:var(--text-dim); font-size:13px; }
               #carousel-review .cr-slide figcaption { font-size:11px; color:var(--text-dim); margin-top:5px; }
               #carousel-review .cr-noimg { color:var(--text-dim); font-size:12px; padding:10px 0; }
               #carousel-review .cr-empty { color:var(--text-dim); padding:30px; text-align:center; }

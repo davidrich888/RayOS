@@ -103,6 +103,9 @@ function renderCarouselDecks(decks) {
 
     wrap.querySelectorAll('.cr-approve-box').forEach((box) =>
         box.addEventListener('change', () => onCarouselApprove(box)));
+    // click a slide thumbnail (object-fit:cover, so cropped) to view it full-size in a lightbox.
+    wrap.querySelectorAll('.cr-slide img').forEach((img) =>
+        img.addEventListener('click', () => openCarouselLightbox(img.src, img.alt)));
     // 展開/收合 peek: see an approved deck's slides without un-approving it.
     wrap.querySelectorAll('.cr-peek-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -174,6 +177,26 @@ function copyAllCarouselFeedback() {
     const done = () => { if (typeof showToast === 'function') showToast('已複製反饋 markdown'); };
     if (navigator.clipboard) navigator.clipboard.writeText(md).then(done, () => done());
     else done();
+}
+
+// Lightbox: a single reused overlay appended to <body> on first use. Click anywhere
+// (or press Esc) to close. Shows the slide at full resolution with object-fit:contain.
+function openCarouselLightbox(src, cap) {
+    let box = document.getElementById('cr-lightbox');
+    if (!box) {
+        box = document.createElement('div');
+        box.id = 'cr-lightbox';
+        box.innerHTML = '<button type="button" class="cr-lb-close" aria-label="關閉">&times;</button>' +
+            '<img alt=""/><div class="cr-lb-cap"></div>';
+        document.body.appendChild(box);
+        const close = () => box.classList.remove('open');
+        box.addEventListener('click', close);
+        box.querySelector('img').addEventListener('click', (e) => e.stopPropagation());
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    }
+    box.querySelector('img').src = src;
+    box.querySelector('.cr-lb-cap').textContent = (cap || '') + ' · 點任意處關閉';
+    box.classList.add('open');
 }
 
 function updateCarouselCount(decks) {
