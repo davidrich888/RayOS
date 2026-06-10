@@ -60,6 +60,7 @@ function carouselDeckHTML(d) {
       <header class="cr-head">
         <div class="cr-head-l">
           <h3>${crEsc(d.deck_slug)}</h3>
+          ${d.source_yt_title ? `<p class="cr-src">📺 來源 YT：${crEsc(d.source_yt_title)}</p>` : ''}
           <p class="cr-sub">${d.slide_count || urls.length} slides · <code>${crEsc(d.style || '')}</code>` +
             `${d.topic ? ' · ' + crEsc(d.topic) : ''} <span class="cr-status cr-status-${crEsc(d.status)}">${crEsc(d.status)}</span></p>
         </div>

@@ -20,7 +20,7 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Supabase env not configured (AIOS_SUPABASE_URL / AIOS_SUPABASE_SERVICE_KEY)' });
     }
 
-    const cols = 'deck_slug,topic,style,slide_count,slide_urls,status,approved_at,updated_at';
+    const cols = 'deck_slug,topic,style,slide_count,slide_urls,status,source_yt_title,approved_at,updated_at';
     const url = `${base.replace(/\/$/, '')}/rest/v1/carousel_publish_queue`
         + `?select=${cols}&order=updated_at.desc`;
 
