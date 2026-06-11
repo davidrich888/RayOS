@@ -8,10 +8,34 @@
 // service_role key; the browser never sees it.
 
 let _carouselLoaded = false;
+let _carouselFocusHooked = false;
+
+// When Ray switches back to this tab after Claude regenerated a deck, the server's
+// feedback may have been CONSUMED (cleared) while this still-open page holds the old
+// text in its textareas — a stale blur-save would then resurrect it (2026-06-11 Ray:
+// "已存的重整後應該自己消失"). So on focus/visibility we pull the latest rows and
+// re-render, aligning the textareas to DB truth — UNLESS Ray is mid-edit in a note
+// (don't yank what he's typing).
+function hookCarouselFocusRefresh() {
+    if (_carouselFocusHooked) return;
+    _carouselFocusHooked = true;
+    const refresh = () => {
+        const wrap = document.getElementById('carousel-decks');
+        if (!wrap || !_carouselLoaded) return;
+        const el = document.activeElement;
+        if (el && el.classList && el.classList.contains('cr-note')) return; // mid-edit
+        loadCarouselReview(true);
+    };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') refresh();
+    });
+}
 
 async function loadCarouselReview(force = false) {
     const wrap = document.getElementById('carousel-decks');
     if (!wrap) return;
+    hookCarouselFocusRefresh();
     if (_carouselLoaded && !force) return;
 
     const loading = document.getElementById('carousel-loading');
