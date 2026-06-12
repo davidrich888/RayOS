@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-12T11:41:23+00:00",
+  "generated_at": "2026-06-12T11:44:41+00:00",
   "summary": {
-    "active_projects": 37,
+    "active_projects": 38,
     "completed_projects": 7,
     "next_actions": 7,
     "waiting_for": 0,
@@ -376,6 +376,15 @@
       "status": "Backlog — 待開工。TFT landing page（fundwithray.com/tft）上的 AI 客服機器人，回答潛在學員的常見問題（價格 / 三個 tier 差異 / 退費 / 適合誰 / 如何開始），降低成交摩擦。",
       "outcome": "潛在學員在 landing page 即時得到答案 → 提升頁面停留與申請轉化、減 Ray 手動回覆 DM/email",
       "next_action": "@ray 確認範圍（純 FAQ bot vs 導流到申請流程 vs 收 lead）+ 放哪個頁面 + 知識來源（TFT 課程介紹 / 定價 / FAQ 語料）→ @claude 評估技術路線（嵌入式 widget + Claude API，知識庫接 DataOS TFT 語料）",
+      "completed": false,
+      "completed_date": null
+    },
+    {
+      "name": "QW29 — Skool 學員出金慶祝文 → 自動裂變（Hormozi-inspired）",
+      "area": "Main Business",
+      "status": "Backlog — 未來要做（Ray capture #31，Hormozi 啟發）",
+      "outcome": "Skool 學員自發 po 出金/成果慶祝文 → 自動偵測 → 一鍵裂變成 IG 貼文 / 限動 / YT post（社會證明引擎，學員見證自動轉公開素材）",
+      "next_action": "@ray 確認觸發範圍（哪個 Skool 群 / 要不要先徵學員同意）→ @claude 評估偵測管線（已有 skool collector 撈貼文 → 關鍵字/出金截圖偵測 → 接 `/create-carousel` + reels 工單）",
       "completed": false,
       "completed_date": null
     },
