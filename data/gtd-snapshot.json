@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-12T11:44:41+00:00",
+  "generated_at": "2026-06-13T08:53:07+00:00",
   "summary": {
-    "active_projects": 38,
-    "completed_projects": 7,
+    "active_projects": 37,
+    "completed_projects": 8,
     "next_actions": 7,
     "waiting_for": 0,
     "automation_pct": 22,
@@ -103,11 +103,11 @@
     {
       "name": "MT5 EA 鎖定 self-healing（換帳號零手動）",
       "area": "Main Business",
-      "status": "測試 — server self-healing 上線 ✅（`~/scripts/guard-sync-server.py` 讀每 dir `instance_login.json` 命名 lock 檔）+ bootstrap `instance_login.json` 已手寫（MT5 主 511246320 / MT5 FP 12152920）；現在按 Extension 鎖頭可正常鎖 + 平倉。**root cause from 5/18**：Extension 寫 511221058 / EA 找 511246320 → 三方 ID 不對齊 → guard 永遠不啟動",
+      "status": "Completed ✅ 2026-06-13 — server self-healing 上線 ✅（`~/scripts/guard-sync-server.py` 讀每 dir `instance_login.json` 命名 lock 檔）+ bootstrap `instance_login.json` 已手寫（MT5 主 511246320 / MT5 FP 12152920）；現在按 Extension 鎖頭可正常鎖 + 平倉。**root cause from 5/18**：Extension 寫 511221058 / EA 找 511246320 → 三方 ID 不對齊 → guard 永遠不啟動",
       "outcome": "Extension → server → EA 全鏈路 self-healing；未來出金換帳號（MT5 重新登入）EA 自動重寫 `instance_login.json` → server 自動對齊 → 不用改任何 config / Extension / memory",
       "next_action": "@me Mac Mini 開 MetaEditor → 編 `TFT_TradeSync.mq5`（MT5 主 + MT5 FP 各一）→ F7 編譯 → chart EA reattach → 驗 Experts log 印出 `instance_login.json` 寫入訊息 + 30s 後檔案 mtime 更新；之後按 Extension 鎖頭實測秒平",
-      "completed": false,
-      "completed_date": null
+      "completed": true,
+      "completed_date": "2026-06-13"
     },
     {
       "name": "🌟 Claude Managed Agent 雲端化（Mac Mini 退場）",
