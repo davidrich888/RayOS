@@ -818,6 +818,20 @@
                     </div>
                 </div>
 
+                <!-- Section 0: 思考型 Agent（會自己偵測 + 起草，不只是定時鬧鐘） -->
+                <div class="auto-section" style="border:1px solid rgba(212,197,169,0.25);background:linear-gradient(135deg,rgba(212,197,169,0.05),transparent);">
+                    <div class="auto-section-header">
+                        <div>
+                            <div class="auto-section-title">🤖 思考型 Agent</div>
+                            <div class="auto-section-purpose">和上面的定時鬧鐘不同：這些 agent 會自己<strong style="color:var(--text);">偵測該做的事 + 起草內容</strong>，跑完回報到 Telegram，等我說「OK 發」才動。資料來源：DataOS <code style="background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px;">agent_runs</code>（每次跑的心跳）。</div>
+                        </div>
+                        <div class="auto-section-count" id="thinking-agents-count">·</div>
+                    </div>
+                    <div id="thinking-agents" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:6px;">
+                        <div style="font-size:12px;color:var(--text-dim);padding:14px;">載入中…</div>
+                    </div>
+                </div>
+
                 <!-- Section 1: TFT 業務自動化 -->
                 <div class="auto-section">
                     <div class="auto-section-header">

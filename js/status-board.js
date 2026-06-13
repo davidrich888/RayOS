@@ -224,4 +224,65 @@ function switchAgentsView(view) {
     if (view === 'status-board' && !statusBoardLoaded) {
         loadStatusBoard();
     }
+    if (view === 'agents') {
+        loadThinkingAgents();
+    }
 }
+
+// ── 思考型 Agent 卡片（DataOS agent_runs 心跳）──────────────────────────────
+// Distinct from launchd cron: these agents detect work + draft content, then report in.
+let thinkingAgentsLoaded = false;
+const AGENT_LABELS = {
+    churn_save: { name: '流失救援 Agent', desc: '偵測活躍下降學員 → 寫個人化挽留信草稿' },
+    milestone: { name: '里程碑 Agent', desc: '偵測學員進度里程碑 → 寫鼓勵信草稿' },
+};
+
+async function loadThinkingAgents() {
+    const box = document.getElementById('thinking-agents');
+    const countEl = document.getElementById('thinking-agents-count');
+    if (!box) return;
+    try {
+        const r = await fetch('/api/agent-runs');
+        const data = await r.json();
+        const agents = (data && data.agents) || [];
+        if (countEl) countEl.textContent = agents.length || '0';
+        if (!agents.length) {
+            box.innerHTML = '<div style="font-size:12px;color:var(--text-dim);padding:14px;">還沒有任何 agent 跑過（agent_runs 是空的）。第一次 live run 後這裡就會亮起來。</div>';
+            return;
+        }
+        const healthMap = {
+            ok: { dot: '#4CAF50', label: '健康 ✓' },
+            warn: { dot: '#FFB74D', label: '上次出錯 ⚠' },
+            stale: { dot: '#FFB74D', label: '太久沒跑 ⚠' },
+        };
+        box.innerHTML = agents.map(a => {
+            const meta = AGENT_LABELS[a.agent_name] || { name: a.agent_name, desc: '' };
+            const h = healthMap[a.health] || healthMap.ok;
+            const when = a.run_at ? new Date(a.run_at).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+            const segs = a.segment_counts && typeof a.segment_counts === 'object'
+                ? Object.entries(a.segment_counts).map(([k, v]) => `${k} ${v}`).join(' · ') : '';
+            return `<div style="padding:14px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:${h.dot};box-shadow:0 0 6px ${h.dot};"></span>
+                    <span style="font-weight:600;color:var(--text);font-size:14px;">${meta.name}</span>
+                </div>
+                <div style="font-size:11px;color:var(--text-dim);line-height:1.5;margin-bottom:10px;">${meta.desc}</div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);">
+                    <span>上次跑</span><span style="color:var(--text);">${when}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-top:3px;">
+                    <span>本次偵測</span><span style="color:var(--accent);">${a.found_count ?? 0} 人${a.sent_count ? `（已寄 ${a.sent_count}）` : ''}</span></div>
+                ${segs ? `<div style="font-size:10px;color:var(--text-dim);margin-top:6px;">${segs}</div>` : ''}
+                <div style="font-size:10px;color:${h.dot};margin-top:8px;">${h.label} · 累計跑 ${a.run_total} 次</div>
+            </div>`;
+        }).join('');
+        thinkingAgentsLoaded = true;
+    } catch (e) {
+        box.innerHTML = `<div style="font-size:12px;color:#FFB74D;padding:14px;">讀取 agent_runs 失敗：${e.message}</div>`;
+    }
+}
+
+// 自動化頁是預設可見，DOMContentLoaded 時若 agents-view 正顯示就先抓一次。
+document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('agents-view');
+    if (el && el.style.display !== 'none') loadThinkingAgents();
+});
