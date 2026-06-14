@@ -15,9 +15,9 @@ const PRELOAD_WEALTH_HISTORY = [
 
 const PRELOAD_BODY_HISTORY = [
     // Verified from Notion Physic Tracker 2026-02-06 (fallback until n8n fetch_body is configured)
-    { date: '2025-03-08', weight: 78.3, muscle: 35.4, fatpct: 21.0, notes: 'Starting point' },
-    { date: '2025-08-11', weight: 80.3, muscle: 37.6, fatpct: 18.3, notes: '' },
-    { date: '2026-01-02', weight: 79.8, muscle: 37.0, fatpct: 19.2, notes: '' }
+    { date: '2025-03-08', weight: 78.3, muscle: 35.4, fatpct: 21.0, fatmass: 16.4, notes: 'Starting point' },
+    { date: '2025-08-11', weight: 80.3, muscle: 37.6, fatpct: 18.3, fatmass: 14.7, notes: '' },
+    { date: '2026-01-02', weight: 79.8, muscle: 37.0, fatpct: 19.2, fatmass: 15.3, notes: '' }
 ];
 
 // Notion DB: 58da82d6-89ed-4202-9274-234183f77bb6

@@ -179,6 +179,8 @@ function updateBodyChart(type) {
     switch (t) {
         case 'weight': data = hist.map(function(h){ return h.weight; }); break;
         case 'muscle': data = hist.map(function(h){ return h.muscle; }); break;
+        // Fat mass (kg): use stored value, else derive from weight x fat% for legacy rows
+        case 'fatmass': data = hist.map(function(h){ return h.fatmass != null ? h.fatmass : (h.weight && h.fatpct ? Math.round(h.weight * h.fatpct / 100 * 10) / 10 : null); }); break;
         default: data = hist.map(function(h){ return h.fatpct; }); break;
     }
     bodyChart.data.datasets[0].data = data;
@@ -203,7 +205,7 @@ function renderBodyHistoryTable() {
         rows += '<tr><td style="text-align:left;">' + dateDisplay + '</td>' +
             '<td>' + (r.weight || '--') + '</td>' +
             '<td>' + (r.fatpct || '--') + '</td>' +
-            '<td>' + (r.fatmass != null ? r.fatmass : '--') + '</td>' +
+            '<td>' + (r.fatmass != null ? r.fatmass : (r.weight && r.fatpct ? Math.round(r.weight * r.fatpct / 100 * 10) / 10 : '--')) + '</td>' +
             '<td>' + (r.muscle || '--') + '</td>' +
             '<td>' + bmi + '</td>' +
             '<td style="font-size:10px;color:var(--text-dim);">' + (r.notes || '') + '</td>' +
