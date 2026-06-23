@@ -42,6 +42,7 @@
         <div class="nav-item" data-section="business"><div class="nav-icon-wrap">📊</div><span>Business</span></div>
         <div class="nav-item" data-section="information"><div class="nav-icon-wrap">📖</div><span>Information</span></div>
         <div class="nav-item" data-section="carousel-review"><div class="nav-icon-wrap">🖼️</div><span>Carousel</span></div>
+        <div class="nav-item" data-section="pipeline"><div class="nav-icon-wrap">🏭</div><span>Pipeline</span></div>
         <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="收合側欄">«</button>
         <div class="sidebar-footer">
             <div class="sidebar-avatar">R</div>
@@ -1219,6 +1220,42 @@
             </div>
         </section>
 
+        <!-- PIPELINE (content production line; read-only, mirrored from outputs/projects/<slug>/state.json) -->
+        <section class="section" id="pipeline">
+            <style>
+              #pipeline .pl-stage { margin-bottom:26px; }
+              #pipeline .pl-stage-head { color:var(--accent); font-size:15px; margin:0 0 12px;
+                  border-bottom:1px solid #2a2a30; padding-bottom:7px; }
+              #pipeline .pl-stage-n { color:var(--text-dim); font-size:12px; font-weight:400; }
+              #pipeline .pl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+              #pipeline .pl-card { background:#15151a; border:1px solid #26262e; border-radius:10px; padding:13px 15px; }
+              #pipeline .pl-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+              #pipeline .pl-card-title { color:#fff; font-size:13px; font-weight:600; line-height:1.4; }
+              #pipeline .pl-yt { color:#ff8a80; font-size:12px; text-decoration:none; white-space:nowrap; }
+              #pipeline .pl-card-sub { color:var(--text-dim); font-size:11px; margin-top:5px; }
+              #pipeline .pl-card-sub code { background:#222; padding:1px 5px; border-radius:4px; font-size:10px; }
+              #pipeline .pl-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
+              #pipeline .pl-chip { font-size:10px; padding:2px 7px; border-radius:999px; border:1px solid #2c2c34; }
+              #pipeline .pl-chip-on { color:#7bd88f; border-color:#2c4a32; background:#13251a; }
+              #pipeline .pl-chip-off { color:var(--text-dim); }
+              #pipeline .pl-empty { color:var(--text-dim); padding:30px; text-align:center; }
+              #pipeline .pl-empty code { background:#222; padding:2px 6px; border-radius:4px; }
+            </style>
+            <div class="header">
+                <div><div class="page-label">DataOS · content_pipeline_state（只讀，鏡像自本機 state.json）</div><div class="page-title">Content Pipeline</div></div>
+                <div class="header-actions">
+                    <button class="btn" onclick="go('dashboard')">← Back</button>
+                    <span id="pipeline-count" style="color:var(--text-dim);font-size:11px;font-family:'SF Mono',monospace;"></span>
+                    <button class="btn" onclick="loadPipelineBoard(true)" title="Reload pipeline">🔄 Refresh</button>
+                </div>
+            </div>
+            <div class="content">
+                <div id="pipeline-loading" style="text-align:center;padding:40px;color:var(--text-dim);">Loading pipeline…</div>
+                <div id="pipeline-error" style="display:none;padding:24px;text-align:center;color:#ff8a80;"></div>
+                <div id="pipeline-board"></div>
+            </div>
+        </section>
+
         <!-- INFORMATION -->
         <section class="section" id="information">
             <div class="header">
@@ -1525,6 +1562,7 @@
     <script src="js/plan.js"></script>
     <script src="js/gtd.js"></script>
     <script src="js/carousel-review.js"></script>
+    <script src="js/pipeline-board.js"></script>
     <script src="js/init.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
