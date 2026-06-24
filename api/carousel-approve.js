@@ -12,6 +12,11 @@
 //   stripped client-side, so an all-clear deck sends {} (= 驗收通過，無需重生). Persisting
 //   to DataOS lets Claude read change-requests straight from the table for the regen loop.
 //
+// Mode C — published toggle. Body: { deck_slug: string, published: boolean }
+//   Ray ticks 已發布 AFTER he manually posts to IG. published=true -> status='published'
+//   (strikethrough in the UI); published=false -> status='approved'. ENQUEUE-STATE ONLY,
+//   never calls IG / Graph. Just records what Ray already published by hand.
+//
 // SECURITY (do not change without Ray): approve = ENQUEUE ONLY. This NEVER calls the IG /
 // Graph API. Real IG publishing stays whitelist-gated (Metricool confirm-gate, #53); a
 // future scheduler reads status='approved' rows. service_role key is server-side only.
@@ -36,7 +41,7 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Supabase env not configured (AIOS_SUPABASE_URL / AIOS_SUPABASE_SERVICE_KEY)' });
     }
 
-    const { deck_slug, approved, feedback } = req.body || {};
+    const { deck_slug, approved, published, feedback } = req.body || {};
     if (!deck_slug) {
         return res.status(400).json({ error: 'Missing deck_slug' });
     }
@@ -49,13 +54,20 @@ module.exports = async function handler(req, res) {
             return res.status(400).json({ error: 'feedback must be an object { top?, slideNN? }' });
         }
         patch = { feedback, updated_at: now };
+    } else if (typeof published === 'boolean') {
+        // Mode C — published toggle. Ray ticks this AFTER he manually posts to IG; it only
+        // marks the queue row 'published' (→ strikethrough in the UI), NEVER sends anything.
+        // Un-marking falls back to 'approved' (still queued, just not posted yet).
+        patch = published
+            ? { status: 'published', updated_at: now }
+            : { status: 'approved', updated_at: now };
     } else if (typeof approved === 'boolean') {
         // Mode A — approve toggle.
         patch = approved
             ? { status: 'approved', approved_at: now, approved_by: 'ray', updated_at: now }
             : { status: 'pending', approved_at: null, updated_at: now };
     } else {
-        return res.status(400).json({ error: 'Provide approved (boolean) or feedback (object)' });
+        return res.status(400).json({ error: 'Provide approved/published (boolean) or feedback (object)' });
     }
 
     const url = `${base.replace(/\/$/, '')}/rest/v1/carousel_publish_queue`

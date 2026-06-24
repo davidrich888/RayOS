@@ -1161,6 +1161,13 @@
               #carousel-review .cr-approve.err .cr-approve-label { color:#ff8a80; }
               #carousel-review .cr-peek-btn { display:none; background:#1a1a1a; color:#bbb; border:1px solid #333;
                   border-radius:999px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+              #carousel-review .cr-pub-btn { background:#1a1a1a; color:#7bd88f; border:1px solid #2e7d32;
+                  border-radius:999px; padding:7px 13px; font-size:12px; font-weight:700; cursor:pointer; }
+              #carousel-review .cr-pub-btn.done { background:#16331c; border-color:#3ea75a; }
+              #carousel-review .cr-pub-btn:disabled { opacity:0.5; cursor:wait; }
+              /* a deck Ray has manually published: strike its title so the bottom list reads as done */
+              #carousel-review .cr-deck.published .cr-head h3 { text-decoration:line-through;
+                  text-decoration-color:#7bd88f; text-decoration-thickness:2px; opacity:0.5; }
               /* approved decks collapse their slides + sink to the bottom so 待審 stays scannable */
               #carousel-review #carousel-decks { display:flex; flex-direction:column; }
               #carousel-review .cr-deck { order:0; }

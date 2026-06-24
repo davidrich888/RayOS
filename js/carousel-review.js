@@ -73,6 +73,7 @@ function carouselIsApproved(status) {
 
 function carouselDeckHTML(d) {
     const approved = carouselIsApproved(d.status);
+    const published = d.status === 'published';
     const urls = Array.isArray(d.slide_urls) ? d.slide_urls : [];
     const fb = (d.feedback && typeof d.feedback === 'object') ? d.feedback : {};
     const grid = urls.length
@@ -86,7 +87,7 @@ function carouselDeckHTML(d) {
         }).join('')
         : '<div class="cr-noimg">（無 slide_urls，重跑 upload_deck_slides.py）</div>';
     return `
-    <section class="cr-deck ${approved ? 'approved-collapsed' : ''}" data-deck="${crEsc(d.deck_slug)}">
+    <section class="cr-deck ${approved ? 'approved-collapsed' : ''}${published ? ' published' : ''}" data-deck="${crEsc(d.deck_slug)}">
       <header class="cr-head">
         <div class="cr-head-l">
           <h3>${crEsc(d.deck_slug)}</h3>
@@ -101,6 +102,7 @@ function carouselDeckHTML(d) {
             <input type="checkbox" class="cr-approve-box" data-deck="${crEsc(d.deck_slug)}" ${approved ? 'checked' : ''}/>
             <span class="cr-approve-label">✅ 審核通過</span>
           </label>
+          ${approved ? `<button type="button" class="cr-pub-btn ${published ? 'done' : ''}" data-deck="${crEsc(d.deck_slug)}" title="你在 IG 手動發完後點這個；標記後標題會劃掉。再點一次取消">${published ? '✅ 已發布' : '標記已發布'}</button>` : ''}
         </div>
       </header>
       <textarea class="cr-note cr-note-top${fb.top ? ' filled' : ''}" data-deck="${crEsc(d.deck_slug)}" data-scope="top" ` +
@@ -127,6 +129,9 @@ function renderCarouselDecks(decks) {
 
     wrap.querySelectorAll('.cr-approve-box').forEach((box) =>
         box.addEventListener('change', () => onCarouselApprove(box)));
+    // 已發布: Ray ticks this after manually posting to IG → strikethrough on the title.
+    wrap.querySelectorAll('.cr-pub-btn').forEach((btn) =>
+        btn.addEventListener('click', () => onCarouselPublished(btn)));
     // click a slide thumbnail (object-fit:cover, so cropped) to view it full-size in a lightbox.
     wrap.querySelectorAll('.cr-slide img').forEach((img) =>
         img.addEventListener('click', () => openCarouselLightbox(img.src, img.alt)));
@@ -263,5 +268,41 @@ async function onCarouselApprove(box) {
         wrap.classList.add('err');
         if (typeof showToast === 'function') showToast('寫入失敗：' + e.message, true);
         else alert('寫入失敗：' + e.message);
+    }
+}
+
+// 已發布 toggle: marks the queue row 'published' (or back to 'approved'). This only records
+// that Ray ALREADY posted it by hand — it never sends to IG. Title gets a strikethrough.
+async function onCarouselPublished(btn) {
+    const sec = btn.closest('.cr-deck');
+    const makePublished = !btn.classList.contains('done');
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/carousel-approve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deck_slug: btn.dataset.deck, published: makePublished }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+            throw new Error((data.error && JSON.stringify(data.error)) || ('HTTP ' + res.status));
+        }
+        btn.classList.toggle('done', makePublished);
+        btn.textContent = makePublished ? '✅ 已發布' : '標記已發布';
+        sec.classList.toggle('published', makePublished);
+        const pill = sec.querySelector('.cr-status');
+        if (pill) {
+            const st = makePublished ? 'published' : 'approved';
+            pill.className = 'cr-status cr-status-' + st;
+            pill.textContent = st;
+        }
+        if (typeof showToast === 'function') {
+            showToast(makePublished ? '已標記發布（標題劃線）' : '已取消發布標記');
+        }
+    } catch (e) {
+        if (typeof showToast === 'function') showToast('標記失敗：' + e.message, true);
+        else alert('標記失敗：' + e.message);
+    } finally {
+        btn.disabled = false;
     }
 }
