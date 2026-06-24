@@ -1164,11 +1164,13 @@
               /* approved decks collapse their slides + sink to the bottom so 待審 stays scannable */
               #carousel-review #carousel-decks { display:flex; flex-direction:column; }
               #carousel-review .cr-deck { order:0; }
-              #carousel-review .cr-deck.approved-collapsed { order:1; opacity:0.7; }
-              #carousel-review .cr-deck.approved-collapsed .cr-grid { display:none; }
+              #carousel-review .cr-deck.approved-collapsed { order:1; opacity:0.7; margin-bottom:12px; }
+              #carousel-review .cr-deck.approved-collapsed .cr-grid,
+              #carousel-review .cr-deck.approved-collapsed .cr-note-top { display:none; }
               #carousel-review .cr-deck.approved-collapsed .cr-peek-btn { display:inline-block; }
-              #carousel-review .cr-deck.approved-collapsed.peek { opacity:1; }
+              #carousel-review .cr-deck.approved-collapsed.peek { opacity:1; margin-bottom:28px; }
               #carousel-review .cr-deck.approved-collapsed.peek .cr-grid { display:grid; }
+              #carousel-review .cr-deck.approved-collapsed.peek .cr-note-top { display:block; }
               #carousel-review .cr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
                   gap:14px; margin-top:14px; }
               #carousel-review .cr-slide { margin:0; }
