@@ -161,7 +161,9 @@ function collectDeckFeedback(deckSlug) {
     return fb;
 }
 
-async function onCarouselFeedbackSave(deckSlug) {
+// archive=true tells the server to snapshot the row's current feedback into feedback_log
+// before wiping it — used by the 🧹 clear-all path so a manual clear keeps an audit trail.
+async function onCarouselFeedbackSave(deckSlug, archive = false) {
     if (!deckSlug) return;
     const tag = document.querySelector(`.cr-saved[data-deck="${CSS.escape(deckSlug)}"]`);
     const feedback = collectDeckFeedback(deckSlug);
@@ -171,7 +173,7 @@ async function onCarouselFeedbackSave(deckSlug) {
         const res = await fetch('/api/carousel-approve', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ deck_slug: deckSlug, feedback }),
+            body: JSON.stringify({ deck_slug: deckSlug, feedback, archive }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) {
@@ -215,10 +217,11 @@ async function clearAllCarouselFeedback() {
     const filled = [...notes].filter((ta) => ta.value.trim() !== '');
     if (!filled.length) { if (typeof showToast === 'function') showToast('目前沒有任何反饋'); return; }
     if (!confirm(`確定清除全部 ${filled.length} 則反饋？（本機 + DataOS）`)) return;
-    notes.forEach((ta) => { ta.value = ''; ta.classList.remove('filled'); });
-    // Persist the cleared state for each affected deck (unique slugs only).
+    // Capture affected decks BEFORE wiping (server archives their current feedback to feedback_log).
     const decks = [...new Set(filled.map((ta) => ta.dataset.deck))];
-    await Promise.all(decks.map((slug) => onCarouselFeedbackSave(slug)));
+    notes.forEach((ta) => { ta.value = ''; ta.classList.remove('filled'); });
+    // Persist the cleared state per deck with archive=true so the notes land in feedback_log.
+    await Promise.all(decks.map((slug) => onCarouselFeedbackSave(slug, true)));
     if (typeof showToast === 'function') showToast(`已清除 ${filled.length} 則反饋`);
 }
 

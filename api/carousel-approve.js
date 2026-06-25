@@ -7,10 +7,14 @@
 //   approved=true  -> status='approved', stamp approved_at/approved_by='ray'
 //   approved=false -> status='pending'  (un-tick returns the deck to the 待審 list)
 //
-// Mode B — feedback save. Body: { deck_slug: string, feedback: { top?, slideNN?, ... } }
+// Mode B — feedback save. Body: { deck_slug: string, feedback: { top?, slideNN?, ... }, archive?: boolean }
 //   PATCHes the feedback JSONB column only; NEVER touches status. Empty notes are
 //   stripped client-side, so an all-clear deck sends {} (= 驗收通過，無需重生). Persisting
 //   to DataOS lets Claude read change-requests straight from the table for the regen loop.
+//   archive=true (sent by the UI 🧹 清除反饋 button): before overwriting, read the row's
+//   CURRENT feedback and, if non-empty, append it to feedback_log so a manual clear keeps an
+//   audit trail (the regen path already archives via upload_deck_slides.py; this closes the
+//   manual-clear gap, 2026-06-26 Ray). Read-modify-write — fine for this low-freq action.
 //
 // Mode C — published toggle. Body: { deck_slug: string, published: boolean }
 //   Ray ticks 已發布 AFTER he manually posts to IG. published=true -> status='published'
@@ -41,10 +45,18 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Supabase env not configured (AIOS_SUPABASE_URL / AIOS_SUPABASE_SERVICE_KEY)' });
     }
 
-    const { deck_slug, approved, published, feedback } = req.body || {};
+    const { deck_slug, approved, published, feedback, archive } = req.body || {};
     if (!deck_slug) {
         return res.status(400).json({ error: 'Missing deck_slug' });
     }
+
+    const restUrl = `${base.replace(/\/$/, '')}/rest/v1/carousel_publish_queue`
+        + `?deck_slug=eq.${encodeURIComponent(deck_slug)}`;
+    const restHeaders = {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+    };
 
     const now = new Date().toISOString();
     let patch;
@@ -54,6 +66,22 @@ module.exports = async function handler(req, res) {
             return res.status(400).json({ error: 'feedback must be an object { top?, slideNN? }' });
         }
         patch = { feedback, updated_at: now };
+        if (archive === true) {
+            // Manual-clear archive: pull the row's current feedback/feedback_log and, if there
+            // are notes to lose, append them to the log before this PATCH wipes feedback.
+            try {
+                const sel = await fetch(`${restUrl}&select=feedback,feedback_log`, { headers: restHeaders });
+                const rows = sel.ok ? await sel.json().catch(() => []) : [];
+                const cur = rows[0] || {};
+                const curFb = (cur.feedback && typeof cur.feedback === 'object') ? cur.feedback : {};
+                if (Object.keys(curFb).length) {
+                    const log = Array.isArray(cur.feedback_log) ? cur.feedback_log : [];
+                    patch.feedback_log = [...log, { at: now, feedback: curFb, via: 'manual-clear' }];
+                }
+            } catch (e) {
+                // Archiving is best-effort; never block the clear itself on a read failure.
+            }
+        }
     } else if (typeof published === 'boolean') {
         // Mode C — published toggle. Ray ticks this AFTER he manually posts to IG; it only
         // marks the queue row 'published' (→ strikethrough in the UI), NEVER sends anything.
@@ -70,18 +98,10 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'Provide approved/published (boolean) or feedback (object)' });
     }
 
-    const url = `${base.replace(/\/$/, '')}/rest/v1/carousel_publish_queue`
-        + `?deck_slug=eq.${encodeURIComponent(deck_slug)}`;
-
     try {
-        const r = await fetch(url, {
+        const r = await fetch(restUrl, {
             method: 'PATCH',
-            headers: {
-                apikey: key,
-                Authorization: `Bearer ${key}`,
-                'Content-Type': 'application/json',
-                Prefer: 'return=minimal',
-            },
+            headers: { ...restHeaders, Prefer: 'return=minimal' },
             body: JSON.stringify(patch),
         });
         if (!r.ok) {
