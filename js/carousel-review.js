@@ -208,6 +208,20 @@ function copyAllCarouselFeedback() {
     else done();
 }
 
+// Wipe every deck's notes — clears all textareas locally, then persists the now-empty
+// feedback per deck back to DataOS so a Refresh won't bring the old notes back.
+async function clearAllCarouselFeedback() {
+    const notes = document.querySelectorAll('.cr-note');
+    const filled = [...notes].filter((ta) => ta.value.trim() !== '');
+    if (!filled.length) { if (typeof showToast === 'function') showToast('目前沒有任何反饋'); return; }
+    if (!confirm(`確定清除全部 ${filled.length} 則反饋？（本機 + DataOS）`)) return;
+    notes.forEach((ta) => { ta.value = ''; ta.classList.remove('filled'); });
+    // Persist the cleared state for each affected deck (unique slugs only).
+    const decks = [...new Set(filled.map((ta) => ta.dataset.deck))];
+    await Promise.all(decks.map((slug) => onCarouselFeedbackSave(slug)));
+    if (typeof showToast === 'function') showToast(`已清除 ${filled.length} 則反饋`);
+}
+
 // Lightbox: a single reused overlay appended to <body> on first use. Click anywhere
 // (or press Esc) to close. Shows the slide at full resolution with object-fit:contain.
 function openCarouselLightbox(src, cap) {
