@@ -235,6 +235,7 @@ let thinkingAgentsLoaded = false;
 const AGENT_LABELS = {
     churn_save: { name: '流失救援 Agent', desc: '偵測活躍下降學員 → 寫個人化挽留信草稿' },
     milestone: { name: '里程碑 Agent', desc: '偵測學員進度里程碑 → 寫鼓勵信草稿' },
+    journal_to_tft: { name: '盤中日誌轉文 Agent', desc: '每天抓 TradeZella 盤中檢討 → 寫 TFT 做單解析貼文草稿' },
 };
 
 async function loadThinkingAgents() {
