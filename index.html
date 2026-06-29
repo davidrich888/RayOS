@@ -1167,7 +1167,7 @@
               #carousel-review .cr-pub-btn:disabled { opacity:0.5; cursor:wait; }
               /* a deck Ray has manually published: strike its title so the bottom list reads as done */
               #carousel-review .cr-deck.published .cr-head h3 { text-decoration:line-through;
-                  text-decoration-color:#7bd88f; text-decoration-thickness:2px; opacity:0.5; }
+                  text-decoration-color:#7bd88f; text-decoration-thickness:2px; }
               /* approved decks collapse their slides + sink to the bottom so 待審 stays scannable */
               #carousel-review #carousel-decks { display:flex; flex-direction:column; }
               #carousel-review .cr-deck { order:0; }
@@ -1178,6 +1178,10 @@
               #carousel-review .cr-deck.approved-collapsed.peek { opacity:1; margin-bottom:28px; }
               #carousel-review .cr-deck.approved-collapsed.peek .cr-grid { display:grid; }
               #carousel-review .cr-deck.approved-collapsed.peek .cr-note-top { display:block; }
+              /* published dims the WHOLE card (title + 來源 + sub + slides); placed after
+                 approved-collapsed so it wins the 0.7 and dims everything to 0.45 */
+              #carousel-review .cr-deck.published,
+              #carousel-review .cr-deck.approved-collapsed.published { opacity:0.45; }
               #carousel-review .cr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
                   gap:14px; margin-top:14px; }
               #carousel-review .cr-slide { margin:0; }
