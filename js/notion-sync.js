@@ -11,6 +11,43 @@ const NOTION_API = 'https://api.notion.com/v1';
 let notionPageIndex = JSON.parse(localStorage.getItem('notion_page_index') || '{}');
 let syncInProgress = false;
 
+// === Pending-write protection ==============================================
+// A habit cell is "pending" from the moment the user toggles it until its
+// Notion write is CONFIRMED. While pending, the replace-style sync below must
+// not overwrite it — otherwise a failed/raced write silently reverts the edit
+// to Notion's stale value ("跳回空缺"). Persisted to localStorage so the guard
+// survives the page reload that triggers the clobbering sync.
+function pendingHabitKey(dateStr, habit) { return dateStr + '|' + habit; }
+function markHabitPending(dateStr, habit, value) {
+    pendingHabitWrites[pendingHabitKey(dateStr, habit)] = value;
+    localStorage.setItem('pending_habit_writes', JSON.stringify(pendingHabitWrites));
+}
+function clearHabitPending(dateStr, habit) {
+    delete pendingHabitWrites[pendingHabitKey(dateStr, habit)];
+    localStorage.setItem('pending_habit_writes', JSON.stringify(pendingHabitWrites));
+}
+function isHabitPending(dateStr, habit) {
+    return Object.prototype.hasOwnProperty.call(pendingHabitWrites, pendingHabitKey(dateStr, habit));
+}
+// Overlay pending local edits on top of values pulled from Notion.
+// Self-heals: once Notion's checkbox already reflects our intent, the write
+// clearly landed, so we stop protecting that cell (prevents unbounded growth).
+function mergePendingHabits(dateStr, notionVals) {
+    const out = { ...notionVals };
+    for (const habit of Object.keys(notionVals)) {
+        if (!isHabitPending(dateStr, habit)) continue;
+        const pendingVal = pendingHabitWrites[pendingHabitKey(dateStr, habit)];
+        const notionChecked = notionVals[habit] === true;
+        if (notionChecked === (pendingVal === true)) {
+            clearHabitPending(dateStr, habit); // Notion matches our intent → confirmed
+        } else {
+            out[habit] = pendingVal; // still unconfirmed → keep the local edit
+        }
+    }
+    return out;
+}
+// ===========================================================================
+
 function getN8nUrl() { return localStorage.getItem('n8n_webhook') || ''; }
 function getNotionToken() { return localStorage.getItem('notion_token') || ''; }
 function hasNotionDirect() { return !!getNotionToken(); }
@@ -71,7 +108,7 @@ async function syncDailyFromNotionDirect(silent = false) {
             const dateStr = titleArr[0].plain_text;
             if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) continue;
             newPageIndex[dateStr] = page.id;
-            dailyHabitsData[dateStr] = {
+            dailyHabitsData[dateStr] = mergePendingHabits(dateStr, {
                 trading: props['Trading']?.checkbox === true ? true : null,
                 advertise: props['Advertise']?.checkbox === true ? true : null,
                 deliver: (props['Deliver']?.checkbox || props['Deliever']?.checkbox) === true ? true : null,
@@ -80,7 +117,7 @@ async function syncDailyFromNotionDirect(silent = false) {
                 ai: props['AI']?.checkbox === true ? true : null,
                 nofap: props['NoFap']?.checkbox === true ? true : null,
                 sleep: props['Sleep']?.checkbox === true ? true : null
-            };
+            });
             count++;
         }
         notionPageIndex = newPageIndex;
@@ -191,7 +228,7 @@ async function syncDailyFromNotion(silent = false) {
             if (!data.pageIndex) console.warn('[RayOS n8n] Response missing pageIndex — update_habit will fail');
             Object.keys(data.habits).forEach(dateStr => {
                 const nd = data.habits[dateStr];
-                dailyHabitsData[dateStr] = {
+                dailyHabitsData[dateStr] = mergePendingHabits(dateStr, {
                     trading: (nd.Trading || nd.trading) === true ? true : null,
                     advertise: (nd.Advertise || nd.advertise) === true ? true : null,
                     deliver: (nd.Deliver || nd.Deliever || nd.deliver) === true ? true : null,
@@ -200,7 +237,7 @@ async function syncDailyFromNotion(silent = false) {
                     ai: (nd.AI || nd.ai) === true ? true : null,
                     nofap: (nd.NoFap || nd.nofap) === true ? true : null,
                     sleep: (nd.Sleep || nd.sleep) === true ? true : null
-                };
+                });
             });
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
             loadDailyHabits();
@@ -219,16 +256,19 @@ async function syncDailyFromNotion(silent = false) {
 }
 
 // === 勾選後即時寫回 Notion（Direct 優先，失敗 fallback N8N）===
+// Returns true only when the write is CONFIRMED landed in Notion, so the
+// caller can safely clear the pending-write guard. Any failure returns false,
+// keeping the cell protected from the next replace-sync.
 async function writeHabitToNotion(dateStr, habit, value) {
     const field = H2N[habit];
-    if (!field) return;
+    if (!field) return false;
 
     // 1. 優先嘗試 Notion Direct API
     if (hasNotionDirect()) {
         try {
             console.log('[RayOS] Trying Notion Direct for', habit, '=', value);
             await writeHabitToNotionDirect(dateStr, habit, value);
-            return; // 成功就結束
+            return true; // 成功就結束
         } catch (e) {
             console.warn('[RayOS] Notion Direct failed, trying N8N fallback:', e.message);
         }
@@ -237,8 +277,8 @@ async function writeHabitToNotion(dateStr, habit, value) {
     // 2. Fallback: N8N
     const url = getN8nUrl();
     if (!url) {
-        showToast('Notion 同步失敗：無可用連線', true);
-        return;
+        showToast('Notion 同步失敗：無可用連線（本地已保留，稍後自動重試）', true);
+        return false;
     }
     console.log('[RayOS] Using N8N for', habit, '=', value);
     let pageId = notionPageIndex[dateStr];
@@ -248,7 +288,7 @@ async function writeHabitToNotion(dateStr, habit, value) {
         pageId = notionPageIndex[dateStr];
         if (!pageId) {
             showToast('Notion 同步失敗：無法取得 pageId', true);
-            return;
+            return false;
         }
     }
     try {
@@ -260,12 +300,14 @@ async function writeHabitToNotion(dateStr, habit, value) {
         if (!res.ok) {
             console.warn('[RayOS n8n] update_habit failed:', res.status);
             showToast('Notion 更新失敗: ' + res.status, true);
-        } else {
-            console.log('[RayOS n8n] Updated', dateStr, field, '=', !!value);
+            return false;
         }
+        console.log('[RayOS n8n] Updated', dateStr, field, '=', !!value);
+        return true;
     } catch (e) {
         console.error('[RayOS n8n] Write error:', e);
         showToast('Notion 寫入錯誤', true);
+        return false;
     }
 }
 

@@ -18,6 +18,9 @@ let propRecords = [];
 let dailyHabitsData = {};
 let planItems = [];
 let planPageIndex = JSON.parse(localStorage.getItem('plan_page_index') || '{}');
+// Habit cells edited locally but not yet confirmed written to Notion.
+// Protected from the replace-style Notion sync so a failed/raced write can't clobber a local edit.
+let pendingHabitWrites = JSON.parse(localStorage.getItem('pending_habit_writes') || '{}');
 
 // Load from localStorage
 try {

@@ -15,6 +15,7 @@ function cycleHabit(habit) {
     else if (current === true) next = false;
     else next = null;
     dailyHabitsData[today][habit] = next;
+    markHabitPending(today, habit, next); // protect until Notion write confirms
     try { localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData)); } catch(e) {}
     // 更新 UI
     updateHabitItemUI(habit, next);
@@ -28,7 +29,11 @@ async function syncHabitToNotion(dateStr, habit, value) {
     if (!notionPageIndex[dateStr]) {
         await createDayInNotion(dateStr);
     }
-    writeHabitToNotion(dateStr, habit, value === true);
+    const confirmed = await writeHabitToNotion(dateStr, habit, value === true);
+    // Only drop the guard once Notion has confirmed the write; otherwise the
+    // cell stays protected so the next sync can't revert it.
+    if (confirmed) clearHabitPending(dateStr, habit);
+    return confirmed;
 }
 
 function updateHabitItemUI(habit, value) {
@@ -194,6 +199,7 @@ async function toggleHistoryHabit(dateStr, habit) {
     else if (current === true) next = false;
     else next = null;
     dailyHabitsData[dateStr][habit] = next;
+    markHabitPending(dateStr, habit, next); // protect until Notion write confirms
     localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
     updateDailyHistoryTable();
     const today = new Date().toISOString().split('T')[0];
