@@ -986,4 +986,23 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # Any non-zero exit or crash must alert — a silent failure once let the
+    # expense tracker rot for ~2 months (env var wiped, no one saw the log).
+    try:
+        main()
+    except SystemExit as e:
+        if e.code not in (0, None):
+            send_tg_alert(
+                "⚠️ *台新 expense sync 失敗*\n"
+                f"exit code {e.code}\n"
+                "log: ~/Library/Logs/taishin-expense.log\n"
+                "常見原因：TAISHIN_BILL_PASSWORD 不見了(身分證後2碼+生日MMDD)、gws token 過期、驗證碼連錯"
+            )
+        raise
+    except Exception as e:
+        send_tg_alert(
+            "⚠️ *台新 expense sync 失敗*\n"
+            f"{type(e).__name__}: {str(e)[:300]}\n"
+            "log: ~/Library/Logs/taishin-expense.log"
+        )
+        raise
