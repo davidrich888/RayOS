@@ -13524,10 +13524,1109 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/13",
+    "desc": "統一超商-新里",
+    "amount": 134.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/13",
+    "desc": "ACPAY-芯動力國際",
+    "amount": 65.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/13",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 688.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/14",
     "desc": "星巴克大里門市",
     "amount": 170,
     "category": "餐飲",
     "month": "2026/05"
+  },
+  {
+    "date": "2026/05/15",
+    "desc": "WORLDGY",
+    "amount": 888.0,
+    "category": "投資自己",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/16",
+    "desc": "統一超商-美生",
+    "amount": 75.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/16",
+    "desc": "OK超商-台中北區運動",
+    "amount": 28.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/17",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 9.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/17",
+    "desc": "ANTHROPIC",
+    "amount": 631.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/17",
+    "desc": "優步-街頭G吧鹹水雞",
+    "amount": 586.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/17",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 6.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/17",
+    "desc": "APPLE.COM/BILL",
+    "amount": 390.0,
+    "category": "Apple",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/18",
+    "desc": "優步-暗巷烤雞南屯店",
+    "amount": 750.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/19",
+    "desc": "樂購蝦皮-1030PE",
+    "amount": 1399.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/19",
+    "desc": "樂購蝦皮-MOMOTA",
+    "amount": 1398.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/19",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 668.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/20",
+    "desc": "優步-全聯福利中心大",
+    "amount": 678.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/20",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 571.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/20",
+    "desc": "統一超商-新里",
+    "amount": 25.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/21",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 626.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/22",
+    "desc": "MOMO-EC3D",
+    "amount": 5060.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/22",
+    "desc": "星巴克大里門市",
+    "amount": 170.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/23",
+    "desc": "全家便利商店台中一中讚",
+    "amount": 39.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/23",
+    "desc": "勤美誠品綠園道",
+    "amount": 100.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/23",
+    "desc": "全家便利商店台中鑫貴店",
+    "amount": 130.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "板橋凱撒大飯店",
+    "amount": 2376.0,
+    "category": "旅行",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 20.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "APPLE.COM/BILL",
+    "amount": 1320.0,
+    "category": "Apple",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "統一超商-龍侑",
+    "amount": 55.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "統一超商-龍侑",
+    "amount": 25.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "挪威森林VILLAM",
+    "amount": 700.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "格上租車-共享APP",
+    "amount": 3000.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "六星旅館(中壢館)",
+    "amount": 900.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/25",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 395.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/25",
+    "desc": "GOGORONETW",
+    "amount": 499.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/25",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 232.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/25",
+    "desc": "格上租車-共享APP",
+    "amount": 1824.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/25",
+    "desc": "格上租車-共享APP",
+    "amount": 200.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/25",
+    "desc": "統一超商-龍侑",
+    "amount": 126.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/25",
+    "desc": "優步-蛋白盒子健康餐盒",
+    "amount": 738.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/27",
+    "desc": "萊爾富-台中綠川店",
+    "amount": 25.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/28",
+    "desc": "國外交易手續費 -TRADER",
+    "amount": 5.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/28",
+    "desc": "TRADERSCONNECT.COM",
+    "amount": 303.0,
+    "category": "Prop Firm",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/28",
+    "desc": "國外交易手續費 -ALPHA",
+    "amount": 362.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/28",
+    "desc": "ALPHA CAPITAL GROUP",
+    "amount": 24132.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/28",
+    "desc": "統一超商-新里",
+    "amount": 70.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/29",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 10.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/29",
+    "desc": "ANTHROPIC",
+    "amount": 643.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/29",
+    "desc": "優步-秧米YUMEA",
+    "amount": 336.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/29",
+    "desc": "綠界-BYZOOMFI",
+    "amount": 43935.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/30",
+    "desc": "國外交易手續費 -XDEVE",
+    "amount": 2.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/30",
+    "desc": "X DEVELOPER PLATFORM",
+    "amount": 163.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/30",
+    "desc": "國外交易手續費 -GROKX",
+    "amount": 2.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/30",
+    "desc": "GROK XAI",
+    "amount": 158.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/30",
+    "desc": "優步-中華大車隊股份有",
+    "amount": 332.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/30",
+    "desc": "優步-中天衛星車隊",
+    "amount": 348.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/31",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 267.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/31",
+    "desc": "國外交易手續費 -MANYCH",
+    "amount": 21.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/31",
+    "desc": "MANYCHAT.COM",
+    "amount": 1414.0,
+    "category": "事業",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/31",
+    "desc": "台中秀泰廣場-美食餐飲",
+    "amount": 1714.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/31",
+    "desc": "台中秀泰廣場文心店",
+    "amount": 185.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/31",
+    "desc": "秀泰全球影城-台中文心",
+    "amount": 1015.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/06/01",
+    "desc": "星巴克大里門市",
+    "amount": 185.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/01",
+    "desc": "PCHOME1",
+    "amount": 3916.0,
+    "category": "購物",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/01",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 10.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/01",
+    "desc": "ANTHROPIC",
+    "amount": 640.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/02",
+    "desc": "優步-中天衛星車隊",
+    "amount": 591.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/02",
+    "desc": "優步-中華大車隊股份有",
+    "amount": 104.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/02",
+    "desc": "憲賣國際股份有限公司",
+    "amount": 352.0,
+    "category": "其他",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/02",
+    "desc": "全家便利商店台中樂樂店",
+    "amount": 133.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/02",
+    "desc": "統一超商-庄鎂",
+    "amount": 42.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/02",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 214.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/02",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 438.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/02",
+    "desc": "統一超商-庄鎂",
+    "amount": 35.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/03",
+    "desc": "全聯福利中心-大里益民",
+    "amount": 1556.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/03",
+    "desc": "國外交易手續費 -OPENAI",
+    "amount": 3.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/03",
+    "desc": "OPENAI",
+    "amount": 168.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "國外交易手續費 -OPENAI",
+    "amount": 3.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "OPENAI",
+    "amount": 178.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "國外交易手續費 -FIRECR",
+    "amount": 9.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "FIRECRAWL.DEV",
+    "amount": 622.0,
+    "category": "其他",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 7.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "APPLE.COM/BILL",
+    "amount": 455.0,
+    "category": "Apple",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "國外交易手續費 -OPENAI",
+    "amount": 2.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "OPENAI",
+    "amount": 126.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "OPENAI",
+    "amount": 166.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 9.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "ANTHROPIC",
+    "amount": 630.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "國外交易手續費 -GOOGLE",
+    "amount": 10.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "GOOGLE*GOOGLE ONE",
+    "amount": 650.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/04",
+    "desc": "OPENAI",
+    "amount": 174.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/05",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 285.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/05",
+    "desc": "國外交易手續費 -TOPSTE",
+    "amount": 74.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/05",
+    "desc": "TOPSTEP",
+    "amount": 4925.0,
+    "category": "Prop Firm",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/05",
+    "desc": "優步-中華大車隊股份有",
+    "amount": 278.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/05",
+    "desc": "國外交易手續費 -STREAM",
+    "amount": 21.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/05",
+    "desc": "STREAMYARD.COM",
+    "amount": 1417.0,
+    "category": "事業",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 95.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "ANTHROPIC* CLAUDE SUB",
+    "amount": 6319.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 445.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "OK超商-台中北區運動",
+    "amount": 80.0,
+    "category": "其他",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "國外交易手續費 -GOOGLE",
+    "amount": 5.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "GOOGLE*CLOUD PXWSCW",
+    "amount": 330.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "國外交易手續費 -TOPSTE",
+    "amount": 74.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "TOPSTEP",
+    "amount": 4943.0,
+    "category": "Prop Firm",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "優步-中華大車隊股份有",
+    "amount": 301.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "國外交易手續費 -PADDLE",
+    "amount": 14.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/06",
+    "desc": "PADDLE.NET* N8N CLOUD1",
+    "amount": 927.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/07",
+    "desc": "全家便利商店-台中美美",
+    "amount": 75.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/07",
+    "desc": "所勤美店",
+    "amount": 2495.0,
+    "category": "購物",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/07",
+    "desc": "優步-中天衛星車隊",
+    "amount": 295.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/07",
+    "desc": "國外交易手續費 -TRADER",
+    "amount": 23.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/07",
+    "desc": "TRADERSCONNECT.COM",
+    "amount": 1518.0,
+    "category": "Prop Firm",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/08",
+    "desc": "優步福爾摩沙股份有限公",
+    "amount": 252.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/08",
+    "desc": "國外交易手續費 -OPENAI",
+    "amount": 2.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/08",
+    "desc": "OPENAI",
+    "amount": 166.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/08",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 492.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/08",
+    "desc": "LULO",
+    "amount": 1650.0,
+    "category": "其他",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/09",
+    "desc": "統一超商-新里",
+    "amount": 92.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/09",
+    "desc": "國外交易手續費 -LUCID",
+    "amount": 45.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/09",
+    "desc": "LUCID TRADING",
+    "amount": 2996.0,
+    "category": "Prop Firm",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/09",
+    "desc": "國外交易手續費 -LUCID",
+    "amount": 46.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/09",
+    "desc": "LUCID TRADING",
+    "amount": 3091.0,
+    "category": "Prop Firm",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/09",
+    "desc": "國外交易手續費 -LUCID",
+    "amount": 33.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/09",
+    "desc": "LUCID TRADING",
+    "amount": 2208.0,
+    "category": "Prop Firm",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/10",
+    "desc": "華南產物保險股份有限公",
+    "amount": 2928.0,
+    "category": "保險",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/10",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 155.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/10",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 159.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/10",
+    "desc": "統一超商-新里",
+    "amount": 25.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/10",
+    "desc": "星巴克大里門市",
+    "amount": 170.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/10",
+    "desc": "國外交易手續費 -ANTHRO",
+    "amount": 10.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/10",
+    "desc": "ANTHROPIC",
+    "amount": 648.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/11",
+    "desc": "優步-麥當勞S581",
+    "amount": 221.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/11",
+    "desc": "優食台灣股份有限公司",
+    "amount": 120.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/11",
+    "desc": "萊爾富-台中綠川店",
+    "amount": 25.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/11",
+    "desc": "優步-中天衛星車隊",
+    "amount": 145.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/11",
+    "desc": "優步-中天衛星車隊",
+    "amount": 154.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/12",
+    "desc": "優步-永保車隊",
+    "amount": 295.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/12",
+    "desc": "寶雅生活館台中大里店",
+    "amount": 1254.0,
+    "category": "生活",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/13",
+    "desc": "50嵐-大里中興店",
+    "amount": 100.0,
+    "category": "其他",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/13",
+    "desc": "統一超商-新里",
+    "amount": 361.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/13",
+    "desc": "優步-中天衛星車隊",
+    "amount": 271.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/13",
+    "desc": "優步-永保車隊",
+    "amount": 496.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/13",
+    "desc": "酉喜炭火燒鳥研製所",
+    "amount": 3674.0,
+    "category": "其他",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/14",
+    "desc": "優步-中天衛星車隊",
+    "amount": 590.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/14",
+    "desc": "統一超商-庄鎂",
+    "amount": 49.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/14",
+    "desc": "統一超商-庄鎂",
+    "amount": 130.0,
+    "category": "餐飲",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/14",
+    "desc": "樂購蝦皮-CSJSHO",
+    "amount": 1337.0,
+    "category": "購物",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/14",
+    "desc": "優步-飛狗衛星車隊",
+    "amount": 509.0,
+    "category": "交通",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/15",
+    "desc": "國外交易手續費 -OPENAI",
+    "amount": 4.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/15",
+    "desc": "OPENAI",
+    "amount": 278.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/15",
+    "desc": "國外交易手續費 -OPENAI",
+    "amount": 5.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/15",
+    "desc": "OPENAI",
+    "amount": 332.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/16",
+    "desc": "國外交易手續費 -OPENAI",
+    "amount": 3.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/16",
+    "desc": "OPENAI",
+    "amount": 170.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/16",
+    "desc": "國外交易手續費 -APPLE.",
+    "amount": 11.0,
+    "category": "國外手續費",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/16",
+    "desc": "APPLE.COM/BILL",
+    "amount": 710.0,
+    "category": "Apple",
+    "month": "2026/06"
+  },
+  {
+    "date": "2026/06/16",
+    "desc": "OPENAI",
+    "amount": 169.0,
+    "category": "AI/SaaS",
+    "month": "2026/06"
   }
 ]
