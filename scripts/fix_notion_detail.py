@@ -28,15 +28,16 @@ for env_path in [RAYOS_DIR / '.env', RAYOS_DIR.parent / '.env', RAYOS_DIR.parent
             line = line.strip()
             if line and not line.startswith('#') and '=' in line:
                 key, val = line.split('=', 1)
-                os.environ.setdefault(key.strip(), val.strip())
+                _k = key.strip()
+                os.environ[_k] = os.environ.get(_k) or val.strip()
 
 NOTION_TOKEN = os.environ.get('NOTION_TOKEN', '')
 NOTION_DETAIL_DB = 'ca2878aa-4fa1-473a-8776-f4d8f9d16d59'
 
 CATEGORY_TO_NOTION = {
-    'Prop Firm': 'Prop Firm', '事業': '事業', 'AI/SaaS': 'AI/SaaS',
+    'Prop Firm': 'Prop Firm', '交易': '交易', '事業': '事業', 'AI/SaaS': 'AI/SaaS',
     'Apple': 'Apple', '交通': '交通', '餐飲': '餐飲', '旅行': '旅行',
-    '保險': '保險', '健身': '健身', '購物': '購物', '生活': '生活',
+    '保險': '保險', '健身': '健身', '投資自己': '投資自己', '購物': '購物', '生活': '生活',
     '娛樂': '娛樂', '約會': '約會', '國外手續費': '國外手續費', '其他': '其他',
 }
 

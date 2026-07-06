@@ -2,12 +2,14 @@
 
 // Category classification rules (enhanced)
 const EXPENSE_CATEGORIES = {
-    'Prop Firm': ['E8 FUNDING', 'E8FUNDING', 'TOPSTEP', 'APEX TRADER', 'APEX FUNDING', 'APEXTRADERFUNDING', 'FTMO', 'FUNDEDNEXT', 'FXIFY', 'THE5ERS', '5%ERS', 'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TRADERSCONNECT', 'TAKEPROFITTRADER', 'TRADESYNCER', 'KIT.COM', 'SIM2FUNDED'],
+    'Prop Firm': ['E8 FUNDING', 'E8FUNDING', 'TOPSTEP', 'APEX TRADER', 'APEX FUNDING', 'APEXTRADERFUNDING', 'FTMO', 'FUNDEDNEXT', 'FXIFY', 'THE5ERS', '5%ERS', 'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TRADERSCONNECT', 'TAKEPROFITTRADER', 'TRADESYNCER', 'KIT.COM', 'SIM2FUNDED', 'ALPHA CAPITAL', 'ALPHACAPITAL', 'FUNDINGPIPS'],
+    '交易': ['TRADINGVIEW', 'TRADEZELLA', 'MT5'],
     '事業': ['SKOOL.COM', 'SKOOL', 'TELLA', 'STREAMYARD', 'CAPCUT', 'CAPCUTO', 'SUBEASY', 'MANYCHAT', 'CANVA', 'FUNNEL MASTE', 'ZAC PHUA'],
-    'AI/SaaS': ['ANTHROPIC', 'CLAUDE.AI', 'N8N', 'PADDLE', 'APIFY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY', 'VERCEL', 'GOOGLE*CLOUD', 'GOOGLE CLOUD', 'GOOGLE*WORKSPACE', 'GSUITE', 'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME', 'TRADINGVIEW', 'SCRIBD', 'NAME-CHEAP', 'NAMECHEAP', 'METACOPIER', 'FORMFLOW', '2CO.COM', 'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE'],
+    'AI/SaaS': ['ANTHROPIC', 'CLAUDE.AI', 'N8N', 'PADDLE', 'APIFY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY', 'VERCEL', 'GOOGLE*CLOUD', 'GOOGLE CLOUD', 'GOOGLE*WORKSPACE', 'GSUITE', 'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME', 'SCRIBD', 'NAME-CHEAP', 'NAMECHEAP', 'METACOPIER', 'FORMFLOW', '2CO.COM', 'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE'],
+    '約會': ['TINDER', 'BUMBLE', 'COFFEE MEETS BAGEL', 'CMB ', '浪琴文創', '薆悅', 'MOTEL', '汽車旅館', 'VILLA', '六星旅館'],
     'Apple': ['APPLE.COM/BILL', 'APPLE.COM'],
-    '交通': ['UBER ', 'UBER*', 'GOGORO', 'MOBILE SUICA', 'SUICA', '台灣大車隊', 'GRAB.COM', 'GRAB ', '加油站', '中油', '高鐵', '優步', 'CHARGESPOT', '城市車旅', 'ALPHA FLIGHT'],
-    '餐飲': ['UBEREATS', '優食', 'FOODPANDA', '7-ELEVEN', '全家便利', '萊爾富', 'STARBUCKS', '星巴克', 'MOS-', 'MOS ', 'CAFE', 'SUSHI', 'HANDROLL', '全聯', '義美', 'PUTIEN', 'MUNCHIZ', 'XIAOLONGKAN', 'HOTPOT', 'GRILL', 'HOUSE KOREAN', 'ARABICA', 'BOOST JUICE', '拉麵', '燒肉', '鍋物', 'OMAKASE', '日嚐', '木門咖啡', '波奇', 'GELATO', 'DEAN&DELUCA', 'MCD', 'BREAD STREET', '統一超商', 'SEVEN-ELEVEN', 'FAMILYMART', 'MINISTOP', '鐵板燒', '食事', '壽司', 'ICHIRAN', 'UNATOTO', '冒煙的喬', '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT'],
+    '交通': ['UBER ', 'UBER*', 'GOGORO', 'MOBILE SUICA', 'SUICA', '台灣大車隊', 'GRAB.COM', 'GRAB ', '加油站', '中油', '高鐵', 'CHARGESPOT', '城市車旅', 'ALPHA FLIGHT', '格上', '租車', 'IRENT', 'ZIPCAR', '和運'],
+    '餐飲': ['UBEREATS', '優食', 'FOODPANDA', '7-ELEVEN', '全家便利', '萊爾富', 'STARBUCKS', '星巴克', 'MOS-', 'MOS ', 'CAFE', 'SUSHI', 'HANDROLL', '全聯', '義美', 'PUTIEN', 'MUNCHIZ', 'XIAOLONGKAN', 'HOTPOT', 'GRILL', 'HOUSE KOREAN', 'ARABICA', 'BOOST JUICE', '拉麵', '燒肉', '鍋物', 'OMAKASE', '日嚐', '木門咖啡', '波奇', 'GELATO', 'DEAN&DELUCA', 'MCD', 'BREAD STREET', '統一超商', 'SEVEN-ELEVEN', 'FAMILYMART', 'MINISTOP', '鐵板燒', '食事', '壽司', 'ICHIRAN', 'UNATOTO', '冒煙的喬', '丰禾', 'HUN混', 'CUPPAVV', '起家', 'DONUT', '美食', '餐飲', '肝新', '嵩SUNG'],
     '旅行': ['AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店', 'KIWI.COM', 'STARLUX', 'FLYSCOOT', 'TOKYO', 'SHIBUYA', 'EKKAMAI', '易遊網', 'TRIP.COM', 'BANGKO', 'BANGKOK', 'DUBAI', 'DUTY FREE', 'DUTY_FREE', 'RYANAIR', 'SALA RATTANAKOSIN', 'ICONSIAM', 'EMQUARTIER', 'EMSPHERE', 'SIAM', 'PARAGON', 'SUKHUMVIT', 'THONGLOR', 'ASIATIQUE', 'KING POWER', 'SUVARNA', 'AIR ARABIA', 'NARITA', 'EDELWEISS', 'SOUTH COAST', 'SNOWIN', '滑雪', 'PRINCE HOTEL', 'SOLAMACHI', '行旅', 'WAYSIM', '酷遊天'],
     '保險': ['國泰人壽', '保險'],
     '健身': ['WORLDGY', 'WORLD GY', '大有運動', 'DECATHLON', '迪卡儂', 'JETTS FITNESS', 'NU TRITION DEPOT'],
@@ -19,6 +21,7 @@ const EXPENSE_CATEGORIES = {
 
 const CATEGORY_COLORS = {
     'Prop Firm': '#d4c5a9',
+    '交易': '#4ea1ff',
     '事業': '#7cb5ec',
     'AI/SaaS': '#90ed7d',
     'Apple': '#a0a0a0',
@@ -27,10 +30,12 @@ const CATEGORY_COLORS = {
     '旅行': '#f15c80',
     '保險': '#2b908f',
     '健身': '#e4d354',
+    '投資自己': '#c3a6ff',
     '購物': '#f45b5b',
     '國外手續費': '#c4a35a',
     '生活': '#91dcea',
     '娛樂': '#ff9ff3',
+    '約會': '#ff8fab',
     '薪資成本': '#9b8cdf',
     '其他': '#555'
 };
@@ -223,7 +228,7 @@ function renderEmptyExpense() {
 }
 
 // Fixed category column order
-const EXPENSE_COL_ORDER = ['Prop Firm', '事業', 'AI/SaaS', 'Apple', '交通', '餐飲', '旅行', '保險', '健身', '購物', '生活', '娛樂', '薪資成本', '國外手續費', '其他'];
+const EXPENSE_COL_ORDER = ['Prop Firm', '交易', '事業', 'AI/SaaS', 'Apple', '交通', '餐飲', '旅行', '保險', '健身', '投資自己', '購物', '生活', '娛樂', '約會', '薪資成本', '國外手續費', '其他'];
 
 function renderExpenseTable(months) {
     const thStyle = 'padding:6px 8px;text-align:right;white-space:nowrap;font-size:11px;';

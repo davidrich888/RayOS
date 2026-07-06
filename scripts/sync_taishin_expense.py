@@ -70,7 +70,10 @@ EXPENSE_CATEGORIES = {
         'APEXTRADERFUNDING', 'FTMO', 'FUNDEDNEXT', 'FXIFY', 'THE5ERS', '5%ERS',
         'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TRADERSCONNECT', 'TAKEPROFITTRADER',
         'TRADESYNCER', 'KIT.COM', 'SIM2FUNDED',
+        'ALPHA CAPITAL', 'ALPHACAPITAL', 'FUNDINGPIPS',
     ],
+    # Trading tools / brokers — separate from Prop Firm challenge fees (Ray 2026-07-06)
+    '交易': ['TRADINGVIEW', 'TRADEZELLA', 'MT5'],
     '事業': [
         'SKOOL.COM', 'SKOOL', 'TELLA', 'STREAMYARD', 'CAPCUT', 'CAPCUTO',
         'SUBEASY', 'MANYCHAT', 'CANVA', 'FUNNEL MASTE', 'ZAC PHUA',
@@ -80,18 +83,23 @@ EXPENSE_CATEGORIES = {
         'APIFY', 'ELEVENLABS', 'UPPIT', 'OPENAI', 'MIDJOURNEY',
         'VERCEL',
         'GOOGLE*CLOUD', 'GOOGLE CLOUD', 'GOOGLE*WORKSPACE', 'GSUITE',
-        'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME', 'TRADINGVIEW',
+        'ZOOM.COM', 'DESCRIPT', 'AMAZON PRIME',
         'SCRIBD', 'NAME-CHEAP', 'NAMECHEAP', 'METACOPIER', 'FORMFLOW', '2CO.COM',
         'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'NOKIA',
         'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE',
         'GOOGLE WORKSPACE', 'GOOGLE CHROME',
     ],
+    '約會': [
+        'TINDER', 'BUMBLE', 'COFFEE MEETS BAGEL', 'CMB ',
+        '浪琴文創', '薆悅', 'MOTEL', '汽車旅館', 'VILLA', '六星旅館',
+    ],
     'Apple': ['APPLE.COM/BILL', 'APPLE.COM'],
     '交通': [
         'UBER ', 'UBER*', 'GOGORO', 'MOBILE SUICA', 'SUICA', '台灣大車隊',
         'GRAB.COM', 'GRAB ',
-        '加油站', '中油', '高鐵', '優步', 'CHARGESPOT', '城市車旅',
+        '加油站', '中油', '高鐵', 'CHARGESPOT', '城市車旅',
         'ALPHA FLIGHT', 'JR EAST',
+        '格上', '租車', 'IRENT', 'ZIPCAR', '和運',
     ],
     '餐飲': [
         'UBEREATS', '優食', 'FOODPANDA', '7-ELEVEN', '全家便利', '萊爾富',
@@ -110,6 +118,7 @@ EXPENSE_CATEGORIES = {
         'GOOD BY SICILY', 'YUZU HOUSE', 'MUUM MUUM',
         'MILES STUTZERLENB', 'TANBAYA', 'UMEIYA',
         '可不可',
+        '美食', '餐飲', '肝新', '嵩SUNG',
     ],
     '旅行': [
         'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店',
@@ -156,6 +165,8 @@ EXPENSE_CATEGORIES = {
 
 SKIP_PATTERNS = ['CUBEAPP', 'RICHART', '上期帳單']
 FOREIGN_FEE_PATTERNS = ['國外交易手續費', '國外交易服務費']
+# 優步 defaults to Uber Eats (餐飲); only a taxi-fleet marker makes it a ride (交通)
+UBER_RIDE_MARKERS = ['車隊', 'TAXI', '福爾摩沙', '小黃']
 
 
 def normalize(text: str) -> str:
@@ -172,6 +183,12 @@ def classify(desc: str) -> str:
     for pat in FOREIGN_FEE_PATTERNS:
         if pat in norm:
             return '國外手續費'
+    # Uber/優步: food-delivery by default; ride-hailing only when a taxi-fleet
+    # marker is present (優步 is almost always Uber Eats — Ray 2026-07-06).
+    if '優步' in norm:
+        return '交通' if any(m in norm for m in UBER_RIDE_MARKERS) else '餐飲'
+    if 'UBER *EATS' in norm or 'UBEREATS' in norm:
+        return '餐飲'
     for cat, keywords in EXPENSE_CATEGORIES.items():
         for kw in keywords:
             if kw in norm:
