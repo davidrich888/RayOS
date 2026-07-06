@@ -13300,6 +13300,13 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/05",
+    "desc": "統一超商-新里A9739 TAICHU",
+    "amount": 114.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/06",
     "desc": "ANTHROPIC",
     "amount": 638,
@@ -13405,6 +13412,62 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/06",
+    "desc": "優步-POK?MPOK?A9739 TAIPEI",
+    "amount": 499.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/07",
+    "desc": "FUNDINGPIPS.COMNICOSI",
+    "amount": 16613.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/07",
+    "desc": "國外交易服務費-16613.00",
+    "amount": 249.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/07",
+    "desc": "TRADERSCONNECT.COMO6609 LONDON",
+    "amount": 314.0,
+    "category": "Prop Firm",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/07",
+    "desc": "國外交易服務費-314.00",
+    "amount": 5.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/07",
+    "desc": "TRADERSCONNECT.COMO6609 LONDON",
+    "amount": 328.0,
+    "category": "Prop Firm",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/07",
+    "desc": "國外交易服務費-328.00",
+    "amount": 5.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/07",
+    "desc": "連加*連加*新鑫安全帽(美村TAIPEI",
+    "amount": 950.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/08",
     "desc": "APPLE.COM/BILL",
     "amount": 2990,
@@ -13426,6 +13489,13 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/08",
+    "desc": "優步-暗巷烤雞 總店A9739 TAIPEI",
+    "amount": 668.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/09",
     "desc": "ANTHROPIC",
     "amount": 632,
@@ -13437,6 +13507,20 @@
     "desc": "國外交易手續費 -ANTHRO",
     "amount": 9,
     "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/09",
+    "desc": "寶雅生活館台中大里店A9739 TAICHU",
+    "amount": 455.0,
+    "category": "生活",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/09",
+    "desc": "富邦MOMO-ECTAIPEI",
+    "amount": 849.0,
+    "category": "購物",
     "month": "2026/05"
   },
   {
@@ -13465,6 +13549,13 @@
     "desc": "國外交易手續費 -APPLE.",
     "amount": 28,
     "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/10",
+    "desc": "肝新A9739 TAICHU",
+    "amount": 1749.0,
+    "category": "其他",
     "month": "2026/05"
   },
   {
@@ -13510,6 +13601,13 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/12",
+    "desc": "星巴克 大里門市A9739 TAICHU",
+    "amount": 160.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/13",
     "desc": "ANTHROPIC",
     "amount": 635,
@@ -13545,6 +13643,41 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/13",
+    "desc": "PCHOME1TAIPEI",
+    "amount": 2040.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/13",
+    "desc": "星巴克 大里門市A9739 TAICHU",
+    "amount": 170.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/13",
+    "desc": "PCHOME1TAIPEI",
+    "amount": 1176.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/13",
+    "desc": "LUCID TRADINGBASKIN",
+    "amount": 3001.0,
+    "category": "Prop Firm",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/13",
+    "desc": "國外交易服務費-3001.00",
+    "amount": 45.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/14",
     "desc": "星巴克大里門市",
     "amount": 170,
@@ -13552,10 +13685,52 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/14",
+    "desc": "優步-蛋白盒子健康餐盒 A9739 TAIPEI",
+    "amount": 668.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/14",
+    "desc": "LUCID TRADINGBASKIN",
+    "amount": 2998.0,
+    "category": "Prop Firm",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/14",
+    "desc": "國外交易服務費-2998.00",
+    "amount": 45.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/15",
     "desc": "WORLDGY",
     "amount": 888.0,
     "category": "投資自己",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/15",
+    "desc": "AMAZON PRIME*620283FP3O1362 SEATTL",
+    "amount": 524.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/15",
+    "desc": "國外交易服務費-524.00",
+    "amount": 8.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/15",
+    "desc": "寶雅生活館台中漢口二店A9739 TAICHU",
+    "amount": 547.0,
+    "category": "生活",
     "month": "2026/05"
   },
   {
@@ -13569,6 +13744,27 @@
     "date": "2026/05/16",
     "desc": "OK超商-台中北區運動",
     "amount": 28.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/16",
+    "desc": "中油-台中復興路站(D4A9739 TAICHU",
+    "amount": 323.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/16",
+    "desc": "星巴克 大里門市A9739 TAICHU",
+    "amount": 170.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/16",
+    "desc": "嵩SUNG台中美村店A9739 TAICHU",
+    "amount": 1359.0,
     "category": "其他",
     "month": "2026/05"
   },
@@ -13608,6 +13804,27 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/17",
+    "desc": "優步-中華大車隊股份有限A9739 TAIPEI",
+    "amount": 143.0,
+    "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/17",
+    "desc": "統一超商-庄鎂A9739 TAICHU",
+    "amount": 88.0,
+    "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/17",
+    "desc": "LULOA9739 TAICHU",
+    "amount": 2090.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/18",
     "desc": "優步-暗巷烤雞南屯店",
     "amount": 750.0,
@@ -13633,6 +13850,13 @@
     "desc": "優步-蛋白盒子健康餐盒",
     "amount": 668.0,
     "category": "交通",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/19",
+    "desc": "連加*連加*康森藥局TAIPEI",
+    "amount": 150.0,
+    "category": "購物",
     "month": "2026/05"
   },
   {
@@ -13664,6 +13888,34 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/21",
+    "desc": "FLASHYTHUMBNAILLONDON",
+    "amount": 9685.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/21",
+    "desc": "國外交易服務費-9685.00",
+    "amount": 145.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/21",
+    "desc": "CAPCUTO7785 SINGAP",
+    "amount": 590.0,
+    "category": "事業",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/21",
+    "desc": "國外交易服務費-590.00",
+    "amount": 9.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/22",
     "desc": "MOMO-EC3D",
     "amount": 5060.0,
@@ -13675,6 +13927,27 @@
     "desc": "星巴克大里門市",
     "amount": 170.0,
     "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/22",
+    "desc": "繳交115年05月份電話費  09637***56",
+    "amount": 599.0,
+    "category": "生活",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/22",
+    "desc": "TRADINGVIEWM*PRODUCTO1908 NEW YO",
+    "amount": 232.0,
+    "category": "AI/SaaS",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/22",
+    "desc": "國外交易服務費-232.00",
+    "amount": 3.0,
+    "category": "國外手續費",
     "month": "2026/05"
   },
   {
@@ -13755,6 +14028,34 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/24",
+    "desc": "連加*USPACETAIPEI",
+    "amount": 1.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "連加*USPACETAIPEI",
+    "amount": -1.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "挪威森林VILLA MOTELTAIPEI",
+    "amount": 1980.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/24",
+    "desc": "連加*USPACETAIPEI",
+    "amount": 80.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/25",
     "desc": "優步-飛狗衛星車隊",
     "amount": 395.0,
@@ -13804,10 +14105,31 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/25",
+    "desc": "連加*LINEPAY*ORIGBLACKTAIPEI",
+    "amount": 170.0,
+    "category": "購物",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/27",
     "desc": "萊爾富-台中綠川店",
     "amount": 25.0,
     "category": "餐飲",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/27",
+    "desc": "SIM2FUNDEDSOLUTIONSO6075 MIAMI",
+    "amount": 913.0,
+    "category": "Prop Firm",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/27",
+    "desc": "國外交易服務費-913.00",
+    "amount": 14.0,
+    "category": "國外手續費",
     "month": "2026/05"
   },
   {
