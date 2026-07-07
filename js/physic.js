@@ -118,7 +118,9 @@ function updatePhysicDisplay() {
         // Goal card
         if (el('physic-current')) el('physic-current').textContent = latest.fatpct ? latest.fatpct.toFixed(1) : '--';
         if (el('physic-target')) el('physic-target').textContent = physicGoal.target;
-        if (el('stat-bodyfat')) el('stat-bodyfat').textContent = latest.fatpct ? latest.fatpct.toFixed(1) + '%' : '--';
+        // Dashboard card: use most recent record that HAS a fat% (weight-only entries would otherwise blank it to '--')
+        var latestFat = sorted.slice().reverse().find(function(r){ return r.fatpct; });
+        if (el('stat-bodyfat')) el('stat-bodyfat').textContent = latestFat ? latestFat.fatpct.toFixed(1) + '%' : '--';
         var start = physicGoal.start, target = physicGoal.target;
         var progress = Math.max(0, Math.min(100, ((start - latest.fatpct) / (start - target)) * 100));
         if (el('physic-bar')) el('physic-bar').style.width = progress + '%';
