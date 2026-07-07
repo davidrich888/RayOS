@@ -54,7 +54,7 @@
     if(localStorage.getItem('bridge_token')) document.getElementById('bridge-token').value = localStorage.getItem('bridge_token');
     
     document.getElementById('body-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('biz-date').value = new Date().toISOString().split('T')[0];
+    // biz-date input removed in DataOS refactor (commit 62c7033); ref deleted to stop init() from crashing here
     
     updateWealthDisplay();
     updateBizDisplay();

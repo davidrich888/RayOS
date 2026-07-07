@@ -43,8 +43,7 @@ const bodyChartOptions = {
 };
 const bodyChart = new Chart(bodyCtx, { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#d4c5a9', tension: 0.4, fill: true, backgroundColor: 'rgba(212,197,169,0.1)', pointRadius: 5, pointBackgroundColor: '#d4c5a9', pointBorderColor: '#d4c5a9', borderWidth: 2 }] }, options: bodyChartOptions });
 
-const bizCtx = document.getElementById('bizChart').getContext('2d');
-const bizChart = new Chart(bizCtx, { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#d4c5a9', tension: 0.4, fill: true, backgroundColor: 'rgba(212,197,169,0.1)' }] }, options: chartOptions });
+// bizChart canvas removed in DataOS refactor (commit 62c7033); dead ref deleted so charts.js keeps loading algoChart/manualChart
 
 const algoCtx = document.getElementById('algoChart').getContext('2d');
 const algoChartOpts = {
