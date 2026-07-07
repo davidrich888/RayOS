@@ -116,11 +116,11 @@
             setTimeout(() => syncVideosFromNotion(true), 2500);
             setTimeout(() => syncContentFromNotion(true), 3000);
         }
-        // Body auto-sync: 只在有 N8N URL 且「沒有」Notion Token 時觸發
-        if (getN8nUrl() && !hasNotionDirect()) {
-            if (bodyHistory.length <= 3) {
-                setTimeout(() => syncBodyFromNotion(), 1200);
-            }
+        // Body auto-sync on every dashboard load (like Videos/Content) so the Body Fat
+        // card stays fresh without first visiting the Physic tab. syncBodyFromNotion uses
+        // the n8n fetch_body webhook, so it only needs an n8n URL (Notion token irrelevant).
+        if (getN8nUrl()) {
+            setTimeout(() => syncBodyFromNotion(true), 1200);
         }
     }
     

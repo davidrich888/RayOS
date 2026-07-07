@@ -49,10 +49,10 @@ async function writeBodyToNotion(data) {
     } catch(e) { console.error('Body sync error:', e); }
 }
 
-async function syncBodyFromNotion() {
+async function syncBodyFromNotion(silent) {
     const url = getN8nUrl();
-    if (!url) return showToast('Set n8n Webhook URL in Settings first', true);
-    showToast('Syncing body data...');
+    if (!url) { if (!silent) showToast('Set n8n Webhook URL in Settings first', true); return; }
+    if (!silent) showToast('Syncing body data...');
     try {
         const res = await fetch(url, {
             method: 'POST',
@@ -81,11 +81,11 @@ async function syncBodyFromNotion() {
             }).filter(r => r.date).sort((a,b) => a.date.localeCompare(b.date));
             localStorage.setItem('body_history', JSON.stringify(bodyHistory));
             updatePhysicDisplay();
-            showToast('✔ Synced ' + bodyHistory.length + ' records from Physic Tracker');
-        } else { showToast('No records found', true); }
+            if (!silent) showToast('✔ Synced ' + bodyHistory.length + ' records from Physic Tracker');
+        } else { if (!silent) showToast('No records found', true); }
     } catch(e) {
         console.error('Body sync error:', e);
-        showToast('Sync failed: ' + e.message, true);
+        if (!silent) showToast('Sync failed: ' + e.message, true);
     }
 }
 
