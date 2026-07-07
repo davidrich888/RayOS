@@ -123,6 +123,28 @@ function showModal(id) { document.getElementById(id).classList.add('show'); }
 
 // Target modal data
 const TARGET_DATA = {
+    batcave: {
+        title: '🦇 Bat Cave — $100,000 USD',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：Bat Cave（第一優先）</p>
+                    <p><strong style="color:var(--accent);">預算</strong>：$100,000 USD</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
+                </div>
+            </div>`
+    },
+    mustang: {
+        title: '🐎 Mustang 5.0 — $60,000 USD',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：Mustang 5.0（第二優先）</p>
+                    <p><strong style="color:var(--accent);">預算</strong>：$60,000 USD</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
+                </div>
+            </div>`
+    },
     bali: {
         title: '🏝️ Bali Villa — $200,000 USD',
         html: `
