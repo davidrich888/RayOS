@@ -138,13 +138,14 @@ EXPENSE_CATEGORIES = {
     ],
     '保險': ['國泰人壽', '保險', 'TOKIO MARINE'],
     '投資自己': [
-        'JETTS FITNESS', 'NU TRITION DEPOT',
-        'BOXING', '拳擊', 'UDEMY', 'COURSERA', 'MAVEN', 'COHORT', 'ACADEMY',
+        'NU TRITION DEPOT',
+        'UDEMY', 'COURSERA', 'MAVEN', 'COHORT', 'ACADEMY',
     ],
-    '健身': ['BYZOOMFI', 'WORLDGY', 'WORLDGYM', 'WORLD GY'],
+    '健身': ['BYZOOMFI', 'WORLDGY', 'WORLDGYM', 'WORLD GY',
+             'JETTS FITNESS', 'BOXING', '拳擊'],
     '購物': [
         'PCHOME', '蝦皮', 'LALAPORT', '秀泰', 'GLOBAL MALL', '環球',
-        '富邦MOMO', 'MOMO購物', '無印良品', 'MUJI', '金典', '勤美',
+        '富邦MOMO', 'MOMO購物', 'MOMO-EC', '無印良品', 'MUJI', '金典', '勤美',
         'CONVERSE', '大魯閣', '台灣菸酒', '連加', 'HOLA',
         'TSUTAYA', 'BURTON', 'J STREAM', 'K區',
         'WHSMITH', 'PIKZELS', 'CHANCHAO', '昇昌',
