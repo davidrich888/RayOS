@@ -30,7 +30,7 @@ DATAJS_PATH = os.path.join(ROOT, 'js', 'data.js')
 # Buckets Ray's rule fixes move OUT of (keyword-derived, safe to recompute)
 SOURCE_CATEGORIES = {'交通', '購物', '其他', 'AI/SaaS'}
 # Buckets Ray's rule fixes move INTO
-TARGET_CATEGORIES = {'餐飲', '交易', 'Prop Firm', '交通', '約會'}
+TARGET_CATEGORIES = {'餐飲', '交易', 'Prop Firm', '交通', '約會', '健身'}
 
 
 def reclassify(transactions: list) -> list:
