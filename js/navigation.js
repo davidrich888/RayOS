@@ -196,6 +196,17 @@ const TARGET_DATA = {
                     <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
                 </div>
             </div>`
+    },
+    skoolPlatinum: {
+        title: '💎 Skool Platinum — $100,000 MRR',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：Skool Platinum 白金里程碑</p>
+                    <p><strong style="color:var(--accent);">指標</strong>：MRR $100,000 USD／月</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：進行中</p>
+                </div>
+            </div>`
     }
 };
 
