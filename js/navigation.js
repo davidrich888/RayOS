@@ -201,6 +201,7 @@ const TARGET_DATA = {
         title: '💎 Skool Platinum — $100,000 MRR',
         html: `
             <div style="margin-bottom:16px;">
+                <img src="icons/skool-platinum.png" alt="Skool Platinum" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：Skool Platinum 白金里程碑</p>
                     <p><strong style="color:var(--accent);">指標</strong>：MRR $100,000 USD／月</p>
