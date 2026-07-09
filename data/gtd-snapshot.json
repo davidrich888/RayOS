@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-06T04:04:44+00:00",
+  "generated_at": "2026-07-09T15:10:48+00:00",
   "summary": {
     "active_projects": 37,
     "completed_projects": 8,
@@ -112,9 +112,9 @@
     {
       "name": "🌟 Claude Managed Agent 雲端化（Mac Mini 退場）",
       "area": "Main Business",
-      "status": "測試 — Memory MCP Cloud Agent pilot LIVE 2026-05-26（Anthropic Cloud → Tailscale Funnel → memory-mcp → Supabase agent_memory 229 筆，smoke test ✅）+ 北極星 II 5 Phase 雙寫進行中（Phase 0+1 schema/backfill ✅，3 collector + video_transcripts/reels 雙寫 ship 對帳期 ≥1 週）",
+      "status": "測試 — ① Memory MCP Cloud pilot **3 驗收條件全達成**：對帳 day1-3(05-26~28) diff=0 ✅ / obsolete vault `vlt_011Cb…` archived 05-26 ✅ / token 移 macOS Keychain 05-26 ✅。② 北極星 II 5 Phase：**Phase 2 reader 全切雲端**（06-24 `631ca4a`，payout detector + 5 支 reader）；**Phase 3 現行雙寫健康**（2026-07-09 對帳：members_raw 38647 / dm_channels 320 = 0 diff，course_progress/dm_messages 近 7 日逐日 0 diff）但有**歷史落差待回補**（course_progress -2581≈1 日量、dm_messages -4）；**Phase 4** Edge Function pilot 已跑（collect_kit_sequences + collect_email + pg_cron）",
       "outcome": "所有業務資料 + collector + agent 都跑在 Supabase + Claude Managed Agents + Edge Function/pg_cron。Mac Mini 退場，跨 device 任一裝置接同一個 agent + 同一份記憶",
-      "next_action": "@me 對帳 ≥3 天 cloud agent ↔ Supabase memory sync diff=0 → 切 Supabase 為唯一 source of truth；archive obsolete vault `vlt_011CbPfdhAycK5PZXrERsvy2`；token 移 Keychain",
+      "next_action": "@me 切 reader 前先回補 course_progress 歷史缺日(-2581) + dm_messages(-4)；滿觀察期 + Ray 一字 OK 才升級 view + Step5 切 Supabase 為唯一 source（**不可逆**）。Phase 4 剩 12 launchd → pg_cron/Edge Function 搬遷順序計畫見 `outputs/projects/north-star-ii-phase4/human/launchd-migration-plan.md`",
       "completed": false,
       "completed_date": null
     },
