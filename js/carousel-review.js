@@ -71,6 +71,13 @@ function carouselIsApproved(status) {
     return status === 'approved' || status === 'scheduled' || status === 'published';
 }
 
+// A deck's first slide can be a video cover (video_cover.mp4 prepended to slide_urls).
+// Detect it by extension (ignore the ?v= cache-bust query) so we render a playable
+// <video> instead of an <img> — an mp4 in an <img> just shows a black box.
+function crIsVideo(u) {
+    return /\.(mp4|mov|webm|m4v)(\?|$)/i.test(String(u || ''));
+}
+
 function carouselDeckHTML(d) {
     const approved = carouselIsApproved(d.status);
     const published = d.status === 'published';
@@ -80,7 +87,10 @@ function carouselDeckHTML(d) {
         ? urls.map((u, i) => {
             const key = 'slide' + String(i + 1).padStart(2, '0');
             const raw = fb[key] || '';
-            return `<figure class="cr-slide"><img src="${crEsc(u)}" alt="slide${i + 1}" loading="lazy"/>` +
+            const media = crIsVideo(u)
+                ? `<video class="cr-vid" src="${crEsc(u)}" controls preload="metadata" playsinline></video>`
+                : `<img src="${crEsc(u)}" alt="slide${i + 1}" loading="lazy"/>`;
+            return `<figure class="cr-slide">${media}` +
                 `<figcaption>${key}</figcaption>` +
                 `<textarea class="cr-note${raw ? ' filled' : ''}" data-deck="${crEsc(d.deck_slug)}" data-scope="${key}" ` +
                 `placeholder="改什麼？（留空 = 驗收，跳過重生）">${crEsc(raw)}</textarea></figure>`;

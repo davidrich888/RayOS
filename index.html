@@ -1203,6 +1203,10 @@
                   border-radius:8px; background:#000; display:block; cursor:zoom-in;
                   transition:opacity .15s; }
               #carousel-review .cr-slide img:hover { opacity:.85; }
+              /* video cover (first slide can be video_cover.mp4): same box as an image slide,
+                 native controls so Ray can click-to-play and review it inline. */
+              #carousel-review .cr-slide video { width:100%; aspect-ratio:1080/1350; object-fit:cover;
+                  border-radius:8px; background:#000; display:block; }
               /* lightbox: click a slide to see it full-size (thumbnails are object-fit:cover so cropped) */
               #cr-lightbox { position:fixed; inset:0; z-index:9999; display:none;
                   align-items:center; justify-content:center; background:rgba(0,0,0,.92);
