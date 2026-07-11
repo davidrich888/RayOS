@@ -87,10 +87,12 @@ function carouselDeckHTML(d) {
         ? urls.map((u, i) => {
             const key = 'slide' + String(i + 1).padStart(2, '0');
             const raw = fb[key] || '';
-            const media = crIsVideo(u)
+            const isVid = crIsVideo(u);
+            const media = isVid
                 ? `<video class="cr-vid" src="${crEsc(u)}" controls preload="metadata" playsinline></video>`
                 : `<img src="${crEsc(u)}" alt="slide${i + 1}" loading="lazy"/>`;
             return `<figure class="cr-slide">${media}` +
+                `<button type="button" class="cr-zoom" data-src="${crEsc(u)}" data-vid="${isVid ? '1' : '0'}" title="放大" aria-label="放大">⛶</button>` +
                 `<figcaption>${key}</figcaption>` +
                 `<textarea class="cr-note${raw ? ' filled' : ''}" data-deck="${crEsc(d.deck_slug)}" data-scope="${key}" ` +
                 `placeholder="改什麼？（留空 = 驗收，跳過重生）">${crEsc(raw)}</textarea></figure>`;
@@ -145,6 +147,13 @@ function renderCarouselDecks(decks) {
     // click a slide thumbnail (object-fit:cover, so cropped) to view it full-size in a lightbox.
     wrap.querySelectorAll('.cr-slide img').forEach((img) =>
         img.addEventListener('click', () => openCarouselLightbox(img.src, img.alt)));
+    // ⛶ zoom badge on every slide (video too — a <video controls> element eats plain clicks,
+    // so a dedicated button is the reliable way to enlarge a video cover).
+    wrap.querySelectorAll('.cr-zoom').forEach((btn) =>
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openCarouselLightbox(btn.dataset.src, '', btn.dataset.vid === '1');
+        }));
     // 展開/收合 peek: see an approved deck's slides without un-approving it.
     wrap.querySelectorAll('.cr-peek-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -237,20 +246,39 @@ async function clearAllCarouselFeedback() {
 
 // Lightbox: a single reused overlay appended to <body> on first use. Click anywhere
 // (or press Esc) to close. Shows the slide at full resolution with object-fit:contain.
-function openCarouselLightbox(src, cap) {
+function openCarouselLightbox(src, cap, isVideo) {
     let box = document.getElementById('cr-lightbox');
     if (!box) {
         box = document.createElement('div');
         box.id = 'cr-lightbox';
         box.innerHTML = '<button type="button" class="cr-lb-close" aria-label="關閉">&times;</button>' +
-            '<img alt=""/><div class="cr-lb-cap"></div>';
+            '<img alt=""/><video class="cr-lb-vid" controls playsinline></video><div class="cr-lb-cap"></div>';
         document.body.appendChild(box);
-        const close = () => box.classList.remove('open');
+        const close = () => {
+            box.classList.remove('open');
+            const v = box.querySelector('video');
+            if (v) v.pause();  // stop audio/playback when the lightbox is dismissed
+        };
         box.addEventListener('click', close);
         box.querySelector('img').addEventListener('click', (e) => e.stopPropagation());
+        box.querySelector('video').addEventListener('click', (e) => e.stopPropagation());
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
     }
-    box.querySelector('img').src = src;
+    const img = box.querySelector('img');
+    const vid = box.querySelector('video');
+    if (isVideo || crIsVideo(src)) {
+        img.style.display = 'none';
+        img.removeAttribute('src');
+        vid.style.display = '';
+        vid.src = src;
+        vid.currentTime = 0;
+    } else {
+        vid.style.display = 'none';
+        vid.pause();
+        vid.removeAttribute('src');
+        img.style.display = '';
+        img.src = src;
+    }
     box.querySelector('.cr-lb-cap').textContent = (cap || '') + ' · 點任意處關閉';
     box.classList.add('open');
 }

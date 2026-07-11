@@ -1198,7 +1198,7 @@
               #carousel-review .cr-deck.approved-collapsed.published { opacity:0.45; }
               #carousel-review .cr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
                   gap:14px; margin-top:14px; }
-              #carousel-review .cr-slide { margin:0; }
+              #carousel-review .cr-slide { margin:0; position:relative; }
               #carousel-review .cr-slide img { width:100%; aspect-ratio:1080/1350; object-fit:cover;
                   border-radius:8px; background:#000; display:block; cursor:zoom-in;
                   transition:opacity .15s; }
@@ -1207,13 +1207,22 @@
                  native controls so Ray can click-to-play and review it inline. */
               #carousel-review .cr-slide video { width:100%; aspect-ratio:1080/1350; object-fit:cover;
                   border-radius:8px; background:#000; display:block; }
+              /* ⛶ zoom badge: top-right of every slide. <video controls> swallows plain clicks,
+                 so a dedicated button is the reliable way to enlarge an image OR a video cover. */
+              #carousel-review .cr-slide .cr-zoom { position:absolute; top:7px; right:7px; z-index:2;
+                  width:30px; height:30px; padding:0; border:none; border-radius:7px; cursor:zoom-in;
+                  background:rgba(10,10,12,.62); color:#fff; font-size:15px; line-height:30px;
+                  opacity:0; transition:opacity .15s, background .15s; backdrop-filter:blur(2px); }
+              #carousel-review .cr-slide:hover .cr-zoom { opacity:.9; }
+              #carousel-review .cr-slide .cr-zoom:hover { opacity:1; background:rgba(242,163,60,.9); }
               /* lightbox: click a slide to see it full-size (thumbnails are object-fit:cover so cropped) */
               #cr-lightbox { position:fixed; inset:0; z-index:9999; display:none;
                   align-items:center; justify-content:center; background:rgba(0,0,0,.92);
                   cursor:zoom-out; padding:24px; box-sizing:border-box; }
               #cr-lightbox.open { display:flex; }
-              #cr-lightbox img { max-width:100%; max-height:100%; object-fit:contain;
+              #cr-lightbox img, #cr-lightbox video { max-width:100%; max-height:100%; object-fit:contain;
                   border-radius:6px; box-shadow:0 8px 40px rgba(0,0,0,.6); }
+              #cr-lightbox video { width:auto; height:auto; background:#000; }
               #cr-lightbox .cr-lb-close { position:absolute; top:18px; right:24px; font-size:34px;
                   line-height:1; color:#fff; background:none; border:none; cursor:pointer; opacity:.8; }
               #cr-lightbox .cr-lb-close:hover { opacity:1; }
