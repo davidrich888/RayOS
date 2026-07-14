@@ -1,5 +1,5 @@
 // RayOS Service Worker v1
-const CACHE_NAME = 'rayos-v19';
+const CACHE_NAME = 'rayos-v20';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
