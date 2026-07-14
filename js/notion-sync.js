@@ -56,6 +56,29 @@ function mergePendingHabits(dateStr, notionVals) {
     }
     return out;
 }
+// FailedHabits companion field: Notion checkbox is binary, so the tri-state "✗
+// failed" is persisted separately as a JSON list of habit keys in a rich_text
+// property. This makes ✗ survive cross-device (not just same-device reloads).
+function parseFailedSet(richTextArr) {
+    try {
+        const txt = richTextArr && richTextArr[0] ? richTextArr[0].plain_text : '';
+        if (!txt) return new Set();
+        const arr = JSON.parse(txt);
+        return new Set(Array.isArray(arr) ? arr : []);
+    } catch (e) { return new Set(); }
+}
+// Collapse a Notion checkbox + failed-set into the tri-state value.
+function triState(checked, habit, failedSet) {
+    if (checked === true) return true;
+    if (failedSet.has(habit)) return false;
+    return null;
+}
+// Build the Notion FailedHabits rich_text payload from the current local day.
+function failedHabitsProp(dateStr) {
+    const day = dailyHabitsData[dateStr] || {};
+    const failed = ALL_HABITS.filter(h => day[h] === false);
+    return { rich_text: failed.length ? [{ text: { content: JSON.stringify(failed) } }] : [] };
+}
 // ===========================================================================
 
 function getN8nUrl() { return localStorage.getItem('n8n_webhook') || ''; }
@@ -118,15 +141,16 @@ async function syncDailyFromNotionDirect(silent = false) {
             const dateStr = titleArr[0].plain_text;
             if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) continue;
             newPageIndex[dateStr] = page.id;
+            const failedSet = parseFailedSet(props['FailedHabits']?.rich_text);
             dailyHabitsData[dateStr] = mergePendingHabits(dateStr, {
-                trading: props['Trading']?.checkbox === true ? true : null,
-                advertise: props['Advertise']?.checkbox === true ? true : null,
-                deliver: (props['Deliver']?.checkbox || props['Deliever']?.checkbox) === true ? true : null,
-                gym: props['Gym']?.checkbox === true ? true : null,
-                fatloss: (props['FatLoss']?.checkbox || props['Fat Loss']?.checkbox) === true ? true : null,
-                ai: props['AI']?.checkbox === true ? true : null,
-                nofap: props['NoFap']?.checkbox === true ? true : null,
-                sleep: props['Sleep']?.checkbox === true ? true : null
+                trading: triState(props['Trading']?.checkbox, 'trading', failedSet),
+                advertise: triState(props['Advertise']?.checkbox, 'advertise', failedSet),
+                deliver: triState(props['Deliver']?.checkbox || props['Deliever']?.checkbox, 'deliver', failedSet),
+                gym: triState(props['Gym']?.checkbox, 'gym', failedSet),
+                fatloss: triState(props['FatLoss']?.checkbox || props['Fat Loss']?.checkbox, 'fatloss', failedSet),
+                ai: triState(props['AI']?.checkbox, 'ai', failedSet),
+                nofap: triState(props['NoFap']?.checkbox, 'nofap', failedSet),
+                sleep: triState(props['Sleep']?.checkbox, 'sleep', failedSet)
             });
             count++;
         }
@@ -161,7 +185,10 @@ async function writeHabitToNotionDirect(dateStr, habit, value) {
         if (!pageId) throw new Error('Failed to create day ' + dateStr);
     }
     await notionFetch('/pages/' + pageId, 'PATCH', {
-        properties: { [field]: { checkbox: !!value } }
+        properties: {
+            [field]: { checkbox: !!value },
+            'FailedHabits': failedHabitsProp(dateStr) // persist tri-state ✗ list
+        }
     });
     console.log('[RayOS Direct] Updated', dateStr, field, '=', !!value);
 }
@@ -179,7 +206,8 @@ async function createDayInNotionDirect(dateStr) {
             'FatLoss': { checkbox: !!habits.fatloss },
             'AI': { checkbox: !!habits.ai },
             'NoFap': { checkbox: !!habits.nofap },
-            'Sleep': { checkbox: !!habits.sleep }
+            'Sleep': { checkbox: !!habits.sleep },
+            'FailedHabits': failedHabitsProp(dateStr)
         };
         // Add date property
         props['\u65e5\u671f'] = { date: { start: dateStr } };
@@ -238,15 +266,19 @@ async function syncDailyFromNotion(silent = false) {
             if (!data.pageIndex) console.warn('[RayOS n8n] Response missing pageIndex — update_habit will fail');
             Object.keys(data.habits).forEach(dateStr => {
                 const nd = data.habits[dateStr];
+                // n8n may return FailedHabits as a JSON string (forward-compat);
+                // if absent, falls back to null + local-false preservation.
+                let ndFailed = new Set();
+                try { if (nd.FailedHabits) ndFailed = new Set(JSON.parse(nd.FailedHabits)); } catch (e) {}
                 dailyHabitsData[dateStr] = mergePendingHabits(dateStr, {
-                    trading: (nd.Trading || nd.trading) === true ? true : null,
-                    advertise: (nd.Advertise || nd.advertise) === true ? true : null,
-                    deliver: (nd.Deliver || nd.Deliever || nd.deliver) === true ? true : null,
-                    gym: (nd.Gym || nd.gym) === true ? true : null,
-                    fatloss: (nd.FatLoss || nd['Fat Loss'] || nd.fatloss) === true ? true : null,
-                    ai: (nd.AI || nd.ai) === true ? true : null,
-                    nofap: (nd.NoFap || nd.nofap) === true ? true : null,
-                    sleep: (nd.Sleep || nd.sleep) === true ? true : null
+                    trading: triState((nd.Trading || nd.trading) === true, 'trading', ndFailed),
+                    advertise: triState((nd.Advertise || nd.advertise) === true, 'advertise', ndFailed),
+                    deliver: triState((nd.Deliver || nd.Deliever || nd.deliver) === true, 'deliver', ndFailed),
+                    gym: triState((nd.Gym || nd.gym) === true, 'gym', ndFailed),
+                    fatloss: triState((nd.FatLoss || nd['Fat Loss'] || nd.fatloss) === true, 'fatloss', ndFailed),
+                    ai: triState((nd.AI || nd.ai) === true, 'ai', ndFailed),
+                    nofap: triState((nd.NoFap || nd.nofap) === true, 'nofap', ndFailed),
+                    sleep: triState((nd.Sleep || nd.sleep) === true, 'sleep', ndFailed)
                 });
             });
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
