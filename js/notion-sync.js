@@ -34,12 +34,22 @@ function isHabitPending(dateStr, habit) {
 // clearly landed, so we stop protecting that cell (prevents unbounded growth).
 function mergePendingHabits(dateStr, notionVals) {
     const out = { ...notionVals };
+    const existing = dailyHabitsData[dateStr] || {};
     for (const habit of Object.keys(notionVals)) {
+        // Notion checkbox is binary and cannot store the "✗ failed" state — it
+        // reads back as unchecked (null here), indistinguishable from "空白".
+        // localStorage is the tri-state source of truth and survives reloads,
+        // so preserve a known local false whenever Notion isn't checking this
+        // cell. A real ✓ in Notion still wins (out[habit] would be true).
+        if (out[habit] !== true && existing[habit] === false) {
+            out[habit] = false;
+        }
         if (!isHabitPending(dateStr, habit)) continue;
         const pendingVal = pendingHabitWrites[pendingHabitKey(dateStr, habit)];
         const notionChecked = notionVals[habit] === true;
         if (notionChecked === (pendingVal === true)) {
             clearHabitPending(dateStr, habit); // Notion matches our intent → confirmed
+            if (pendingVal === false) out[habit] = false; // keep confirmed ✗, not null
         } else {
             out[habit] = pendingVal; // still unconfirmed → keep the local edit
         }
