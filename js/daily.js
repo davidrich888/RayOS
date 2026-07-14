@@ -55,26 +55,17 @@ function updateDailyProgress() {
     updateDailyHistoryTable();
 }
 
-// 向下相容：舊 localStorage 的 false 轉成 null（舊資料的 false 其實是「未記錄」）
-function migrateOldData() {
-    let changed = false;
-    Object.keys(dailyHabitsData).forEach(dateStr => {
-        const day = dailyHabitsData[dateStr];
-        if (!day || typeof day !== 'object') return;
-        Object.keys(day).forEach(h => {
-            if (day[h] === false) {
-                day[h] = null;
-                changed = true;
-            }
-        });
-    });
-    if (changed) {
-        try { localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData)); } catch(e) {}
-    }
-}
+// RETIRED (2026-07-15): This used to convert every `false` → `null` on each load,
+// back when `false` meant "未記錄". Since the tri-state ✗ feature, `false` is a
+// LEGITIMATE state (habit failed) persisted via the FailedHabits rich_text field and
+// reconstructed by triState() on sync. Running this on every loadDailyHabits() call
+// silently wiped ✗ back to ∅ right before render — the "✗ disappears on reload" bug.
+// VERIFIED in-browser 2026-07-15: with this active, synced 2026-07-14 nofap=false was
+// clobbered to null; neutered, it stayed false (✗). Legacy false-as-unrecorded data was
+// already purged by the daily_data_version v2 cache clear in init.js, so this is a no-op.
+function migrateOldData() { /* retired — see comment above */ }
 
 function loadDailyHabits() {
-    migrateOldData();
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('daily-date').textContent = today;
     if (!dailyHabitsData[today]) {
