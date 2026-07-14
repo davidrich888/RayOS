@@ -337,7 +337,11 @@ async function writeHabitToNotion(dateStr, habit, value) {
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'update_habit', pageId, field, value: !!value })
+            body: JSON.stringify({
+                type: 'update_habit', pageId, field, value: !!value,
+                // tri-state ✗ list so the n8n workflow can persist FailedHabits too
+                failed: ALL_HABITS.filter(h => (dailyHabitsData[dateStr] || {})[h] === false)
+            })
         });
         if (!res.ok) {
             console.warn('[RayOS n8n] update_habit failed:', res.status);
