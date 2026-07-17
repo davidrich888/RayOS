@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
 
     const cols = 'deck_slug,topic,style,slide_count,slide_urls,status,source_yt_title,feedback,approved_at,updated_at';
     const url = `${base.replace(/\/$/, '')}/rest/v1/carousel_publish_queue`
-        + `?select=${cols}&order=updated_at.desc`;
+        + `?select=${cols}&status=neq.hold&order=updated_at.desc`;
 
     try {
         const r = await fetch(url, {
