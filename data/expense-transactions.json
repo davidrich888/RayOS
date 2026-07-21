@@ -1732,7 +1732,7 @@
     "date": "2025/10/12",
     "desc": "TRADERSCONNECT.COMO6609 LONDON",
     "amount": 445,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2025/10"
   },
   {
@@ -4189,7 +4189,7 @@
     "date": "2025/11/11",
     "desc": "TRADERSCONNECT.COMO6609 LONDON",
     "amount": 1425,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2025/11"
   },
   {
@@ -5120,7 +5120,7 @@
     "date": "2025/11/27",
     "desc": "TRADERSCONNECT.COMO6609 LONDON",
     "amount": 149,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2025/11"
   },
   {
@@ -6492,7 +6492,7 @@
     "date": "2025/12/11",
     "desc": "TRADERSCONNECT.COMO6609 LONDON",
     "amount": 1873,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2025/12"
   },
   {
@@ -7654,7 +7654,7 @@
     "date": "2026/01/08",
     "desc": "TRADERSCONNECT.COMO6609 LONDON",
     "amount": 229,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2026/01"
   },
   {
@@ -7752,7 +7752,7 @@
     "date": "2026/01/11",
     "desc": "TRADERSCONNECT.COMO6609 LONDON",
     "amount": 4748,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2026/01"
   },
   {
@@ -12365,7 +12365,7 @@
     "date": "2026/04/11",
     "desc": "50嵐-大智店",
     "amount": 115,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/04"
   },
   {
@@ -13436,7 +13436,7 @@
     "date": "2026/05/07",
     "desc": "TRADERSCONNECT.COMO6609 LONDON",
     "amount": 314.0,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2026/05"
   },
   {
@@ -13450,7 +13450,7 @@
     "date": "2026/05/07",
     "desc": "TRADERSCONNECT.COMO6609 LONDON",
     "amount": 328.0,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2026/05"
   },
   {
@@ -13744,7 +13744,7 @@
     "date": "2026/05/16",
     "desc": "OK超商-台中北區運動",
     "amount": 28.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/05"
   },
   {
@@ -13821,7 +13821,7 @@
     "date": "2026/05/17",
     "desc": "LULOA9739 TAICHU",
     "amount": 2090.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/05"
   },
   {
@@ -14143,7 +14143,7 @@
     "date": "2026/05/28",
     "desc": "TRADERSCONNECT.COM",
     "amount": 303.0,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2026/05"
   },
   {
@@ -14409,7 +14409,7 @@
     "date": "2026/06/04",
     "desc": "FIRECRAWL.DEV",
     "amount": 622.0,
-    "category": "其他",
+    "category": "AI/SaaS",
     "month": "2026/06"
   },
   {
@@ -14549,7 +14549,7 @@
     "date": "2026/06/06",
     "desc": "OK超商-台中北區運動",
     "amount": 80.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/06"
   },
   {
@@ -14633,7 +14633,7 @@
     "date": "2026/06/07",
     "desc": "TRADERSCONNECT.COM",
     "amount": 1518.0,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2026/06"
   },
   {
@@ -14668,7 +14668,7 @@
     "date": "2026/06/08",
     "desc": "LULO",
     "amount": 1650.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/06"
   },
   {
@@ -14822,7 +14822,7 @@
     "date": "2026/06/13",
     "desc": "50嵐-大里中興店",
     "amount": 100.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/06"
   },
   {
@@ -14850,7 +14850,7 @@
     "date": "2026/06/13",
     "desc": "酉喜炭火燒鳥研製所",
     "amount": 3674.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/06"
   },
   {
@@ -15018,7 +15018,7 @@
     "date": "2026/06/16",
     "desc": "50嵐-大里中興店",
     "amount": 65.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/06"
   },
   {
@@ -15284,7 +15284,7 @@
     "date": "2026/06/22",
     "desc": "DISNEY PLUS",
     "amount": 285.0,
-    "category": "其他",
+    "category": "娛樂",
     "month": "2026/06"
   },
   {
@@ -15543,7 +15543,7 @@
     "date": "2026/06/29",
     "desc": "SUPABASE",
     "amount": 797.0,
-    "category": "其他",
+    "category": "AI/SaaS",
     "month": "2026/06"
   },
   {
@@ -15641,7 +15641,7 @@
     "date": "2026/07/04",
     "desc": "FIRECRAWL.DEV",
     "amount": 631.0,
-    "category": "其他",
+    "category": "AI/SaaS",
     "month": "2026/07"
   },
   {
@@ -15669,7 +15669,7 @@
     "date": "2026/07/04",
     "desc": "LULO",
     "amount": 2068.0,
-    "category": "其他",
+    "category": "餐飲",
     "month": "2026/07"
   },
   {
@@ -15802,7 +15802,7 @@
     "date": "2026/07/07",
     "desc": "TRADERSCONNECT.COM",
     "amount": 320.0,
-    "category": "Prop Firm",
+    "category": "交易",
     "month": "2026/07"
   },
   {

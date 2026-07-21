@@ -28,9 +28,11 @@ JSON_PATH = os.path.join(ROOT, 'data', 'expense-transactions.json')
 DATAJS_PATH = os.path.join(ROOT, 'js', 'data.js')
 
 # Buckets Ray's rule fixes move OUT of (keyword-derived, safe to recompute)
-SOURCE_CATEGORIES = {'交通', '購物', '其他', 'AI/SaaS'}
+# 'Prop Firm' added 2026-07-22 so TRADERSCONNECT can be reclassified out to '交易'.
+SOURCE_CATEGORIES = {'交通', '購物', '其他', 'AI/SaaS', 'Prop Firm'}
 # Buckets Ray's rule fixes move INTO
-TARGET_CATEGORIES = {'餐飲', '交易', 'Prop Firm', '交通', '約會', '健身'}
+# 'AI/SaaS'(SUPABASE/FIRECRAWL) + '娛樂'(DISNEY) added 2026-07-22 per Ray's fixes.
+TARGET_CATEGORIES = {'餐飲', '交易', 'Prop Firm', '交通', '約會', '健身', 'AI/SaaS', '娛樂'}
 
 
 def reclassify(transactions: list) -> list:

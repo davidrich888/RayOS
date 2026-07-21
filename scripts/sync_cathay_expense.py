@@ -69,12 +69,13 @@ EXPENSE_CATEGORIES = {
     'Prop Firm': [
         'E8 FUNDING', 'E8FUNDING', 'TOPSTEP', 'APEX TRADER', 'APEX FUNDING',
         'APEXTRADERFUNDING', 'FTMO', 'FUNDEDNEXT', 'FXIFY', 'THE5ERS', '5%ERS',
-        'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TRADERSCONNECT', 'TAKEPROFITTRADER',
+        'PROPW', 'TRADEIFY', 'LUCID TRADING', 'TAKEPROFITTRADER',
         'TRADESYNCER', 'KIT.COM', 'SIM2FUNDED',
         'ALPHA CAPITAL', 'ALPHACAPITAL', 'FUNDINGPIPS',
     ],
     # Trading tools / brokers — separate from Prop Firm challenge fees (Ray 2026-07-06)
-    '交易': ['TRADINGVIEW', 'TRADEZELLA', 'MT5'],
+    # TRADERSCONNECT = broker/copytrade tool, not a prop challenge fee (Ray 2026-07-22)
+    '交易': ['TRADINGVIEW', 'TRADEZELLA', 'MT5', 'TRADERSCONNECT'],
     '事業': [
         'SKOOL.COM', 'SKOOL', 'TELLA', 'STREAMYARD', 'CAPCUT', 'CAPCUTO',
         'SUBEASY', 'MANYCHAT', 'CANVA', 'FUNNEL MASTE', 'ZAC PHUA',
@@ -89,6 +90,7 @@ EXPENSE_CATEGORIES = {
         'METAQUOTES', 'MQL5', 'RAPIDAPI', 'PAXCLOUD', 'NOKIA',
         'GOOGLE*GOOGLE ONE', 'GOOGLE *GOOGLE ONE',
         'GOOGLE WORKSPACE', 'GOOGLE CHROME',
+        'SUPABASE', 'FIRECRAWL',
     ],
     '約會': [
         'TINDER', 'BUMBLE', 'COFFEE MEETS BAGEL', 'CMB ',
@@ -121,6 +123,7 @@ EXPENSE_CATEGORIES = {
         'SHAKE SHACK', '海底撈', '牛肉麵', 'SOGO(餐廳)', 'ASAKUSAGYUKATSU',
         'KOPABORU', 'MAISON CREPERIE', 'C.STAND',
         '美食', '餐飲', '肝新', '嵩SUNG',
+        'LULO', '燒鳥', '50嵐', 'OK超商',
     ],
     '旅行': [
         'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店',
@@ -162,7 +165,7 @@ EXPENSE_CATEGORIES = {
     '娛樂': [
         '威秀影城', 'GOOGLE*YOUTUBE', 'GOOGLE *YOUTUBE', 'GOOGLE*TV', 'LINE STO',
         'DECATHLON', '迪卡儂', '大有運動',
-        'YASMIN NIGHT', 'CLOUD NINE',
+        'YASMIN NIGHT', 'CLOUD NINE', 'DISNEY',
     ],
 }
 
