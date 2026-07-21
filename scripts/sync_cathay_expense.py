@@ -521,6 +521,22 @@ def notion_request(method, endpoint, data=None):
     return resp.json() if resp.text else {}
 
 
+def ensure_month_db_properties(needed_cols: set[str]):
+    """Auto-create missing number properties on the monthly Notion DB.
+
+    Self-healing: a new expense category (e.g. '交易') that has no matching
+    Notion column would otherwise 400 on every sync. Detect and create them.
+    """
+    db = notion_request('GET', f'databases/{NOTION_EXPENSE_DB}')
+    existing_props = set(db.get('properties', {}).keys())
+    missing = [c for c in sorted(needed_cols) if c not in existing_props]
+    if not missing:
+        return
+    props_patch = {c: {'number': {'format': 'number'}} for c in missing}
+    notion_request('PATCH', f'databases/{NOTION_EXPENSE_DB}', {'properties': props_patch})
+    print(f"  Notion: added {len(missing)} missing month-DB column(s): {', '.join(missing)}")
+
+
 def sync_monthly_to_notion(all_transactions: list[dict]):
     """Sync monthly aggregates to Notion expense DB."""
     monthly = defaultdict(lambda: {'total': 0, 'categories': defaultdict(int)})
@@ -528,6 +544,11 @@ def sync_monthly_to_notion(all_transactions: list[dict]):
         m = monthly[txn['month']]
         m['total'] += txn['amount']
         m['categories'][txn['category']] += txn['amount']
+
+    # Self-heal: ensure every category has a matching number column before writing
+    needed_cols = {CATEGORY_TO_NOTION.get(cat, cat)
+                   for m in monthly.values() for cat in m['categories']}
+    ensure_month_db_properties(needed_cols)
 
     # Get existing rows
     existing = notion_request('POST', f'databases/{NOTION_EXPENSE_DB}/query', {
