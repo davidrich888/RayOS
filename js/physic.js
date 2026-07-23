@@ -269,9 +269,10 @@ function loadBodyProgressFromDrive() {
 }
 
 // silent=true: triggered on auto-init, suppress success/empty toasts but still surface errors.
-// Endpoint resolution: localStorage override > built-in /api/drive-body-photos (OAuth, zero-config).
+// Always the SA-backed built-in endpoint — never the legacy Apps Script (drive_script_url),
+// whose bodyProgress lags behind newly-added date folders (e.g. missed 20260722).
 async function syncBodyPhotosFromDrive(silent) {
-    const scriptUrl = localStorage.getItem('drive_script_url') || '/api/drive-body-photos';
+    const scriptUrl = '/api/drive-body-photos';
     if (!silent) showToast('📷 同步 Body Progress...');
     try {
         const response = await fetch(scriptUrl);

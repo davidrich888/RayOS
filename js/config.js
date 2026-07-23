@@ -173,18 +173,10 @@ async function syncMoodboardFromDrive() {
             if (statusEl) statusEl.textContent = '⚠️ 資料夾沒有圖片';
         }
 
-        // Body Progress photos
-        if (data && data.bodyProgress) {
-            const normalized = {};
-            Object.keys(data.bodyProgress).forEach(k => { normalized[normDate(k)] = data.bodyProgress[k]; });
-            const dates = Object.keys(normalized).filter(d => normalized[d].length > 0);
-            if (dates.length > 0) {
-                bodyProgressDates = normalized;
-                localStorage.setItem('body_progress_drive', JSON.stringify(data.bodyProgress));
-                loadBodyProgressFromDrive();
-                showToast('📷 Body Progress: ' + dates.length + ' dates synced');
-            }
-        }
+        // Body Progress photos are owned solely by the SA-backed built-in
+        // endpoint (physic.js -> /api/drive-body-photos). The legacy Apps Script's
+        // bodyProgress lags behind newly-added date folders (e.g. missed 20260722),
+        // so we must NOT let a moodboard sync overwrite the good data here.
     } catch(e) {
         console.error('Drive sync error:', e);
         if (statusEl) statusEl.textContent = '❌ 連線失敗';
