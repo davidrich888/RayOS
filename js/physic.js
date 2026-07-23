@@ -257,15 +257,26 @@ function normDate(d) {
 }
 
 function loadBodyProgressFromDrive() {
+    // Cache is only a first-paint fallback. NEVER clobber an already-populated
+    // in-memory set: syncBodyPhotosFromDrive (network) is the source of truth and
+    // may hold newer Drive dates (e.g. 20260722) that a stale cache lacks. If this
+    // ran destructively on every physic-tab entry it would repaint the dropdown
+    // back to the old 5 dates over the freshly-synced 6. (root cause fix 2026-07-23)
     try {
-        const stored = localStorage.getItem('body_progress_drive');
-        if (stored) {
-            const raw = JSON.parse(stored);
-            bodyProgressDates = {};
-            Object.keys(raw).forEach(k => { bodyProgressDates[normDate(k)] = raw[k]; });
+        const alreadyLoaded = Object.keys(bodyProgressDates).length > 0;
+        if (!alreadyLoaded) {
+            const stored = localStorage.getItem('body_progress_drive');
+            if (stored) {
+                const raw = JSON.parse(stored);
+                bodyProgressDates = {};
+                Object.keys(raw).forEach(k => { bodyProgressDates[normDate(k)] = raw[k]; });
+            }
         }
     } catch(e) { console.log('body progress load error:', e); }
     renderPhotoSelects();
+    // Always kick a fresh network sync so newly-added Drive date folders surface
+    // without a hard reload. silent=true keeps it toast-free on tab navigation.
+    if (typeof syncBodyPhotosFromDrive === 'function') syncBodyPhotosFromDrive(true);
 }
 
 // silent=true: triggered on auto-init, suppress success/empty toasts but still surface errors.
