@@ -109,7 +109,8 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 ### Moodboard
 - 使用 Google Drive（不是 Notion）
 - Ray 在 Drive 建立 "RayOS Moodboard" 資料夾，內有分類子資料夾
-- 透過 Google Apps Script 部署，URL 貼到 Settings 自動同步
+- **同步方式（現行，2026-07-27）**：內建 `api/drive-moodboard.js`（Service Account，重用 Vercel `GOOGLE_SA_KEY`，同 `drive-body-photos.js` 模式）。前端 `syncMoodboardBuiltin()`（`js/config.js`）每天打一次 `/api/drive-moodboard`，**所有裝置共用同一份、畫面一致、零設定**。設定一次＝把 `RayOS Moodboard` 資料夾分享給 SA `mcp-sheets-service@x-content-system.iam.gserviceaccount.com`（Viewer）。無圖或未分享時靜默保留 `DEFAULT_MOODBOARD_IMAGES`。
+- **Legacy（保留相容，勿再用）**：per-device Google Apps Script URL（Settings `drive_script_url` → `syncMoodboardFromDrive()`）。每台要各自設定，已被內建端點取代。
 
 ## n8n Webhook System
 
