@@ -70,7 +70,7 @@ async function listImages(token, folderId, category, out) {
     );
     for (const f of files) {
         out.push({
-            url: `https://lh3.googleusercontent.com/d/${f.id}=s1200`,
+            url: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1200`,
             category,
             name: f.name
         });
