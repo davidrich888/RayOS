@@ -185,6 +185,26 @@ async function syncMoodboardFromDrive() {
     renderMoodboard();
 }
 
+// Built-in Drive moodboard sync (Service-Account backed, no per-device config).
+// Every device fetches the same /api/drive-moodboard, so the board is identical
+// everywhere. Silently keeps cache/defaults if the folder isn't shared yet.
+async function syncMoodboardBuiltin() {
+    try {
+        const response = await fetch('/api/drive-moodboard');
+        if (!response.ok) return; // 404 = folder not shared yet; keep defaults
+        const data = await response.json();
+        if (data && Array.isArray(data.images) && data.images.length > 0) {
+            const urls = data.images.map(img => img.url);
+            localStorage.setItem('moodboard_images', JSON.stringify(urls));
+            localStorage.setItem('moodboard_drive_data', JSON.stringify(data.images));
+            localStorage.setItem('moodboard_sync_date', new Date().toISOString().split('T')[0]);
+            renderMoodboard();
+        }
+    } catch (e) {
+        // Silent: offline or endpoint unavailable → keep whatever is cached
+    }
+}
+
 async function testDriveConnection() {
     const url = document.getElementById('drive-script-url').value.replace(/\/+$/, '');
     if (!url) { showToast('請先貼上 Apps Script URL', true); return; }

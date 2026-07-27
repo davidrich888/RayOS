@@ -74,6 +74,14 @@
     updateModelBadges();
     // 🖼️ Moodboard: render immediately from cache/defaults, then sync from Drive
     renderMoodboard();
+    // Built-in SA-backed Drive sync — identical board on every device, zero config.
+    // Runs once/day; silently keeps defaults if the folder isn't shared yet.
+    {
+        const mbSyncDate = localStorage.getItem('moodboard_sync_date');
+        const mbToday = new Date().toISOString().split('T')[0];
+        if (mbSyncDate !== mbToday) setTimeout(() => syncMoodboardBuiltin(), 800);
+    }
+    // Legacy per-device Apps Script URL (kept for backward compatibility)
     if (localStorage.getItem('drive_script_url')) {
         document.getElementById('drive-script-url').value = localStorage.getItem('drive_script_url');
         const syncDate = localStorage.getItem('moodboard_sync_date');
