@@ -4,6 +4,13 @@
 // only; the key never reaches the browser). Pending (待審) decks sort first so Ray sees
 // what still needs review at the top, then most-recently-updated.
 //
+// Optional ?brand=fundwithray|mancave scopes the board to one brand (the Man Cave review
+// page passes ?brand=mancave to keep its decks separate from FUNDwithRay). The filter is
+// applied ONLY when the param is present, so the default no-param call behaves exactly as
+// before — this keeps the FUNDwithRay board working even before the brand column migration
+// (20260728130000) is pushed to DataOS. One serverless function serves both boards (adding
+// a second function would be Vercel Hobby's 13th and break every deploy).
+//
 // Env (set in Vercel project settings): AIOS_SUPABASE_URL, AIOS_SUPABASE_SERVICE_KEY.
 
 module.exports = async function handler(req, res) {
@@ -20,9 +27,17 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Supabase env not configured (AIOS_SUPABASE_URL / AIOS_SUPABASE_SERVICE_KEY)' });
     }
 
-    const cols = 'deck_slug,topic,style,slide_count,slide_urls,status,source_yt_title,feedback,approved_at,updated_at';
+    // Whitelist the brand param; anything else is ignored (falls back to the unscoped board).
+    const ALLOWED_BRANDS = ['fundwithray', 'mancave'];
+    const brand = ALLOWED_BRANDS.includes(req.query && req.query.brand) ? req.query.brand : null;
+
+    // Only select/filter `brand` when scoping is requested, so the default call never touches
+    // the brand column (safe before the 20260728130000 migration lands in DataOS).
+    const cols = 'deck_slug,topic,style,slide_count,slide_urls,status,source_yt_title,feedback,approved_at,updated_at'
+        + (brand ? ',brand' : '');
     const url = `${base.replace(/\/$/, '')}/rest/v1/carousel_publish_queue`
-        + `?select=${cols}&status=neq.hold&order=updated_at.desc`;
+        + `?select=${cols}&status=neq.hold&order=updated_at.desc`
+        + (brand ? `&brand=eq.${encodeURIComponent(brand)}` : '');
 
     try {
         const r = await fetch(url, {

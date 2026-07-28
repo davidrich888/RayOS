@@ -92,6 +92,9 @@ function go(section) {
         case 'carousel-review':
             if (typeof loadCarouselReview === 'function') loadCarouselReview(firstVisit);
             break;
+        case 'mancave':
+            if (typeof loadMancaveReview === 'function') loadMancaveReview(firstVisit);
+            break;
         case 'pipeline':
             if (typeof loadPipelineBoard === 'function') loadPipelineBoard(firstVisit);
             break;
