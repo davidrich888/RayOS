@@ -12,7 +12,10 @@ module.exports = async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { path, method, body, token } = req.body;
+    const { path, method, body } = req.body;
+    // Fall back to the built-in NOTION_TOKEN env var when the client sends no
+    // token, so every device syncs Notion with zero per-device config.
+    const token = req.body.token || process.env.NOTION_TOKEN;
 
     if (!path || !token) {
         return res.status(400).json({ error: 'Missing path or token' });

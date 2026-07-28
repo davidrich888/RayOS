@@ -83,7 +83,7 @@ function failedHabitsProp(dateStr) {
 
 function getN8nUrl() { return localStorage.getItem('n8n_webhook') || ''; }
 function getNotionToken() { return localStorage.getItem('notion_token') || ''; }
-function hasNotionDirect() { return !!getNotionToken(); }
+function hasNotionDirect() { return true; } // proxy has built-in NOTION_TOKEN env — always available, zero config
 function updateSyncDot() {
     const d = document.getElementById('sync-dot');
     if (d) d.className = 'sync-dot ' + ((hasNotionDirect() || getN8nUrl()) ? 'on' : 'off');
@@ -91,8 +91,9 @@ function updateSyncDot() {
 
 // === Notion API helper (via Vercel serverless proxy to avoid CORS) ===
 async function notionFetch(path, method, body) {
+    // token may be '' — the /api/notion proxy falls back to the built-in
+    // Vercel NOTION_TOKEN env var, so every device syncs with zero config.
     const token = getNotionToken();
-    if (!token) throw new Error('No Notion token');
     const proxyUrl = location.origin + '/api/notion';
     console.log('[RayOS Proxy]', (method || 'POST'), path);
     try {
