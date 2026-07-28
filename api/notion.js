@@ -13,9 +13,11 @@ module.exports = async function handler(req, res) {
     }
 
     const { path, method, body } = req.body;
-    // Fall back to the built-in NOTION_TOKEN env var when the client sends no
-    // token, so every device syncs Notion with zero per-device config.
-    const token = req.body.token || process.env.NOTION_TOKEN;
+    // Prefer the built-in NOTION_TOKEN env var (verified valid) over any client
+    // token, so a stale/truncated token in a device's localStorage can never
+    // cause 401s. Every device syncs Notion with zero per-device config.
+    // Falls back to the client token only when no env var is set (local dev).
+    const token = process.env.NOTION_TOKEN || req.body.token;
 
     if (!path || !token) {
         return res.status(400).json({ error: 'Missing path or token' });
