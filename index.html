@@ -1151,7 +1151,13 @@
         <!-- CAROUSEL REVIEW (cloud-native replacement for local review_server.py) -->
         <section class="section" id="carousel-review">
             <style>
-              #carousel-review .cr-deck { margin-bottom:28px; padding:16px; background:#15151a;
+              /* Deck panel bg MUST stay near-black (== board body): the near-black cine
+                 slides sit in a 14px-gap grid on this panel, so a lighter panel (was #15151a
+                 = rgb(21,21,26)) shows through the gaps/padding and reads as a "frame" around
+                 EVERY slide (cover + inner). This was the real cause of the recurring cover-frame
+                 complaints — not the image edges. Match it to the body so slides sit flush; the
+                 1px border still groups the deck. (Ray 2026-07-29, measured edge-vs-panel Δ≤5.) */
+              #carousel-review .cr-deck { margin-bottom:28px; padding:16px; background:#0a0a0a;
                   border:1px solid var(--border); border-radius:12px; }
               #carousel-review .cr-head { display:flex; align-items:flex-start; justify-content:space-between;
                   gap:14px; flex-wrap:wrap; }
@@ -1269,7 +1275,7 @@
         <!-- MAN CAVE REVIEW (brand=mancave; same flow as Carousel 審核, separate board) -->
         <section class="section" id="mancave">
             <style>
-              #mancave .cr-deck { margin-bottom:28px; padding:16px; background:#15151a;
+              #mancave .cr-deck { margin-bottom:28px; padding:16px; background:#0a0a0a;
                   border:1px solid var(--border); border-radius:12px; }
               #mancave .cr-head { display:flex; align-items:flex-start; justify-content:space-between;
                   gap:14px; flex-wrap:wrap; }
