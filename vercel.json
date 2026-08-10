@@ -2,8 +2,10 @@
   "version": 2,
   "functions": {
     "api/*.js": {
-      "memory": 256,
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/drive-token", "destination": "/api/drive-upload?action=token" }
+  ]
 }

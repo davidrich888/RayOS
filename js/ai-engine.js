@@ -280,13 +280,10 @@ function getAIContext() {
     return context;
 }
 
-// AI is available when the server has a built-in key (RAYOS_BUILTIN, filled by
-// bootstrapBuiltinConfig() in init.js) OR this device set one manually.
-// Defaults to true before the bootstrap fetch resolves so first paint doesn't
-// flash the "no key" fallback on a correctly-configured deployment.
+// AI is available when the deployment ships a server-side key (js/defaults.js →
+// api/claude.js reads ANTHROPIC_API_KEY) OR this device set one manually.
 function hasClaudeAI() {
-    if (window.RAYOS_BUILTIN) return !!(window.RAYOS_BUILTIN.anthropic || localStorage.getItem('anthropic_key'));
-    return true;
+    return !!(RAYOS_BUILTIN.anthropic || localStorage.getItem('anthropic_key'));
 }
 
 // Shared Anthropic caller — routes through the Vercel /api/claude proxy so the

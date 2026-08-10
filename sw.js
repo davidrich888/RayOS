@@ -1,9 +1,14 @@
 // RayOS Service Worker v1
-const CACHE_NAME = 'rayos-v25';
+const CACHE_NAME = 'rayos-v26';
+// NOTE: cache.addAll() rejects the whole install if ANY entry 404s. '/js/ideas.js'
+// was listed here after the file was deleted, so every SW install failed and the
+// offline cache never populated (verified 2026-08-10: GET /js/ideas.js -> 404).
+// Only list files that actually exist.
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/style.css',
+    '/js/defaults.js',
     '/js/data.js',
     '/js/config.js',
     '/js/state.js',
@@ -17,7 +22,6 @@ const STATIC_ASSETS = [
     '/js/trading.js',
     '/js/physic.js',
     '/js/daily.js',
-    '/js/ideas.js',
     '/js/plan.js',
     '/js/init.js',
     '/icons/icon-192.png',

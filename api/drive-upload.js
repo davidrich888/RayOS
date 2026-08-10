@@ -1,4 +1,8 @@
-// Upload screenshot to Google Drive via OAuth2 refresh token
+// Upload screenshot to Google Drive via OAuth2 refresh token.
+// Also serves the former /api/drive-token route (action=token) — the two shared
+// the same OAuth env vars, and Vercel Hobby caps a deployment at 12 Serverless
+// Functions. vercel.json rewrites /api/drive-token here, so existing callers
+// (shame-wall.html, scripts/canva/upload_pptx_for_canva.py) keep working.
 // Env vars: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN, DRIVE_FOLDER_ID
 
 module.exports = async function handler(req, res) {
@@ -10,17 +14,47 @@ module.exports = async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { image, filename, mimeType, folderId: bodyFolderId } = req.body || {};
-    if (!image) return res.status(400).json({ error: 'Missing image (base64)' });
-
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
-    const folderId = bodyFolderId || process.env.DRIVE_FOLDER_ID || '1TSx5ZXXhMVU7maBQPoGO-IAuFngc33Zx';
-
     if (!clientId || !clientSecret || !refreshToken) {
         return res.status(500).json({ error: 'Server missing Google OAuth config' });
     }
+
+    // === /api/drive-token: mint a short-lived Drive access token ===
+    // Used by clients doing large/streaming Drive ops directly against Google,
+    // bypassing Vercel's 4.5MB body limit. Tokens are Ray-scoped and ~1h.
+    const action = (req.query && req.query.action) || (req.body && req.body.action);
+    if (action === 'token') {
+        try {
+            const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    refresh_token: refreshToken,
+                    grant_type: 'refresh_token'
+                })
+            });
+            const data = await tokenRes.json();
+            if (!data.access_token) {
+                return res.status(500).json({ error: 'Failed to refresh token', detail: data });
+            }
+            return res.status(200).json({
+                access_token: data.access_token,
+                expires_in: data.expires_in,
+                token_type: data.token_type
+            });
+        } catch (e) {
+            return res.status(500).json({ error: e.message });
+        }
+    }
+
+    const { image, filename, mimeType, folderId: bodyFolderId } = req.body || {};
+    if (!image) return res.status(400).json({ error: 'Missing image (base64)' });
+
+    const folderId = bodyFolderId || process.env.DRIVE_FOLDER_ID || '1TSx5ZXXhMVU7maBQPoGO-IAuFngc33Zx';
 
     try {
         // Step 1: Get access token from refresh token

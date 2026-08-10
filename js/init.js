@@ -1,36 +1,17 @@
 // ==================== INIT ====================
 
-// Pull the deployment's built-in settings from /api/config and seed any key this
-// device is missing. Without this, a fresh browser / new Chrome profile / PWA /
-// cleared site data opens with a blank Settings panel and Ray has to retype
-// everything. Never overwrites a value the device already has — local edits win.
-// Fire-and-forget so first paint isn't blocked on the network.
-const BOOTSTRAP_KEYS = ['n8n_webhook', 'bridge_url', 'bridge_token', 'ai_model', 'ai_profile'];
-
-async function bootstrapBuiltinConfig() {
-    try {
-        const res = await fetch(location.origin + '/api/config');
-        if (!res.ok) return;
-        const cfg = await res.json();
-        window.RAYOS_BUILTIN = cfg.builtin || {};
-
-        const seeded = [];
-        Object.entries(cfg.defaults || {}).forEach(([key, val]) => {
-            if (!BOOTSTRAP_KEYS.includes(key) || !val) return;
-            if (localStorage.getItem(key)) return; // device already configured
-            localStorage.setItem(key, val);
-            seeded.push(key);
-        });
-        if (seeded.length) console.log('[RayOS] Seeded built-in settings:', seeded.join(', '));
-
-        refreshSettingsFields();
-        updateBuiltinStatusLabels();
-        if (typeof updateSyncDot === 'function') updateSyncDot();
-        if (typeof updateModelBadges === 'function') updateModelBadges();
-    } catch (e) {
-        console.warn('[RayOS] Built-in config unavailable:', e.message);
-        window.RAYOS_BUILTIN = window.RAYOS_BUILTIN || {};
-    }
+// Seed any built-in setting this device is missing (js/defaults.js). Without
+// this, a fresh browser / new Chrome profile / PWA / cleared site data opens
+// with a blank Settings panel and Ray has to retype everything.
+// Never overwrites a value the device already has — local edits win.
+function bootstrapBuiltinConfig() {
+    const seeded = [];
+    Object.entries(RAYOS_DEFAULTS).forEach(([key, val]) => {
+        if (!val || localStorage.getItem(key)) return; // device already configured
+        localStorage.setItem(key, val);
+        seeded.push(key);
+    });
+    if (seeded.length) console.log('[RayOS] Seeded built-in settings:', seeded.join(', '));
 }
 
 // Mirror localStorage into the Settings inputs. Called on init and again after
@@ -55,7 +36,7 @@ function refreshSettingsFields() {
 // Replace the hardcoded "未設定" placeholders with what is actually true.
 // They previously never updated, which made a zero-config deployment look broken.
 function updateBuiltinStatusLabels() {
-    const b = window.RAYOS_BUILTIN || {};
+    const b = RAYOS_BUILTIN;
     const notionEl = document.getElementById('notion-direct-status');
     if (notionEl) {
         notionEl.innerHTML = b.notion

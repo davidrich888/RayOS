@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-07-26T22:01:43+00:00",
+  "generated_at": "2026-08-09T22:01:46+00:00",
   "kpis": {
     "yt_fundwithray": {
-      "value": 5720,
-      "delta_7d": 30
+      "value": 5780,
+      "delta_7d": 40
     },
     "yt_tft_story": {
-      "value": 784,
-      "delta_7d": 8
+      "value": 818,
+      "delta_7d": 21
     },
     "ig_fundwithray": {
       "value": 11786,
@@ -26,23 +26,23 @@
       "delta_7d": null
     },
     "email_free": {
-      "value": 6315,
+      "value": 6361,
       "delta_7d": null
     },
     "email_tft": {
-      "value": 82,
+      "value": 83,
       "delta_7d": null
     },
     "audience_total": {
-      "value": 18290,
+      "value": 18384,
       "delta_7d": null
     }
   },
   "mtd": {
     "yt_main_subs": {
-      "this_mtd": 140,
+      "this_mtd": 40,
       "last_mtd": 40,
-      "pace": 2.5,
+      "pace": 0.0,
       "kind": "int"
     },
     "ig_followers": {
@@ -53,23 +53,23 @@
     },
     "skool_free_members": {
       "this_mtd": null,
-      "last_mtd": 28,
+      "last_mtd": null,
       "pace": null,
       "kind": "int"
     },
     "skool_tft_members": {
       "this_mtd": null,
-      "last_mtd": -7,
+      "last_mtd": null,
       "pace": null,
       "kind": "int"
     },
     "tft_mrr": {
       "this_mtd": null,
-      "last_mtd": -1148.4799999999996,
+      "last_mtd": null,
       "pace": null,
       "kind": "money"
     },
-    "days_into_month": 26
+    "days_into_month": 9
   },
   "skool_funnel": {
     "free": {
@@ -82,7 +82,7 @@
       "visitors_30d": null,
       "signups_30d": null,
       "new_mrr_30d_usd": null,
-      "date": "2026-07-26"
+      "date": "2026-08-09"
     },
     "tft": {
       "members": null,
@@ -94,7 +94,7 @@
       "visitors_30d": null,
       "signups_30d": null,
       "new_mrr_30d_usd": null,
-      "date": "2026-07-26"
+      "date": "2026-08-09"
     }
   },
   "skool_traffic": {
@@ -185,31 +185,31 @@
   },
   "youtube_28d": {
     "fundwithray": {
-      "subs_gained_28d": 208,
-      "subs_lost_28d": 69,
-      "views_28d": 30495,
-      "watch_hours_28d": 1894.4,
+      "subs_gained_28d": 190,
+      "subs_lost_28d": 65,
+      "views_28d": 38956,
+      "watch_hours_28d": 1675.3,
       "est_revenue_usd_28d": null,
-      "date": "2026-07-26"
+      "date": "2026-08-09"
     }
   },
   "youtube_totals": {},
   "freshness": [
     {
       "source": "business_finance",
-      "last_run": "2026-07-26T22:00:03.343138+00:00",
-      "status": "skipped",
-      "records": 0
+      "last_run": "2026-08-09T22:00:07.221074+00:00",
+      "status": "success",
+      "records": 599
     },
     {
       "source": "content_draft",
-      "last_run": "2026-07-25T01:00:54.901002+00:00",
+      "last_run": "2026-08-08T01:01:01.668167+00:00",
       "status": "success",
       "records": 1
     },
     {
       "source": "email",
-      "last_run": "2026-07-26T22:00:07.201592+00:00",
+      "last_run": "2026-08-09T22:00:10.486318+00:00",
       "status": "success",
       "records": 3
     },
@@ -227,13 +227,13 @@
     },
     {
       "source": "ga4",
-      "last_run": "2026-07-26T22:00:07.832764+00:00",
+      "last_run": "2026-08-09T22:00:11.144164+00:00",
       "status": "skipped",
       "records": 0
     },
     {
       "source": "ig",
-      "last_run": "2026-07-26T22:00:07.833492+00:00",
+      "last_run": "2026-08-09T22:00:11.144895+00:00",
       "status": "skipped",
       "records": 0
     },
@@ -245,13 +245,13 @@
     },
     {
       "source": "skool",
-      "last_run": "2026-07-26T22:00:52.822144+00:00",
+      "last_run": "2026-08-09T22:00:55.283512+00:00",
       "status": "success",
       "records": 2
     },
     {
       "source": "skool_live",
-      "last_run": "2026-07-23T05:09:52.516789+00:00",
+      "last_run": "2026-08-04T16:07:53.492818+00:00",
       "status": "success",
       "records": 1
     },
@@ -269,25 +269,25 @@
     },
     {
       "source": "video_to_dataos",
-      "last_run": "2026-07-23T21:28:25.386425+00:00",
+      "last_run": "2026-08-07T16:07:07.423952+00:00",
       "status": "success",
       "records": 1
     },
     {
       "source": "youtube",
-      "last_run": "2026-07-26T22:01:02.066830+00:00",
+      "last_run": "2026-08-09T22:01:04.013264+00:00",
       "status": "success",
       "records": 2
     },
     {
       "source": "youtube_analytics",
-      "last_run": "2026-07-26T22:01:02.225861+00:00",
+      "last_run": "2026-08-09T22:01:04.177898+00:00",
       "status": "skipped",
       "records": 0
     },
     {
       "source": "yt_channel_metrics",
-      "last_run": "2026-07-26T22:01:42.941774+00:00",
+      "last_run": "2026-08-09T22:01:46.399732+00:00",
       "status": "error",
       "records": 0
     },
@@ -299,13 +299,13 @@
     },
     {
       "source": "yt_studio_ctr",
-      "last_run": "2026-07-26T22:01:43.011824+00:00",
+      "last_run": "2026-08-09T22:01:46.469397+00:00",
       "status": "exception",
       "records": 0
     },
     {
       "source": "yt_thumbnails",
-      "last_run": "2026-07-26T22:01:43.203909+00:00",
+      "last_run": "2026-08-09T22:01:46.678316+00:00",
       "status": "exception",
       "records": 0
     }
