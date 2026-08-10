@@ -188,5 +188,8 @@ function updateBuiltinStatusLabels() {
         }
     }
     
-    document.getElementById('life-ai-input').addEventListener('keypress', e => { if (e.key === 'Enter') askLifeAI(); });
+    // #life-ai-input no longer exists in index.html; unguarded this threw and killed
+    // the tail of init(). Guarded so a removed element can't break boot again.
+    const lifeAiInput = document.getElementById('life-ai-input');
+    if (lifeAiInput) lifeAiInput.addEventListener('keypress', e => { if (e.key === 'Enter') askLifeAI(); });
 })();
