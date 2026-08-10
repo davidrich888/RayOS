@@ -280,11 +280,41 @@ function getAIContext() {
     return context;
 }
 
-async function callClaudeAPI(userMessage) {
-    const apiKey = localStorage.getItem('anthropic_key');
-    if (!apiKey) {
-        return '⚠️ 請先到 Settings 設定 Anthropic API Key。\n\n取得方式：[console.anthropic.com](https://console.anthropic.com/settings/keys) → API Keys';
+// AI is available when the server has a built-in key (RAYOS_BUILTIN, filled by
+// bootstrapBuiltinConfig() in init.js) OR this device set one manually.
+// Defaults to true before the bootstrap fetch resolves so first paint doesn't
+// flash the "no key" fallback on a correctly-configured deployment.
+function hasClaudeAI() {
+    if (window.RAYOS_BUILTIN) return !!(window.RAYOS_BUILTIN.anthropic || localStorage.getItem('anthropic_key'));
+    return true;
+}
+
+// Shared Anthropic caller — routes through the Vercel /api/claude proxy so the
+// key can live in the ANTHROPIC_API_KEY env var instead of every device's
+// localStorage. Sends the local key too, as a fallback for local dev where the
+// env var is absent. Returns the parsed Anthropic response; throws on error.
+async function claudeFetch({ model, max_tokens, system, messages }) {
+    const res = await fetch(location.origin + '/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            model,
+            max_tokens,
+            system,
+            messages,
+            apiKey: localStorage.getItem('anthropic_key') || undefined
+        })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        const err = new Error(data.error?.message || 'API error ' + res.status);
+        err.status = res.status;
+        throw err;
     }
+    return data;
+}
+
+async function callClaudeAPI(userMessage) {
     const systemPrompt = buildSystemPrompt();
     const context = getAIContext();
     const model = localStorage.getItem('ai_model') || 'claude-haiku-4-5-20251001';
@@ -297,34 +327,20 @@ async function callClaudeAPI(userMessage) {
     }
     userContent += `Current question: ${userMessage}`;
     try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify({
-                model: model,
-                max_tokens: maxTokens,
-                system: systemPrompt,
-                messages: [{ role: 'user', content: userContent }]
-            })
+        const data = await claudeFetch({
+            model: model,
+            max_tokens: maxTokens,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userContent }]
         });
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            if (response.status === 401) return '⚠️ API Key 無效，請到 Settings 重新設定。';
-            if (response.status === 429) return '⚠️ 請求太頻繁，請稍後再試。';
-            return '⚠️ API 錯誤 (' + response.status + '): ' + (errData.error?.message || 'Unknown error');
-        }
-        const data = await response.json();
         const rawText = data.content?.map(b => b.type === 'text' ? b.text : '').join('') || 'No response';
         // 提取 [MEMORY:...] 並儲存，回傳乾淨文字
         const text = extractAndSaveMemory(rawText);
         return text;
     } catch (err) {
         console.error('Claude API error:', err);
+        if (err.status === 401) return '⚠️ API Key 無效 — 請確認 Vercel 環境變數 ANTHROPIC_API_KEY。';
+        if (err.status === 429) return '⚠️ 請求太頻繁，請稍後再試。';
         return '⚠️ 連線失敗：' + err.message;
     }
 }
@@ -342,8 +358,8 @@ async function askLifeAI() {
     const container = document.getElementById('life-ai-suggestion');
     const question = input.value.trim();
     if (!question) return;
-    if (!localStorage.getItem('anthropic_key')) {
-        showToast('請先到 ⚙️ Settings 設定 Anthropic API Key', true);
+    if (!hasClaudeAI()) {
+        showToast('AI 未啟用 — 伺服器缺 ANTHROPIC_API_KEY', true);
         return;
     }
     input.value = '';
@@ -365,7 +381,7 @@ async function autoAnalyzeLife() {
     const container = document.getElementById('life-ai-suggestion');
     if (!container) return;
 
-    if (!localStorage.getItem('anthropic_key')) {
+    if (!hasClaudeAI()) {
         container.innerHTML = getLifeFallback();
         return;
     }

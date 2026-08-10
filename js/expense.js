@@ -339,8 +339,7 @@ async function importExpenseCSV() {
     const csvText = document.getElementById('expense-paste').value.trim();
     if (!csvText) { showToast('請先貼上 CSV 資料', true); return; }
 
-    const apiKey = localStorage.getItem('anthropic_key');
-    if (!apiKey) { showToast('請先在 Settings 設定 API Key', true); return; }
+    if (!hasClaudeAI()) { showToast('AI 未啟用 — 伺服器缺 ANTHROPIC_API_KEY', true); return; }
 
     const statusEl = document.getElementById('expense-import-status');
     statusEl.style.display = 'block';
@@ -355,18 +354,10 @@ async function importExpenseCSV() {
             .map(([cat, keywords]) => `${cat}: ${keywords.join(', ')}`)
             .join('\n');
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify({
-                model: model,
-                max_tokens: 4096,
-                system: `You are an expense classifier. Classify each transaction into one of these categories: ${categoryList}, 國外手續費, 其他.
+        const data = await claudeFetch({
+            model: model,
+            max_tokens: 4096,
+            system: `You are an expense classifier. Classify each transaction into one of these categories: ${categoryList}, 國外手續費, 其他.
 
 Keyword hints:
 ${keywordInfo}
@@ -377,12 +368,9 @@ Output ONLY a JSON array. Each item: {"date":"YYYY/MM/DD","desc":"description","
 - month is derived from date (YYYY/MM)
 - Skip header rows, summary rows, and payment/繳款 rows
 - For ambiguous items, use "其他"`,
-                messages: [{ role: 'user', content: csvText }]
-            })
+            messages: [{ role: 'user', content: csvText }]
         });
 
-        if (!response.ok) throw new Error('API error: ' + response.status);
-        const data = await response.json();
         const text = data.content?.[0]?.text || '';
 
         const jsonMatch = text.match(/\[[\s\S]*\]/);

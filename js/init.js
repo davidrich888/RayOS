@@ -1,6 +1,86 @@
 // ==================== INIT ====================
 
+// Pull the deployment's built-in settings from /api/config and seed any key this
+// device is missing. Without this, a fresh browser / new Chrome profile / PWA /
+// cleared site data opens with a blank Settings panel and Ray has to retype
+// everything. Never overwrites a value the device already has — local edits win.
+// Fire-and-forget so first paint isn't blocked on the network.
+const BOOTSTRAP_KEYS = ['n8n_webhook', 'bridge_url', 'bridge_token', 'ai_model', 'ai_profile'];
+
+async function bootstrapBuiltinConfig() {
+    try {
+        const res = await fetch(location.origin + '/api/config');
+        if (!res.ok) return;
+        const cfg = await res.json();
+        window.RAYOS_BUILTIN = cfg.builtin || {};
+
+        const seeded = [];
+        Object.entries(cfg.defaults || {}).forEach(([key, val]) => {
+            if (!BOOTSTRAP_KEYS.includes(key) || !val) return;
+            if (localStorage.getItem(key)) return; // device already configured
+            localStorage.setItem(key, val);
+            seeded.push(key);
+        });
+        if (seeded.length) console.log('[RayOS] Seeded built-in settings:', seeded.join(', '));
+
+        refreshSettingsFields();
+        updateBuiltinStatusLabels();
+        if (typeof updateSyncDot === 'function') updateSyncDot();
+        if (typeof updateModelBadges === 'function') updateModelBadges();
+    } catch (e) {
+        console.warn('[RayOS] Built-in config unavailable:', e.message);
+        window.RAYOS_BUILTIN = window.RAYOS_BUILTIN || {};
+    }
+}
+
+// Mirror localStorage into the Settings inputs. Called on init and again after
+// the bootstrap fetch lands, so seeded values show up without a reload.
+function refreshSettingsFields() {
+    const map = {
+        'notion-token': 'notion_token',
+        'n8n-webhook': 'n8n_webhook',
+        'anthropic-key': 'anthropic_key',
+        'ai-model': 'ai_model',
+        'ai-profile': 'ai_profile',
+        'bridge-url': 'bridge_url',
+        'bridge-token': 'bridge_token'
+    };
+    Object.entries(map).forEach(([elId, key]) => {
+        const el = document.getElementById(elId);
+        const val = localStorage.getItem(key);
+        if (el && val) el.value = val;
+    });
+}
+
+// Replace the hardcoded "未設定" placeholders with what is actually true.
+// They previously never updated, which made a zero-config deployment look broken.
+function updateBuiltinStatusLabels() {
+    const b = window.RAYOS_BUILTIN || {};
+    const notionEl = document.getElementById('notion-direct-status');
+    if (notionEl) {
+        notionEl.innerHTML = b.notion
+            ? '<span style="color:var(--accent);">✅ 已內建（伺服器 NOTION_TOKEN）— 此欄免填</span>'
+            : (localStorage.getItem('notion_token')
+                ? '🔑 使用此裝置的 Token'
+                : '<span style="color:#e57373;">⚠️ 伺服器未設 NOTION_TOKEN</span>');
+    }
+    const aiEl = document.getElementById('anthropic-status');
+    if (aiEl) {
+        aiEl.innerHTML = b.anthropic
+            ? '<span style="color:var(--accent);">✅ 已內建（伺服器 ANTHROPIC_API_KEY）— 此欄免填</span>'
+            : (localStorage.getItem('anthropic_key')
+                ? '🔑 使用此裝置的 Key'
+                : '<span style="color:#e57373;">⚠️ 伺服器未設 ANTHROPIC_API_KEY</span>');
+    }
+    const n8nEl = document.getElementById('worker-status');
+    if (n8nEl && !n8nEl.dataset.tested) {
+        n8nEl.textContent = localStorage.getItem('n8n_webhook') ? '✅ 已設定（可測試連線）' : '未設定（可選）';
+    }
+}
+
 (function init() {
+    bootstrapBuiltinConfig();
+
     // 📲 Check for settings import from QR code URL
     if (importSettingsFromURL()) return;
 
@@ -41,17 +121,12 @@
     document.getElementById('wealth-quote-author').textContent = '— ' + quote.author;
     document.getElementById('goal-target').textContent = formatNumber(wealthGoal);
     
-    if(localStorage.getItem('notion_token')) document.getElementById('notion-token').value = localStorage.getItem('notion_token');
-    if(localStorage.getItem('n8n_webhook')) document.getElementById('n8n-webhook').value = localStorage.getItem('n8n_webhook');
-    if(localStorage.getItem('anthropic_key')) document.getElementById('anthropic-key').value = localStorage.getItem('anthropic_key');
-    if(localStorage.getItem('ai_model')) document.getElementById('ai-model').value = localStorage.getItem('ai_model');
-    if(localStorage.getItem('ai_profile')) document.getElementById('ai-profile').value = localStorage.getItem('ai_profile');
     // Migrate bridge port 3000 → 3001 (3000 conflicts with 100xMONEY dev server)
     if(localStorage.getItem('bridge_url') && localStorage.getItem('bridge_url').includes(':3000')) {
         localStorage.setItem('bridge_url', localStorage.getItem('bridge_url').replace(':3000', ':3001'));
     }
-    if(localStorage.getItem('bridge_url')) document.getElementById('bridge-url').value = localStorage.getItem('bridge_url');
-    if(localStorage.getItem('bridge_token')) document.getElementById('bridge-token').value = localStorage.getItem('bridge_token');
+    refreshSettingsFields();
+    updateBuiltinStatusLabels();
     
     document.getElementById('body-date').value = new Date().toISOString().split('T')[0];
     // biz-date input removed in DataOS refactor (commit 62c7033); ref deleted to stop init() from crashing here

@@ -1434,16 +1434,21 @@
     <div class="modal-overlay" id="settings-modal">
         <div class="modal">
             <div class="modal-title">Settings</div>
-            <div class="form-group" style="margin-bottom:16px;">
-                <label class="form-label">Notion API Token（直接同步，推薦）</label>
-                <input type="password" class="form-input" id="notion-token" placeholder="ntn_xxxxx...">
-                <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">取得方式：<a href="https://www.notion.so/my-integrations" target="_blank" style="color:var(--accent);">notion.so/my-integrations</a> → 建立 Integration → 複製 Token → 記得在資料庫連接 Integration</div>
+            <div style="font-size:11px;color:var(--text-dim);background:var(--bg-input);border:1px solid var(--border);padding:10px 12px;margin-bottom:16px;line-height:1.7;">
+                ✅ Notion / Anthropic / Google Drive 的金鑰都存在伺服器（Vercel 環境變數），<strong>任何裝置打開都已設定好，下面標「已內建」的欄位不用填</strong>。只有 Bridge Token 是每台不同。
             </div>
             <div class="form-group" style="margin-bottom:16px;">
                 <label class="form-label">Notion 同步狀態</label>
-                <div id="notion-direct-status" style="font-size:12px;color:var(--text-dim);padding:8px 0;">未設定</div>
+                <div id="notion-direct-status" style="font-size:12px;color:var(--text-dim);padding:8px 0;">檢查中...</div>
                 <button class="btn btn-small" onclick="testNotionDirect()" style="margin-top:4px;">🔍 測試 Notion 連線</button>
             </div>
+            <details style="margin-bottom:16px;">
+                <summary style="font-size:11px;color:var(--accent);cursor:pointer;">Notion API Token（覆寫用，一般免填）</summary>
+                <div class="form-group" style="margin-top:8px;">
+                    <input type="password" class="form-input" id="notion-token" placeholder="留空＝使用伺服器內建 Token">
+                    <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">只有要用別的 Integration 時才填。取得方式：<a href="https://www.notion.so/my-integrations" target="_blank" style="color:var(--accent);">notion.so/my-integrations</a></div>
+                </div>
+            </details>
             <div class="form-group" style="margin-bottom:16px;">
                 <label class="form-label">n8n Webhook URL（進階，可選）</label>
                 <input type="text" class="form-input" id="n8n-webhook" placeholder="https://your-n8n.com/webhook/rayos-sync">
@@ -1464,10 +1469,16 @@
                 <button class="btn btn-small" onclick="testN8nConnection()" style="margin-top:4px;">🔍 Test n8n</button>
             </div>
             <div class="form-group" style="margin-bottom:16px;">
-                <label class="form-label">Anthropic API Key (Claude AI Coach)</label>
-                <input type="password" class="form-input" id="anthropic-key" placeholder="sk-ant-...">
-                <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">取得方式：<a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--accent);">console.anthropic.com</a> → API Keys</div>
+                <label class="form-label">Claude AI Coach 狀態</label>
+                <div id="anthropic-status" style="font-size:12px;color:var(--text-dim);padding:8px 0;">檢查中...</div>
             </div>
+            <details style="margin-bottom:16px;">
+                <summary style="font-size:11px;color:var(--accent);cursor:pointer;">Anthropic API Key（覆寫用，一般免填）</summary>
+                <div class="form-group" style="margin-top:8px;">
+                    <input type="password" class="form-input" id="anthropic-key" placeholder="留空＝使用伺服器內建 Key">
+                    <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">只有要用別的 Key 時才填。取得方式：<a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--accent);">console.anthropic.com</a> → API Keys</div>
+                </div>
+            </details>
             <div class="form-group" style="margin-bottom:16px;">
                 <label class="form-label">AI Model（模型選擇）</label>
                 <select class="form-input" id="ai-model">
