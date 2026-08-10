@@ -113,7 +113,11 @@ function updateBuiltinStatusLabels() {
     // biz-date input removed in DataOS refactor (commit 62c7033); ref deleted to stop init() from crashing here
     
     updateWealthDisplay();
-    updateBizDisplay();
+    // updateBizDisplay() was deleted in the DataOS refactor (commit 62c7033) but the
+    // call was left here, so init() threw "updateBizDisplay is not defined" on every
+    // load and everything below never ran — no daily/trading/body/Notion sync, which
+    // is why the dashboard sat at 0 / -- / $0 (verified in console 2026-08-10).
+    // Business now self-loads: business.js:267 + navigation.js:87.
     updateTradingDisplay();
     loadBodyProgressFromDrive(); // Load cached body progress photos before physic display
     updatePhysicDisplay();
