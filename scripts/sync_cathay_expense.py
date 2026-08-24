@@ -79,6 +79,7 @@ EXPENSE_CATEGORIES = {
     '事業': [
         'SKOOL.COM', 'SKOOL', 'TELLA', 'STREAMYARD', 'CAPCUT', 'CAPCUTO',
         'SUBEASY', 'MANYCHAT', 'CANVA', 'FUNNEL MASTE', 'ZAC PHUA',
+        'ROLL TO REEL',
     ],
     'AI/SaaS': [
         'ANTHROPIC', 'CLAUDE.AI', 'N8N', 'PADDLE',
@@ -124,9 +125,10 @@ EXPENSE_CATEGORIES = {
         'KOPABORU', 'MAISON CREPERIE', 'C.STAND',
         '美食', '餐飲', '肝新', '嵩SUNG',
         'LULO', '燒鳥', '50嵐', 'OK超商',
+        '淡定的蚌', 'IHERB', '巧味膳房',
     ],
     '旅行': [
-        'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店',
+        'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店', 'KLOOK',
         'KIWI.COM', 'STARLUX', 'FLYSCOOT', 'TOKYO', 'SHIBUYA', 'EKKAMAI', '易遊網',
         'TRIP.COM', 'BANGKO', 'BANGKOK', 'DUBAI', 'DUTY FREE', 'DUTY_FREE', 'RYANAIR',
         'SALA RATTANAKOSIN', 'ICONSIAM', 'EMQUARTIER', 'EMSPHERE', 'SIAM',
@@ -143,6 +145,7 @@ EXPENSE_CATEGORIES = {
     '投資自己': [
         'NU TRITION DEPOT',
         'UDEMY', 'COURSERA', 'MAVEN', 'COHORT', 'ACADEMY',
+        'NEW MARKET SOLUTIONS', 'CREATOR COLLEGE',
     ],
     '健身': ['BYZOOMFI', 'WORLDGY', 'WORLDGYM', 'WORLD GY',
              'JETTS FITNESS', 'BOXING', '拳擊'],
@@ -155,6 +158,7 @@ EXPENSE_CATEGORIES = {
         'DOPE & DIRTY', 'THE COACH', 'SABINA',
         'DUFRY', '采盟', 'JAPANESE SOUVENIR',
         'BIRKENSTOCK', 'DAIKOKU', 'DAISO', 'WASHINOSHINJUKU',
+        '新光三越',
     ],
     '生活': [
         '遠傳電信', '遠傳電', '電話費', '寶雅', '屈臣氏', '佑全', '三商藥局',
@@ -167,6 +171,15 @@ EXPENSE_CATEGORIES = {
         'DECATHLON', '迪卡儂', '大有運動',
         'YASMIN NIGHT', 'CLOUD NINE', 'DISNEY',
     ],
+}
+
+# Recurring cryptic merchant codes -> human-readable name (Ray confirmed these
+# specific courses 2026-08-24; only for known recurring processor DBAs, not
+# generic stores like department stores whose purchases vary transaction to
+# transaction).
+DESC_OVERRIDES = {
+    'NEW MARKET SOLUTIONS': 'Cooper性愛課程',
+    'CREATOR COLLEGE': 'Storytelling Challenge',
 }
 
 SKIP_PATTERNS = ['CUBEAPP', 'RICHART', '上期帳單']
@@ -389,6 +402,10 @@ def parse_cathay_pdf(pdf_path: str) -> list[dict]:
                 month_key = f"{year}/{mm:02d}"
                 full_date = f"{year}/{date_str}"
                 category = classify(desc)
+                for pat, override_name in DESC_OVERRIDES.items():
+                    if pat in norm_desc:
+                        norm_desc = override_name
+                        break
 
                 transactions.append({
                     'date': full_date,

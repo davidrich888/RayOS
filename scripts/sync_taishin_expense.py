@@ -77,6 +77,7 @@ EXPENSE_CATEGORIES = {
     '事業': [
         'SKOOL.COM', 'SKOOL', 'TELLA', 'STREAMYARD', 'CAPCUT', 'CAPCUTO',
         'SUBEASY', 'MANYCHAT', 'CANVA', 'FUNNEL MASTE', 'ZAC PHUA',
+        'ROLL TO REEL',
     ],
     'AI/SaaS': [
         'ANTHROPIC', 'CLAUDE.AI', 'N8N', 'PADDLE',
@@ -119,9 +120,10 @@ EXPENSE_CATEGORIES = {
         'MILES STUTZERLENB', 'TANBAYA', 'UMEIYA',
         '可不可',
         '美食', '餐飲', '肝新', '嵩SUNG',
+        '淡定的蚌', 'IHERB', '巧味膳房',
     ],
     '旅行': [
-        'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店',
+        'AIRBNB', 'BOOKING.COM', 'AGODA', '航空', 'AIRLINES', 'HOTEL', '飯店', 'KLOOK',
         'KIWI.COM', 'STARLUX', 'FLYSCOOT', 'TOKYO', 'SHIBUYA', 'EKKAMAI', '易遊網',
         'TRIP.COM', 'BANGKO', 'BANGKOK', 'DUBAI', 'DUTY FREE', 'DUTY_FREE', 'RYANAIR',
         'SALA RATTANAKOSIN', 'ICONSIAM', 'EMQUARTIER', 'EMSPHERE', 'SIAM',
@@ -138,7 +140,7 @@ EXPENSE_CATEGORIES = {
     '投資自己': [
         'WORLDGY', 'WORLDGYM', 'WORLD GY', 'JETTS FITNESS', 'NU TRITION DEPOT',
         'BOXING', '拳擊', 'UDEMY', 'COURSERA', 'MAVEN', 'COHORT', 'ACADEMY',
-        'AAAACCELERATOR',
+        'AAAACCELERATOR', 'NEW MARKET SOLUTIONS', 'CREATOR COLLEGE',
     ],
     '健身': [],
     '購物': [
@@ -149,6 +151,7 @@ EXPENSE_CATEGORIES = {
         'WHSMITH', 'PIKZELS', 'CHANCHAO', '昇昌',
         'DOPE & DIRTY', 'THE COACH', 'SABINA',
         'DUFRY', '采盟', 'JAPANESE SOUVENIR',
+        '新光三越',
     ],
     '生活': [
         '遠傳電信', '遠傳電', '電話費', '寶雅', '屈臣氏', '佑全', '三商藥局',
