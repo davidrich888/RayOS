@@ -68,17 +68,12 @@ function updateWealthDisplay() {
             document.getElementById('display-yearly').textContent = (yg > 0 ? '+' : '') + yg.toFixed(2) + '%';
             document.getElementById('display-yearly').className = 'summary-value ' + (yg >= 0 ? 'positive' : 'negative');
         }
-        // Use MDD from GSheets if available, otherwise auto-calculate from history
+        // MDD = current distance from all-time high
         let mdd = lat.mdd;
         if (!mdd || mdd === 0) {
-            let peak = 0, maxDD = 0;
-            for (const h of wealthHistory) {
-                const v = h.totalAssets || 0;
-                if (v > peak) peak = v;
-                const dd = peak - v;
-                if (dd > maxDD) maxDD = dd;
-            }
-            mdd = maxDD;
+            const peak = Math.max(...wealthHistory.map(h => h.totalAssets || 0));
+            const current = lat.totalAssets || 0;
+            mdd = peak > current ? peak - current : 0;
         }
         const statMdd = document.getElementById('stat-mdd');
         if (mdd && mdd > 0) {
