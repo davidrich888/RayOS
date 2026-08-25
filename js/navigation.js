@@ -221,7 +221,7 @@ function showTargetModal(key) {
     if (!data) return;
     document.getElementById('target-modal-title').textContent = data.title;
     document.getElementById('target-modal-body').innerHTML = data.html;
-    document.getElementById('target-modal').style.display = 'flex';
+    document.getElementById('target-modal').classList.add('show');
 }
 function hideModal(id) { document.getElementById(id).classList.remove('show'); }
 function formatNumber(n) { return new Intl.NumberFormat('zh-TW').format(Math.round(n)); }

@@ -1422,11 +1422,11 @@
     <div class="toast" id="toast">Saved</div>
 
     <!-- TARGET MODAL -->
-    <div class="modal-overlay" id="target-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal-overlay" id="target-modal" onclick="if(event.target===this)this.classList.remove('show')">
         <div class="modal" style="max-width:700px;max-height:85vh;display:flex;flex-direction:column;">
             <div class="modal-title" id="target-modal-title"></div>
             <div id="target-modal-body" style="overflow-y:auto;padding-right:8px;"></div>
-            <div style="text-align:right;margin-top:16px;"><button class="btn" onclick="document.getElementById('target-modal').style.display='none'">Close</button></div>
+            <div style="text-align:right;margin-top:16px;"><button class="btn" onclick="document.getElementById('target-modal').classList.remove('show')">Close</button></div>
         </div>
     </div>
 
