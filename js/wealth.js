@@ -68,12 +68,15 @@ function updateWealthDisplay() {
             document.getElementById('display-yearly').textContent = (yg > 0 ? '+' : '') + yg.toFixed(2) + '%';
             document.getElementById('display-yearly').className = 'summary-value ' + (yg >= 0 ? 'positive' : 'negative');
         }
-        // MDD = current distance from all-time high
+        // MDD = current distance from all-time high (skip zero-asset entries)
         let mdd = lat.mdd;
         if (!mdd || mdd === 0) {
-            const peak = Math.max(...wealthHistory.map(h => h.totalAssets || 0));
-            const current = lat.totalAssets || 0;
-            mdd = peak > current ? peak - current : 0;
+            const validHistory = wealthHistory.filter(h => (h.totalAssets || 0) > 0);
+            if (validHistory.length > 0) {
+                const peak = Math.max(...validHistory.map(h => h.totalAssets));
+                const current = validHistory[validHistory.length - 1].totalAssets;
+                mdd = peak > current ? peak - current : 0;
+            }
         }
         const statMdd = document.getElementById('stat-mdd');
         if (mdd && mdd > 0) {
