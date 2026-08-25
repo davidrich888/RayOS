@@ -130,8 +130,9 @@ const TARGET_DATA = {
         title: '🦇 Bat Cave — $100,000 USD',
         html: `
             <div style="margin-bottom:16px;">
+                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" alt="Bat Cave" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;" onerror="this.style.display='none'">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
-                    <p><strong style="color:var(--accent);">目標</strong>：Bat Cave（第一優先）</p>
+                    <p><strong style="color:var(--accent);">目標</strong>：Bat Cave 蝙蝠洞（第一優先）</p>
                     <p><strong style="color:var(--accent);">預算</strong>：$100,000 USD</p>
                     <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
                 </div>
@@ -141,8 +142,9 @@ const TARGET_DATA = {
         title: '🐎 Mustang 5.0 — $60,000 USD',
         html: `
             <div style="margin-bottom:16px;">
+                <img src="https://images.unsplash.com/photo-1584345604476-8ec5f82d661f?w=800&q=80" alt="Mustang 5.0" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;" onerror="this.style.display='none'">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
-                    <p><strong style="color:var(--accent);">目標</strong>：Mustang 5.0（第二優先）</p>
+                    <p><strong style="color:var(--accent);">目標</strong>：Mustang 5.0（第三優先）</p>
                     <p><strong style="color:var(--accent);">預算</strong>：$60,000 USD</p>
                     <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
                 </div>
