@@ -68,9 +68,20 @@ function updateWealthDisplay() {
             document.getElementById('display-yearly').textContent = (yg > 0 ? '+' : '') + yg.toFixed(2) + '%';
             document.getElementById('display-yearly').className = 'summary-value ' + (yg >= 0 ? 'positive' : 'negative');
         }
-        const mdd = lat.mdd;
+        // Use MDD from GSheets if available, otherwise auto-calculate from history
+        let mdd = lat.mdd;
+        if (!mdd || mdd === 0) {
+            let peak = 0, maxDD = 0;
+            for (const h of wealthHistory) {
+                const v = h.totalAssets || 0;
+                if (v > peak) peak = v;
+                const dd = peak - v;
+                if (dd > maxDD) maxDD = dd;
+            }
+            mdd = maxDD;
+        }
         const statMdd = document.getElementById('stat-mdd');
-        if (mdd !== null && mdd !== undefined && mdd !== 0) {
+        if (mdd && mdd > 0) {
             document.getElementById('display-mdd').textContent = formatMoney(mdd);
             document.getElementById('display-mdd').className = 'summary-value negative';
             if (statMdd) {
@@ -78,12 +89,9 @@ function updateWealthDisplay() {
                 statMdd.style.color = '#e07a5f';
             }
         } else {
-            document.getElementById('display-mdd').textContent = '0';
+            document.getElementById('display-mdd').textContent = '--';
             document.getElementById('display-mdd').className = 'summary-value';
-            if (statMdd) {
-                statMdd.textContent = '0';
-                statMdd.style.color = '';
-            }
+            if (statMdd) { statMdd.textContent = '--'; statMdd.style.color = ''; }
         }
         updateWealthChart();
     }
