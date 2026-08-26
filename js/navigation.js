@@ -273,7 +273,13 @@ const TARGET_DATA = {
         title: '🏍️ Kawasaki Ninja ZX-4RR — ✅ 已達標',
         html: `
             <div style="margin-bottom:16px;">
-                <img src="icons/kawasaki-zx4rr.png" alt="Kawasaki Ninja ZX-4RR" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+                    <img src="icons/kawasaki-real-1.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;grid-column:1/-1;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/kawasaki-real-1.jpg')">
+                    <img src="icons/kawasaki-real-2.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/kawasaki-real-2.jpg')">
+                    <img src="icons/kawasaki-real-3.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/kawasaki-real-3.jpg')">
+                    <img src="icons/kawasaki-real-4.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/kawasaki-real-4.jpg')">
+                    <img src="icons/kawasaki-real-5.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/kawasaki-real-5.jpg')">
+                </div>
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：Kawasaki Ninja ZX-4RR</p>
                     <p><strong style="color:var(--accent);">預算</strong>：NT$400,000（約 $12,300 USD，匯率約 32.5 估算）</p>
