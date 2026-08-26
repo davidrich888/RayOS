@@ -226,18 +226,6 @@ const TARGET_DATA = {
                 </div>
             </div>`
     },
-    kawasakiZx10r: {
-        title: '🏍️ Kawasaki Ninja ZX-10R — ✅ 已達標',
-        html: `
-            <div style="margin-bottom:16px;">
-                <img src="icons/kawasaki-zx10r.png" alt="Kawasaki Ninja ZX-10R" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
-                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
-                    <p><strong style="color:var(--accent);">目標</strong>：Kawasaki Ninja ZX-10R</p>
-                    <p><strong style="color:var(--accent);">預算</strong>：NT$400,000（約 $12,300 USD，匯率約 32.5 估算）</p>
-                    <p><strong style="color:var(--accent);">狀態</strong>：✅ 已達標</p>
-                </div>
-            </div>`
-    },
     move: {
         title: '📦 搬家',
         html: `
