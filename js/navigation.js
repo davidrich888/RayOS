@@ -213,6 +213,17 @@ const TARGET_DATA = {
                     <p><strong style="color:var(--accent);">狀態</strong>：進行中</p>
                 </div>
             </div>`
+    },
+    kawasaki: {
+        title: '🏍️ Kawasaki 世豪 — ✅ 已達標',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：Kawasaki 世豪重機</p>
+                    <p><strong style="color:var(--accent);">預算</strong>：NT$400,000（約 $12,300 USD，匯率約 32.5 估算）</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：✅ 已達標</p>
+                </div>
+            </div>`
     }
 };
 

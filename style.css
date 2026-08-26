@@ -140,6 +140,9 @@
         .card-badge { font-size: 9px; color: var(--accent); letter-spacing: 1px; padding: 4px 8px; border: 1px solid var(--accent); border-radius: 4px; }
         .card-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; }
         .card-desc { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+        .card.card-achieved { opacity: 0.5; }
+        .card.card-achieved .card-title { text-decoration: line-through; color: var(--text-dim); }
+        .card.card-achieved .card-badge { border-color: var(--text-dim); color: var(--text-dim); }
         .section-label { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 16px; text-transform: uppercase; }
         
         /* Wealth Layout */
