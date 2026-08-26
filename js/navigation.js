@@ -276,6 +276,17 @@ const TARGET_DATA = {
                 </div>
             </div>`
     },
+    propFirmQuarterly: {
+        title: '📊 Prop Firm 季收入 — 目標 $100,000 USD',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：Prop Firm 交易季收入</p>
+                    <p><strong style="color:var(--accent);">指標</strong>：單季出金 &gt; $100,000 USD</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：進行中</p>
+                </div>
+            </div>`
+    },
     socialGrowth: {
         title: '📈 FUNDwithRay IG + YT 成長',
         html: `
