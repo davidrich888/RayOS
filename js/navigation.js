@@ -269,24 +269,13 @@ const TARGET_DATA = {
                 </div>
             </div>`
     },
-    igGrowth: {
-        title: '📸 FUNDwithRay IG — 目標 100,000 粉絲',
+    socialGrowth: {
+        title: '📸▶️ FUNDwithRay IG + YT 成長',
         html: `
             <div style="margin-bottom:16px;">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
-                    <p><strong style="color:var(--accent);">目標</strong>：FUNDwithRay Instagram 帳號成長</p>
-                    <p><strong style="color:var(--accent);">指標</strong>：粉絲數 &gt; 100,000</p>
-                    <p><strong style="color:var(--accent);">狀態</strong>：進行中</p>
-                </div>
-            </div>`
-    },
-    ytGrowth: {
-        title: '▶️ FUNDwithRay YouTube — 目標 10,000 訂閱',
-        html: `
-            <div style="margin-bottom:16px;">
-                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
-                    <p><strong style="color:var(--accent);">目標</strong>：FUNDwithRay YouTube 頻道成長</p>
-                    <p><strong style="color:var(--accent);">指標</strong>：訂閱數 &gt; 10,000</p>
+                    <p><strong style="color:var(--accent);">目標</strong>：FUNDwithRay Instagram + YouTube 帳號成長</p>
+                    <p><strong style="color:var(--accent);">指標</strong>：IG 粉絲數 &gt; 100,000 ／ YouTube 訂閱數 &gt; 10,000</p>
                     <p><strong style="color:var(--accent);">狀態</strong>：進行中</p>
                 </div>
             </div>`
