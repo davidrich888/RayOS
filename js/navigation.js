@@ -270,7 +270,7 @@ const TARGET_DATA = {
             </div>`
     },
     socialGrowth: {
-        title: '📸▶️ FUNDwithRay IG + YT 成長',
+        title: '📈 FUNDwithRay IG + YT 成長',
         html: `
             <div style="margin-bottom:16px;">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
