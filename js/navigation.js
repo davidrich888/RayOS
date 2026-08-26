@@ -219,13 +219,34 @@ const TARGET_DATA = {
         html: `
             <div style="margin-bottom:16px;">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
-                    <img src="icons/move-1.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-1.jpg')">
-                    <img src="icons/move-2.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-2.jpg')">
-                    <img src="icons/move-3.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-3.jpg')">
-                    <img src="icons/move-4.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-4.jpg')">
-                    <img src="icons/move-5.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-5.jpg')">
-                    <img src="icons/move-6.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-6.jpg')">
-                    <img src="icons/move-7.jpg" style="width:100%;border-radius:4px;grid-column:1/-1;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-7.jpg')">
+                    <div style="position:relative;">
+                        <img src="icons/move-1.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.parentElement.style.display='none'" onclick="openTargetLightbox('icons/move-1.jpg')">
+                        <div style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.72);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;pointer-events:none;">32,000 元/月</div>
+                    </div>
+                    <div style="position:relative;">
+                        <img src="icons/move-2.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.parentElement.style.display='none'" onclick="openTargetLightbox('icons/move-2.jpg')">
+                        <div style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.72);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;pointer-events:none;">32,000 元/月</div>
+                    </div>
+                    <div style="position:relative;">
+                        <img src="icons/move-3.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.parentElement.style.display='none'" onclick="openTargetLightbox('icons/move-3.jpg')">
+                        <div style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.72);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;pointer-events:none;">27,000 元/月</div>
+                    </div>
+                    <div style="position:relative;">
+                        <img src="icons/move-4.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.parentElement.style.display='none'" onclick="openTargetLightbox('icons/move-4.jpg')">
+                        <div style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.72);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;pointer-events:none;">23,500 元/月</div>
+                    </div>
+                    <div style="position:relative;">
+                        <img src="icons/move-5.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.parentElement.style.display='none'" onclick="openTargetLightbox('icons/move-5.jpg')">
+                        <div style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.72);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;pointer-events:none;">32,000 元/月</div>
+                    </div>
+                    <div style="position:relative;">
+                        <img src="icons/move-6.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.parentElement.style.display='none'" onclick="openTargetLightbox('icons/move-6.jpg')">
+                        <div style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.72);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;pointer-events:none;">30,000 元/月</div>
+                    </div>
+                    <div style="position:relative;grid-column:1/-1;">
+                        <img src="icons/move-7.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.parentElement.style.display='none'" onclick="openTargetLightbox('icons/move-7.jpg')">
+                        <div style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.72);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;pointer-events:none;">34,000 元/月</div>
+                    </div>
                 </div>
                 <div style="font-size:13px;color:var(--text-dim);line-height:1.9;">
                     <p><strong style="color:var(--accent);">區域</strong>：台中西區・近勤美/科博館/草悟道</p>
