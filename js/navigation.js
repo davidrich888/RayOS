@@ -195,7 +195,7 @@ const TARGET_DATA = {
             </div>`
     },
     mclaren: {
-        title: '🏎️ McLaren — 資產 > $2,000,000 USD',
+        title: '🏎️ McLaren — 資產 > 台幣 6,000 萬',
         html: `
             <div style="margin-bottom:16px;">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
@@ -204,7 +204,7 @@ const TARGET_DATA = {
                 </div>
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：McLaren</p>
-                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; $2,000,000 USD</p>
+                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; 台幣 6,000 萬</p>
                     <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
                 </div>
             </div>`
