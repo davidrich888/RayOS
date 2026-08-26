@@ -139,13 +139,13 @@ const TARGET_DATA = {
             </div>`
     },
     mustang: {
-        title: '🐎 Mustang 5.0 — $60,000 USD',
+        title: '🐎 Mustang 5.0',
         html: `
             <div style="margin-bottom:16px;">
                 <img src="https://images.unsplash.com/photo-1584345604476-8ec5f82d661f?w=800&q=80" alt="Mustang 5.0" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;" onerror="this.style.display='none'">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：Mustang 5.0（第三優先）</p>
-                    <p><strong style="color:var(--accent);">預算</strong>：$60,000 USD</p>
+                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; $350,000 USD（約台幣 1,000 萬）</p>
                     <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
                 </div>
             </div>`
