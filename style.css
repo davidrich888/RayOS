@@ -143,6 +143,7 @@
         .card.card-achieved { opacity: 0.5; }
         .card.card-achieved .card-title { text-decoration: line-through; color: var(--text-dim); }
         .card.card-achieved .card-badge { border-color: var(--text-dim); color: var(--text-dim); }
+        .card.card-lowpriority { opacity: 0.6; }
         .section-label { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 16px; text-transform: uppercase; }
         
         /* Wealth Layout */
