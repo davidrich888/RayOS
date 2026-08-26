@@ -202,6 +202,18 @@ const TARGET_DATA = {
                 </div>
             </div>`
     },
+    kawasaki: {
+        title: '🏍️ Kawasaki Ninja ZX-4RR — ✅ 已達標',
+        html: `
+            <div style="margin-bottom:16px;">
+                <img src="icons/kawasaki-zx10r.png" alt="Kawasaki ZX-10R" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;" onerror="this.style.display='none'">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">車款</strong>：Kawasaki Ninja ZX-4RR</p>
+                    <p><strong style="color:var(--accent);">金額</strong>：$12,300 USD</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：✅ 已達標</p>
+                </div>
+            </div>`
+    },
     skoolPlatinum: {
         title: '💎 Skool Platinum — $100,000 MRR',
         html: `
