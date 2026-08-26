@@ -194,7 +194,10 @@ const TARGET_DATA = {
         title: '🏎️ McLaren — $300,000 USD',
         html: `
             <div style="margin-bottom:16px;">
-                <img src="https://images.unsplash.com/photo-1621135802920-133df287f89c?w=800&q=80" alt="McLaren" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+                    <img src="icons/mclaren-real-1.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/mclaren-real-1.jpg')">
+                    <img src="icons/mclaren-real-2.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/mclaren-real-2.jpg')">
+                </div>
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：McLaren</p>
                     <p><strong style="color:var(--accent);">預算</strong>：$300,000 USD</p>
