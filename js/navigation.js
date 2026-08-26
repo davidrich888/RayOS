@@ -149,19 +149,19 @@ const TARGET_DATA = {
                 </div>
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：Mustang 5.0（第三優先）</p>
-                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; $350,000 USD（約台幣 1,000 萬）</p>
+                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; 台幣 1,000 萬</p>
                     <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
                 </div>
             </div>`
     },
     bali: {
-        title: '🏝️ Bali Villa — 資產 > $1,000,000 USD',
+        title: '🏝️ Bali Villa — 資產 > 台幣 2,500 萬',
         html: `
             <div style="margin-bottom:16px;">
                 <img src="icons/bali-villa.jpg" alt="Bali Villa" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：峇里島私人別墅</p>
-                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; $1,000,000 USD</p>
+                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; 台幣 2,500 萬</p>
                     <p><strong style="color:var(--accent);">用途</strong>：度假 + 遠端工作基地</p>
                     <p><strong style="color:var(--accent);">靈感參考</strong>：</p>
                     <p>📸 <a href="https://www.instagram.com/axelrayne/saved/_/18034424416904428/" target="_blank" style="color:var(--accent);">IG 收藏 — Bali Villa 靈感</a></p>
@@ -259,7 +259,7 @@ const TARGET_DATA = {
                     <p><strong style="color:var(--accent);">區域</strong>：台中西區・近勤美/科博館/草悟道</p>
                     <p><strong style="color:var(--accent);">格局</strong>：2房 2廳</p>
                     <p><strong style="color:var(--accent);">租金範圍</strong>：$23,500 – $34,000 / 月</p>
-                    <p><strong style="color:var(--accent);">達標條件</strong>：資產 &gt; $200,000 USD</p>
+                    <p><strong style="color:var(--accent);">達標條件</strong>：資產 &gt; 台幣 650 萬</p>
                     <p><strong style="color:var(--accent);">條件</strong>：可養寵物・有車位・近商圈</p>
                 </div>
             </div>`
