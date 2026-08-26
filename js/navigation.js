@@ -214,6 +214,28 @@ const TARGET_DATA = {
                 </div>
             </div>`
     },
+    move: {
+        title: '📦 搬家 — 西區 2房',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+                    <img src="icons/move-1.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
+                    <img src="icons/move-2.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
+                    <img src="icons/move-3.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
+                    <img src="icons/move-4.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
+                    <img src="icons/move-5.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
+                    <img src="icons/move-6.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
+                    <img src="icons/move-7.jpg" style="width:100%;border-radius:4px;grid-column:1/-1;object-fit:cover;height:120px;" onerror="this.style.display='none'">
+                </div>
+                <div style="font-size:13px;color:var(--text-dim);line-height:1.9;">
+                    <p><strong style="color:var(--accent);">區域</strong>：台中西區・近勤美/科博館/草悟道</p>
+                    <p><strong style="color:var(--accent);">格局</strong>：2房 2廳</p>
+                    <p><strong style="color:var(--accent);">租金範圍</strong>：$23,500 – $34,000 / 月</p>
+                    <p><strong style="color:var(--accent);">達標條件</strong>：資產 &gt; $200,000 USD</p>
+                    <p><strong style="color:var(--accent);">條件</strong>：可養寵物・有車位・近商圈</p>
+                </div>
+            </div>`
+    },
     skoolPlatinum: {
         title: '💎 Skool Platinum — $100,000 MRR',
         html: `
