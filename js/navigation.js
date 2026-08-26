@@ -155,13 +155,13 @@ const TARGET_DATA = {
             </div>`
     },
     bali: {
-        title: '🏝️ Bali Villa — $200,000 USD',
+        title: '🏝️ Bali Villa — 資產 > $1,000,000 USD',
         html: `
             <div style="margin-bottom:16px;">
                 <img src="icons/bali-villa.jpg" alt="Bali Villa" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：峇里島私人別墅</p>
-                    <p><strong style="color:var(--accent);">預算</strong>：$200,000 USD</p>
+                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; $1,000,000 USD</p>
                     <p><strong style="color:var(--accent);">用途</strong>：度假 + 遠端工作基地</p>
                     <p><strong style="color:var(--accent);">靈感參考</strong>：</p>
                     <p>📸 <a href="https://www.instagram.com/axelrayne/saved/_/18034424416904428/" target="_blank" style="color:var(--accent);">IG 收藏 — Bali Villa 靈感</a></p>
