@@ -237,6 +237,18 @@ const TARGET_DATA = {
                     <p><strong style="color:var(--accent);">狀態</strong>：✅ 已達標</p>
                 </div>
             </div>`
+    },
+    move: {
+        title: '📦 搬家',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：西區附近 2房1廳</p>
+                    <p><strong style="color:var(--accent);">月租費</strong>：NT$30,000</p>
+                    <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; NT$6,000,000（約 $185,000 USD，匯率約 32.5 估算）</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：進行中</p>
+                </div>
+            </div>`
     }
 };
 
