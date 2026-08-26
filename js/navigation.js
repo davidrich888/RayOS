@@ -219,13 +219,13 @@ const TARGET_DATA = {
         html: `
             <div style="margin-bottom:16px;">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
-                    <img src="icons/move-1.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
-                    <img src="icons/move-2.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
-                    <img src="icons/move-3.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
-                    <img src="icons/move-4.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
-                    <img src="icons/move-5.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
-                    <img src="icons/move-6.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:120px;" onerror="this.style.display='none'">
-                    <img src="icons/move-7.jpg" style="width:100%;border-radius:4px;grid-column:1/-1;object-fit:cover;height:120px;" onerror="this.style.display='none'">
+                    <img src="icons/move-1.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-1.jpg')">
+                    <img src="icons/move-2.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-2.jpg')">
+                    <img src="icons/move-3.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-3.jpg')">
+                    <img src="icons/move-4.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-4.jpg')">
+                    <img src="icons/move-5.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-5.jpg')">
+                    <img src="icons/move-6.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-6.jpg')">
+                    <img src="icons/move-7.jpg" style="width:100%;border-radius:4px;grid-column:1/-1;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-7.jpg')">
                 </div>
                 <div style="font-size:13px;color:var(--text-dim);line-height:1.9;">
                     <p><strong style="color:var(--accent);">區域</strong>：台中西區・近勤美/科博館/草悟道</p>
@@ -270,6 +270,11 @@ function showTargetModal(key) {
     document.getElementById('target-modal').classList.add('show');
 }
 function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+function openTargetLightbox(url) {
+    document.getElementById('target-lightbox-img').src = url;
+    document.getElementById('target-lightbox').classList.add('active');
+}
+function closeTargetLightbox() { document.getElementById('target-lightbox').classList.remove('active'); }
 function formatNumber(n) { return new Intl.NumberFormat('zh-TW').format(Math.round(n)); }
 function formatMoney(n) { if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M'; if (n >= 1000) return Math.round(n / 1000) + 'K'; return formatNumber(n); }
 function toTWD(a, c) { if (c === 'USD') return a * USD_RATE; if (c === 'USDT') return a * USDT_RATE; return a; }
