@@ -127,12 +127,12 @@ function showModal(id) { document.getElementById(id).classList.add('show'); }
 // Target modal data
 const TARGET_DATA = {
     batcave: {
-        title: '🦇 Bat Cave — $100,000 USD',
+        title: '🥊 Man Cave — $100,000 USD',
         html: `
             <div style="margin-bottom:16px;">
-                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" alt="Bat Cave" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;" onerror="this.style.display='none'">
+                <img src="icons/mancave.jpg" alt="Man Cave" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;" onerror="this.style.display='none'">
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
-                    <p><strong style="color:var(--accent);">目標</strong>：Bat Cave 蝙蝠洞（第一優先）</p>
+                    <p><strong style="color:var(--accent);">目標</strong>：Man Cave 男人窩（第二優先）</p>
                     <p><strong style="color:var(--accent);">預算</strong>：$100,000 USD</p>
                     <p><strong style="color:var(--accent);">狀態</strong>：研究中</p>
                 </div>
