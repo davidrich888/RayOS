@@ -142,7 +142,11 @@ const TARGET_DATA = {
         title: '🐎 Mustang 5.0',
         html: `
             <div style="margin-bottom:16px;">
-                <img src="https://images.unsplash.com/photo-1584345604476-8ec5f82d661f?w=800&q=80" alt="Mustang 5.0" style="width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:12px;" onerror="this.style.display='none'">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+                    <img src="icons/mustang-real-1.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;grid-column:1/-1;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/mustang-real-1.jpg')">
+                    <img src="icons/mustang-real-2.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/mustang-real-2.jpg')">
+                    <img src="icons/mustang-real-3.jpg" style="width:100%;border-radius:4px;object-fit:cover;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/mustang-real-3.jpg')">
+                </div>
                 <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
                     <p><strong style="color:var(--accent);">目標</strong>：Mustang 5.0（第三優先）</p>
                     <p><strong style="color:var(--accent);">達標門檻</strong>：資產 &gt; $350,000 USD（約台幣 1,000 萬）</p>
