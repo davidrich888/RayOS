@@ -280,6 +280,17 @@ const TARGET_DATA = {
                 </div>
             </div>`
     },
+    totalAssets: {
+        title: '💰 總資產 — 目標 NT$30,000,000',
+        html: `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+                    <p><strong style="color:var(--accent);">目標</strong>：個人總資產成長</p>
+                    <p><strong style="color:var(--accent);">指標</strong>：總資產 &gt; NT$30,000,000（3000 萬）</p>
+                    <p><strong style="color:var(--accent);">狀態</strong>：進行中</p>
+                </div>
+            </div>`
+    },
     kawasaki: {
         title: '🏍️ Kawasaki Ninja ZX-4RR — ✅ 已達標',
         html: `
