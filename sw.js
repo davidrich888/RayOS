@@ -1,5 +1,5 @@
 // RayOS Service Worker v1
-const CACHE_NAME = 'rayos-v26';
+const CACHE_NAME = 'rayos-v27';  // v27: IG Hook tab (index.html is cached, so bump or it won't show)
 // NOTE: cache.addAll() rejects the whole install if ANY entry 404s. '/js/ideas.js'
 // was listed here after the file was deleted, so every SW install failed and the
 // offline cache never populated (verified 2026-08-10: GET /js/ideas.js -> 404).

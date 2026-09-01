@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-09-01T08:44:43.883176+00:00",
+  "baseline": 59,
+  "window_days": 90,
+  "min_sample": 3,
+  "in_window": 59,
+  "labeled_total": 103,
+  "auto_share": 1.0,
+  "ranked": [
+    {
+      "hook": "故事",
+      "median": 572,
+      "best": 850,
+      "n": 3
+    },
+    {
+      "hook": "自我診斷",
+      "median": 291,
+      "best": 637,
+      "n": 3
+    },
+    {
+      "hook": "反直覺",
+      "median": 102.5,
+      "best": 663,
+      "n": 8
+    },
+    {
+      "hook": "數字",
+      "median": 102.5,
+      "best": 485,
+      "n": 8
+    },
+    {
+      "hook": "證明",
+      "median": 43.0,
+      "best": 76,
+      "n": 4
+    },
+    {
+      "hook": "金句",
+      "median": 38.0,
+      "best": 543,
+      "n": 28
+    }
+  ],
+  "thin": [
+    "其他(n=2)",
+    "清單(n=2)",
+    "警告(n=1)"
+  ],
+  "fresh": [
+    {
+      "short_code": "DcmAcFwTKp7",
+      "hook": "故事",
+      "engagement": 572,
+      "ratio": 9.69,
+      "url": "https://www.instagram.com/p/DcmAcFwTKp7/",
+      "posted_at": "2026-08-28T18:29:57+00:00"
+    },
+    {
+      "short_code": "DclGfL-DnAn",
+      "hook": "其他",
+      "engagement": 22,
+      "ratio": 0.37,
+      "url": "https://www.instagram.com/p/DclGfL-DnAn/",
+      "posted_at": "2026-08-28T10:02:49+00:00"
+    }
+  ]
+}

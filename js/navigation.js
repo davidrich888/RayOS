@@ -92,6 +92,9 @@ function go(section) {
         case 'carousel-review':
             if (typeof loadCarouselReview === 'function') loadCarouselReview(firstVisit);
             break;
+        case 'ig-hook':
+            if (typeof loadIgHook === 'function') loadIgHook(firstVisit);
+            break;
         case 'mancave':
             if (typeof loadMancaveReview === 'function') loadMancaveReview(firstVisit);
             break;
