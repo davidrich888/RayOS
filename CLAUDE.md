@@ -23,6 +23,8 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
   - `Gym` → frontend key: `gym`
   - `AI` → frontend key: `ai`
   - `NoFap` → frontend key: `nofap`
+  - `Sleep` → frontend key: `sleep`
+  - `EarlyRise` → frontend key: `earlyrise`（🌅 早起，2026-09-02 新增；Notion 欄位已由 MCP 建好）
   - `FailedHabits` (rich_text) → 存當天所有 ✗ 習慣 key 的 JSON 陣列（如 `["nofap","gym"]`）
 - **三態機制**: 前端支援 null/true/false 三態。Notion checkbox 只有 true/false，所以 `true`(✓) 存 checkbox；`false`(✗) 額外記進 `FailedHabits` rich_text 欄，read 時由 `triState()` 還原（讓 ✗ 跨裝置存活）；`null`(空白)＝checkbox unchecked 且不在 FailedHabits。write/read 邏輯見 `js/notion-sync.js`（`failedHabitsProp` / `parseFailedSet` / `triState`）。Direct 與 n8n fallback 兩條路徑都支援 FailedHabits（n8n workflow `RayOS Sync Hub v2` 的 `Prepare Update` 寫入、`Transform Habits` 回傳）
 - **Title field**: `Name`（格式為日期字串，如 "2026-02-12"）

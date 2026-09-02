@@ -195,9 +195,9 @@ function buildSystemPrompt() {
         const ds = d.toISOString().split('T')[0];
         const dh = dailyHabitsData[ds] || {};
         last7done += Object.values(dh).filter(v => v === true).length;
-        last7total += 6;
+        last7total += ALL_HABITS.length;
     }
-    prompt += `\n- Daily Habits: Today ${todayDone}/6, Last 7 days ${last7done}/${last7total} (${(last7done/last7total*100).toFixed(0)}%)`;
+    prompt += `\n- Daily Habits: Today ${todayDone}/${ALL_HABITS.length}, Last 7 days ${last7done}/${last7total} (${(last7done/last7total*100).toFixed(0)}%)`;
     // Ideas
     const ideasNew = ideasData.filter(i => i.status === '💡 新想法').length;
     const ideasActive = ideasData.filter(i => i.status === '🚀 執行中').length;
@@ -268,7 +268,7 @@ function getAIContext() {
     // Daily Habits
     const today = new Date().toISOString().split('T')[0];
     const todayH = dailyHabitsData[today] || {};
-    const habitNames = ['trading', 'advertise', 'deliver', 'gym', 'fatloss', 'ai'];
+    const habitNames = ALL_HABITS;
     const todayStatus = habitNames.map(h => `${h}: ${todayH[h] ? '✓' : '✗'}`).join(', ');
     context += `\n\n=== DAILY HABITS ===
 - Today (${today}): ${todayStatus}`;
@@ -419,7 +419,7 @@ function updateLifeOverview() {
         <div class="stat-box" onclick="go('wealth')"><div class="stat-value">${pctW}%</div><div class="stat-label">Wealth Goal</div></div>
         <div class="stat-box" onclick="go('physic')"><div class="stat-value">${latB.fatpct || '--'}%</div><div class="stat-label">Body Fat</div></div>
         <div class="stat-box" onclick="go('trading')"><div class="stat-value">${latAlgo.cumRet?.toFixed(1) || '0'}%</div><div class="stat-label">Trading</div></div>
-        <div class="stat-box" onclick="go('daily')"><div class="stat-value">${todayDone}/6</div><div class="stat-label">Habits</div></div>
+        <div class="stat-box" onclick="go('daily')"><div class="stat-value">${todayDone}/${ALL_HABITS.length}</div><div class="stat-label">Habits</div></div>
         <div class="stat-box" onclick="go('ideas')"><div class="stat-value">${ideasData.length}</div><div class="stat-label">Ideas</div></div>
         <div class="stat-box" onclick="go('information')"><div class="stat-value">${videoKnowledge.length}</div><div class="stat-label">Learning</div></div>
     `;
