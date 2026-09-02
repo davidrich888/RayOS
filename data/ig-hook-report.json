@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T08:44:43.883176+00:00",
+  "generated_at": "2026-09-02T01:45:01.415046+00:00",
   "baseline": 59,
   "window_days": 90,
   "min_sample": 3,
@@ -49,22 +49,5 @@
     "清單(n=2)",
     "警告(n=1)"
   ],
-  "fresh": [
-    {
-      "short_code": "DcmAcFwTKp7",
-      "hook": "故事",
-      "engagement": 572,
-      "ratio": 9.69,
-      "url": "https://www.instagram.com/p/DcmAcFwTKp7/",
-      "posted_at": "2026-08-28T18:29:57+00:00"
-    },
-    {
-      "short_code": "DclGfL-DnAn",
-      "hook": "其他",
-      "engagement": 22,
-      "ratio": 0.37,
-      "url": "https://www.instagram.com/p/DclGfL-DnAn/",
-      "posted_at": "2026-08-28T10:02:49+00:00"
-    }
-  ]
+  "fresh": []
 }
