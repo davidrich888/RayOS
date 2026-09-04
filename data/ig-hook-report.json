@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-03T01:45:00.944092+00:00",
+  "generated_at": "2026-09-04T01:45:01.457477+00:00",
   "baseline": 59,
   "window_days": 90,
   "min_sample": 3,
-  "in_window": 59,
-  "labeled_total": 103,
+  "in_window": 61,
+  "labeled_total": 105,
   "auto_share": 1.0,
   "ranked": [
     {
@@ -33,15 +33,15 @@
     },
     {
       "hook": "證明",
-      "median": 43.0,
+      "median": 42,
       "best": 76,
-      "n": 4
+      "n": 5
     },
     {
       "hook": "金句",
-      "median": 38.0,
+      "median": 39,
       "best": 543,
-      "n": 28
+      "n": 29
     }
   ],
   "thin": [
@@ -49,5 +49,22 @@
     "清單(n=2)",
     "警告(n=1)"
   ],
-  "fresh": []
+  "fresh": [
+    {
+      "short_code": "DcvJzWCADah",
+      "hook": "證明",
+      "engagement": 23,
+      "ratio": 0.39,
+      "url": "https://www.instagram.com/p/DcvJzWCADah/",
+      "posted_at": "2026-09-01T07:45:34+00:00"
+    },
+    {
+      "short_code": "DcsVoMZAxNr",
+      "hook": "金句",
+      "engagement": 117,
+      "ratio": 1.98,
+      "url": "https://www.instagram.com/p/DcsVoMZAxNr/",
+      "posted_at": "2026-08-31T05:29:45+00:00"
+    }
+  ]
 }
