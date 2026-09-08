@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-07T01:45:02.001662+00:00",
-  "baseline": 54,
+  "generated_at": "2026-09-08T01:45:01.252161+00:00",
+  "baseline": 56.5,
   "window_days": 90,
   "min_sample": 3,
-  "in_window": 69,
-  "labeled_total": 113,
+  "in_window": 70,
+  "labeled_total": 114,
   "auto_share": 1.0,
   "ranked": [
     {
@@ -20,12 +20,6 @@
       "n": 3
     },
     {
-      "hook": "反直覺",
-      "median": 102.5,
-      "best": 663,
-      "n": 8
-    },
-    {
       "hook": "數字",
       "median": 97.5,
       "best": 485,
@@ -36,6 +30,12 @@
       "median": 97,
       "best": 102,
       "n": 3
+    },
+    {
+      "hook": "反直覺",
+      "median": 77,
+      "best": 663,
+      "n": 9
     },
     {
       "hook": "證明",
@@ -56,60 +56,20 @@
   ],
   "fresh": [
     {
+      "short_code": "Dc56hYik6NW",
+      "hook": "反直覺",
+      "engagement": 70,
+      "ratio": 1.24,
+      "url": "https://www.instagram.com/p/Dc56hYik6NW/",
+      "posted_at": "2026-09-05T12:03:24+00:00"
+    },
+    {
       "short_code": "Dc3kz9yjCaj",
       "hook": "其他",
       "engagement": 102,
-      "ratio": 1.89,
+      "ratio": 1.81,
       "url": "https://www.instagram.com/p/Dc3kz9yjCaj/",
       "posted_at": "2026-09-04T14:14:23+00:00"
-    },
-    {
-      "short_code": "Dc1WEEvRYwh",
-      "hook": "金句",
-      "engagement": 4,
-      "ratio": 0.07,
-      "url": "https://www.instagram.com/p/Dc1WEEvRYwh/",
-      "posted_at": "2026-09-03T17:26:57+00:00"
-    },
-    {
-      "short_code": "Dc1UowVj5ev",
-      "hook": "金句",
-      "engagement": 166,
-      "ratio": 3.07,
-      "url": "https://www.instagram.com/p/Dc1UowVj5ev/",
-      "posted_at": "2026-09-03T17:14:53+00:00"
-    },
-    {
-      "short_code": "Dc0N6dagT_x",
-      "hook": "金句",
-      "engagement": 7,
-      "ratio": 0.13,
-      "url": "https://www.instagram.com/p/Dc0N6dagT_x/",
-      "posted_at": "2026-09-03T06:56:55+00:00"
-    },
-    {
-      "short_code": "Dc0NoIAA7jI",
-      "hook": "金句",
-      "engagement": 18,
-      "ratio": 0.33,
-      "url": "https://www.instagram.com/p/Dc0NoIAA7jI/",
-      "posted_at": "2026-09-03T06:54:57+00:00"
-    },
-    {
-      "short_code": "Dc0MnC9g_LD",
-      "hook": "金句",
-      "engagement": 59,
-      "ratio": 1.09,
-      "url": "https://www.instagram.com/p/Dc0MnC9g_LD/",
-      "posted_at": "2026-09-03T06:50:35+00:00"
-    },
-    {
-      "short_code": "Dc0HJA4gm8i",
-      "hook": "數字",
-      "engagement": 33,
-      "ratio": 0.61,
-      "url": "https://www.instagram.com/p/Dc0HJA4gm8i/",
-      "posted_at": "2026-09-03T05:57:25+00:00"
     }
   ]
 }
