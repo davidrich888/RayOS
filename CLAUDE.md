@@ -25,7 +25,7 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
   - `NoFap` → frontend key: `nofap`
   - `Sleep` → frontend key: `sleep`
   - `EarlyRise` → frontend key: `earlyrise`（🌅 早起，2026-09-02 新增；Notion 欄位已由 MCP 建好）
-  - `PullUp` → frontend key: `pullup`（🦾 拉單槓，2026-09-11 新增；Notion 欄位已由 MCP 建好）
+  - `PullUp` → frontend key: `pullup`（🏋️ 拉單槓，2026-09-11 新增；Notion 欄位已由 MCP 建好）
 - ⚠️ **新增習慣要改 3 個地方**（少一個就會 drift）：① Notion DB 加 checkbox 欄 ② 前端 `js/daily.js` 的 `ALL_HABITS` + `js/notion-sync.js` 的 `H2N`／read／create／預設值 + `index.html` 表頭 ③ **n8n live workflow `RayOS Sync Hub v2`（ID `AY7M7UbpYhcDyUsn40A2e`，n8n Cloud 上才是真正在跑的版本，`workflows/*.json` 是過期匯出檔）的 `Transform Habits`（read）+ `Prepare Create`（建當天）兩個 Code node。`Prepare Update` 是 field-generic 不用改
   - `FailedHabits` (rich_text) → 存當天所有 ✗ 習慣 key 的 JSON 陣列（如 `["nofap","gym"]`）
 - **三態機制**: 前端支援 null/true/false 三態。Notion checkbox 只有 true/false，所以 `true`(✓) 存 checkbox；`false`(✗) 額外記進 `FailedHabits` rich_text 欄，read 時由 `triState()` 還原（讓 ✗ 跨裝置存活）；`null`(空白)＝checkbox unchecked 且不在 FailedHabits。write/read 邏輯見 `js/notion-sync.js`（`failedHabitsProp` / `parseFailedSet` / `triState`）。Direct 與 n8n fallback 兩條路徑都支援 FailedHabits（n8n workflow `RayOS Sync Hub v2` 的 `Prepare Update` 寫入、`Transform Habits` 回傳）
