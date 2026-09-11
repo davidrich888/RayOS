@@ -27,6 +27,7 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
   - `EarlyRise` → frontend key: `earlyrise`（🌅 早起，2026-09-02 新增；Notion 欄位已由 MCP 建好）
   - `PullUp` → frontend key: `pullup`（🏋️ 拉單槓，2026-09-11 新增；Notion 欄位已由 MCP 建好）
   - `Chest` → frontend key: `chest`（🦍 胸肌訓練 一週 10 組，2026-09-11 新增；Notion 欄位已由 MCP 建好、n8n Transform Habits / Prepare Create 已 patch）
+  - `Shadowbox` → frontend key: `shadowbox`（🥊 每天 shadowboxing 10 分鐘，2026-09-12 新增；Notion 欄位已由 MCP 建好、n8n Transform Habits / Prepare Create 已 patch）
 - 💡 表頭 emoji 的說明文字寫在 `index.html` 的 `<th data-tip="...">`，樣式在 `style.css` 的 `.daily-history-wrapper thead th[data-tip]::after`（hover 才顯示，向下彈出避免被 sticky header 的 overflow 裁切）
 - ⚠️ **新增習慣要改 3 個地方**（少一個就會 drift）：① Notion DB 加 checkbox 欄 ② 前端 `js/daily.js` 的 `ALL_HABITS` + `js/notion-sync.js` 的 `H2N`／read／create／預設值 + `index.html` 表頭 ③ **n8n live workflow `RayOS Sync Hub v2`（ID `AY7M7UbpYhcDyUsn40A2e`，n8n Cloud 上才是真正在跑的版本，`workflows/*.json` 是過期匯出檔）的 `Transform Habits`（read）+ `Prepare Create`（建當天）兩個 Code node。`Prepare Update` 是 field-generic 不用改
   - `FailedHabits` (rich_text) → 存當天所有 ✗ 習慣 key 的 JSON 陣列（如 `["nofap","gym"]`）

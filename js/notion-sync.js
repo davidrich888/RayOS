@@ -6,7 +6,7 @@ const IDEAS_DB_ID = 'e04c6b41e1ae490baf3396dc7fe80fc5';
 const VIDEOS_DB_ID = '76fb8600ae9649bcb6c475f75f0ec818';
 const BODY_DS_ID = '6b8fea6a-9249-4a7b-a36e-5cd7f6ceb61f';
 const PLAN_DB_ID = '5f505efdebd540c0ab248999e5529ad2';
-const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI', nofap:'NoFap', sleep:'Sleep', earlyrise:'EarlyRise', pullup:'PullUp', chest:'Chest'};
+const H2N = {trading:'Trading', advertise:'Advertise', deliver:'Deliver', gym:'Gym', fatloss:'FatLoss', ai:'AI', nofap:'NoFap', sleep:'Sleep', earlyrise:'EarlyRise', pullup:'PullUp', chest:'Chest', shadowbox:'Shadowbox'};
 const NOTION_API = 'https://api.notion.com/v1';
 let notionPageIndex = JSON.parse(localStorage.getItem('notion_page_index') || '{}');
 let syncInProgress = false;
@@ -154,7 +154,8 @@ async function syncDailyFromNotionDirect(silent = false) {
                 sleep: triState(props['Sleep']?.checkbox, 'sleep', failedSet),
                 earlyrise: triState(props['EarlyRise']?.checkbox, 'earlyrise', failedSet),
                 pullup: triState(props['PullUp']?.checkbox, 'pullup', failedSet),
-                chest: triState(props['Chest']?.checkbox, 'chest', failedSet)
+                chest: triState(props['Chest']?.checkbox, 'chest', failedSet),
+                shadowbox: triState(props['Shadowbox']?.checkbox, 'shadowbox', failedSet)
             });
             count++;
         }
@@ -214,6 +215,7 @@ async function createDayInNotionDirect(dateStr) {
             'EarlyRise': { checkbox: !!habits.earlyrise },
             'PullUp': { checkbox: !!habits.pullup },
             'Chest': { checkbox: !!habits.chest },
+            'Shadowbox': { checkbox: !!habits.shadowbox },
             'FailedHabits': failedHabitsProp(dateStr)
         };
         // Add date property
@@ -288,7 +290,8 @@ async function syncDailyFromNotion(silent = false) {
                     sleep: triState((nd.Sleep || nd.sleep) === true, 'sleep', ndFailed),
                     earlyrise: triState((nd.EarlyRise || nd.earlyrise) === true, 'earlyrise', ndFailed),
                     pullup: triState((nd.PullUp || nd.pullup) === true, 'pullup', ndFailed),
-                    chest: triState((nd.Chest || nd.chest) === true, 'chest', ndFailed)
+                    chest: triState((nd.Chest || nd.chest) === true, 'chest', ndFailed),
+                    shadowbox: triState((nd.Shadowbox || nd.shadowbox) === true, 'shadowbox', ndFailed)
                 });
             });
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
@@ -519,7 +522,7 @@ function checkNewDay() {
     if (now !== curDay) {
         curDay = now;
         if (!dailyHabitsData[now]) {
-            dailyHabitsData[now] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null,sleep:null,earlyrise:null,pullup:null,chest:null};
+            dailyHabitsData[now] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null,sleep:null,earlyrise:null,pullup:null,chest:null,shadowbox:null};
             localStorage.setItem('daily_habits', JSON.stringify(dailyHabitsData));
         }
         // 不自動建立 Notion 項目，等使用者勾選時再建立
@@ -595,7 +598,7 @@ async function createNext7Days() {
                     continue;
                 }
                 if (!dailyHabitsData[dateStr]) {
-                    dailyHabitsData[dateStr] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null,sleep:null,earlyrise:null,pullup:null,chest:null};
+                    dailyHabitsData[dateStr] = {trading:null,advertise:null,deliver:null,gym:null,fatloss:null,ai:null,nofap:null,sleep:null,earlyrise:null,pullup:null,chest:null,shadowbox:null};
                 }
                 await createDayInNotionDirect(dateStr);
                 if (dateStr < todayStr) {
