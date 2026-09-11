@@ -393,6 +393,46 @@
         .daily-history-wrapper thead th:last-child {
             font-size: 11px;
         }
+        /* Habit emoji header tooltips (rendered downward so the scroll box never clips them) */
+        .daily-history-wrapper thead th[data-tip] {
+            position: relative;
+            cursor: help;
+        }
+        .daily-history-wrapper thead th[data-tip]::after {
+            content: attr(data-tip);
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 10px;
+            border-radius: 7px;
+            background: rgba(20, 20, 24, 0.98);
+            border: 1px solid rgba(212, 197, 169, 0.25);
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.4;
+            white-space: nowrap;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.12s ease;
+            z-index: 30;
+        }
+        .daily-history-wrapper thead th[data-tip]:hover::after {
+            opacity: 1;
+        }
+        /* last emoji columns: anchor right so the tooltip stays inside the table */
+        .daily-history-wrapper thead th[data-tip]:nth-last-child(-n+3)::after {
+            left: auto;
+            right: 0;
+            transform: none;
+        }
+        /* first emoji column: anchor left for the same reason */
+        .daily-history-wrapper thead th[data-tip]:nth-child(2)::after {
+            left: 0;
+            transform: none;
+        }
         .daily-history-wrapper tbody td {
             padding: 8px 4px;
             border-bottom: 1px solid rgba(212,197,169,0.04);
