@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-10T01:45:00.316540+00:00",
+  "generated_at": "2026-09-11T01:45:04.831124+00:00",
   "baseline": 54,
   "window_days": 90,
   "min_sample": 3,
@@ -54,14 +54,5 @@
     "清單(n=2)",
     "警告(n=1)"
   ],
-  "fresh": [
-    {
-      "short_code": "Dc8fUGMjwRA",
-      "hook": "反直覺",
-      "engagement": 24,
-      "ratio": 0.44,
-      "url": "https://www.instagram.com/p/Dc8fUGMjwRA/",
-      "posted_at": "2026-09-06T12:02:34+00:00"
-    }
-  ]
+  "fresh": []
 }
