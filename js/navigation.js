@@ -225,9 +225,33 @@ const TARGET_DATA = {
             </div>`
     },
     move: {
-        title: '📦 搬家 — 西區 2房',
+        title: '📦 搬家 — 北屯區 四房透天',
         html: `
             <div style="margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <span style="background:var(--accent);color:#1a1a1a;font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px;">🎯 目前鎖定</span>
+                    <span style="font-size:13px;color:var(--text-dim);">北屯區・可寵・雙車庫・四房透天別墅</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+                    <img src="icons/move-beitun-1.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-1.jpg')">
+                    <img src="icons/move-beitun-2.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-2.jpg')">
+                    <img src="icons/move-beitun-3.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-3.jpg')">
+                    <img src="icons/move-beitun-4.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-4.jpg')">
+                    <img src="icons/move-beitun-5.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-5.jpg')">
+                    <img src="icons/move-beitun-6.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-6.jpg')">
+                    <img src="icons/move-beitun-7.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-7.jpg')">
+                    <img src="icons/move-beitun-8.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-8.jpg')">
+                    <img src="icons/move-beitun-9.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;grid-column:1/-1;" onerror="this.style.display='none'" onclick="openTargetLightbox('icons/move-beitun-9.jpg')">
+                </div>
+                <div style="font-size:13px;color:var(--text-dim);line-height:1.9;margin-bottom:16px;">
+                    <p><strong style="color:var(--accent);">區域</strong>：台中北屯區</p>
+                    <p><strong style="color:var(--accent);">格局</strong>：四房・雙車庫透天別墅</p>
+                    <p><strong style="color:var(--accent);">租金</strong>：$47,000／月（車庫有充電樁）</p>
+                    <p><strong style="color:var(--accent);">管理費</strong>：$1,500</p>
+                    <p><strong style="color:var(--accent);">電梯</strong>：無　<strong style="color:var(--accent);">寵物</strong>：可寵</p>
+                    <p><strong style="color:var(--accent);">電費/水費</strong>：台電台水</p>
+                </div>
+                <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:8px;font-size:12px;color:var(--text-dim);">備選物件（西區 2房2廳）</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
                     <div style="position:relative;">
                         <img src="icons/move-1.jpg" style="width:100%;display:block;border-radius:4px;object-fit:cover;object-position:top;height:180px;cursor:zoom-in;" onerror="this.parentElement.style.display='none'" onclick="openTargetLightbox('icons/move-1.jpg')">
