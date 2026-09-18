@@ -452,7 +452,60 @@
             background: rgba(212,197,169,0.15);
             font-weight: 600;
         }
-        
+
+        /* Recent Days 欄位顯示控制 */
+        .habit-col-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .habit-col-toggle-btn:hover {
+            border-color: rgba(212,197,169,0.4);
+            color: var(--accent);
+        }
+        .habit-col-picker {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 150px;
+            background: rgba(20, 20, 24, 0.98);
+            border: 1px solid rgba(212, 197, 169, 0.25);
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+            z-index: 40;
+        }
+        .habit-col-picker-reset {
+            display: block;
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(212,197,169,0.15);
+            color: var(--accent);
+            font-size: 11px;
+            text-align: left;
+            padding: 4px 2px 6px;
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+        .habit-col-picker-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text);
+            padding: 3px 2px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .habit-col-picker-row:hover {
+            color: var(--accent);
+        }
+
         /* Mobile */
         .mobile-menu-btn { display: none; position: fixed; top: calc(10px + env(safe-area-inset-top)); left: calc(10px + env(safe-area-inset-left)); z-index: 200; width: 44px; height: 44px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--accent); font-size: 20px; cursor: pointer; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 90; }

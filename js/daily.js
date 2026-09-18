@@ -2,6 +2,98 @@
 
 const ALL_HABITS = ['trading', 'advertise', 'deliver', 'gym', 'fatloss', 'ai', 'nofap', 'sleep', 'earlyrise', 'pullup', 'chest', 'shadowbox'];
 
+const HABIT_META = {
+    trading:   { emoji: '📈', label: 'Trading' },
+    advertise: { emoji: '📣', label: 'Advertise' },
+    deliver:   { emoji: '📦', label: 'Deliver' },
+    gym:       { emoji: '💪', label: 'Gym' },
+    fatloss:   { emoji: '🏃', label: 'FatLoss' },
+    ai:        { emoji: '🤖', label: 'AI' },
+    nofap:     { emoji: '🔫', label: 'NoFap' },
+    sleep:     { emoji: '😴', label: 'Sleep' },
+    earlyrise: { emoji: '🌅', label: 'EarlyRise' },
+    pullup:    { emoji: '🏋️', label: 'PullUp' },
+    chest:     { emoji: '🦍', label: 'Chest' },
+    shadowbox: { emoji: '🥊', label: 'Shadowbox' },
+};
+
+// 欄位顯示控制：只影響 Recent Days 表格渲染，不影響 dailyHabitsData / Notion 資料
+let HIDDEN_HABITS = [];
+try {
+    HIDDEN_HABITS = JSON.parse(localStorage.getItem('rayos_hidden_habits') || '[]');
+} catch (e) { HIDDEN_HABITS = []; }
+
+function saveHiddenHabits() {
+    try { localStorage.setItem('rayos_hidden_habits', JSON.stringify(HIDDEN_HABITS)); } catch (e) {}
+}
+
+function applyHabitColumnVisibility() {
+    const theadRow = document.querySelector('#daily-history-table thead tr');
+    if (!theadRow) return;
+    theadRow.querySelectorAll('th[data-habit]').forEach(th => {
+        th.style.display = HIDDEN_HABITS.includes(th.dataset.habit) ? 'none' : '';
+    });
+}
+
+function toggleHabitColPicker() {
+    const el = document.getElementById('habit-col-picker');
+    if (!el) return;
+    if (el.hidden) {
+        renderHabitColumnPicker();
+        el.hidden = false;
+    } else {
+        el.hidden = true;
+    }
+}
+
+function renderHabitColumnPicker() {
+    const el = document.getElementById('habit-col-picker');
+    if (!el) return;
+    el.textContent = '';
+
+    const resetBtn = document.createElement('button');
+    resetBtn.type = 'button';
+    resetBtn.className = 'habit-col-picker-reset';
+    resetBtn.textContent = '↺ 全部顯示';
+    resetBtn.onclick = () => {
+        HIDDEN_HABITS = [];
+        saveHiddenHabits();
+        applyHabitColumnVisibility();
+        updateDailyHistoryTable();
+        renderHabitColumnPicker();
+    };
+    el.appendChild(resetBtn);
+
+    ALL_HABITS.forEach(h => {
+        const meta = HABIT_META[h] || { emoji: '', label: h };
+        const row = document.createElement('label');
+        row.className = 'habit-col-picker-row';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !HIDDEN_HABITS.includes(h);
+        cb.onchange = () => {
+            if (cb.checked) {
+                HIDDEN_HABITS = HIDDEN_HABITS.filter(x => x !== h);
+            } else if (!HIDDEN_HABITS.includes(h)) {
+                HIDDEN_HABITS.push(h);
+            }
+            saveHiddenHabits();
+            applyHabitColumnVisibility();
+            updateDailyHistoryTable();
+        };
+        row.appendChild(cb);
+        row.appendChild(document.createTextNode(' ' + meta.emoji + ' ' + meta.label));
+        el.appendChild(row);
+    });
+}
+
+document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('habit-col-picker-wrap');
+    const picker = document.getElementById('habit-col-picker');
+    if (!wrap || !picker || picker.hidden) return;
+    if (!wrap.contains(e.target)) picker.hidden = true;
+});
+
 // 三態循環：null → true → false → null
 function cycleHabit(habit) {
     const today = new Date().toISOString().split('T')[0];
@@ -97,6 +189,9 @@ function updateDailyHistoryTable() {
     const tbody = document.getElementById('daily-history-body');
     if (!tbody) return;
 
+    applyHabitColumnVisibility();
+    const visibleHabits = ALL_HABITS.filter(h => !HIDDEN_HABITS.includes(h));
+
     const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
     const todayStr = new Date().toISOString().split('T')[0];
 
@@ -104,7 +199,7 @@ function updateDailyHistoryTable() {
         tbody.textContent = '';
         const tr = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = ALL_HABITS.length + 2;
+        td.colSpan = visibleHabits.length + 2;
         td.style.cssText = 'text-align:center;color:var(--text-dim);padding:40px;font-size:12px;';
         td.textContent = '⏳ 正在從 Notion 同步資料...';
         tr.appendChild(td);
@@ -133,14 +228,14 @@ function updateDailyHistoryTable() {
         dateTd.textContent = dateLabel + (inNotion ? '' : ' ⚠️');
         tr.appendChild(dateTd);
 
-        // 各習慣欄（三態顯示）
+        // 各習慣欄（三態顯示）。Total 一律照全部 12 個習慣算，不受欄位隱藏影響
         let completed = 0;
-        ALL_HABITS.forEach(h => {
+        ALL_HABITS.forEach(h => { if (dayHabits[h] === true) completed++; });
+        visibleHabits.forEach(h => {
             const val = dayHabits[h];
             const td = document.createElement('td');
             td.style.cssText = 'text-align:center;cursor:pointer;';
             if (val === true) {
-                completed++;
                 td.style.cssText += 'color:#4a7c59;font-weight:bold;font-size:14px;';
                 td.textContent = '✓';
             } else if (val === false) {
