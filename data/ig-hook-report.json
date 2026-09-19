@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-18T01:45:00.194737+00:00",
+  "generated_at": "2026-09-19T01:45:03.731165+00:00",
   "baseline": 54,
   "window_days": 90,
   "min_sample": 3,
-  "in_window": 71,
+  "in_window": 67,
   "labeled_total": 115,
   "auto_share": 1.0,
   "ranked": [
@@ -21,9 +21,9 @@
     },
     {
       "hook": "數字",
-      "median": 97.5,
+      "median": 99,
       "best": 485,
-      "n": 10
+      "n": 9
     },
     {
       "hook": "其他",
@@ -45,9 +45,9 @@
     },
     {
       "hook": "金句",
-      "median": 38.0,
-      "best": 543,
-      "n": 34
+      "median": 39,
+      "best": 371,
+      "n": 31
     }
   ],
   "thin": [
