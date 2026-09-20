@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-19T01:45:03.731165+00:00",
-  "baseline": 54,
+  "generated_at": "2026-09-20T01:45:04.809687+00:00",
+  "baseline": 52.5,
   "window_days": 90,
   "min_sample": 3,
-  "in_window": 67,
+  "in_window": 66,
   "labeled_total": 115,
   "auto_share": 1.0,
   "ranked": [
@@ -14,12 +14,6 @@
       "n": 3
     },
     {
-      "hook": "自我診斷",
-      "median": 291,
-      "best": 637,
-      "n": 3
-    },
-    {
       "hook": "數字",
       "median": 99,
       "best": 485,
@@ -27,7 +21,7 @@
     },
     {
       "hook": "其他",
-      "median": 97,
+      "median": 98,
       "best": 102,
       "n": 3
     },
@@ -52,6 +46,7 @@
   ],
   "thin": [
     "清單(n=2)",
+    "自我診斷(n=2)",
     "警告(n=1)"
   ],
   "fresh": []
