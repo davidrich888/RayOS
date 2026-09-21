@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-20T01:45:04.809687+00:00",
-  "baseline": 52.5,
+  "generated_at": "2026-09-21T01:45:03.837415+00:00",
+  "baseline": 47.5,
   "window_days": 90,
   "min_sample": 3,
-  "in_window": 66,
+  "in_window": 64,
   "labeled_total": 115,
   "auto_share": 1.0,
   "ranked": [
@@ -21,7 +21,7 @@
     },
     {
       "hook": "其他",
-      "median": 98,
+      "median": 99,
       "best": 102,
       "n": 3
     },
@@ -39,14 +39,14 @@
     },
     {
       "hook": "金句",
-      "median": 39,
-      "best": 371,
-      "n": 31
+      "median": 38.0,
+      "best": 375,
+      "n": 30
     }
   ],
   "thin": [
     "清單(n=2)",
-    "自我診斷(n=2)",
+    "自我診斷(n=1)",
     "警告(n=1)"
   ],
   "fresh": []
