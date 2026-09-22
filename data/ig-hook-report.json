@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-21T01:45:03.837415+00:00",
-  "baseline": 47.5,
+  "generated_at": "2026-09-22T01:45:03.314052+00:00",
+  "baseline": 51,
   "window_days": 90,
   "min_sample": 3,
-  "in_window": 64,
-  "labeled_total": 115,
+  "in_window": 65,
+  "labeled_total": 116,
   "auto_share": 1.0,
   "ranked": [
     {
@@ -15,9 +15,9 @@
     },
     {
       "hook": "數字",
-      "median": 99,
+      "median": 100.5,
       "best": 485,
-      "n": 9
+      "n": 10
     },
     {
       "hook": "其他",
@@ -40,7 +40,7 @@
     {
       "hook": "金句",
       "median": 38.0,
-      "best": 375,
+      "best": 387,
       "n": 30
     }
   ],
@@ -49,5 +49,14 @@
     "自我診斷(n=1)",
     "警告(n=1)"
   ],
-  "fresh": []
+  "fresh": [
+    {
+      "short_code": "Ddd9t8QCD1d",
+      "hook": "數字",
+      "engagement": 102,
+      "ratio": 2.0,
+      "url": "https://www.instagram.com/p/Ddd9t8QCD1d/",
+      "posted_at": "2026-09-19T12:02:59+00:00"
+    }
+  ]
 }
