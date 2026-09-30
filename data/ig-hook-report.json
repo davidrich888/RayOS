@@ -1,62 +1,71 @@
 {
-  "generated_at": "2026-09-22T01:45:03.314052+00:00",
-  "baseline": 51,
+  "generated_at": "2026-09-30T01:45:02.286311+00:00",
+  "baseline": 44,
   "window_days": 90,
   "min_sample": 3,
-  "in_window": 65,
-  "labeled_total": 116,
+  "in_window": 45,
+  "labeled_total": 125,
   "auto_share": 1.0,
   "ranked": [
     {
-      "hook": "故事",
-      "median": 572,
-      "best": 850,
-      "n": 3
+      "hook": "反直覺",
+      "median": 104.5,
+      "best": 685,
+      "n": 4
     },
     {
       "hook": "數字",
-      "median": 100.5,
-      "best": 485,
-      "n": 10
-    },
-    {
-      "hook": "其他",
-      "median": 99,
-      "best": 102,
-      "n": 3
-    },
-    {
-      "hook": "反直覺",
-      "median": 73.5,
-      "best": 663,
+      "median": 52.5,
+      "best": 505,
       "n": 10
     },
     {
       "hook": "證明",
-      "median": 42,
-      "best": 76,
-      "n": 5
+      "median": 46.5,
+      "best": 77,
+      "n": 4
     },
     {
       "hook": "金句",
-      "median": 38.0,
-      "best": 387,
-      "n": 30
+      "median": 37,
+      "best": 166,
+      "n": 21
+    },
+    {
+      "hook": "其他",
+      "median": 25.0,
+      "best": 102,
+      "n": 4
     }
   ],
   "thin": [
-    "清單(n=2)",
-    "自我診斷(n=1)",
+    "故事(n=1)",
     "警告(n=1)"
   ],
   "fresh": [
     {
-      "short_code": "Ddd9t8QCD1d",
+      "short_code": "Dd0EHOwiFzg",
       "hook": "數字",
-      "engagement": 102,
-      "ratio": 2.0,
-      "url": "https://www.instagram.com/p/Ddd9t8QCD1d/",
-      "posted_at": "2026-09-19T12:02:59+00:00"
+      "engagement": 54,
+      "ratio": 1.23,
+      "url": "https://www.instagram.com/p/Dd0EHOwiFzg/",
+      "posted_at": "2026-09-28T02:02:19+00:00"
+    },
+    {
+      "short_code": "DdxfUa3CJOT",
+      "hook": "數字",
+      "engagement": 16,
+      "ratio": 0.36,
+      "url": "https://www.instagram.com/p/DdxfUa3CJOT/",
+      "posted_at": "2026-09-27T02:03:24+00:00"
+    },
+    {
+      "short_code": "Ddu6hm0CbHp",
+      "hook": "數字",
+      "engagement": 44,
+      "ratio": 1.0,
+      "url": "https://www.instagram.com/p/Ddu6hm0CbHp/",
+      "posted_at": "2026-09-26T02:02:20+00:00"
     }
   ]
 }
