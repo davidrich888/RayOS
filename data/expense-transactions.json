@@ -13916,6 +13916,20 @@
     "month": "2026/05"
   },
   {
+    "date": "2026/05/21",
+    "desc": "爭議帳款-交易查證中Q",
+    "amount": -9685.0,
+    "category": "其他",
+    "month": "2026/05"
+  },
+  {
+    "date": "2026/05/21",
+    "desc": "取消國外交易服務費",
+    "amount": -145.0,
+    "category": "國外手續費",
+    "month": "2026/05"
+  },
+  {
     "date": "2026/05/22",
     "desc": "MOMO-EC3D",
     "amount": 5060.0,
@@ -16765,6 +16779,13 @@
     "month": "2026/07"
   },
   {
+    "date": "2026/07/31",
+    "desc": "一卡通自動加值-臺北捷運忠孝敦化",
+    "amount": 500.0,
+    "category": "其他",
+    "month": "2026/07"
+  },
+  {
     "date": "2026/08/01",
     "desc": "國外交易手續費 -ANTHRO",
     "amount": 10.0,
@@ -16839,6 +16860,13 @@
     "desc": "微風信義美食",
     "amount": 150.0,
     "category": "餐飲",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/01",
+    "desc": "新光三越百貨臺北信義A",
+    "amount": 5601.0,
+    "category": "購物",
     "month": "2026/08"
   },
   {
@@ -17276,6 +17304,13 @@
     "month": "2026/08"
   },
   {
+    "date": "2026/08/08",
+    "desc": "連加*湯姆熊-台中文心TAIPEI",
+    "amount": 200.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
     "date": "2026/08/09",
     "desc": "巧味膳房",
     "amount": 9856.0,
@@ -17374,6 +17409,13 @@
     "month": "2026/08"
   },
   {
+    "date": "2026/08/11",
+    "desc": "連加*連加*拳運會TAIPEI",
+    "amount": 657.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
     "date": "2026/08/12",
     "desc": "國外交易手續費 -ANTHRO",
     "amount": 10.0,
@@ -17448,6 +17490,475 @@
     "desc": "全家便利商店-高雄西子",
     "amount": 108.0,
     "category": "餐飲",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/15",
+    "desc": "桑堤股份有限公司KAOHSI",
+    "amount": 1364.0,
+    "category": "其他",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/15",
+    "desc": "連加*LINEPAY*JUNSHENG CULTUTAIPEI",
+    "amount": -1.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/15",
+    "desc": "連加*LINEPAY*JUNSHENG CULTUTAIPEI",
+    "amount": 1.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/15",
+    "desc": "連加*LINEPAY*JUNSHENG CULTUTAIPEI",
+    "amount": 145.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/15",
+    "desc": "連加*連加*福泉雪花冰布丁豆TAIPEI",
+    "amount": 70.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/15",
+    "desc": "連加*連加*城市車旅TAIPEI",
+    "amount": 40.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/15",
+    "desc": "連加*連加*嘟嘟房TAIPEI",
+    "amount": 600.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/15",
+    "desc": "全家便利商店-高雄臨一店KAOHSI",
+    "amount": 130.0,
+    "category": "餐飲",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*連加*統一超商TAIPEI",
+    "amount": 108.0,
+    "category": "餐飲",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*連加*嘟嘟房TAIPEI",
+    "amount": 850.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*LINEPAY*CHIMEI MUSEUMTAIPEI",
+    "amount": 3960.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*LINEPAY*YUAN XIONG GUATAIPEI",
+    "amount": 98.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*LINEPAY*PARKINGTAIPEI",
+    "amount": 200.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*連加*KLOOK 客路TAIPEI",
+    "amount": 4400.0,
+    "category": "旅行",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*LINEPAY*YUAN XIONG GUATAIPEI",
+    "amount": 600.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*LINEPAY*YUAN XIONG GUATAIPEI",
+    "amount": 2467.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*阜爾運通股份有限TAIPEI",
+    "amount": 80.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/16",
+    "desc": "連加*LINEPAY*CHIMEI MUSEUMTAIPEI",
+    "amount": 240.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/17",
+    "desc": "連加*連加*KLOOK 客路TAIPEI",
+    "amount": -2200.0,
+    "category": "旅行",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/17",
+    "desc": "連加*連加*SMART2GOTAIPEI",
+    "amount": 2885.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/18",
+    "desc": "立吉富-歐簿客科技股份有限公司TAIPEI",
+    "amount": 6530.0,
+    "category": "其他",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/19",
+    "desc": "山海山唱片行CHANGH",
+    "amount": 5380.0,
+    "category": "其他",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/19",
+    "desc": "優步-全聯福利中心 大里新芳TAIPEI",
+    "amount": 2308.0,
+    "category": "餐飲",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/19",
+    "desc": "秀泰全球影城股份有限公司A9519 TAIPEI",
+    "amount": 869.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/20",
+    "desc": "奕鳴有限公司TAOYUA",
+    "amount": 6740.0,
+    "category": "其他",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/21",
+    "desc": "優步福爾摩沙股份有限公司-中天TAIPEI",
+    "amount": 142.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/21",
+    "desc": "優步福爾摩沙股份有限公司-中華TAIPEI",
+    "amount": 208.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/21",
+    "desc": "優步福爾摩沙股份有限公司-永保TAIPEI",
+    "amount": 138.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/21",
+    "desc": "優步福爾摩沙股份有限公司-飛狗TAIPEI",
+    "amount": 323.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/22",
+    "desc": "優步福爾摩沙股份有限公司-飛狗TAIPEI",
+    "amount": 790.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/22",
+    "desc": "優步福爾摩沙股份有限公司-飛狗TAIPEI",
+    "amount": 32.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/22",
+    "desc": "優步福爾摩沙股份有限公司-中天TAIPEI",
+    "amount": 40.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/23",
+    "desc": "優步福爾摩沙股份有限公司-飛狗TAIPEI",
+    "amount": 171.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/23",
+    "desc": "優步-美滿小籠湯?? 炒烏龍麵TAIPEI",
+    "amount": 492.0,
+    "category": "餐飲",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/23",
+    "desc": "優步福爾摩沙股份有限公司-飛狗TAIPEI",
+    "amount": 263.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/24",
+    "desc": "繳交115年08月份電話費  09637***56",
+    "amount": 599.0,
+    "category": "生活",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/24",
+    "desc": "藍新-蕭伊TAIPEI",
+    "amount": 718.0,
+    "category": "其他",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/24",
+    "desc": "ANTHROPICO7785 SAN FR",
+    "amount": 478.0,
+    "category": "AI/SaaS",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/24",
+    "desc": "國外交易服務費-478.00",
+    "amount": 7.0,
+    "category": "國外手續費",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/24",
+    "desc": "PCHOME1TAIPEI",
+    "amount": 6930.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/25",
+    "desc": "連加*APEX LEATAIPEI",
+    "amount": 3800.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/25",
+    "desc": "優步福爾摩沙股份有限公司-永保TAIPEI",
+    "amount": 233.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/25",
+    "desc": "優步福爾摩沙股份有限公司-中天TAIPEI",
+    "amount": 140.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/26",
+    "desc": "優步福爾摩沙股份有限公司-永保TAIPEI",
+    "amount": 209.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/26",
+    "desc": "樂購蝦皮-COLLEGETOWN251TAIPEI",
+    "amount": 3960.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/26",
+    "desc": "富邦MOMO-ECTAIPEI",
+    "amount": 6500.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/27",
+    "desc": "樂購蝦皮-透思國際有限公司TAIPEI",
+    "amount": 1745.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/27",
+    "desc": "樂購蝦皮-周楷翔TAIPEI",
+    "amount": 890.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/27",
+    "desc": "優步福爾摩沙股份有公司TAIPEI",
+    "amount": 657.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/27",
+    "desc": "樂購蝦皮-西伍企業社TAIPEI",
+    "amount": 729.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/27",
+    "desc": "優步福爾摩沙股份有公司TAIPEI",
+    "amount": 723.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/27",
+    "desc": "樂購蝦皮-TR70FR100ZR5000TAIPEI",
+    "amount": 599.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/27",
+    "desc": "優步福爾摩沙股份有公司TAIPEI",
+    "amount": 2928.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/27",
+    "desc": "SL-禾財■■TAIPEI",
+    "amount": 3600.0,
+    "category": "其他",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/28",
+    "desc": "ANTHROPICO7785 SAN FR",
+    "amount": 476.0,
+    "category": "AI/SaaS",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/28",
+    "desc": "國外交易服務費-476.00",
+    "amount": 7.0,
+    "category": "國外手續費",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/28",
+    "desc": "優步福爾摩沙股份有公司TAIPEI",
+    "amount": 602.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/28",
+    "desc": "樂購蝦皮-妙雅家居工坊TAIPEI",
+    "amount": 1186.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/29",
+    "desc": "優步福爾摩沙股份有限公司-中天TAIPEI",
+    "amount": 395.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/29",
+    "desc": "連加*LINEPAY*POKE POEKE BOTAIPEI",
+    "amount": 575.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/29",
+    "desc": "優步福爾摩沙股份有限公司-中華TAIPEI",
+    "amount": 289.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/29",
+    "desc": "優步福爾摩沙股份有限公司-飛狗TAIPEI",
+    "amount": 333.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/30",
+    "desc": "樂購蝦皮-HACKEN 07 MERCHANDISTAIPEI",
+    "amount": 2680.0,
+    "category": "購物",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/30",
+    "desc": "優步福爾摩沙股份有限公司-飛狗TAIPEI",
+    "amount": 884.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/30",
+    "desc": "優步福爾摩沙股份有限公司-中天TAIPEI",
+    "amount": 327.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/31",
+    "desc": "優步福爾摩沙股份有限公司-中天TAIPEI",
+    "amount": 592.0,
+    "category": "交通",
+    "month": "2026/08"
+  },
+  {
+    "date": "2026/08/31",
+    "desc": "優步福爾摩沙股份有公司TAIPEI",
+    "amount": 458.0,
+    "category": "交通",
     "month": "2026/08"
   }
 ]
