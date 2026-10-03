@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-10-02T01:45:02.091386+00:00",
-  "baseline": 42.0,
+  "generated_at": "2026-10-03T01:45:04.712995+00:00",
+  "baseline": 44,
   "window_days": 90,
   "min_sample": 3,
-  "in_window": 46,
+  "in_window": 45,
   "labeled_total": 127,
   "auto_share": 1.0,
   "ranked": [
     {
       "hook": "反直覺",
       "median": 104.5,
-      "best": 689,
+      "best": 692,
       "n": 4
     },
     {
       "hook": "數字",
-      "median": 55.0,
-      "best": 516,
+      "median": 64.0,
+      "best": 520,
       "n": 10
     },
     {
@@ -27,13 +27,13 @@
     },
     {
       "hook": "金句",
-      "median": 35.0,
-      "best": 166,
-      "n": 22
+      "median": 36,
+      "best": 176,
+      "n": 21
     },
     {
       "hook": "其他",
-      "median": 25.0,
+      "median": 25.5,
       "best": 102,
       "n": 4
     }
@@ -47,7 +47,7 @@
       "short_code": "Dd5bxYWjKy2",
       "hook": "金句",
       "engagement": 36,
-      "ratio": 0.86,
+      "ratio": 0.82,
       "url": "https://www.instagram.com/p/Dd5bxYWjKy2/",
       "posted_at": "2026-09-30T04:06:17+00:00"
     },
@@ -55,17 +55,9 @@
       "short_code": "Dd2o75_D4ZE",
       "hook": "金句",
       "engagement": 8,
-      "ratio": 0.19,
+      "ratio": 0.18,
       "url": "https://www.instagram.com/p/Dd2o75_D4ZE/",
       "posted_at": "2026-09-29T02:03:36+00:00"
-    },
-    {
-      "short_code": "Dd0EHOwiFzg",
-      "hook": "數字",
-      "engagement": 54,
-      "ratio": 1.29,
-      "url": "https://www.instagram.com/p/Dd0EHOwiFzg/",
-      "posted_at": "2026-09-28T02:02:19+00:00"
     }
   ]
 }
