@@ -88,6 +88,11 @@ function updateBuiltinStatusLabels() {
         localStorage.removeItem('drive_script_url');
         localStorage.setItem('drive_body_photos_endpoint_v', '1');
     }
+    // 🔄 Migration: n8n Cloud -> Supabase Edge Function (Ray cancelled n8n, 2026-11-06)
+    if (localStorage.getItem('n8n_webhook') === 'https://david86726.app.n8n.cloud/webhook/rayos-sync') {
+        localStorage.setItem('n8n_webhook', 'https://pinwlmoawxxzdjsrogzg.supabase.co/functions/v1/rayos-sync');
+        console.log('[RayOS] Migrated n8n_webhook to Supabase Edge Function');
+    }
     // 🔄 Migration v4: update body data to verified Notion values (2025-03-08 start)
     if (localStorage.getItem('body_data_version') !== '4') {
         localStorage.removeItem('body_history');

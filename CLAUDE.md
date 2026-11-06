@@ -1,11 +1,11 @@
 # RayOS
 
 ## 這是什麼
-Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、資產管理、交易績效、事業指標和靈感管理。前端為單一 HTML 檔案，透過 n8n webhook 與 Notion 資料庫雙向同步。
+Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、資產管理、交易績效、事業指標和靈感管理。前端為單一 HTML 檔案，透過 Supabase Edge Function 與 Notion 資料庫雙向同步。
 
 ## 技術堆疊
 - **Frontend**: `rayos-v4.html`（單一 HTML/JS/CSS 檔案）
-- **Backend**: n8n webhook 做為中間層，根據 `type` 欄位路由到不同 Notion 操作
+- **Backend**: Supabase Edge Function `rayos-sync`（2026-11-06 從 n8n Cloud 搬過來，Ray 退訂 n8n 時順便搬的）做為中間層，根據 `type` 欄位路由到不同 Notion 操作
 - **Database**: Notion databases
 - **部署**: GitHub → Vercel 自動部署
 - **Repo**: github.com/davidrich888/RayOS
@@ -29,9 +29,9 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
   - `Chest` → frontend key: `chest`（🦍 胸肌訓練 一週 10 組，2026-09-11 新增；Notion 欄位已由 MCP 建好、n8n Transform Habits / Prepare Create 已 patch）
   - `Shadowbox` → frontend key: `shadowbox`（🥊 每天 shadowboxing 10 分鐘，2026-09-12 新增；Notion 欄位已由 MCP 建好、n8n Transform Habits / Prepare Create 已 patch）
 - 💡 表頭 emoji 的說明文字寫在 `index.html` 的 `<th data-tip="...">`，樣式在 `style.css` 的 `.daily-history-wrapper thead th[data-tip]::after`（hover 才顯示，向下彈出避免被 sticky header 的 overflow 裁切）
-- ⚠️ **新增習慣要改 3 個地方**（少一個就會 drift）：① Notion DB 加 checkbox 欄 ② 前端 `js/daily.js` 的 `ALL_HABITS` + `js/notion-sync.js` 的 `H2N`／read／create／預設值 + `index.html` 表頭 ③ **n8n live workflow `RayOS Sync Hub v2`（ID `AY7M7UbpYhcDyUsn40A2e`，n8n Cloud 上才是真正在跑的版本，`workflows/*.json` 是過期匯出檔）的 `Transform Habits`（read）+ `Prepare Create`（建當天）兩個 Code node。`Prepare Update` 是 field-generic 不用改
+- ⚠️ **新增習慣要改 3 個地方**（少一個就會 drift）：① Notion DB 加 checkbox 欄 ② 前端 `js/daily.js` 的 `ALL_HABITS` + `js/notion-sync.js` 的 `H2N`／read／create／預設值 + `index.html` 表頭 ③ **`supabase/functions/rayos-sync/index.ts`（2026-11-06 起取代 n8n workflow）的 `fetchHabits`（read）+ `createDay`（建當天）兩個 function，改完要重新 `supabase functions deploy rayos-sync --project-ref pinwlmoawxxzdjsrogzg --no-verify-jwt`**。`updateHabit` 是 field-generic 不用改
   - `FailedHabits` (rich_text) → 存當天所有 ✗ 習慣 key 的 JSON 陣列（如 `["nofap","gym"]`）
-- **三態機制**: 前端支援 null/true/false 三態。Notion checkbox 只有 true/false，所以 `true`(✓) 存 checkbox；`false`(✗) 額外記進 `FailedHabits` rich_text 欄，read 時由 `triState()` 還原（讓 ✗ 跨裝置存活）；`null`(空白)＝checkbox unchecked 且不在 FailedHabits。write/read 邏輯見 `js/notion-sync.js`（`failedHabitsProp` / `parseFailedSet` / `triState`）。Direct 與 n8n fallback 兩條路徑都支援 FailedHabits（n8n workflow `RayOS Sync Hub v2` 的 `Prepare Update` 寫入、`Transform Habits` 回傳）
+- **三態機制**: 前端支援 null/true/false 三態。Notion checkbox 只有 true/false，所以 `true`(✓) 存 checkbox；`false`(✗) 額外記進 `FailedHabits` rich_text 欄，read 時由 `triState()` 還原（讓 ✗ 跨裝置存活）；`null`(空白)＝checkbox unchecked 且不在 FailedHabits。write/read 邏輯見 `js/notion-sync.js`（`failedHabitsProp` / `parseFailedSet` / `triState`）。Direct 與 Supabase `rayos-sync` fallback 兩條路徑都支援 FailedHabits（`rayos-sync` 的 `updateHabit` 寫入、`fetchHabits` 回傳）
 - **Title field**: `Name`（格式為日期字串，如 "2026-02-12"）
 
 ### Physic Tracker
@@ -119,22 +119,24 @@ Ray 的個人生活數據儀表板，整合每日習慣追蹤、體態數據、�
 - **同步方式（現行，2026-07-27）**：內建 `api/drive-moodboard.js`（Service Account，重用 Vercel `GOOGLE_SA_KEY`，同 `drive-body-photos.js` 模式）。前端 `syncMoodboardBuiltin()`（`js/config.js`）每天打一次 `/api/drive-moodboard`，**所有裝置共用同一份、畫面一致、零設定**。設定一次＝把 `RayOS Moodboard` 資料夾分享給 SA `mcp-sheets-service@x-content-system.iam.gserviceaccount.com`（Viewer）。無圖或未分享時靜默保留 `DEFAULT_MOODBOARD_IMAGES`。
 - **Legacy（保留相容，勿再用）**：per-device Google Apps Script URL（Settings `drive_script_url` → `syncMoodboardFromDrive()`）。每台要各自設定，已被內建端點取代。
 
-## n8n Webhook System
+## RayOS Sync 中間層（Supabase Edge Function，2026-11-06 起）
 
-前端透過統一的 webhook URL 發送 POST 請求，n8n 根據 `type` 欄位路由：
+前端透過統一的 webhook URL（`localStorage.n8n_webhook`，預設見 `js/defaults.js`，實際位置是
+`supabase/functions/rayos-sync/index.ts`，部署在 DataOS 專案 `pinwlmoawxxzdjsrogzg`）發送 POST 請求，依 `type` 欄位路由到不同 Notion 操作：
 
 ```json
-{
-  "type": "update_daily_habit",   // 更新單一習慣 checkbox
-  "type": "create_daily_entry",   // 建立新日期的 row
-  "type": "fetch_daily_habits",   // 從 Notion 拉取所有習慣數據
-  "type": "wealth",               // 儲存資產快照
-  "type": "body",                 // 儲存體態數據
-  "database_id": "...",
-  "data": { ... },
-  "ts": "ISO timestamp"
-}
+{ "type": "fetch_habits" }                                            // 拉全部習慣
+{ "type": "update_habit", "pageId": "...", "field": "...", "value": true, "failed": [] }  // 更新單一 checkbox
+{ "type": "create_day", "date": "2026-11-06", "habits": {...}, "dateProperty": "..." }    // 建當天 row
+{ "type": "fetch_body" }                                              // 拉全部體態紀錄
+{ "type": "create_body", "data": {...} }                              // 新增體態紀錄
+{ "type": "update_body", "pageId": "...", "data": {...} }             // 更新體態紀錄
 ```
+
+Notion 認證走 Edge Function secret `NOTION_TOKEN`（`supabase secrets set`，不在程式碼或前端出現）。
+`wealth`/`create_wealth`/`fetch_ideas`/`create_idea`/`update_idea` 這幾條舊 n8n 路由前端從未呼叫過，搬遷時沒有一起搬。
+內容靈感回饋（`/ideas` 用）走另一支獨立的 `supabase/functions/agent-memory-write/index.ts`，`js/content.js` 直接呼叫固定網址，不經過 `n8n_webhook`。
+舊版邏輯原本是 n8n workflow（`RayOS Sync Hub v2`, id `AY7M7UbpYhcDyUsn40A2e`；`Agent Memory - Write After Execution`, id `WIMAICTS1xNuQH99`），搬遷後前端已不再呼叫，供 Ray 退訂 n8n Cloud 之用。
 
 ## Critical Rules
 

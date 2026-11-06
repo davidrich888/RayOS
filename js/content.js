@@ -604,10 +604,11 @@ async function updateContentIdeaStatus(ideaId, newStatus) {
         // Local Alfred AI memory
         if (typeof saveAIMemory === 'function') saveAIMemory('選題回饋 ' + summary);
 
-        // N8N Agent Memory (for /ideas command in Claude Code)
-        const n8nBase = typeof getN8nUrl === 'function' && getN8nUrl();
-        if (n8nBase) {
-            const webhookUrl = n8nBase.replace(/\/webhook\/.*$/, '/webhook/agent-memory-write');
+        // Agent Memory (for /ideas command in Claude Code)
+        // Migrated off n8n Cloud 2026-11-06: was derived from the n8n webhook base via
+        // regex, now points straight at the Supabase Edge Function (no base to derive from).
+        {
+            const webhookUrl = 'https://pinwlmoawxxzdjsrogzg.supabase.co/functions/v1/agent-memory-write';
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

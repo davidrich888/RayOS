@@ -15,10 +15,11 @@
 // Bridge stays per-device by design.
 
 const RAYOS_DEFAULTS = {
-    // n8n cloud host is already public in api/n8n.js and the webhook path is in
-    // workflows/*.json — publishing it here leaks nothing new. Needed so body
-    // metrics sync (fetch_body) works on a device that never opened Settings.
-    n8n_webhook: 'https://david86726.app.n8n.cloud/webhook/rayos-sync',
+    // Migrated off n8n Cloud 2026-11-06 (Ray cancelling the n8n subscription) to a
+    // Supabase Edge Function that ports the same 6 branches (habits + body) 1:1.
+    // The URL carries no secret — the Notion token lives server-side as an Edge
+    // Function secret, same trust model as the old n8n webhook.
+    n8n_webhook: 'https://pinwlmoawxxzdjsrogzg.supabase.co/functions/v1/rayos-sync',
     ai_model: 'claude-haiku-4-5-20251001'
 };
 
